@@ -1,0 +1,9 @@
+# Local environment
+.env
+*.env
+
+# Azure deployment outputs with sensitive data  
+*.json.output
+
+# VS Code
+.vscode/
