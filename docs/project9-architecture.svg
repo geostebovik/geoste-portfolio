@@ -1,0 +1,185 @@
+<svg width="100%" viewBox="0 0 720 620" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <title>AZ-104 Phase 3 Project 9 — Azure Monitor Architecture</title>
+  <desc>Architecture showing vm-linux-dev-01 and vm-win-dev-01 sending metrics and logs via AMA and DCR to Log Analytics Workspace, which feeds alert rules triggering action group email notifications.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-alert" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#993c1d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-notify" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#3b6d11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: Segoe UI, system-ui, sans-serif; }
+      .caption  { font-size: 11px; fill: #9a9890; }
+      .lbl-main { font-size: 13px; font-weight: 500; }
+      .lbl-sub  { font-size: 11px; }
+      .lbl-mono { font-size: 10px; font-family: Consolas, monospace; }
+      .conn     { stroke: #b4b2a9; stroke-width: 0.5; fill: none; }
+      .conn-data { stroke: #185fa5; stroke-width: 1.5; fill: none; stroke-dasharray: 6 3; }
+      .conn-alert { stroke: #993c1d; stroke-width: 1.5; fill: none; }
+      .conn-notify { stroke: #3b6d11; stroke-width: 1.5; fill: none; stroke-dasharray: 4 2; }
+
+      .box-rg   { fill: #f1efe8; stroke: #888780; }
+      .box-vm   { fill: #d3d1c7; stroke: #5f5e5a; }
+      .box-ama  { fill: #eeedfe; stroke: #534ab7; }
+      .box-dcr  { fill: #e6f1fb; stroke: #185fa5; }
+      .box-law  { fill: #e6f1fb; stroke: #185fa5; }
+      .box-tbl  { fill: #d0e8f8; stroke: #185fa5; }
+      .box-alrt { fill: #faece7; stroke: #993c1d; }
+      .box-ag   { fill: #eaf3de; stroke: #3b6d11; }
+      .box-email { fill: #eaf3de; stroke: #3b6d11; }
+      .box-kql  { fill: #faeeda; stroke: #854f0b; }
+
+      .txt-rg   { fill: #2c2c2a; }
+      .txt-vm   { fill: #2c2c2a; }
+      .txt-ama  { fill: #3c3489; }
+      .txt-dcr  { fill: #0c447c; }
+      .txt-law  { fill: #0c447c; }
+      .txt-alrt { fill: #712b13; }
+      .txt-ag   { fill: #27500a; }
+      .txt-kql  { fill: #633806; }
+      .txt-muted { fill: #6b6860; }
+    </style>
+  </defs>
+
+  <text x="360" y="18" text-anchor="middle" class="caption">AZ-104 · Phase 3 · Project 9 · West US 3</text>
+
+  <!-- Resource Group -->
+  <rect x="20" y="28" width="680" height="538" rx="16" class="box-rg" stroke-width="0.5"/>
+  <text x="42" y="52" class="lbl-main txt-rg">rg-az104-dev-wus3-01</text>
+  <text x="42" y="67" class="lbl-sub txt-muted">resource group · West US 3</text>
+
+  <!-- ── VM COLUMN ── -->
+
+  <!-- Linux VM -->
+  <rect x="40" y="80" width="200" height="180" rx="10" class="box-vm" stroke-width="0.5"/>
+  <text x="140" y="102" text-anchor="middle" class="lbl-main txt-vm">vm-linux-dev-01</text>
+  <text x="140" y="117" text-anchor="middle" class="lbl-sub txt-muted">Ubuntu 24.04 · B2s</text>
+
+  <rect x="56" y="126" width="168" height="28" rx="6" class="box-ama" stroke-width="0.5"/>
+  <text x="140" y="140" text-anchor="middle" class="lbl-main txt-ama">AzureMonitorLinuxAgent</text>
+  <text x="140" y="153" text-anchor="middle" class="lbl-sub txt-ama">v1.0 · auto-upgrade</text>
+
+  <rect x="56" y="162" width="168" height="22" rx="4" fill="#c8c5f0" stroke="#534ab7" stroke-width="0.5"/>
+  <text x="140" y="177" text-anchor="middle" class="lbl-mono txt-ama">MDE.Linux (Defender)</text>
+
+  <rect x="56" y="192" width="78" height="36" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="95" y="207" text-anchor="middle" class="lbl-sub txt-dcr">Perf</text>
+  <text x="95" y="221" text-anchor="middle" class="lbl-mono txt-dcr">60s sample</text>
+
+  <rect x="146" y="192" width="78" height="36" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="185" y="207" text-anchor="middle" class="lbl-sub txt-dcr">Syslog</text>
+  <text x="185" y="221" text-anchor="middle" class="lbl-mono txt-dcr">warn+</text>
+
+  <!-- Windows VM -->
+  <rect x="40" y="280" width="200" height="180" rx="10" class="box-vm" stroke-width="0.5"/>
+  <text x="140" y="302" text-anchor="middle" class="lbl-main txt-vm">vm-win-dev-01</text>
+  <text x="140" y="317" text-anchor="middle" class="lbl-sub txt-muted">Windows Server 2025 · B2s</text>
+
+  <rect x="56" y="326" width="168" height="28" rx="6" class="box-ama" stroke-width="0.5"/>
+  <text x="140" y="340" text-anchor="middle" class="lbl-main txt-ama">AzureMonitorWindowsAgent</text>
+  <text x="140" y="353" text-anchor="middle" class="lbl-sub txt-ama">v1.0 · auto-upgrade</text>
+
+  <rect x="56" y="362" width="168" height="22" rx="4" fill="#c8c5f0" stroke="#534ab7" stroke-width="0.5"/>
+  <text x="140" y="377" text-anchor="middle" class="lbl-mono txt-ama">MDE.Windows (Defender)</text>
+
+  <rect x="56" y="392" width="78" height="36" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="95" y="407" text-anchor="middle" class="lbl-sub txt-dcr">Perf</text>
+  <text x="95" y="421" text-anchor="middle" class="lbl-mono txt-dcr">60s sample</text>
+
+  <rect x="146" y="392" width="78" height="36" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="185" y="407" text-anchor="middle" class="lbl-sub txt-dcr">Event Log</text>
+  <text x="185" y="421" text-anchor="middle" class="lbl-mono txt-dcr">warn+</text>
+
+  <!-- ── DCR ── -->
+  <rect x="268" y="170" width="164" height="130" rx="10" class="box-dcr" stroke-width="0.5"/>
+  <text x="350" y="192" text-anchor="middle" class="lbl-main txt-dcr">dcr-az104-dev-wus3-01</text>
+  <text x="350" y="207" text-anchor="middle" class="lbl-sub txt-dcr">Data Collection Rule</text>
+
+  <rect x="280" y="216" width="140" height="22" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="350" y="231" text-anchor="middle" class="lbl-sub txt-dcr">Microsoft-Perf</text>
+
+  <rect x="280" y="244" width="140" height="22" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="350" y="259" text-anchor="middle" class="lbl-sub txt-dcr">Microsoft-Syslog</text>
+
+  <rect x="280" y="272" width="140" height="22" rx="4" fill="#b8d8f0" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="350" y="287" text-anchor="middle" class="lbl-sub txt-dcr">Microsoft-Event</text>
+
+  <!-- ── LAW ── -->
+  <rect x="460" y="80" width="220" height="280" rx="10" class="box-law" stroke-width="0.5"/>
+  <text x="570" y="104" text-anchor="middle" class="lbl-main txt-law">law-az104-dev-wus03-01</text>
+  <text x="570" y="119" text-anchor="middle" class="lbl-sub txt-law">Log Analytics Workspace</text>
+  <text x="570" y="133" text-anchor="middle" class="lbl-sub txt-muted">30 day retention · PerGB2018</text>
+
+  <!-- LAW tables -->
+  <rect x="474" y="142" width="92" height="44" rx="6" class="box-tbl" stroke-width="0.5"/>
+  <text x="520" y="160" text-anchor="middle" class="lbl-main txt-law">Heartbeat</text>
+  <text x="520" y="176" text-anchor="middle" class="lbl-mono txt-law">VM availability</text>
+
+  <rect x="576" y="142" width="92" height="44" rx="6" class="box-tbl" stroke-width="0.5"/>
+  <text x="622" y="160" text-anchor="middle" class="lbl-main txt-law">Perf</text>
+  <text x="622" y="176" text-anchor="middle" class="lbl-mono txt-law">CPU · mem · disk</text>
+
+  <rect x="474" y="196" width="92" height="44" rx="6" class="box-tbl" stroke-width="0.5"/>
+  <text x="520" y="214" text-anchor="middle" class="lbl-main txt-law">Syslog</text>
+  <text x="520" y="230" text-anchor="middle" class="lbl-mono txt-law">Linux logs</text>
+
+  <rect x="576" y="196" width="92" height="44" rx="6" class="box-tbl" stroke-width="0.5"/>
+  <text x="622" y="214" text-anchor="middle" class="lbl-main txt-law">Event</text>
+  <text x="622" y="230" text-anchor="middle" class="lbl-mono txt-law">Windows events</text>
+
+  <!-- KQL -->
+  <rect x="474" y="252" width="194" height="90" rx="6" class="box-kql" stroke-width="0.5"/>
+  <text x="571" y="270" text-anchor="middle" class="lbl-main txt-kql">KQL queries</text>
+  <text x="480" y="288" class="lbl-mono txt-kql">Heartbeat | summarize</text>
+  <text x="480" y="302" class="lbl-mono txt-kql">  max(TimeGenerated)</text>
+  <text x="480" y="316" class="lbl-mono txt-kql">  by Computer</text>
+  <text x="480" y="330" class="lbl-mono txt-kql">Perf | where CounterName</text>
+
+  <!-- ── ALERT RULES ── -->
+  <rect x="268" y="390" width="400" height="76" rx="10" class="box-alrt" stroke-width="0.5"/>
+  <text x="468" y="412" text-anchor="middle" class="lbl-main txt-alrt">Alert Rules</text>
+
+  <rect x="280" y="420" width="178" height="36" rx="6" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="369" y="436" text-anchor="middle" class="lbl-sub txt-alrt">alert-cpu-high-linux</text>
+  <text x="369" y="450" text-anchor="middle" class="lbl-mono txt-alrt">CPU &gt; 80% · 5min · sev2</text>
+
+  <rect x="470" y="420" width="186" height="36" rx="6" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="563" y="436" text-anchor="middle" class="lbl-sub txt-alrt">alert-heartbeat-vms</text>
+  <text x="563" y="450" text-anchor="middle" class="lbl-mono txt-alrt">heartbeat &lt; 1 · 5min · sev1</text>
+
+  <!-- ── ACTION GROUP ── -->
+  <rect x="268" y="488" width="400" height="60" rx="10" class="box-ag" stroke-width="0.5"/>
+  <text x="468" y="510" text-anchor="middle" class="lbl-main txt-ag">ag-az104-dev-wus3-01</text>
+  <text x="468" y="526" text-anchor="middle" class="lbl-sub txt-ag">Action Group · email-me · djeemunee@letter7.onmicrosoft.com</text>
+  <rect x="560" y="514" width="96" height="22" rx="4" fill="#c0dd97" stroke="#3b6d11" stroke-width="0.5"/>
+  <text x="608" y="529" text-anchor="middle" class="lbl-sub txt-ag">📧 email alert</text>
+
+  <!-- ── CONNECTORS ── -->
+
+  <!-- VMs to DCR -->
+  <line x1="240" y1="210" x2="268" y2="232" class="conn-data" marker-end="url(#arrow)"/>
+  <line x1="240" y1="370" x2="268" y2="280" class="conn-data" marker-end="url(#arrow)"/>
+
+  <!-- DCR label -->
+  <text x="254" y="258" class="caption" text-anchor="middle" transform="rotate(-35 254 258)">DCR association</text>
+
+  <!-- DCR to LAW -->
+  <line x1="432" y1="235" x2="460" y2="200" class="conn-data" marker-end="url(#arrow)"/>
+
+  <!-- LAW to Alerts -->
+  <line x1="570" y1="360" x2="468" y2="390" class="conn-alert" marker-end="url(#arrow-alert)"/>
+
+  <!-- Metric alert scope (Linux VM direct) -->
+  <line x1="140" y1="260" x2="310" y2="420" class="conn-alert" stroke-dasharray="4 2" marker-end="url(#arrow-alert)"/>
+  <text x="190" y="345" class="caption" transform="rotate(55 190 345)">metric scope</text>
+
+  <!-- Alerts to Action Group -->
+  <line x1="468" y1="466" x2="468" y2="488" class="conn-alert" marker-end="url(#arrow-alert)"/>
+
+  <text x="360" y="604" text-anchor="middle" class="caption">ostebovik.net · AZ-104 Phase 3 · Project 9</text>
+</svg>

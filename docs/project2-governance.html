@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 2: Azure Governance Lab — Ste Bovik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a18;
+    --ink-2: #3d3d38;
+    --ink-3: #6b6b64;
+    --paper: #f5f4ef;
+    --paper-2: #edecea;
+    --paper-3: #e3e2dc;
+    --azure: #0072c6;
+    --azure-light: #e8f2fc;
+    --azure-mid: #b3d4f5;
+    --policy: #107c10;
+    --policy-light: #e8f5e8;
+    --warn: #d83b01;
+    --warn-light: #fef3ee;
+    --accent: #8b5cf6;
+    --accent-light: #f3effe;
+    --rule: 1px solid #d4d3cc;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  .site-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--paper);
+    border-bottom: var(--rule);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+    font-size: 13px;
+  }
+  .site-nav a { color: var(--ink-3); text-decoration: none; }
+  .site-nav a:hover { color: var(--ink); }
+  .nav-left { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--azure); }
+  .nav-links { display: flex; gap: 24px; }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 2rem 56px;
+    border-bottom: var(--rule);
+  }
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 28px;
+  }
+  .eyebrow-line { flex: 1; height: 1px; background: var(--paper-3); }
+  .hero h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: clamp(36px, 6vw, 58px);
+    font-weight: 400; line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .hero h1 em { font-style: italic; color: var(--azure); }
+  .hero-sub {
+    font-size: 17px; color: var(--ink-2); line-height: 1.65;
+    max-width: 620px; margin-bottom: 36px;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-3);
+  }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+
+  /* ── MAIN LAYOUT ── */
+  .page-body {
+    max-width: 860px; margin: 0 auto;
+    padding: 0 2rem 120px;
+  }
+
+  /* ── SECTION ── */
+  .section { padding: 56px 0; border-bottom: var(--rule); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 20px;
+  }
+  .section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; font-weight: 400;
+    line-height: 1.25; margin-bottom: 16px;
+  }
+  p { color: var(--ink-2); line-height: 1.75; margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  /* ── WHAT I BUILT GRID ── */
+  .built-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px; background: var(--paper-3);
+    border: var(--rule); border-radius: 10px;
+    overflow: hidden; margin-top: 28px;
+  }
+  .built-cell {
+    background: var(--paper);
+    padding: 20px;
+  }
+  .built-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px; color: var(--azure);
+    line-height: 1; margin-bottom: 6px;
+  }
+  .built-label { font-size: 13px; color: var(--ink-2); }
+  .built-sub { font-size: 11px; color: var(--ink-3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+  /* ── POLICIES TABLE-STYLE ── */
+  .policy-list { margin-top: 28px; display: flex; flex-direction: column; gap: 0; border: var(--rule); border-radius: 10px; overflow: hidden; }
+  .policy-row {
+    display: grid; grid-template-columns: 1fr 110px 90px;
+    gap: 16px; align-items: center;
+    padding: 14px 18px;
+    border-bottom: var(--rule);
+    background: var(--paper);
+    font-size: 14px;
+  }
+  .policy-row:last-child { border-bottom: none; }
+  .policy-row.header {
+    background: var(--paper-2);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .policy-name { font-weight: 500; color: var(--ink); }
+  .policy-scope { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-3); }
+  .badge {
+    display: inline-block; padding: 3px 9px;
+    border-radius: 20px; font-size: 11px; font-weight: 500;
+    font-family: 'DM Mono', monospace; white-space: nowrap;
+  }
+  .badge-deny   { background: var(--warn-light); color: var(--warn); }
+  .badge-audit  { background: var(--policy-light); color: var(--policy); }
+  .badge-append { background: var(--azure-light); color: var(--azure); }
+
+  /* ── PROOF / EVIDENCE CARDS ── */
+  .evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+  @media (max-width: 600px) { .evidence-grid { grid-template-columns: 1fr; } }
+  .evidence-card {
+    background: var(--paper);
+    border: var(--rule); border-radius: 10px;
+    overflow: hidden;
+  }
+  .evidence-screen {
+    background: var(--paper-2);
+    padding: 20px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; line-height: 1.7;
+    border-bottom: var(--rule);
+    min-height: 110px;
+  }
+  .ev-path { color: var(--ink-3); margin-bottom: 8px; }
+  .ev-error { color: var(--warn); font-weight: 500; }
+  .ev-ok { color: var(--policy); font-weight: 500; }
+  .ev-muted { color: var(--ink-3); }
+  .ev-white { color: var(--ink); }
+  .evidence-caption { padding: 12px 16px; }
+  .evidence-caption strong { display: block; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+  .evidence-caption span { font-size: 12px; color: var(--ink-3); }
+
+  /* ── CODE BLOCK ── */
+  .code-section { margin-top: 28px; }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--ink);
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+    font-family: 'DM Mono', monospace; font-size: 12px; color: #9ca3af;
+  }
+  .code-lang { color: #60a5fa; }
+  pre {
+    background: #1e1e1e; color: #d4d4d4;
+    padding: 20px;
+    font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8;
+    border-radius: 0 0 8px 8px;
+    overflow-x: auto;
+  }
+  .c-key { color: #9cdcfe; }
+  .c-str { color: #ce9178; }
+  .c-num { color: #b5cea8; }
+  .c-comment { color: #6a9955; }
+
+  /* ── EMPLOYER SECTION ── */
+  .employer-cards { display: flex; flex-direction: column; gap: 16px; margin-top: 28px; }
+  .employer-card {
+    border: var(--rule); border-radius: 10px;
+    padding: 20px 22px;
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--paper);
+    transition: border-color .2s;
+  }
+  .employer-card:hover { border-color: var(--azure); }
+  .employer-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .employer-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; color: var(--ink); }
+  .employer-card p { font-size: 14px; color: var(--ink-2); margin: 0; line-height: 1.6; }
+
+  /* ── LESSONS LEARNED ── */
+  .lessons { display: flex; flex-direction: column; gap: 0; margin-top: 28px; border: var(--rule); border-radius: 10px; overflow: hidden; }
+  .lesson-row {
+    display: flex; gap: 16px; padding: 16px 18px;
+    border-bottom: var(--rule); background: var(--paper);
+    font-size: 14px;
+  }
+  .lesson-row:last-child { border-bottom: none; }
+  .lesson-q { font-style: italic; color: var(--ink-3); font-family: 'DM Serif Display', serif; font-size: 16px; min-width: 20px; }
+  .lesson-body strong { display: block; color: var(--ink); font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+  .lesson-body span { color: var(--ink-2); font-size: 13px; line-height: 1.6; }
+
+  /* ── TAGS / SKILLS ── */
+  .skills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .skill-tag {
+    background: var(--azure-light); color: var(--azure);
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    max-width: 860px; margin: 0 auto;
+    padding: 32px 2rem;
+    border-top: var(--rule);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--ink-3);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { color: var(--ink-3); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero h1 { animation: fadeUp .6s ease both; }
+  .hero-sub { animation: fadeUp .6s .1s ease both; }
+  .hero-meta { animation: fadeUp .6s .2s ease both; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-left">
+    <div class="nav-dot"></div>
+    <a href="/">ostebovik.net</a>
+  </div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/projects">Project artifacts</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow">
+    <span>AZ-104 Phase 1 &mdash; Project 2 of 11</span>
+    <div class="eyebrow-line"></div>
+    <span>Azure Administrator</span>
+  </div>
+  <h1>Azure Policy &amp;<br><em>Governance</em> Lab</h1>
+  <p class="hero-sub">
+    Building the enforcement layer that stops cloud sprawl before it starts — automated compliance, resource locking, and cost guardrails applied at scale.
+  </p>
+  <div class="hero-meta">
+    <div class="meta-item"><div class="meta-dot"></div>3 policy assignments</div>
+    <div class="meta-item"><div class="meta-dot"></div>1 policy initiative</div>
+    <div class="meta-item"><div class="meta-dot"></div>2 resource locks</div>
+    <div class="meta-item"><div class="meta-dot"></div>$30 budget alert</div>
+    <div class="meta-item"><div class="meta-dot"></div>~$0 cost</div>
+  </div>
+</header>
+
+<main class="page-body">
+
+  <!-- WHAT I BUILT -->
+  <section class="section">
+    <div class="section-label">What I built</div>
+    <h2>A baseline governance framework from scratch</h2>
+    <p>
+      In any real Azure environment, you can't wait until resources are deployed to think about compliance. Governance has to be in place first — before a single VM or storage account exists — otherwise you spend months cleaning up what should never have been allowed. This project builds exactly that foundation.
+    </p>
+    <p>
+      I created three Azure Policy assignments, bundled them into a reusable Policy Initiative, applied two types of resource locks, and configured a cost budget with automated alerts — all scoped to a dedicated lab resource group to prove the controls work without touching anything outside it.
+    </p>
+
+    <div class="built-grid">
+      <div class="built-cell">
+        <div class="built-num">3</div>
+        <div class="built-label">Policy assignments</div>
+        <div class="built-sub">Deny · Audit · Append</div>
+      </div>
+      <div class="built-cell">
+        <div class="built-num">1</div>
+        <div class="built-label">Policy initiative</div>
+        <div class="built-sub">Bundled governance set</div>
+      </div>
+      <div class="built-cell">
+        <div class="built-num">2</div>
+        <div class="built-label">Resource locks</div>
+        <div class="built-sub">ReadOnly + Delete</div>
+      </div>
+      <div class="built-cell">
+        <div class="built-num">$30</div>
+        <div class="built-label">Budget threshold</div>
+        <div class="built-sub">80% + 100% forecast alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POLICIES DEPLOYED -->
+  <section class="section">
+    <div class="section-label">Policies deployed</div>
+    <h2>Three controls, three different enforcement modes</h2>
+    <p>
+      Azure Policy has several effects — <strong>Deny</strong> blocks non-compliant deployments outright, <strong>Audit</strong> flags them without blocking (useful for discovery), and <strong>Append</strong> automatically adds required fields. I used all three to show how a layered compliance approach works.
+    </p>
+
+    <div class="policy-list">
+      <div class="policy-row header">
+        <span>Policy name</span>
+        <span>Scope</span>
+        <span>Effect</span>
+      </div>
+      <div class="policy-row">
+        <div>
+          <div class="policy-name">Allowed locations</div>
+          <div class="policy-scope">Resources must deploy to East US only</div>
+        </div>
+        <span class="policy-scope">Resource group</span>
+        <span class="badge badge-deny">Deny</span>
+      </div>
+      <div class="policy-row">
+        <div>
+          <div class="policy-name">Require tag on resource groups</div>
+          <div class="policy-scope">Tag key: <code style="font-size:11px;background:var(--paper-2);padding:1px 5px;border-radius:3px">environment</code> required</div>
+        </div>
+        <span class="policy-scope">Resource group</span>
+        <span class="badge badge-append">Append</span>
+      </div>
+      <div class="policy-row">
+        <div>
+          <div class="policy-name">Audit VMs without managed disks</div>
+          <div class="policy-scope">Flags unmanaged disk usage in reports</div>
+        </div>
+        <span class="policy-scope">Resource group</span>
+        <span class="badge badge-audit">Audit</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF IT WORKS -->
+  <section class="section">
+    <div class="section-label">Evidence — proof the controls work</div>
+    <h2>Testing every control, not just configuring it</h2>
+    <p>
+      Configuring a policy means nothing if you haven't verified it fires. I tested each control by deliberately triggering it and capturing the result. Here's what the enforcement looks like in practice.
+    </p>
+
+    <div class="evidence-grid">
+      <div class="evidence-card">
+        <div class="evidence-screen">
+          <div class="ev-path">portal.azure.com &gt; Create Storage Account</div>
+          <div style="margin-top:10px">Region: <span class="ev-white">West Europe</span></div>
+          <div style="margin-top:8px" class="ev-error">&#x2715; Resource was disallowed by policy.</div>
+          <div style="margin-top:4px" class="ev-muted">Policy: Allowed locations</div>
+          <div class="ev-muted">Allowed: ["westus3"]</div>
+        </div>
+        <div class="evidence-caption">
+          <strong>Location policy limiting deployment to West US 3 region</strong>
+          <span>Deployment denied — portal shows exact policy name and allowed values</span>
+        </div>
+      </div>
+
+      <div class="evidence-card">
+        <div class="evidence-screen">
+          <div class="ev-path">portal.azure.com &gt; rg-phase1-lab &gt; Locks</div>
+          <div style="margin-top:10px">Lock: <span class="ev-white">lock-prod-readonly</span> (ReadOnly)</div>
+          <div style="margin-top:8px">Attempt: modify storage account settings</div>
+          <div style="margin-top:8px" class="ev-error">&#x2715; The scope is locked. Modifications are not permitted.</div>
+        </div>
+        <div class="evidence-caption">
+          <strong>ReadOnly lock preventing modification</strong>
+          <span>Lock blocks all write operations — reads still succeed</span>
+        </div>
+      </div>
+
+      <div class="evidence-card">
+        <div class="evidence-screen">
+          <div class="ev-path">Azure Policy &gt; Compliance</div>
+          <div style="margin-top:10px">initiative-baseline-governance</div>
+          <div style="margin-top:6px"><span class="ev-ok">&#x2713;</span> <span class="ev-white">Allowed locations</span> &mdash; Compliant</div>
+          <div><span class="ev-ok">&#x2713;</span> <span class="ev-white">Require tag</span> &mdash; Compliant</div>
+          <div><span class="ev-muted">&#x25CB;</span> <span class="ev-white">Audit managed disks</span> &mdash; 0 flagged</div>
+        </div>
+        <div class="evidence-caption">
+          <strong>Compliance dashboard — all policies green</strong>
+          <span>Initiative bundles all three policies into a single compliance view</span>
+        </div>
+      </div>
+
+      <div class="evidence-card">
+        <div class="evidence-screen">
+          <div class="ev-path">Cost Management &gt; Budgets &gt; budget-phase1-lab</div>
+          <div style="margin-top:10px">Monthly budget: <span class="ev-white">$30.00</span></div>
+          <div style="margin-top:6px">Alert 1: <span class="ev-white">80% actual</span> &rarr; email</div>
+          <div>Alert 2: <span class="ev-white">100% forecast</span> &rarr; email</div>
+          <div style="margin-top:6px" class="ev-ok">&#x2713; Budget active — current spend $0.83</div>
+        </div>
+        <div class="evidence-caption">
+          <strong>Budget alert configured and active</strong>
+          <span>Forecast alert fires before you hit the limit, not after</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POLICY INITIATIVE JSON -->
+  <section class="section">
+    <div class="section-label">Code artifact</div>
+    <h2>Policy initiative definition — exported from Azure</h2>
+    <p>
+      After testing, I exported the initiative definition as JSON. This is the artifact that can be imported into any Azure subscription to instantly apply the same governance baseline — this is how real organizations deploy policy at scale across hundreds of subscriptions using Azure DevOps or GitHub Actions.
+    </p>
+    <div class="code-section">
+      <div class="code-header">
+        <span class="code-lang">JSON</span>
+        <span>initiative-baseline-governance.json</span>
+      </div>
+      <pre>{
+  <span class="c-key">"name"</span>: <span class="c-str">"initiative-baseline-governance"</span>,
+  <span class="c-key">"properties"</span>: {
+    <span class="c-key">"displayName"</span>: <span class="c-str">"Baseline Governance Initiative"</span>,
+    <span class="c-key">"description"</span>: <span class="c-str">"Enforces location, tagging, and disk compliance"</span>,
+    <span class="c-key">"policyDefinitions"</span>: [
+      {
+        <span class="c-comment">// Deny deployments outside East US</span>
+        <span class="c-key">"policyDefinitionId"</span>: <span class="c-str">"/providers/Microsoft.Authorization/
+          policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4f"</span>,
+        <span class="c-key">"parameters"</span>: {
+          <span class="c-key">"listOfAllowedLocations"</span>: {
+            <span class="c-key">"value"</span>: [<span class="c-str">"westus3"</span>]
+          }
+        }
+      },
+      {
+        <span class="c-comment">// Require 'environment' tag on resource groups</span>
+        <span class="c-key">"policyDefinitionId"</span>: <span class="c-str">"/providers/Microsoft.Authorization/
+          policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025"</span>,
+        <span class="c-key">"parameters"</span>: {
+          <span class="c-key">"tagName"</span>: { <span class="c-key">"value"</span>: <span class="c-str">"environment"</span> }
+        }
+      },
+      {
+        <span class="c-comment">// Audit VMs without managed disks</span>
+        <span class="c-key">"policyDefinitionId"</span>: <span class="c-str">"/providers/Microsoft.Authorization/
+          policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d"</span>
+      }
+    ]
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- WHY IT MATTERS -->
+  <section class="section">
+    <div class="section-label">Why this matters to employers</div>
+    <h2>What this project demonstrates beyond the exam</h2>
+    <p>
+      Governance is the difference between a cloud environment that stays manageable at 10 subscriptions and one that collapses into chaos at 3. Every organization using Azure at scale has a governance story — and the Azure administrator is usually the one writing it. Here's what this project signals to a hiring team.
+    </p>
+
+    <div class="employer-cards">
+      <div class="employer-card">
+        <div class="employer-icon" style="background:var(--warn-light)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d83b01" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3>Security posture — not just configuration</h3>
+          <p>Using Deny effect to block non-approved regions prevents data sovereignty violations before they happen. Using Audit before switching to Deny shows measured, production-safe rollout thinking — the same approach used in enterprise change management.</p>
+        </div>
+      </div>
+      <div class="employer-card">
+        <div class="employer-icon" style="background:var(--policy-light)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#107c10" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div>
+          <h3>Compliance automation at scale</h3>
+          <p>A Policy Initiative exported as JSON can be applied to 500 subscriptions in a single pipeline run. This project demonstrates understanding of that pattern — governance as code, not governance as portal clicking. That's the skill that matters in organizations managing cloud at scale.</p>
+        </div>
+      </div>
+      <div class="employer-card">
+        <div class="employer-icon" style="background:var(--azure-light)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0072c6" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+          <h3>Cost awareness built in from day one</h3>
+          <p>Configuring a budget alert before doing any other work — not as an afterthought — signals FinOps awareness. Azure admins who understand that governance includes cost governance are significantly more valuable than those who treat billing as someone else's problem.</p>
+        </div>
+      </div>
+      <div class="employer-card">
+        <div class="employer-icon" style="background:var(--accent-light)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        </div>
+        <div>
+          <h3>Operational discipline — testing what you build</h3>
+          <p>Deliberately triggering the location policy denial and the resource lock error — and capturing both as evidence — shows that I don't just configure controls, I verify them. In a production environment, an untested policy is an unknown policy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LESSONS LEARNED -->
+  <section class="section">
+    <div class="section-label">Lessons learned</div>
+    <h2>What surprised me, and what I'd do differently</h2>
+    <div class="lessons">
+      <div class="lesson-row">
+        <div class="lesson-q">01</div>
+        <div class="lesson-body">
+          <strong>Policy evaluation is not immediate</strong>
+          <span>After assigning a policy, Azure takes 5–15 minutes to evaluate existing resources. I initially thought the policy wasn't working — it was just still propagating. In production, you'd use the compliance scan trigger to force immediate evaluation.</span>
+        </div>
+      </div>
+      <div class="lesson-row">
+        <div class="lesson-q">02</div>
+        <div class="lesson-body">
+          <strong>ReadOnly locks block more than expected</strong>
+          <span>A ReadOnly lock prevents not just writes to resource properties but also operations that require write access to metadata — including some read-only-seeming operations like listing storage keys. Understanding lock scope is critical before applying locks in production.</span>
+        </div>
+      </div>
+      <div class="lesson-row">
+        <div class="lesson-q">03</div>
+        <div class="lesson-body">
+          <strong>Initiatives are better than standalone assignments from day one</strong>
+          <span>Even with only three policies, grouping them into an initiative immediately made compliance reporting cleaner and assignment to new scopes a single action. In hindsight I'd always start with an initiative, never standalone assignments.</span>
+        </div>
+      </div>
+      <div class="lesson-row">
+        <div class="lesson-q">04</div>
+        <div class="lesson-body">
+          <strong>Forecast alerts are more useful than actual spend alerts</strong>
+          <span>A 100% actual spend alert tells you you've already overspent. A 100% forecast alert gives you time to react. In this lab I set both, but in a real environment the forecast alert is the one that matters.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section">
+    <div class="section-label">Skills demonstrated</div>
+    <h2>Concepts covered in this project</h2>
+    <div class="skills">
+      <span class="skill-tag">Azure Policy</span>
+      <span class="skill-tag">Policy initiatives</span>
+      <span class="skill-tag">Deny effect</span>
+      <span class="skill-tag">Audit effect</span>
+      <span class="skill-tag">Resource locks</span>
+      <span class="skill-tag">ReadOnly lock</span>
+      <span class="skill-tag">Delete lock</span>
+      <span class="skill-tag">Azure Cost Management</span>
+      <span class="skill-tag">Budget alerts</span>
+      <span class="skill-tag">Management groups</span>
+      <span class="skill-tag">Resource tagging</span>
+      <span class="skill-tag">Compliance reporting</span>
+      <span class="skill-tag">Azure CLI</span>
+      <span class="skill-tag">ARM JSON</span>
+      <span class="skill-tag">FinOps fundamentals</span>
+    </div>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <span>Ste Bovik &mdash; Azure Administrator Portfolio</span>
+  <div class="footer-links">
+    <a href="/projects">All projects</a>
+    <a href="https://github.com/ostebovik" target="_blank">GitHub</a>
+    <a href="/contact">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

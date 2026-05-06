@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerShell vs Bash — Syntax Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2128;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e9ec;
+    --muted: #767b87;
+    --ps-accent: #7b8cde;
+    --ps-glow: rgba(123,140,222,0.15);
+    --bash-accent: #5dbea3;
+    --bash-glow: rgba(93,190,163,0.15);
+    --high: #e05a5a;
+    --med: #e0a44a;
+    --low: #5dbea3;
+    --code-bg: rgba(255,255,255,0.06);
+    --radius: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; }
+
+  /* Header */
+  header { margin-bottom: 40px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  h1 { font-size: 32px; font-weight: 700; line-height: 1.1; color: var(--text); margin-bottom: 8px; }
+  .subtitle { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 520px; }
+
+  /* Shell ID pills */
+  .shell-ids { display: flex; gap: 12px; margin-top: 24px; }
+  .shell-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    border: 1px solid;
+  }
+  .ps-pill  { background: var(--ps-glow);   border-color: var(--ps-accent);   color: var(--ps-accent); }
+  .bash-pill { background: var(--bash-glow); border-color: var(--bash-accent); color: var(--bash-accent); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .ps-dot   { background: var(--ps-accent); }
+  .bash-dot { background: var(--bash-accent); }
+
+  /* Tip box */
+  .tip {
+    background: rgba(123,140,222,0.08);
+    border: 1px solid rgba(123,140,222,0.25);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #a8b3e8;
+    margin-bottom: 32px;
+  }
+  .tip strong { color: var(--ps-accent); }
+  .tip code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; }
+
+  /* Section label */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Table */
+  .ref-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 32px; }
+  .ref-table thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .ref-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; line-height: 1.6; }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Concept cell */
+  .concept { font-weight: 600; color: var(--text); font-size: 13px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* Code cells */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--code-bg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .ps-code code   { border-left: 2px solid var(--ps-accent);   background: rgba(123,140,222,0.07); color: #c4ccf0; }
+  .bash-code code { border-left: 2px solid var(--bash-accent); background: rgba(93,190,163,0.07);  color: #9eddd0; }
+  .inline-note { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+  /* Frequency badges */
+  .freq {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 2px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+    font-family: 'Syne', sans-serif;
+  }
+  .freq-high { background: rgba(224,90,90,0.15);  color: #e88;  border: 1px solid rgba(224,90,90,0.3); }
+  .freq-med  { background: rgba(224,164,74,0.15); color: #dda;  border: 1px solid rgba(224,164,74,0.3); }
+  .freq-low  { background: rgba(93,190,163,0.15); color: #9dd;  border: 1px solid rgba(93,190,163,0.3); }
+
+  /* Pipeline explainer */
+  .pipeline-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .pipeline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .pipeline-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .pipeline-card .ps-h  { color: var(--ps-accent); }
+  .pipeline-card .bash-h { color: var(--bash-accent); }
+  .pipeline-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .analogy { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; border-left: 2px solid var(--border); padding-left: 10px; }
+
+  footer { font-size: 12px; color: var(--muted); text-align: center; padding-top: 24px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">AZ-104 Phase 3 — Shell Reference</p>
+    <h1>PowerShell vs Bash</h1>
+    <p class="subtitle">Sorted by frequency. The Azure CLI (<code style="font-family:JetBrains Mono,monospace;font-size:13px;background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">az ...</code>) works identically in both — only the surrounding shell syntax differs.</p>
+    <div class="shell-ids">
+      <div class="shell-pill ps-pill"><span class="dot ps-dot"></span>PowerShell — Windows terminal / pwsh</div>
+      <div class="shell-pill bash-pill"><span class="dot bash-dot"></span>Bash — Cloud Shell default / Linux/macOS</div>
+    </div>
+  </header>
+
+  <div class="tip">
+    <strong>Quick "which shell am I in?" test:</strong> type <code>$PSVersionTable</code> — if it returns a version table, you're in PowerShell. If you see an error, you're in Bash. Azure Cloud Shell defaults to Bash; local Windows terminals usually default to PowerShell.
+  </div>
+
+  <!-- Core table -->
+  <table class="ref-table">
+    <thead>
+      <tr>
+        <th style="width:13%">Frequency</th>
+        <th style="width:21%">Concept</th>
+        <th style="width:33%">PowerShell</th>
+        <th style="width:33%">Bash</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr><td colspan="4" class="section-label">Variables &amp; output — you'll see these in every script</td></tr>
+
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Variables</div><div class="note">Assignment &amp; use</div></td>
+        <td class="ps-code"><code>$name = "east-us"</code><div class="inline-note">Always $ on both sides</div></td>
+        <td class="bash-code"><code>name="east-us"</code> → read as <code>$name</code><div class="inline-note">No $ on left; $ only when reading</div></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Print to screen</div></td>
+        <td class="ps-code"><code>Write-Host "hello"</code><div class="inline-note">or just type the value</div></td>
+        <td class="bash-code"><code>echo "hello"</code></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Capture output</div><div class="note">Command → variable</div></td>
+        <td class="ps-code"><code>$rg = az group list</code></td>
+        <td class="bash-code"><code>rg=$(az group list)</code></td>
+      </tr>
+
+      <tr><td colspan="4" class="section-label">String building — constructing resource names &amp; IDs</td></tr>
+
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Embed variable in string</div></td>
+        <td class="ps-code"><code>"rg-$name"</code><div class="inline-note">Double quotes expand; single quotes are literal</div></td>
+        <td class="bash-code"><code>"rg-$name"</code> or <code>"rg-${name}"</code><div class="inline-note">Same double/single rule</div></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-med">Medium</span></td>
+        <td><div class="concept">Multi-line command</div></td>
+        <td class="ps-code"><code>`</code> backtick at line end</td>
+        <td class="bash-code"><code>\</code> backslash at line end</td>
+      </tr>
+
+      <tr><td colspan="4" class="section-label">Environment &amp; shell identity</td></tr>
+
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Environment variables</div></td>
+        <td class="ps-code"><code>$env:HOME</code> / <code>$env:PATH</code></td>
+        <td class="bash-code"><code>$HOME</code> / <code>$PATH</code></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-high">Very high</span></td>
+        <td><div class="concept">Pipeline</div><div class="note">Chain commands</div></td>
+        <td class="ps-code"><code>cmd | Select-Object Name</code><div class="inline-note">Passes structured objects</div></td>
+        <td class="bash-code"><code>cmd | grep "name"</code><div class="inline-note">Passes plain text</div></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-med">Medium</span></td>
+        <td><div class="concept">Which shell am I in?</div></td>
+        <td class="ps-code"><code>$PSVersionTable</code></td>
+        <td class="bash-code"><code>echo $SHELL</code> or <code>ps -p $$</code></td>
+      </tr>
+
+      <tr><td colspan="4" class="section-label">Control flow — conditionals &amp; loops</td></tr>
+
+      <tr>
+        <td><span class="freq freq-med">Medium</span></td>
+        <td><div class="concept">If / else</div></td>
+        <td class="ps-code"><code>if ($x -eq "val") { ... }</code><div class="inline-note">Operators: -eq -ne -gt -lt</div></td>
+        <td class="bash-code"><code>if [ "$x" = "val" ]; then ... fi</code><div class="inline-note">Operators: = != -gt -lt</div></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-med">Medium</span></td>
+        <td><div class="concept">For loop</div></td>
+        <td class="ps-code"><code>foreach ($i in $list) { ... }</code></td>
+        <td class="bash-code"><code>for i in "${list[@]}"; do ... done</code></td>
+      </tr>
+
+      <tr><td colspan="4" class="section-label">Less common — recognise, don't memorise</td></tr>
+
+      <tr>
+        <td><span class="freq freq-low">Lower</span></td>
+        <td><div class="concept">Functions</div></td>
+        <td class="ps-code"><code>function Greet { param($n) "Hi $n" }</code></td>
+        <td class="bash-code"><code>greet() { echo "Hi $1"; }</code></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-low">Lower</span></td>
+        <td><div class="concept">Error handling</div></td>
+        <td class="ps-code"><code>try { ... } catch { ... }</code></td>
+        <td class="bash-code"><code>cmd || echo "failed"</code> or <code>set -e</code></td>
+      </tr>
+      <tr>
+        <td><span class="freq freq-low">Lower</span></td>
+        <td><div class="concept">Here-string</div><div class="note">Multi-line literal</div></td>
+        <td class="ps-code"><code>@"...multi-line..."@</code></td>
+        <td class="bash-code"><code>&lt;&lt;EOF ... EOF</code></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <!-- CLI Discovery -->
+  <table class="ref-table">
+    <thead>
+      <tr>
+        <th style="width:20%">Pattern</th>
+        <th style="width:40%">What to run</th>
+        <th style="width:40%">When to use it</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3" class="section-label">Finding the right az command — drill-down with --help</td></tr>
+      <tr>
+        <td><div class="concept">Step 1 — find the service group</div></td>
+        <td class="bash-code"><code>az monitor --help</code><div class="inline-note">Lists all subgroups under az monitor</div></td>
+        <td style="font-size:13px;color:#767b87">You know the service (monitor, network, keyvault) but not the subgroup. Read the list — log-analytics, diagnostic-settings, etc will appear.</td>
+      </tr>
+      <tr>
+        <td><div class="concept">Step 2 — find the noun</div></td>
+        <td class="bash-code"><code>az monitor log-analytics --help</code><div class="inline-note">Shows subgroups: workspace, cluster, etc</div></td>
+        <td style="font-size:13px;color:#767b87">Drill into the subgroup. Each level narrows further until you reach commands (show, create, delete, list).</td>
+      </tr>
+      <tr>
+        <td><div class="concept">Step 3 — find the flags</div></td>
+        <td class="bash-code"><code>az monitor log-analytics workspace show --help</code><div class="inline-note">Shows all flags, required vs optional, and examples</div></td>
+        <td style="font-size:13px;color:#767b87">The final --help shows every flag. Required flags are marked. Examples section at the bottom is the fastest path to correct syntax.</td>
+      </tr>
+      <tr><td colspan="3" class="section-label">Finding JSON shapes — use show before create</td></tr>
+      <tr>
+        <td><div class="concept">show an existing resource</div><div class="note">Get the exact JSON shape Azure expects</div></td>
+        <td class="bash-code"><code>az monitor diagnostic-settings show \<br>&nbsp;&nbsp;--resource $RESOURCE_ID</code><div class="inline-note">Returns the full JSON of an existing setting</div></td>
+        <td style="font-size:13px;color:#767b87">When --help says "JSON encoded list" but gives no example: run show on an existing resource first. Copy that JSON shape into your create command. This works for --logs, --metrics, --rules, and any other complex JSON flag.</td>
+      </tr>
+      <tr>
+        <td><div class="concept">list available categories</div><div class="note">Find valid values for --logs categories</div></td>
+        <td class="bash-code"><code>az monitor diagnostic-settings categories list \<br>&nbsp;&nbsp;--resource $RESOURCE_ID \<br>&nbsp;&nbsp;--query "[].{name:name,type:categoryType}" -o table</code></td>
+        <td style="font-size:13px;color:#767b87">Every resource type exposes different log categories (AuditEvent, StorageRead, AppServiceHTTPLogs, etc). This command returns exactly what is valid for that specific resource — no guessing.</td>
+      </tr>
+      <tr><td colspan="3" class="section-label">Flag shorthand — both forms are always valid</td></tr>
+      <tr>
+        <td><div class="concept">Common shorthand flags</div></td>
+        <td class="bash-code">
+          <code>-g</code> = <code>--resource-group</code><br>
+          <code>-n</code> = <code>--name</code><br>
+          <code>-l</code> = <code>--location</code><br>
+          <code>-o</code> = <code>--output</code>
+        </td>
+        <td style="font-size:13px;color:#767b87">Azure CLI defines shorthand aliases for the most common flags. Both forms work identically — -g rg-name and --resource-group rg-name produce the same result. Use shorthand in scripts you run often, full form when readability matters.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pipeline analogy -->
+  <div class="pipeline-box">
+    <div class="pipeline-card">
+      <h3 class="ps-h">PowerShell pipeline</h3>
+      <p>Commands pass <strong>structured objects</strong> — like handing someone a filled-out form with labelled fields.</p>
+      <p class="analogy">You can ask for a specific field by name: <code style="font-family:JetBrains Mono,monospace;font-size:11px">| Select-Object Name</code></p>
+    </div>
+    <div class="pipeline-card">
+      <h3 class="bash-h">Bash pipeline</h3>
+      <p>Commands pass <strong>plain text</strong> — like handing someone a sticky note. You parse it yourself.</p>
+      <p class="analogy">You use text tools to find what you need: <code style="font-family:JetBrains Mono,monospace;font-size:11px">| grep "name"</code></p>
+    </div>
+  </div>
+
+  <footer>ostebovik.net · AZ-104 Study Reference · Updated Phase 4</footer>
+
+</div>
+</body>
+</html>

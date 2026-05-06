@@ -1,0 +1,136 @@
+<svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>Azure Load Balancer Architecture — Project 5</title>
+  <desc>Architecture diagram showing public internet traffic flowing through pip-lb-web to Standard Load Balancer lb-web, through health probe and load balancing rules, distributing to vm-web-01 and vm-web-02 in an availability set across fault domains 0 and 1 in vnet-spoke snet-web. Outbound SNAT via pip-lb-outbound is also shown.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}</style>
+  </defs>
+  <rect width="900" height="620" fill="#f7f6f2"/>
+  <text x="450" y="28" text-anchor="middle" style="font-size:15px;font-weight:600;fill:#1a1a18;">Azure Load Balancer Architecture — Project 5</text>
+  <text x="450" y="46" text-anchor="middle" style="font-size:11px;fill:#6b6b64;">Standard SKU · Round-robin · Health probe · Outbound SNAT</text>
+
+  <!-- Internet cloud -->
+  <g transform="translate(340,58)">
+    <ellipse cx="62" cy="26" rx="56" ry="20" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="34" cy="30" rx="28" ry="14" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="88" cy="30" rx="24" ry="13" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <rect x="10" y="28" width="104" height="14" fill="#e8e8e4"/>
+    <text x="62" y="36" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#3d3d38;">Internet</text>
+  </g>
+
+  <!-- Inbound arrow Internet → LB -->
+  <line x1="450" y1="106" x2="450" y2="148" stroke="#107c10" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+  <rect x="352" y="110" width="96" height="16" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="400" y="122" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#166534;">http://20.171.241.228</text>
+
+  <!-- Public IPs row -->
+  <!-- pip-lb-web -->
+  <rect x="310" y="148" width="160" height="56" rx="9" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="390" y="170" text-anchor="middle" style="font-size:11px;font-weight:500;fill:#185FA5;">pip-lb-web</text>
+  <text x="390" y="185" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#378ADD;">20.171.241.228</text>
+  <text x="390" y="197" text-anchor="middle" style="font-size:9px;fill:#378ADD;">Inbound frontend</text>
+
+  <!-- pip-lb-outbound -->
+  <rect x="490" y="148" width="160" height="56" rx="9" fill="#fff7ed" stroke="#b35c00" stroke-width="1"/>
+  <text x="570" y="170" text-anchor="middle" style="font-size:11px;font-weight:500;fill:#92400e;">pip-lb-outbound</text>
+  <text x="570" y="185" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#b35c00;">Dynamic public IP</text>
+  <text x="570" y="197" text-anchor="middle" style="font-size:9px;fill:#b35c00;">Outbound SNAT only</text>
+
+  <!-- LB box -->
+  <rect x="220" y="230" width="460" height="130" rx="12" fill="#dbeafe" stroke="#185FA5" stroke-width="1.5"/>
+  <text x="300" y="252" style="font-size:13px;font-weight:600;fill:#185FA5;">lb-web</text>
+  <text x="300" y="267" style="font-size:10px;font-family:monospace;fill:#378ADD;">Standard SKU · Public</text>
+
+  <!-- Frontend IP configs inside LB -->
+  <rect x="240" y="274" width="150" height="36" rx="6" fill="#fff" fill-opacity="0.8" stroke="#378ADD" stroke-width="0.75"/>
+  <text x="315" y="289" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#185FA5;">fe-web (inbound)</text>
+  <text x="315" y="302" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#378ADD;">LoadBalancerFrontEnd</text>
+
+  <rect x="410" y="274" width="150" height="36" rx="6" fill="#fff" fill-opacity="0.8" stroke="#b35c00" stroke-width="0.75"/>
+  <text x="485" y="289" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#92400e;">fe-outbound</text>
+  <text x="485" y="302" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#b35c00;">Outbound SNAT rule</text>
+
+  <!-- Health probe + LB rule tags -->
+  <rect x="240" y="318" width="140" height="32" rx="6" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.75"/>
+  <text x="310" y="331" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#27500A;">probe-http</text>
+  <text x="310" y="343" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#3B6D11;">HTTP:80 / every 15s</text>
+
+  <rect x="400" y="318" width="140" height="32" rx="6" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.75"/>
+  <text x="470" y="331" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#27500A;">rule-http</text>
+  <text x="470" y="343" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#3B6D11;">TCP 80→80 · Default</text>
+
+  <!-- Arrow pip-lb-web → LB fe-web -->
+  <line x1="390" y1="204" x2="340" y2="274" stroke="#185FA5" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <!-- Arrow pip-lb-outbound → LB fe-outbound -->
+  <line x1="535" y1="204" x2="500" y2="274" stroke="#b35c00" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+
+  <!-- vnet-spoke / snet-web container -->
+  <rect x="110" y="390" width="680" height="210" rx="14" fill="#e6f5f3" fill-opacity="0.5" stroke="#0a7e6e" stroke-width="1.5"/>
+  <rect x="110" y="390" width="680" height="28" rx="14" fill="#0a7e6e"/>
+  <rect x="110" y="406" width="680" height="12" fill="#0a7e6e"/>
+  <text x="130" y="408" style="font-size:12px;font-weight:600;fill:#fff;">vnet-spoke / snet-web  ·  10.1.1.0/24</text>
+  <text x="774" y="408" text-anchor="end" style="font-size:9px;font-weight:600;fill:#a7d8d0;letter-spacing:.06em;">nsg-web applied</text>
+
+  <!-- Availability set container -->
+  <rect x="130" y="428" width="640" height="162" rx="10" fill="#fff" fill-opacity="0.6" stroke="#185FA5" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="148" y="446" style="font-size:11px;font-weight:500;fill:#185FA5;">avset-web — Availability set</text>
+  <text x="148" y="460" style="font-size:9px;font-family:monospace;fill:#378ADD;">2 fault domains · 2 update domains · Aligned managed disks</text>
+
+  <!-- vm-web-01 -->
+  <rect x="150" y="468" width="260" height="110" rx="9" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="280" y="488" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#185FA5;">vm-web-01</text>
+  <text x="280" y="503" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#378ADD;">Ubuntu 22.04 · B1s · Fault domain 0</text>
+  <rect x="168" y="512" width="224" height="20" rx="4" fill="#fff" fill-opacity="0.8" stroke="#378ADD" stroke-width="0.5"/>
+  <text x="280" y="526" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#185FA5;">Private IP: 10.1.1.4</text>
+  <rect x="168" y="536" width="224" height="20" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="280" y="550" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#166534;">nginx running · port 80</text>
+  <rect x="168" y="558" width="224" height="14" rx="3" fill="#EAF3DE" stroke="#86efac" stroke-width="0.5"/>
+  <text x="280" y="569" text-anchor="middle" style="font-size:9px;fill:#27500A;">Health probe: Healthy</text>
+
+  <!-- vm-web-02 -->
+  <rect x="490" y="468" width="260" height="110" rx="9" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="620" y="488" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#185FA5;">vm-web-02</text>
+  <text x="620" y="503" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#378ADD;">Ubuntu 22.04 · B1s · Fault domain 1</text>
+  <rect x="508" y="512" width="224" height="20" rx="4" fill="#fff" fill-opacity="0.8" stroke="#378ADD" stroke-width="0.5"/>
+  <text x="620" y="526" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#185FA5;">Private IP: 10.1.1.5</text>
+  <rect x="508" y="536" width="224" height="20" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="620" y="550" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#166534;">nginx running · port 80</text>
+  <rect x="508" y="558" width="224" height="14" rx="3" fill="#EAF3DE" stroke="#86efac" stroke-width="0.5"/>
+  <text x="620" y="569" text-anchor="middle" style="font-size:9px;fill:#27500A;">Health probe: Healthy</text>
+
+  <!-- LB → VM arrows -->
+  <line x1="380" y1="360" x2="280" y2="468" stroke="#185FA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="480" y1="360" x2="620" y2="468" stroke="#185FA5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- be-web label on arrows -->
+  <rect x="380" y="398" width="140" height="16" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="450" y="410" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#185FA5;">be-web backend pool</text>
+
+  <!-- Outbound SNAT arrow (VMs → outbound IP) -->
+  <path d="M 150 523 Q 80 430 310 204" fill="none" stroke="#b35c00" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0.7"/>
+  <text x="86" y="370" style="font-size:9px;fill:#92400e;">Outbound</text>
+  <text x="86" y="382" style="font-size:9px;fill:#92400e;">SNAT</text>
+  <text x="86" y="394" style="font-size:9px;fill:#92400e;">(apt install)</text>
+
+  <!-- NSG legend -->
+  <rect x="560" y="230" width="110" height="86" rx="8" fill="#fff7ed" stroke="#b35c00" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="615" y="248" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#92400e;">nsg-web rules</text>
+  <text x="575" y="263" style="font-size:9px;fill:#78350f;">✓ TCP 80 (p.100)</text>
+  <text x="575" y="275" style="font-size:9px;fill:#78350f;">✓ TCP 443 (p.110)</text>
+  <text x="575" y="287" style="font-size:9px;fill:#78350f;">✓ AzureLB (p.120)</text>
+  <text x="575" y="299" style="font-size:9px;fill:#78350f;">✓ VirtualNet (p.150)</text>
+  <text x="575" y="311" style="font-size:9px;fill:#c0392b;">✗ RDP Internet (p.400)</text>
+
+  <!-- Legend -->
+  <rect x="110" y="588" width="680" height="26" rx="6" fill="#fff" stroke="#d4d3cc" stroke-width="0.75"/>
+  <rect x="124" y="597" width="10" height="10" rx="2" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="140" y="606" style="font-size:10px;fill:#3d3d38;">Load balancer component</text>
+  <rect x="280" y="597" width="10" height="10" rx="2" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="296" y="606" style="font-size:10px;fill:#3d3d38;">Backend VM in VNet</text>
+  <rect x="430" y="597" width="10" height="10" rx="2" fill="#fff7ed" stroke="#b35c00" stroke-width="1"/>
+  <text x="446" y="606" style="font-size:10px;fill:#3d3d38;">Outbound SNAT path</text>
+  <rect x="574" y="597" width="10" height="10" rx="2" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+  <text x="590" y="606" style="font-size:10px;fill:#3d3d38;">Allowed traffic flow</text>
+</svg>

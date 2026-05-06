@@ -1,0 +1,221 @@
+<svg width="100%" viewBox="0 0 680 760" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>AZ-104 Phase 3 Project 10 — Backup and Site Recovery</title>
+  <desc>Architecture showing vm-linux-dev-wus3-01 and vm-win-dev-wus3-01 protected by rsv-az104-dev-wus3-01 with backup policy, restore options, and Azure Site Recovery replication to secondary region.</desc>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+      .sans { font-family: 'Syne', 'Segoe UI', system-ui, sans-serif; }
+      .cap  { font-size: 10px; fill: #64748b; letter-spacing: .08em; }
+      .nm   { font-size: 12px; font-weight: 500; }
+      .sub  { font-size: 10px; }
+      .row  { font-size: 10px; }
+      .conn-red    { stroke: #ef4444; stroke-width: 1.5; fill: none; }
+      .conn-purple { stroke: #a855f7; stroke-width: 1.5; fill: none; stroke-dasharray: 6 3; }
+      .conn-green  { stroke: #22c55e; stroke-width: 1;   fill: none; stroke-dasharray: 3 2; }
+      .conn-gray   { stroke: #475569; stroke-width: 0.5; fill: none; }
+    </style>
+  </defs>
+
+  <!-- page bg -->
+  <rect width="680" height="760" fill="#0f1117"/>
+
+  <!-- header stripe -->
+  <rect x="0" y="0" width="680" height="3" fill="#ef4444"/>
+
+  <!-- header -->
+  <rect x="0" y="3" width="680" height="44" fill="#161b27"/>
+  <rect x="0" y="47" width="680" height="1" fill="#2a3347"/>
+  <text x="20" y="28" class="sans nm" fill="#e2e8f0" font-size="13" font-weight="600">AZ-104 · Phase 3 · Project 10</text>
+  <text x="20" y="42" class="sub" fill="#64748b">Backup and Site Recovery · West US 3 → East US</text>
+  <rect x="512" y="12" width="148" height="22" rx="11" fill="#450a0a" stroke="#ef4444" stroke-width="0.5"/>
+  <text x="586" y="27" text-anchor="middle" class="sub" fill="#fca5a5">phase-3 · project-10</text>
+
+  <!-- ── PRIMARY REGION boundary ── -->
+  <rect x="16" y="60" width="424" height="666" rx="12" fill="#161b27" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="30" y="79" class="cap sans" fill="#94a3b8" font-size="10">rg-az104-dev-wus3-01  ·  primary region  ·  West US 3</text>
+
+  <!-- Linux VM card -->
+  <rect x="28" y="88" width="188" height="120" rx="10" fill="#1d2435" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="28" y="88" width="188" height="3" rx="2" fill="#94a3b8"/>
+  <text x="122" y="107" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="12" font-weight="600">vm-linux-dev-wus3-01</text>
+  <text x="122" y="121" text-anchor="middle" class="sub" fill="#64748b">Ubuntu 24.04 · Standard B2s</text>
+  <line x1="28" y1="128" x2="216" y2="128" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="38" y="134" width="168" height="16" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/>
+  <text x="122" y="146" text-anchor="middle" class="row" fill="#93c5fd">AzureMonitorLinuxAgent</text>
+  <rect x="38" y="154" width="168" height="16" rx="4" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="122" y="166" text-anchor="middle" class="row" fill="#d8b4fe">MDE.Linux · Defender</text>
+  <rect x="38" y="174" width="168" height="26" rx="4" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="122" y="183" text-anchor="middle" class="row" fill="#94a3b8">no public IP</text>
+  <text x="122" y="196" text-anchor="middle" class="row" fill="#94a3b8">managed identity: system</text>
+
+  <!-- Windows VM card -->
+  <rect x="228" y="88" width="196" height="120" rx="10" fill="#1d2435" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="228" y="88" width="196" height="3" rx="2" fill="#94a3b8"/>
+  <text x="326" y="107" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="12" font-weight="600">vm-win-dev-wus3-01</text>
+  <text x="326" y="121" text-anchor="middle" class="sub" fill="#64748b">Windows Server 2025 · B2s</text>
+  <line x1="228" y1="128" x2="424" y2="128" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="238" y="134" width="176" height="16" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/>
+  <text x="326" y="146" text-anchor="middle" class="row" fill="#93c5fd">AzureMonitorWindowsAgent</text>
+  <rect x="238" y="154" width="176" height="16" rx="4" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="326" y="166" text-anchor="middle" class="row" fill="#d8b4fe">MDE.Windows · Defender</text>
+  <rect x="238" y="174" width="176" height="26" rx="4" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="326" y="183" text-anchor="middle" class="row" fill="#94a3b8">no public IP</text>
+  <text x="326" y="196" text-anchor="middle" class="row" fill="#94a3b8">managed identity: system</text>
+
+  <!-- RSV boundary -->
+  <rect x="28" y="228" width="396" height="480" rx="10" fill="#1d2435" stroke="#ef4444" stroke-width="0.5" stroke-dasharray="4 3"/>
+  <rect x="28" y="228" width="396" height="3" rx="2" fill="#ef4444"/>
+  <text x="226" y="247" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="12" font-weight="600">rsv-az104-dev-wus3-01</text>
+  <text x="226" y="261" text-anchor="middle" class="sub" fill="#64748b">Recovery Services Vault · LRS · soft delete enabled</text>
+
+  <!-- Backup Policy card -->
+  <rect x="40" y="272" width="184" height="120" rx="8" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <rect x="40" y="272" width="184" height="3" rx="2" fill="#f59e0b"/>
+  <text x="132" y="291" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11" font-weight="600">pol-az104-daily-7day</text>
+  <text x="132" y="305" text-anchor="middle" class="sub" fill="#64748b">Backup Policy</text>
+  <line x1="40" y1="312" x2="224" y2="312" stroke="#364259" stroke-width="0.5"/>
+  <rect x="50" y="318" width="164" height="14" rx="3" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="132" y="329" text-anchor="middle" class="row" fill="#fcd34d">Daily 11pm UTC · RPO ~24h</text>
+  <rect x="50" y="336" width="164" height="14" rx="3" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="132" y="347" text-anchor="middle" class="row" fill="#fcd34d">Retain: 7d · 4w · 3m</text>
+  <rect x="50" y="354" width="164" height="14" rx="3" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="132" y="365" text-anchor="middle" class="row" fill="#fcd34d">Snapshot → Vault transfer</text>
+  <rect x="50" y="372" width="164" height="14" rx="3" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="132" y="383" text-anchor="middle" class="row" fill="#fcd34d">10-20 min per VM</text>
+
+  <!-- Restore Options card -->
+  <rect x="236" y="272" width="176" height="120" rx="8" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <rect x="236" y="272" width="176" height="3" rx="2" fill="#22c55e"/>
+  <text x="324" y="291" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11" font-weight="600">Restore Options</text>
+  <line x1="236" y1="298" x2="412" y2="298" stroke="#364259" stroke-width="0.5"/>
+  <rect x="246" y="304" width="156" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="324" y="315" text-anchor="middle" class="row" fill="#86efac">Create new VM</text>
+  <rect x="246" y="322" width="156" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="324" y="333" text-anchor="middle" class="row" fill="#86efac">Replace existing VM</text>
+  <rect x="246" y="340" width="156" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="324" y="351" text-anchor="middle" class="row" fill="#86efac">Restore disks</text>
+  <rect x="246" y="358" width="156" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="324" y="369" text-anchor="middle" class="row" fill="#86efac">File recovery (mount)</text>
+
+  <!-- SLA card -->
+  <rect x="40" y="408" width="372" height="120" rx="8" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <rect x="40" y="408" width="372" height="3" rx="2" fill="#14b8a6"/>
+  <text x="226" y="427" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11" font-weight="600">Backup SLA</text>
+  <line x1="40" y1="434" x2="412" y2="434" stroke="#364259" stroke-width="0.5"/>
+  <rect x="52" y="440" width="168" height="76" rx="6" fill="#134e4a" stroke="#14b8a6" stroke-width="0.5"/>
+  <text x="136" y="458" text-anchor="middle" class="sub" fill="#5eead4">RPO</text>
+  <rect x="60" y="464" width="152" height="14" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="475" text-anchor="middle" class="row" fill="#5eead4">~24h (daily backup schedule)</text>
+  <rect x="60" y="482" width="152" height="14" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="493" text-anchor="middle" class="row" fill="#5eead4">30s with ASR replication</text>
+  <rect x="60" y="500" width="152" height="10" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="509" text-anchor="middle" class="row" fill="#64748b">set by: backup frequency</text>
+
+  <rect x="232" y="440" width="168" height="76" rx="6" fill="#134e4a" stroke="#14b8a6" stroke-width="0.5"/>
+  <text x="316" y="458" text-anchor="middle" class="sub" fill="#5eead4">RTO</text>
+  <rect x="240" y="464" width="152" height="14" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="316" y="475" text-anchor="middle" class="row" fill="#5eead4">30min-2h (vault restore)</text>
+  <rect x="240" y="482" width="152" height="14" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="316" y="493" text-anchor="middle" class="row" fill="#5eead4">minutes with ASR failover</text>
+  <rect x="240" y="500" width="152" height="10" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="316" y="509" text-anchor="middle" class="row" fill="#64748b">set by: recovery infra</text>
+
+  <!-- Soft delete -->
+  <rect x="40" y="542" width="372" height="28" rx="6" fill="#450a0a" stroke="#ef4444" stroke-width="0.5"/>
+  <text x="226" y="552" text-anchor="middle" class="row" fill="#fca5a5">Soft delete: 14-day retention after deletion</text>
+  <text x="226" y="565" text-anchor="middle" class="row" fill="#fca5a5">ransomware protection · cannot disable during retention</text>
+
+  <!-- ASR connector note -->
+  <rect x="40" y="584" width="372" height="112" rx="8" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <rect x="40" y="584" width="372" height="3" rx="2" fill="#a855f7"/>
+  <text x="226" y="603" text-anchor="middle" class="sans nm" fill="#d8b4fe" font-size="11" font-weight="600">Azure Site Recovery (ASR)</text>
+  <line x1="40" y1="610" x2="412" y2="610" stroke="#4c1d95" stroke-width="0.5"/>
+  <rect x="52" y="617" width="168" height="14" rx="3" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="628" text-anchor="middle" class="row" fill="#d8b4fe">RPO: as low as 30 seconds</text>
+  <rect x="52" y="635" width="168" height="14" rx="3" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="646" text-anchor="middle" class="row" fill="#d8b4fe">RTO: minutes (with runbook)</text>
+  <rect x="52" y="653" width="168" height="14" rx="3" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="664" text-anchor="middle" class="row" fill="#d8b4fe">Replication policy: 24h RPO</text>
+  <rect x="52" y="671" width="168" height="14" rx="3" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="136" y="682" text-anchor="middle" class="row" fill="#d8b4fe">Recovery points: 72h retention</text>
+  <rect x="232" y="617" width="168" height="68" rx="4" fill="#450a0a" stroke="#ef4444" stroke-width="0.5"/>
+  <text x="316" y="633" text-anchor="middle" class="row" fill="#fca5a5">Cost: ~$25+/mo per VM</text>
+  <text x="316" y="649" text-anchor="middle" class="row" fill="#fca5a5">Lab: wizard only</text>
+  <text x="316" y="665" text-anchor="middle" class="row" fill="#fca5a5">no live replication</text>
+  <text x="316" y="681" text-anchor="middle" class="row" fill="#fca5a5">enabled in exercise</text>
+
+  <!-- ── SECONDARY REGION ── -->
+  <rect x="456" y="60" width="208" height="666" rx="12" fill="#161b27" stroke="#a855f7" stroke-width="0.5" stroke-dasharray="5 3"/>
+  <text x="560" y="79" text-anchor="middle" class="cap sans" fill="#d8b4fe" font-size="10">Secondary Region · East US</text>
+
+  <!-- ASR secondary card -->
+  <rect x="468" y="88" width="184" height="220" rx="10" fill="#1d2435" stroke="#a855f7" stroke-width="0.5"/>
+  <rect x="468" y="88" width="184" height="3" rx="2" fill="#a855f7"/>
+  <text x="560" y="107" text-anchor="middle" class="sans nm" fill="#d8b4fe" font-size="12" font-weight="600">Site Recovery</text>
+  <text x="560" y="121" text-anchor="middle" class="sub" fill="#64748b">Continuous replication</text>
+  <line x1="468" y1="128" x2="652" y2="128" stroke="#4c1d95" stroke-width="0.5"/>
+  <rect x="478" y="134" width="164" height="14" rx="3" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="560" y="145" text-anchor="middle" class="row" fill="#d8b4fe">RPO: as low as 30s</text>
+  <rect x="478" y="152" width="164" height="14" rx="3" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="560" y="163" text-anchor="middle" class="row" fill="#d8b4fe">RTO: minutes (runbook)</text>
+  <rect x="478" y="170" width="164" height="14" rx="3" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="560" y="181" text-anchor="middle" class="row" fill="#d8b4fe">Replication: 24h policy</text>
+  <rect x="478" y="188" width="164" height="14" rx="3" fill="#3b0764" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="560" y="199" text-anchor="middle" class="row" fill="#d8b4fe">Recovery pts: 72h retain</text>
+  <rect x="478" y="208" width="164" height="30" rx="3" fill="#450a0a" stroke="#ef4444" stroke-width="0.5"/>
+  <text x="560" y="220" text-anchor="middle" class="row" fill="#fca5a5">Cost: ~$25+/mo per VM</text>
+  <text x="560" y="234" text-anchor="middle" class="row" fill="#fca5a5">Lab: wizard, no replication</text>
+  <rect x="478" y="244" width="164" height="54" rx="3" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/>
+  <text x="560" y="258" text-anchor="middle" class="row" fill="#93c5fd">Network: auto-created</text>
+  <text x="560" y="272" text-anchor="middle" class="row" fill="#93c5fd">vnet-asr-eus-01</text>
+  <text x="560" y="286" text-anchor="middle" class="row" fill="#93c5fd">mapped from primary vnet</text>
+
+  <!-- Replica VMs -->
+  <rect x="468" y="324" width="184" height="100" rx="10" fill="#1d2435" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="468" y="324" width="184" height="3" rx="2" fill="#94a3b8"/>
+  <text x="560" y="343" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11" font-weight="600">Replica VMs</text>
+  <text x="560" y="357" text-anchor="middle" class="sub" fill="#64748b">Created on failover only</text>
+  <line x1="468" y1="364" x2="652" y2="364" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="478" y="370" width="78" height="24" rx="4" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="517" y="386" text-anchor="middle" class="row" fill="#94a3b8">vm-linux</text>
+  <rect x="564" y="370" width="78" height="24" rx="4" fill="#242c40" stroke="#364259" stroke-width="0.5"/>
+  <text x="603" y="386" text-anchor="middle" class="row" fill="#94a3b8">vm-win</text>
+  <rect x="478" y="398" width="164" height="18" rx="3" fill="#1d2435" stroke="#364259" stroke-width="0.5"/>
+  <text x="560" y="411" text-anchor="middle" class="row" fill="#64748b">standby · powered off</text>
+
+  <!-- Failover Options -->
+  <rect x="468" y="440" width="184" height="110" rx="10" fill="#1d2435" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="468" y="440" width="184" height="3" rx="2" fill="#22c55e"/>
+  <text x="560" y="459" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11" font-weight="600">Failover Options</text>
+  <line x1="468" y1="466" x2="652" y2="466" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="478" y="472" width="164" height="18" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="560" y="485" text-anchor="middle" class="row" fill="#86efac">Test failover (no impact)</text>
+  <rect x="478" y="494" width="164" height="18" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="0.5"/>
+  <text x="560" y="507" text-anchor="middle" class="row" fill="#86efac">Planned (DR drill)</text>
+  <rect x="478" y="516" width="164" height="26" rx="3" fill="#450a0a" stroke="#ef4444" stroke-width="0.5"/>
+  <text x="560" y="526" text-anchor="middle" class="row" fill="#fca5a5">Unplanned (disaster)</text>
+  <text x="560" y="539" text-anchor="middle" class="row" fill="#fca5a5">initiates immediate failover</text>
+
+  <!-- ── CONNECTORS ── -->
+  <!-- VMs → RSV backup -->
+  <line x1="122" y1="208" x2="122" y2="228" class="conn-red" marker-end="url(#arr)"/>
+  <line x1="326" y1="208" x2="326" y2="228" class="conn-red" marker-end="url(#arr)"/>
+  <text x="86" y="222" class="cap" fill="#ef4444">backup</text>
+  <text x="290" y="222" class="cap" fill="#ef4444">backup</text>
+
+  <!-- VMs → ASR (dashed purple) -->
+  <path d="M424 148 L456 190" class="conn-purple" marker-end="url(#arr)"/>
+  <text x="430" y="168" class="cap" fill="#a855f7">ASR</text>
+
+  <!-- RSV → Replica -->
+  <path d="M424 610 L468 380" class="conn-purple" marker-end="url(#arr)"/>
+
+  <!-- ── FOOTER ── -->
+  <rect x="0" y="725" width="680" height="35" fill="#161b27"/>
+  <rect x="0" y="725" width="680" height="1" fill="#2a3347"/>
+  <text x="340" y="747" text-anchor="middle" class="cap sans" fill="#475569" font-size="10">ostebovik · AZ-104 Phase 3 · Project 10 · Backup and Site Recovery · westus3 → eastus</text>
+</svg>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Phase 3 — Compute & Monitoring Lab Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f1117;
+  --bg2:      #161b27;
+  --bg3:      #1d2435;
+  --bg4:      #242c40;
+  --border:   #2a3347;
+  --border2:  #364259;
+  --text:     #e2e8f0;
+  --text2:    #94a3b8;
+  --text3:    #64748b;
+  --azure:    #3b82f6;
+  --azure2:   #1d4ed8;
+  --azure-bg: #1e3a5f;
+  --azure-lt: #93c5fd;
+  --teal:     #14b8a6;
+  --teal-bg:  #134e4a;
+  --teal-lt:  #5eead4;
+  --amber:    #f59e0b;
+  --amber-bg: #451a03;
+  --amber-lt: #fcd34d;
+  --green:    #22c55e;
+  --green-bg: #14532d;
+  --green-lt: #86efac;
+  --purple:   #a855f7;
+  --purple-bg:#3b0764;
+  --purple-lt:#d8b4fe;
+  --red:      #ef4444;
+  --red-bg:   #450a0a;
+  --red-lt:   #fca5a5;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'Syne', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 12px; color: var(--text2);
+}
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--azure); }
+.header-right { display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.phase-badge { background: var(--azure-bg); color: var(--azure-lt); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+
+/* ── HERO ── */
+.hero {
+  padding: 60px 2rem 48px;
+  max-width: 1000px; margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.hero-eye {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--azure); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eye::after { content:''; flex:1; height:1px; background:var(--border); }
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -.02em; margin-bottom: 16px;
+}
+.hero h1 span { color: var(--azure); }
+.hero-sub { font-size: 16px; color: var(--text2); max-width: 600px; margin-bottom: 32px; line-height: 1.7; }
+.stat-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.stat strong { display: block; font-size: 20px; color: var(--text); font-family: var(--sans); font-weight: 600; margin-bottom: 2px; }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 2rem 0; }
+.progress-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.progress-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azure2), var(--azure)); width: 57%; }
+.phase-dots { display: flex; gap: 0; margin-top: 8px; }
+.phase-dot { flex: 1; text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text3); padding-top: 6px; }
+.phase-dot.done { color: var(--azure-lt); }
+.phase-dot.active { color: var(--azure); font-weight: 500; }
+
+/* ── MAIN LAYOUT ── */
+.main { max-width: 1000px; margin: 0 auto; padding: 32px 2rem 80px; }
+
+/* ── PROJECT CARD ── */
+.proj-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.proj-card:hover { border-color: var(--border2); }
+
+.proj-header {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+  user-select: none;
+}
+.proj-header:hover { background: var(--bg3); }
+.proj-num {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+  font-family: var(--mono);
+}
+.proj-header-text { flex: 1; }
+.proj-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.proj-sub { font-size: 13px; color: var(--text3); }
+.proj-chevron {
+  font-size: 18px; color: var(--text3); transition: transform .3s;
+  flex-shrink: 0; margin-top: 6px;
+}
+.proj-card.open .proj-chevron { transform: rotate(180deg); }
+
+.proj-body {
+  padding: 0 24px 24px;
+  display: none;
+}
+.proj-card.open .proj-body { display: block; }
+
+/* ── STATS MINI GRID ── */
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 24px; }
+.mini-cell { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.mini-label { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.mini-val { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text3);
+  margin: 20px 0 10px;
+}
+
+/* ── CONCEPT BOX ── */
+.concept-box {
+  background: var(--azure-bg); border: 1px solid var(--azure2);
+  border-radius: 8px; padding: 12px 16px;
+  font-size: 13px; color: var(--azure-lt); line-height: 1.65;
+  margin-bottom: 16px;
+}
+.concept-box.warn { background: var(--amber-bg); border-color: var(--amber); color: var(--amber-lt); }
+.concept-box.green { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+
+/* ── STEPS ── */
+.step-list { list-style: none; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.step-item {
+  display: flex; gap: 14px; padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+}
+.step-item:last-child { border-bottom: none; }
+.step-num {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-item.done .step-num { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+.code { font-family: var(--mono); font-size: 11px; background: var(--bg4); color: var(--azure-lt); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); white-space: nowrap; }
+
+/* ── CLI BLOCK ── */
+.cli-wrap { margin-top: 12px; border-radius: 8px; overflow: hidden; }
+.cli-header { background: var(--bg4); border: 1px solid var(--border); border-bottom: none; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; }
+.cli-lang { font-family: var(--mono); font-size: 11px; color: var(--azure); }
+.cli-copy { font-family: var(--mono); font-size: 11px; color: var(--text3); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; cursor: pointer; transition: all .15s; }
+.cli-copy:hover { background: var(--bg3); color: var(--text); }
+.cli-copy.copied { color: var(--green-lt); border-color: var(--green); }
+pre.cli {
+  background: #0d1117; border: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+  padding: 16px; font-family: var(--mono); font-size: 12px;
+  color: #e2e8f0; line-height: 1.9; overflow-x: auto;
+  white-space: pre; tab-size: 2;
+}
+.c-cmd { color: #93c5fd; }
+.c-flag { color: #a78bfa; }
+.c-str { color: #86efac; }
+.c-cmt { color: #475569; font-style: italic; }
+.c-var { color: #fcd34d; }
+
+/* ── PORTFOLIO BOX ── */
+.portfolio-box {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 10px; overflow: hidden; margin-top: 16px;
+}
+.portfolio-header { background: var(--bg4); padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.portfolio-list { list-style: none; }
+.portfolio-item { display: flex; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.portfolio-item:last-child { border-bottom: none; }
+.port-check { width: 18px; height: 18px; border: 1px solid var(--border2); border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 2px; }
+.port-check:hover { border-color: var(--azure); }
+.port-check.checked { background: var(--azure2); border-color: var(--azure); color: #fff; font-size: 10px; }
+
+/* ── ACTION BUTTONS ── */
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 12px;
+  padding: 8px 14px; border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text2);
+  cursor: pointer; transition: all .15s; text-decoration: none;
+}
+.btn:hover { background: var(--bg4); border-color: var(--azure); color: var(--azure-lt); }
+.btn.primary { background: var(--azure-bg); border-color: var(--azure); color: var(--azure-lt); }
+.btn.primary:hover { background: var(--azure2); color: #fff; }
+.btn-arrow { font-size: 14px; }
+
+/* ── WARN STRIP ── */
+.warn-strip { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--amber-lt); margin-top: 14px; font-family: var(--mono); }
+
+/* ── PHASE SUMMARY ── */
+.summary-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 8px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.hero h1 { animation: fadeUp .5s ease both; }
+.hero-sub { animation: fadeUp .5s .08s ease both; }
+.stat-row { animation: fadeUp .5s .16s ease both; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span>AZ-104 Lab Guide</span>
+  </div>
+  <div class="header-right">
+    <span class="phase-badge">Phase 3 of 4</span>
+    <span>ostebovik.net</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eye">AZ-104 Microsoft Certified: Azure Administrator</div>
+  <h1>Phase 3 — <span>Compute</span><br>&amp; Monitoring</h1>
+  <p class="hero-sub">Deploy and manage virtual machines, App Service, containers, Azure Monitor alerting, and backup. The heaviest exam domain — and the most visible to employers.</p>
+  <div class="stat-row">
+    <div class="stat"><strong>Weeks 11–16</strong>Timeline</div>
+    <div class="stat"><strong>~20–30%</strong>of AZ-104 exam</div>
+    <div class="stat"><strong>~57–80%</strong>cumulative after Phase 3</div>
+    <div class="stat"><strong>$15–30</strong>estimated cost</div>
+    <div class="stat"><strong>4 projects</strong>7–11 portfolio items</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Overall AZ-104 progress</span>
+    <span>~57% entering Phase 3</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill"></div></div>
+  <div class="phase-dots">
+    <div class="phase-dot done">Phase 1 ✓<br>Identity</div>
+    <div class="phase-dot done">Phase 2 ✓<br>Network/Storage</div>
+    <div class="phase-dot active">Phase 3 ←<br>Compute</div>
+    <div class="phase-dot">Phase 4<br>Capstone</div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ════════════════════════════════════
+     PROJECT 7 — Virtual Machines
+════════════════════════════════════ -->
+<div class="proj-card" id="p7">
+  <div class="proj-header" onclick="toggle('p7')">
+    <div class="proj-num" style="background:#1e3a5f;color:#93c5fd;">07</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Virtual machines — deployment, extensions &amp; disk management</div>
+      <div class="proj-sub">Simulate enterprise VM provisioning with custom scripts, availability, and managed disk operations</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">VMs deployed</div><div class="mini-val">2 (Win + Linux)</div></div>
+      <div class="mini-cell"><div class="mini-label">Extensions</div><div class="mini-val">Custom Script + BGInfo</div></div>
+      <div class="mini-cell"><div class="mini-label">Disk ops</div><div class="mini-val">Attach, resize, snapshot</div></div>
+      <div class="mini-cell"><div class="mini-label">Availability</div><div class="mini-val">Availability zones</div></div>
+    </div>
+
+    <div class="concept-box">
+      <strong>Analogy:</strong> A VM is like renting a physical server but Azure manages the hardware underneath. The availability zone is like choosing which building your server lives in — if one building loses power, the others keep running. VM Extensions are like app installers that run automatically at first boot without you ever logging in.
+    </div>
+
+    <div class="sec-label">Portal steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create resource group <span class="code">rg-phase3-compute</span> in East US. This is your Phase 3 sandbox — all compute resources live here.</li>
+      <li class="step-item"><span class="step-num">2</span>Deploy a Windows Server VM: Create VM → name <span class="code">vm-win-01</span>, image Windows Server 2022 Datacenter, size Standard_B2s, Zone 1. No public IP. Use <span class="code">vnet-spoke / snet-web</span> from Phase 2. Generate SSH keypair and save it.</li>
+      <li class="step-item"><span class="step-num">3</span>Deploy a Linux VM: name <span class="code">vm-linux-01</span>, Ubuntu 22.04, Standard_B1s, Zone 2. Same VNet, no public IP. This cross-zone pair demonstrates zone-redundant architecture.</li>
+      <li class="step-item"><span class="step-num">4</span>Add a Custom Script Extension to vm-win-01: VM → Extensions + Applications → Add → Custom Script Extension. Upload a .ps1 script that installs IIS and creates a test page. Azure executes this at extension install time — no RDP needed. This is how enterprises automate post-deployment configuration.</li>
+      <li class="step-item"><span class="step-num">5</span>Add BGInfo extension to vm-win-01: Extensions → Add → BGInfo. This writes system info to the desktop wallpaper — useful for confirming which VM you're connected to. Screenshot it via Bastion after install.</li>
+      <li class="step-item"><span class="step-num">6</span>Attach a data disk to vm-linux-01: VM → Disks → Add data disk. Create a new 32GB Premium SSD managed disk named <span class="code">disk-data-linux01</span>. Save. Then connect via Bastion and initialize it: <span class="code">sudo fdisk -l</span> to find it, <span class="code">sudo mkfs.ext4 /dev/sdc</span> to format, <span class="code">sudo mount /dev/sdc /mnt/data</span> to mount.</li>
+      <li class="step-item"><span class="step-num">7</span>Resize the OS disk on vm-linux-01: deallocate the VM first (this is required — you cannot resize a disk on a running VM). In Disks → click the OS disk → Size + performance → change from 30GB to 64GB. Restart the VM. Inside the VM run <span class="code">sudo growpart /dev/sda 1 &amp;&amp; sudo resize2fs /dev/sda1</span> to expand the partition.</li>
+      <li class="step-item"><span class="step-num">8</span>Create a disk snapshot: Disks → select disk-data-linux01 → Create snapshot. Name: <span class="code">snap-data-linux01-001</span>. This is point-in-time backup of a managed disk — faster than a full VM backup for data disks.</li>
+      <li class="step-item"><span class="step-num">9</span>Review VM metrics in the portal: VM → Monitoring → Metrics. Plot CPU Percentage and Disk Read Bytes over the last hour. This is a preview of Project 9 — notice Azure collects these automatically with no configuration needed.</li>
+      <li class="step-item"><span class="step-num">10</span>Run the Azure VM Run Command: VM → Run command → RunPowerShellScript (Windows) or RunShellScript (Linux). Enter <span class="code">hostname</span> and click Run. Output appears in the portal. This lets you run commands on a VM without Bastion or SSH — critical for emergency access when networking is broken.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Deploy Linux VM in zone 2, no public IP</span>
+<span class="c-cmd">az vm create</span> <span class="c-flag">-g</span> rg-phase3-compute <span class="c-flag">-n</span> vm-linux-01 \
+  <span class="c-flag">--image</span> Ubuntu2204 <span class="c-flag">--size</span> Standard_B1s <span class="c-flag">--zone</span> 2 \
+  <span class="c-flag">--vnet-name</span> vnet-spoke <span class="c-flag">--subnet</span> snet-web \
+  <span class="c-flag">--admin-username</span> azureuser <span class="c-flag">--generate-ssh-keys</span> \
+  <span class="c-flag">--public-ip-address</span> <span class="c-str">""</span> <span class="c-flag">--nsg</span> <span class="c-str">""</span>
+
+<span class="c-cmt"># Add and attach a 32GB data disk</span>
+<span class="c-cmd">az vm disk attach</span> <span class="c-flag">-g</span> rg-phase3-compute <span class="c-flag">--vm-name</span> vm-linux-01 \
+  <span class="c-flag">--name</span> disk-data-linux01 <span class="c-flag">--size-gb</span> 32 \
+  <span class="c-flag">--sku</span> Premium_LRS <span class="c-flag">--new</span>
+
+<span class="c-cmt"># Snapshot the data disk</span>
+<span class="c-var">DISK_ID</span>=$(az disk show <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> disk-data-linux01 <span class="c-flag">--query</span> id <span class="c-flag">-o</span> tsv)
+<span class="c-cmd">az snapshot create</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> snap-data-linux01-001 <span class="c-flag">--source</span> <span class="c-var">$DISK_ID</span>
+
+<span class="c-cmt"># Run a command on VM without SSH</span>
+<span class="c-cmd">az vm run-command invoke</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> vm-linux-01 <span class="c-flag">--command-id</span> RunShellScript \
+  <span class="c-flag">--scripts</span> <span class="c-str">"hostname && df -h && free -m"</span>
+
+<span class="c-cmt"># Deallocate VM before disk resize</span>
+<span class="c-cmd">az vm deallocate</span> <span class="c-flag">-g</span> rg-phase3-compute <span class="c-flag">-n</span> vm-linux-01
+<span class="c-cmd">az disk update</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> disk-data-linux01 <span class="c-flag">--size-gb</span> 64
+<span class="c-cmd">az vm start</span> <span class="c-flag">-g</span> rg-phase3-compute <span class="c-flag">-n</span> vm-linux-01</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Screenshot of BGInfo desktop showing system info — proves extension automation worked without RDP</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Portal screenshot showing both VMs in different availability zones (Essentials blade → Zone column)</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Run Command output showing hostname/df/free — proves emergency access method works</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Disk snapshot in portal (snapshots blade showing snap-data-linux01-001)</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Before/after of df -h showing disk resize took effect inside the OS</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: B2s Windows VM ~$0.04/hr, B1s Linux ~$0.01/hr. Deallocate both VMs between sessions. Premium SSD disk costs ~$0.003/hr even when VM is deallocated — delete snapshots and detach disks when done with this project.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 7 VM deployment with custom script extension, disk attach, disk resize, snapshot and run command for AZ-104 Phase 3')"><span class="btn-arrow">&#8599;</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 7 showing vm-win-01 in Zone 1 and vm-linux-01 in Zone 2 both in vnet-spoke snet-web with managed data disk and snapshot attached to the Linux VM for my AZ-104 portfolio')"><span class="btn-arrow">&#8599;</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PROJECT 8 — App Service & Containers
+════════════════════════════════════ -->
+<div class="proj-card" id="p8">
+  <div class="proj-header" onclick="toggle('p8')">
+    <div class="proj-num" style="background:#134e4a;color:#5eead4;">08</div>
+    <div class="proj-header-text">
+      <div class="proj-title">App Service, deployment slots &amp; Container Instances</div>
+      <div class="proj-sub">Platform-managed web hosting with zero-downtime deployments and lightweight container workloads</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">App Service plan</div><div class="mini-val">Standard S1</div></div>
+      <div class="mini-cell"><div class="mini-label">Web apps</div><div class="mini-val">1 with 2 slots</div></div>
+      <div class="mini-cell"><div class="mini-label">Deployment</div><div class="mini-val">Slot swap (blue/green)</div></div>
+      <div class="mini-cell"><div class="mini-label">Container</div><div class="mini-val">Azure Container Instance</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--teal-bg);border-color:var(--teal);color:var(--teal-lt);">
+      <strong>Analogy:</strong> App Service is like a managed apartment building — Azure handles plumbing, electricity, and structure; you just move in your app. A deployment slot is like having a second apartment in the same building — you test changes there, then do a swap (swap the front doors) with zero downtime. No one notices the move happened.
+    </div>
+
+    <div class="sec-label">Portal steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create an App Service Plan: search "App Service plans" → Create. Name: <span class="code">asp-phase3</span>, OS: Linux, region: East US, SKU: Standard S1. Standard tier is required for deployment slots — Free and Basic don't support them. Cost ~$0.10/hr so delete promptly.</li>
+      <li class="step-item"><span class="step-num">2</span>Create a Web App: App Services → Create. Name: <span class="code">app-az104-yourname</span> (must be globally unique — it becomes your URL). Runtime: Python 3.11 or Node 18. Plan: asp-phase3. Deploy a simple hello-world app via the portal's built-in editor or GitHub integration.</li>
+      <li class="step-item"><span class="step-num">3</span>Add a deployment slot: Web App → Deployment slots → Add slot. Name: <span class="code">staging</span>. Clone settings from production. You now have two separate environments at <span class="code">app-az104-yourname.azurewebsites.net</span> (production) and <span class="code">app-az104-yourname-staging.azurewebsites.net</span> (staging).</li>
+      <li class="step-item"><span class="step-num">4</span>Deploy a different version to staging: edit the index page in staging to show "VERSION 2 — STAGING". Verify it at the staging URL. Production still shows the original content.</li>
+      <li class="step-item"><span class="step-num">5</span>Perform a slot swap: Deployment slots → Swap. Source: staging, Target: production. Click Swap. Within 30 seconds, production now serves VERSION 2 and staging serves the old version. No downtime occurred. Screenshot the swap completion. This is blue/green deployment — a critical DevOps skill.</li>
+      <li class="step-item"><span class="step-num">6</span>Configure App Settings: Web App → Configuration → Application settings → New. Add <span class="code">ENVIRONMENT=production</span> and <span class="code">APP_VERSION=2.0</span>. These become environment variables in the app. Mark ENVIRONMENT as a "Slot setting" so it stays with the slot during swaps (doesn't travel with the code).</li>
+      <li class="step-item"><span class="step-num">7</span>Enable Always On: Configuration → General settings → Always On: On. Without this, the app spins down after 20 minutes of inactivity and the first request takes 10–30 seconds. Required for production workloads.</li>
+      <li class="step-item"><span class="step-num">8</span>Deploy a Container Instance: search "Container Instances" → Create. Name: <span class="code">aci-nginx-lab</span>, image: <span class="code">nginx:latest</span> (public Docker Hub), OS: Linux, CPU: 1, Memory: 1.5GB. Set DNS label: <span class="code">aci-nginx-yourname</span>. Within 60 seconds you have a running nginx at a public URL — no VM, no App Service plan. This is the lightest-weight compute option in Azure.</li>
+      <li class="step-item"><span class="step-num">9</span>Check container logs: Container Instance → Containers → Logs. You can see nginx access logs in real time in the portal. Also try Connect tab — it gives you a shell inside the running container. Run <span class="code">nginx -v</span> to confirm the version.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Create App Service plan (Standard tier for slots)</span>
+<span class="c-cmd">az appservice plan create</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> asp-phase3 <span class="c-flag">--sku</span> S1 <span class="c-flag">--is-linux</span>
+
+<span class="c-cmt"># Create web app</span>
+<span class="c-cmd">az webapp create</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-p</span> asp-phase3 <span class="c-flag">-n</span> app-az104-yourname \
+  <span class="c-flag">--runtime</span> <span class="c-str">"PYTHON:3.11"</span>
+
+<span class="c-cmt"># Add staging deployment slot</span>
+<span class="c-cmd">az webapp deployment slot create</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> app-az104-yourname <span class="c-flag">--slot</span> staging \
+  <span class="c-flag">--configuration-source</span> app-az104-yourname
+
+<span class="c-cmt"># Add app settings (slot-sticky)</span>
+<span class="c-cmd">az webapp config appsettings set</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> app-az104-yourname \
+  <span class="c-flag">--settings</span> ENVIRONMENT=production APP_VERSION=2.0
+<span class="c-cmd">az webapp config appsettings set</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> app-az104-yourname <span class="c-flag">--slot-settings</span> ENVIRONMENT=production
+
+<span class="c-cmt"># Swap staging → production</span>
+<span class="c-cmd">az webapp deployment slot swap</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> app-az104-yourname \
+  <span class="c-flag">--slot</span> staging <span class="c-flag">--target-slot</span> production
+
+<span class="c-cmt"># Deploy nginx container instance</span>
+<span class="c-cmd">az container create</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> aci-nginx-lab \
+  <span class="c-flag">--image</span> nginx:latest <span class="c-flag">--ports</span> 80 \
+  <span class="c-flag">--cpu</span> 1 <span class="c-flag">--memory</span> 1.5 \
+  <span class="c-flag">--dns-name-label</span> aci-nginx-yourname \
+  <span class="c-flag">--os-type</span> Linux
+
+<span class="c-cmt"># Get container public URL</span>
+<span class="c-cmd">az container show</span> <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> aci-nginx-lab \
+  <span class="c-flag">--query</span> <span class="c-str">"ipAddress.fqdn"</span> <span class="c-flag">-o</span> tsv</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Two browser screenshots of production URL — before and after slot swap showing the version change with zero downtime</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Deployment slots blade showing both production and staging with their URLs</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>App Settings screenshot showing slot-sticky ENVIRONMENT setting</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Container Instance running nginx — live public URL to include in portfolio</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Container logs screenshot showing real nginx access log entries</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Write-up: App Service vs Container Instances vs VMs — when you'd choose each (1 paragraph each)</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: Standard S1 App Service plan ~$0.10/hr — the most expensive resource in Phase 3. Delete asp-phase3 when done with this project (deletes the web app too). ACI nginx: ~$0.0012/hr — negligible but delete after screenshots.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 8 App Service plan, web app, deployment slots, slot swap, app settings and Azure Container Instance with explanations')"><span class="btn-arrow">&#8599;</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 8 showing App Service plan asp-phase3 containing web app with production and staging deployment slots, plus a separate Azure Container Instance running nginx for my AZ-104 portfolio')"><span class="btn-arrow">&#8599;</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PROJECT 9 — Azure Monitor
+════════════════════════════════════ -->
+<div class="proj-card" id="p9">
+  <div class="proj-header" onclick="toggle('p9')">
+    <div class="proj-num" style="background:#3b0764;color:#d8b4fe;">09</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Azure Monitor — Log Analytics, alerts &amp; workbooks</div>
+      <div class="proj-sub">Build the observability layer that tells you when things go wrong before users notice</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Log Analytics</div><div class="mini-val">1 workspace</div></div>
+      <div class="mini-cell"><div class="mini-label">Alert rules</div><div class="mini-val">3 (metric + log)</div></div>
+      <div class="mini-cell"><div class="mini-label">Action group</div><div class="mini-val">Email notifications</div></div>
+      <div class="mini-cell"><div class="mini-label">Workbook</div><div class="mini-val">Custom dashboard</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--purple-bg);border-color:var(--purple);color:var(--purple-lt);">
+      <strong>Analogy:</strong> Azure Monitor is like the building's central security and facilities system. Log Analytics is the CCTV recording everything to a searchable archive. Metric alerts are motion sensors — they fire when a reading crosses a threshold. Log alerts are pattern matchers — they search recordings for specific events. Action Groups are the alarm contacts list — who gets called and how.
+    </div>
+
+    <div class="sec-label">Portal steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create a Log Analytics workspace: search "Log Analytics workspaces" → Create. Name: <span class="code">law-phase3-monitor</span>, resource group: rg-phase3-compute, region: East US. This is the central repository for all log data across your resources.</li>
+      <li class="step-item"><span class="step-num">2</span>Connect VMs to the workspace: go to vm-linux-01 → Monitoring → Diagnostic settings → Add diagnostic setting. Send all categories to <span class="code">law-phase3-monitor</span>. Repeat for vm-win-01. Also install the Azure Monitor Agent: VM → Extensions → Add → Azure Monitor Agent.</li>
+      <li class="step-item"><span class="step-num">3</span>Create an Action Group first (needed before alert rules): Monitor → Action groups → Create. Name: <span class="code">ag-phase3-ops</span>. Add action: Email/SMS/Push/Voice. Enter your email address. Action name: <span class="code">email-me</span>. Save. This is the "who gets notified" list.</li>
+      <li class="step-item"><span class="step-num">4</span>Create a CPU metric alert: Monitor → Alerts → Create → Alert rule. Scope: vm-linux-01. Signal: Percentage CPU. Condition: greater than 80%, evaluation every 1 minute, lookback 5 minutes. Severity: 2 (Warning). Action group: ag-phase3-ops. Name: <span class="code">alert-cpu-high-linux01</span>.</li>
+      <li class="step-item"><span class="step-num">5</span>Trigger the CPU alert to test it: connect to vm-linux-01 via Bastion and run <span class="code">stress --cpu 4 --timeout 300</span> (install first: <span class="code">sudo apt install stress -y</span>). Within 5 minutes you should receive an email alert. Screenshot the fired alert in Monitor → Alerts.</li>
+      <li class="step-item"><span class="step-num">6</span>Create a log-based alert: Monitor → Alerts → Create. Scope: law-phase3-monitor. Signal type: Custom log search. Query: <span class="code">Heartbeat | where TimeGenerated > ago(5m) | summarize count() by Computer | where count_ < 1</span>. This fires if a VM stops sending heartbeats — i.e., it's down. Threshold: greater than 0 results. This is a VM availability alert.</li>
+      <li class="step-item"><span class="step-num">7</span>Explore Log Analytics queries: law-phase3-monitor → Logs. Run these KQL queries and screenshot the results:<br>— <span class="code">Heartbeat | summarize LastHeartbeat=max(TimeGenerated) by Computer</span><br>— <span class="code">Perf | where CounterName == "% Processor Time" | summarize avg(CounterValue) by Computer, bin(TimeGenerated, 5m)</span></li>
+      <li class="step-item"><span class="step-num">8</span>Create a Workbook: Monitor → Workbooks → New. Add a metric chart showing CPU across both VMs. Add a log query tile showing last 24h of heartbeats. Add a text tile explaining what the dashboard shows. Save as <span class="code">workbook-phase3-vms</span>. Pin it to your Azure dashboard. This is the kind of operational dashboard you'd hand to an L1 support team.</li>
+      <li class="step-item"><span class="step-num">9</span>Set up diagnostic settings on the storage account from Phase 2: stlabeastus001 → Diagnostic settings → Add. Send StorageRead, StorageWrite, StorageDelete logs to law-phase3-monitor. This lets you query who accessed what blob and when — essential for security auditing.</li>
+    </ul>
+
+    <div class="sec-label">Key KQL queries + CLI</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash / KQL</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Create Log Analytics workspace</span>
+<span class="c-cmd">az monitor log-analytics workspace create</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> law-phase3-monitor \
+  <span class="c-flag">--location</span> eastus \
+  <span class="c-flag">--sku</span> PerGB2018
+
+<span class="c-cmt"># Create action group with email</span>
+<span class="c-cmd">az monitor action-group create</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> ag-phase3-ops \
+  <span class="c-flag">--short-name</span> phase3ops \
+  <span class="c-flag">--action</span> email email-me your@email.com
+
+<span class="c-cmt"># Create CPU metric alert</span>
+<span class="c-var">VM_ID</span>=$(az vm show <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> vm-linux-01 <span class="c-flag">--query</span> id <span class="c-flag">-o</span> tsv)
+<span class="c-cmd">az monitor metrics alert create</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> alert-cpu-high-linux01 \
+  <span class="c-flag">--scopes</span> <span class="c-var">$VM_ID</span> \
+  <span class="c-flag">--condition</span> <span class="c-str">"avg Percentage CPU > 80"</span> \
+  <span class="c-flag">--window-size</span> 5m \
+  <span class="c-flag">--evaluation-frequency</span> 1m \
+  <span class="c-flag">--severity</span> 2 \
+  <span class="c-flag">--action</span> ag-phase3-ops
+
+<span class="c-cmt">--- KQL: Last heartbeat per VM ---</span>
+Heartbeat
+| summarize LastSeen=max(TimeGenerated) by Computer
+| extend MinutesSinceLastSeen=datetime_diff('minute',now(),LastSeen)
+| order by MinutesSinceLastSeen asc
+
+<span class="c-cmt">--- KQL: Average CPU over time ---</span>
+Perf
+| where CounterName == <span class="c-str">"% Processor Time"</span>
+| where ObjectName == <span class="c-str">"Processor"</span>
+| where InstanceName == <span class="c-str">"_Total"</span>
+| summarize AvgCPU=avg(CounterValue)
+    by Computer, bin(TimeGenerated, 5m)
+| render timechart</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Screenshot of fired CPU alert email — proof the end-to-end alert pipeline works</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Screenshot of Alerts blade showing alert in Fired state with timeline</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>KQL query results — heartbeat and CPU charts from Log Analytics</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Screenshot of completed Workbook with metric chart and heartbeat tile</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Export the alert rule JSON (portal → alert rule → Export template) for code section</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: Log Analytics ~$2.30/GB ingested. For two B1s VMs in a lab this is pennies. The workspace itself has no base cost — you only pay for data ingested. Delete the workspace when Phase 3 is complete to stop ingestion charges.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 9 Log Analytics workspace, Azure Monitor Agent, action group, CPU metric alert, and log-based VM heartbeat alert for AZ-104 Phase 3')"><span class="btn-arrow">&#8599;</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 9 showing vm-linux-01 and vm-win-01 sending metrics and logs to law-phase3-monitor Log Analytics workspace, which feeds alert rules that trigger action group ag-phase3-ops sending email notifications for my AZ-104 portfolio')"><span class="btn-arrow">&#8599;</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PROJECT 10 — Backup & Site Recovery
+════════════════════════════════════ -->
+<div class="proj-card" id="p10">
+  <div class="proj-header" onclick="toggle('p10')">
+    <div class="proj-num" style="background:#14532d;color:#86efac;">10</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Azure Backup &amp; Site Recovery fundamentals</div>
+      <div class="proj-sub">Protect workloads with recovery vaults, backup policies, and DR replication concepts</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Recovery vault</div><div class="mini-val">1 created</div></div>
+      <div class="mini-cell"><div class="mini-label">Backup policy</div><div class="mini-val">Custom schedule</div></div>
+      <div class="mini-cell"><div class="mini-label">VM backup</div><div class="mini-val">Triggered + verified</div></div>
+      <div class="mini-cell"><div class="mini-label">File recovery</div><div class="mini-val">Item-level restore</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--green-bg);border-color:var(--green);color:var(--green-lt);">
+      <strong>Analogy:</strong> The Recovery Services vault is like a fireproof safe in a separate building from your office. Backup policy is the schedule for how often someone carries documents to that safe. Azure Site Recovery is like having a full duplicate office ready in another city — if your main office burns down, staff show up at the duplicate and work resumes within hours instead of weeks.
+    </div>
+
+    <div class="sec-label">Portal steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create a Recovery Services vault: search "Recovery Services vaults" → Create. Name: <span class="code">rsv-phase3-backup</span>, resource group: rg-phase3-compute, region: East US. Important: the vault must be in the same region as the VMs you want to back up.</li>
+      <li class="step-item"><span class="step-num">2</span>Configure vault redundancy: rsv-phase3-backup → Properties → Backup configuration → Update. Set Storage replication type to Locally Redundant (LRS). For a lab, LRS is fine and cheaper. Production vaults typically use GRS so backups survive a regional outage.</li>
+      <li class="step-item"><span class="step-num">3</span>Create a custom backup policy: vault → Backup policies → Add. Policy type: Azure Virtual Machine. Name: <span class="code">pol-daily-7day</span>. Schedule: Daily at 11:00 PM UTC. Retention: daily 7 days, weekly 4 weeks, monthly 3 months. This is a realistic production policy — daily backups with tiered retention.</li>
+      <li class="step-item"><span class="step-num">4</span>Enable backup for vm-linux-01: vault → Backup → Azure Virtual Machine → Add. Select vm-linux-01, assign policy pol-daily-7day. Alternatively: VM → Backup → Enable backup (points to same flow). After enabling, click "Backup now" to trigger an immediate backup rather than waiting for the scheduled time.</li>
+      <li class="step-item"><span class="step-num">5</span>Monitor the backup job: vault → Backup Jobs. Watch the job progress through Triggered → Taking Snapshot → Transferring data to vault → Completed. This takes 10–20 minutes for a B1s VM. Screenshot the Completed status — this is your proof of working backup.</li>
+      <li class="step-item"><span class="step-num">6</span>Explore restore options: vault → Backup Items → Azure Virtual Machine → vm-linux-01 → Restore VM. Note the three options: Create new VM (deploys a new VM from backup), Replace existing (overwrites the source VM), Restore disks (gives you managed disks to attach anywhere). Do NOT click Restore in the lab — just screenshot the options. Understanding restore paths is exam content.</li>
+      <li class="step-item"><span class="step-num">7</span>File-level recovery: vault → Backup Items → vm-linux-01 → File Recovery. Select a recovery point. Download the script provided — this mounts the backup as a network share on any VM so you can browse and copy individual files without restoring the entire VM. This is how you recover a single accidentally-deleted config file in production.</li>
+      <li class="step-item"><span class="step-num">8</span>Enable soft delete on the vault: vault → Properties → Security settings → Soft delete: Enabled. With soft delete, even if a backup is deleted, it's retained for 14 days and can be recovered. This protects against ransomware attacks that try to destroy backups before encrypting VMs.</li>
+      <li class="step-item"><span class="step-num">9</span>Azure Site Recovery concepts: vault → Site Recovery → Step 1: Replicate. Walk through the wizard without completing it — observe the settings: source region (East US), target region (West US 2), replication policy (RPO 24h, recovery point retention 72h). Screenshot the configuration wizard. ASR is too expensive to run in a lab ($25+/month per VM) so documenting the configuration options is the right approach here.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Create Recovery Services vault</span>
+<span class="c-cmd">az backup vault create</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> rsv-phase3-backup \
+  <span class="c-flag">--location</span> eastus
+
+<span class="c-cmt"># Set vault storage redundancy to LRS</span>
+<span class="c-cmd">az backup vault backup-properties set</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> rsv-phase3-backup \
+  <span class="c-flag">--backup-storage-redundancy</span> LocallyRedundant
+
+<span class="c-cmt"># Enable VM backup with default policy first</span>
+<span class="c-var">VM_ID</span>=$(az vm show <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-n</span> vm-linux-01 <span class="c-flag">--query</span> id <span class="c-flag">-o</span> tsv)
+<span class="c-cmd">az backup protection enable-for-vm</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-v</span> rsv-phase3-backup \
+  <span class="c-flag">--vm</span> <span class="c-var">$VM_ID</span> \
+  <span class="c-flag">--policy-name</span> DefaultPolicy
+
+<span class="c-cmt"># Trigger an immediate backup now</span>
+<span class="c-cmd">az backup protection backup-now</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-v</span> rsv-phase3-backup \
+  <span class="c-flag">--container-name</span> <span class="c-str">"IaasVMContainer;iaasvmcontainerv2;rg-phase3-compute;vm-linux-01"</span> \
+  <span class="c-flag">--item-name</span> <span class="c-str">"vm;iaasvmcontainerv2;rg-phase3-compute;vm-linux-01"</span> \
+  <span class="c-flag">--retain-until</span> $(date -u -d "+7 days" '+%d-%m-%Y')
+
+<span class="c-cmt"># Monitor backup jobs</span>
+<span class="c-cmd">az backup job list</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-v</span> rsv-phase3-backup \
+  <span class="c-flag">--output</span> table
+
+<span class="c-cmt"># List restore points once backup completes</span>
+<span class="c-cmd">az backup recoverypoint list</span> \
+  <span class="c-flag">-g</span> rg-phase3-compute \
+  <span class="c-flag">-v</span> rsv-phase3-backup \
+  <span class="c-flag">--container-name</span> <span class="c-str">"IaasVMContainer;iaasvmcontainerv2;rg-phase3-compute;vm-linux-01"</span> \
+  <span class="c-flag">--item-name</span> <span class="c-str">"vm;iaasvmcontainerv2;rg-phase3-compute;vm-linux-01"</span> \
+  <span class="c-flag">--output</span> table</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Backup job showing Completed status — the most important screenshot from this project</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Custom backup policy pol-daily-7day showing schedule and retention settings</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Screenshot of restore options (Create new VM / Replace existing / Restore disks) — shows you understand recovery paths</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>File Recovery screen showing mounted backup share concept</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>ASR replication wizard screenshot documenting RPO and RTO settings</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Write-up: RPO vs RTO — what they mean and how backup policy settings control them (this question appears in AZ-104 and every infra interview)</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: Recovery Services vault has no base cost. VM backup costs ~$10/month per 500GB protected VM — for a B1s lab VM with tiny disks this is well under $1 for a week. Delete the vault carefully: stop backup protection first, then delete backup data, then delete the vault. Skipping steps causes deletion to fail.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 10 Recovery Services vault, backup policy, enable VM backup for vm-linux-01, trigger immediate backup and monitor the backup job for AZ-104 Phase 3')"><span class="btn-arrow">&#8599;</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 10 showing vm-linux-01 and vm-win-01 protected by rsv-phase3-backup Recovery Services vault with backup policy pol-daily-7day, restore options, and Azure Site Recovery replication to a secondary region for my AZ-104 portfolio')"><span class="btn-arrow">&#8599;</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PHASE 3 SUMMARY
+════════════════════════════════════ -->
+<div class="summary-card">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">When you finish Phase 3</div>
+  <div class="summary-grid">
+    <div class="mini-cell"><div class="mini-label">AZ-104 coverage</div><div class="mini-val" style="color:var(--azure-lt);">~80% cumulative</div></div>
+    <div class="mini-cell"><div class="mini-label">Phase 3 cost</div><div class="mini-val" style="color:var(--amber-lt);">$15–30 total</div></div>
+    <div class="mini-cell"><div class="mini-label">Portfolio items added</div><div class="mini-val" style="color:var(--green-lt);">~20 items</div></div>
+    <div class="mini-cell"><div class="mini-label">Next step</div><div class="mini-val">Phase 4 Capstone</div></div>
+  </div>
+  <div style="font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:16px;">
+    Cleanup order: Stop backup protection before deleting vault → Delete App Service plan → Deallocate and delete VMs → Delete managed disks and snapshots → Delete Log Analytics workspace → Delete resource group.
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="copyPrompt('Give me the Phase 3 cleanup PowerShell script to safely tear down all resources from Projects 7 through 10 in the correct dependency order including stopping backup protection before deleting the Recovery Services vault')"><span class="btn-arrow">&#8599;</span> Copy cleanup script prompt</button>
+    <button class="btn" onclick="copyPrompt('Im done with Phase 3. Give me the detailed breakdown for Phase 4 capstone project including the 3-tier application architecture to deploy using Bicep IaC and what to document on ostebovik.net')"><span class="btn-arrow">&#8599;</span> Copy Phase 4 prompt</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+function toggle(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.cli-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyPrompt(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const note = document.createElement('div');
+    note.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 18px;border-radius:8px;font-family:monospace;font-size:12px;z-index:9999;';
+    note.textContent = 'Prompt copied — paste into Claude';
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 2500);
+  });
+}
+
+function check(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+  const item = el.closest('.portfolio-item');
+  item.style.opacity = el.classList.contains('checked') ? '0.5' : '1';
+}
+
+// Open first card by default
+document.getElementById('p7').classList.add('open');
+</script>
+</body>
+</html>
