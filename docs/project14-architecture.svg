@@ -1,0 +1,129 @@
+<svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', monospace">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Syne:wght@400;600;700&amp;display=swap');
+      .label { font-family: 'Syne', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="680" height="580" fill="#0e0f11"/>
+
+  <!-- ── Resource Group container ── -->
+  <rect x="20" y="20" width="640" height="520" rx="12" fill="#16181c" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="20" y="20" width="640" height="4" rx="2" fill="#a855f7"/>
+  <text x="36" y="44" font-size="10" fill="#a855f7" letter-spacing="1.5" font-weight="500">RESOURCE GROUP</text>
+  <text x="36" y="58" font-size="11" fill="#64748b" font-family="'IBM Plex Mono', monospace">rg-az104-dev-wus3-01  ·  westus3</text>
+
+  <!-- ── App Service card ── -->
+  <rect x="44" y="76" width="260" height="130" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="44" y="76" width="260" height="3" rx="2" fill="#14b8a6"/>
+  <text x="60" y="96" font-size="10" fill="#14b8a6" letter-spacing="1.2" font-family="'Syne', sans-serif">APP SERVICE</text>
+  <text x="60" y="113" font-size="12" fill="#e2e8f0" font-weight="500">app-dev-wus3-01</text>
+  <text x="60" y="129" font-size="10" fill="#64748b">Python 3.11  ·  P0v3  ·  Linux</text>
+  <text x="60" y="145" font-size="10" fill="#64748b">HTTPS only  ·  system identity</text>
+
+  <!-- Identity badge -->
+  <rect x="60" y="158" width="160" height="34" rx="6" fill="#3b0764" stroke="#a855f7" stroke-width="1"/>
+  <text x="75" y="172" font-size="9" fill="#a855f7" letter-spacing="1">MANAGED IDENTITY</text>
+  <text x="75" y="184" font-size="9" fill="#d8b4fe">f4583a28-b52c-4643...</text>
+
+  <!-- App Settings -->
+  <rect x="44" y="222" width="260" height="90" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="44" y="222" width="260" height="3" rx="2" fill="#f59e0b"/>
+  <text x="60" y="242" font-size="10" fill="#f59e0b" letter-spacing="1.2" font-family="'Syne', sans-serif">APP SETTINGS</text>
+  <text x="60" y="258" font-size="10" fill="#64748b">DB_CONNECTION</text>
+  <text x="60" y="271" font-size="9" fill="#fcd34d">@Microsoft.KeyVault(SecretUri=...)</text>
+  <rect x="212" y="261" width="76" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="1"/>
+  <text x="222" y="272" font-size="8" fill="#86efac">✓ Key vault</text>
+  <text x="60" y="289" font-size="10" fill="#64748b">API_KEY</text>
+  <text x="60" y="302" font-size="9" fill="#fcd34d">@Microsoft.KeyVault(SecretUri=...)</text>
+  <rect x="212" y="292" width="76" height="14" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="1"/>
+  <text x="222" y="303" font-size="8" fill="#86efac">✓ Key vault</text>
+
+  <!-- App Service Plan -->
+  <rect x="44" y="328" width="260" height="60" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="44" y="328" width="260" height="3" rx="2" fill="#14b8a6"/>
+  <text x="60" y="348" font-size="10" fill="#14b8a6" letter-spacing="1.2" font-family="'Syne', sans-serif">APP SERVICE PLAN</text>
+  <text x="60" y="364" font-size="12" fill="#e2e8f0" font-weight="500">asp-dev-wus3-01</text>
+  <text x="60" y="378" font-size="10" fill="#64748b">Linux  ·  P0v3  ·  ~$41/mo</text>
+
+  <!-- ── Key Vault card ── -->
+  <rect x="376" y="76" width="260" height="200" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="376" y="76" width="260" height="3" rx="2" fill="#f59e0b"/>
+  <text x="392" y="96" font-size="10" fill="#f59e0b" letter-spacing="1.2" font-family="'Syne', sans-serif">KEY VAULT</text>
+  <text x="392" y="113" font-size="12" fill="#e2e8f0" font-weight="500">kv-az104-dev-wus3-01</text>
+  <text x="392" y="129" font-size="10" fill="#64748b">RBAC model  ·  soft-delete 7d</text>
+
+  <!-- RBAC badge -->
+  <rect x="392" y="140" width="120" height="20" rx="4" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+  <text x="402" y="154" font-size="9" fill="#fcd34d">Key Vault Secrets User</text>
+
+  <!-- Secrets -->
+  <rect x="392" y="172" width="228" height="28" rx="4" fill="#242c40" stroke="#364259" stroke-width="1"/>
+  <text x="404" y="184" font-size="9" fill="#94a3b8">SECRET</text>
+  <text x="404" y="195" font-size="10" fill="#e2e8f0">db-connection-string</text>
+  <text x="598" y="191" font-size="9" fill="#22c55e">enabled</text>
+
+  <rect x="392" y="206" width="228" height="28" rx="4" fill="#242c40" stroke="#364259" stroke-width="1"/>
+  <text x="404" y="218" font-size="9" fill="#94a3b8">SECRET</text>
+  <text x="404" y="229" font-size="10" fill="#e2e8f0">api-key</text>
+  <text x="598" y="225" font-size="9" fill="#22c55e">enabled</text>
+
+  <rect x="392" y="240" width="228" height="28" rx="4" fill="#242c40" stroke="#364259" stroke-width="1"/>
+  <text x="404" y="252" font-size="9" fill="#94a3b8">SECRET</text>
+  <text x="404" y="263" font-size="10" fill="#64748b">vm-admin-password</text>
+  <text x="598" y="259" font-size="9" fill="#22c55e">enabled</text>
+
+  <!-- ── Log Analytics card ── -->
+  <rect x="376" y="294" width="260" height="94" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="376" y="294" width="260" height="3" rx="2" fill="#3b82f6"/>
+  <text x="392" y="314" font-size="10" fill="#3b82f6" letter-spacing="1.2" font-family="'Syne', sans-serif">LOG ANALYTICS</text>
+  <text x="392" y="331" font-size="12" fill="#e2e8f0" font-weight="500">law-az104-dev-wus03-01</text>
+  <text x="392" y="347" font-size="10" fill="#64748b">AuditEvent logs  ·  diagset-kv-dev-wus3-01</text>
+
+  <!-- KQL query sample -->
+  <rect x="392" y="356" width="228" height="26" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+  <text x="402" y="366" font-size="8" fill="#93c5fd">AzureDiagnostics</text>
+  <text x="402" y="377" font-size="8" fill="#93c5fd">| where OperationName == "SecretGet"</text>
+
+  <!-- ── Entra ID card ── -->
+  <rect x="44" y="406" width="260" height="80" rx="8" fill="#1e2128" stroke="#2a2d35" stroke-width="1"/>
+  <rect x="44" y="406" width="260" height="3" rx="2" fill="#a855f7"/>
+  <text x="60" y="426" font-size="10" fill="#a855f7" letter-spacing="1.2" font-family="'Syne', sans-serif">MICROSOFT ENTRA ID</text>
+  <text x="60" y="443" font-size="11" fill="#e2e8f0">Token issuance</text>
+  <text x="60" y="458" font-size="10" fill="#64748b">App Service presents identity →</text>
+  <text x="60" y="471" font-size="10" fill="#64748b">Entra issues scoped token → KV validates</text>
+
+  <!-- ── Connector: App Service → Key Vault (RBAC auth) ── -->
+  <line x1="304" y1="140" x2="376" y2="175" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="372,170 376,175 370,176" fill="#a855f7"/>
+  <text x="318" y="148" font-size="9" fill="#a855f7">RBAC</text>
+  <text x="318" y="159" font-size="9" fill="#a855f7">Secrets User</text>
+
+  <!-- ── Connector: App Service → Key Vault (secret retrieval) ── -->
+  <line x1="304" y1="265" x2="376" y2="220" stroke="#f59e0b" stroke-width="1.5"/>
+  <polygon points="372,216 376,220 370,222" fill="#f59e0b"/>
+  <text x="314" y="252" font-size="9" fill="#f59e0b">resolves</text>
+  <text x="314" y="263" font-size="9" fill="#f59e0b">at runtime</text>
+
+  <!-- ── Connector: Key Vault → Log Analytics (audit logs) ── -->
+  <line x1="506" y1="276" x2="506" y2="294" stroke="#3b82f6" stroke-width="1.5"/>
+  <polygon points="502,290 506,294 510,290" fill="#3b82f6"/>
+  <text x="515" y="288" font-size="9" fill="#3b82f6">AuditEvent</text>
+
+  <!-- ── Connector: App Service → Entra ID ── -->
+  <line x1="174" y1="406" x2="174" y2="392" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="170,396 174,392 178,396" fill="#a855f7"/>
+
+  <!-- ── Zero credential callout ── -->
+  <rect x="44" y="500" width="590" height="28" rx="6" fill="#14532d" stroke="#22c55e" stroke-width="1"/>
+  <text x="339" y="518" font-size="10" fill="#86efac" text-anchor="middle" font-family="'Syne', sans-serif" font-weight="600">
+    ✓ Zero credentials in code · No secrets in config · No keys in git · Audit trail in Log Analytics
+  </text>
+
+  <!-- ── Footer ── -->
+  <text x="340" y="553" font-size="9" fill="#374151" text-anchor="middle">
+    ostebovik.net · AZ-104 Phase 4 · Project 14 — Key Vault &amp; Managed Identity
+  </text>
+</svg>

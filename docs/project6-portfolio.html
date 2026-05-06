@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 6: Azure DNS &amp; Private Endpoints — Ste Bovik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f8f7f3; --bg2: #ffffff; --bg3: #f0efe9; --bg4: #e8e7e0;
+  --border: #dddcD5; --border2: #c8c7be;
+  --ink: #1c1c18; --ink2: #44443c; --ink3: #767668; --ink4: #a8a898;
+  --azure: #0057b8; --azure2: #0072c6; --azure-bg: #e8f2fc; --azure-lt: #bfdbfe;
+  --teal: #0f766e; --teal-bg: #ccfbf1; --teal-lt: #5eead4;
+  --purple: #7c3aed; --purple-bg: #ede9fe;
+  --green: #15803d; --green-bg: #dcfce7;
+  --red: #b91c1c; --red-bg: #fee2e2;
+  --amber: #92400e; --amber-bg: #fef3ee;
+  --mono: 'DM Mono', monospace;
+  --display: 'Playfair Display', Georgia, serif;
+  --body: 'Plus Jakarta Sans', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--body); background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.65; }
+
+/* NAV */
+.nav { position:sticky; top:0; z-index:100; background: var(--bg2); border-bottom:1px solid var(--border); height:52px; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; }
+.nav-brand { font-family: var(--mono); font-size:12px; color: var(--ink3); display:flex; align-items:center; gap:8px; }
+.nav-pip { width:7px; height:7px; border-radius:50%; background: var(--azure2); }
+.nav-links { display:flex; gap:22px; font-size:13px; }
+.nav-links a { color: var(--ink3); text-decoration:none; } .nav-links a:hover { color: var(--ink); }
+
+/* HERO — editorial split layout */
+.hero { max-width:960px; margin:0 auto; padding: 80px 2rem 56px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; border-bottom:1px solid var(--border); }
+@media(max-width:680px){ .hero { grid-template-columns:1fr; } }
+.hero-left {}
+.hero-eyebrow { font-family: var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink3); margin-bottom:20px; }
+h1 { font-family: var(--display); font-size: clamp(32px,5vw,50px); font-weight:700; line-height:1.1; letter-spacing:-.02em; margin-bottom:18px; }
+h1 em { font-style:italic; color: var(--azure2); }
+.hero-concept { font-size:15px; color: var(--ink2); line-height:1.75; }
+.hero-right { padding-top:8px; }
+.key-metric { background: var(--bg3); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:10px; }
+.km-label { font-family: var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color: var(--ink3); margin-bottom:6px; }
+.km-value { font-family: var(--display); font-size:22px; font-weight:700; color: var(--ink); line-height:1.1; }
+.km-sub { font-size:12px; color: var(--ink3); margin-top:3px; font-family: var(--mono); }
+.stat-row { display:flex; gap:8px; }
+.stat-mini { flex:1; background: var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+.stat-mini strong { display:block; font-family: var(--display); font-size:20px; font-weight:700; color: var(--azure2); }
+.stat-mini span { font-size:11px; color: var(--ink3); font-family: var(--mono); }
+
+/* LAYOUT */
+.page { max-width:960px; margin:0 auto; padding:0 2rem 100px; }
+.section { padding:52px 0; border-bottom:1px solid var(--border); }
+.section:last-child { border-bottom:none; }
+.sec-label { font-family: var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink3); margin-bottom:16px; }
+h2 { font-family: var(--display); font-size:28px; font-weight:700; line-height:1.2; margin-bottom:14px; }
+p { color: var(--ink2); line-height:1.8; margin-bottom:14px; font-size:15px; }
+p:last-child { margin-bottom:0; }
+strong { color: var(--ink); font-weight:600; }
+code { font-family: var(--mono); font-size:12px; background: var(--bg3); color: var(--azure2); padding:2px 7px; border-radius:4px; border:1px solid var(--border); }
+
+/* CONCEPT BOX */
+.concept { background: var(--azure-bg); border-left:3px solid var(--azure2); padding:16px 20px; border-radius:0 8px 8px 0; margin: 20px 0; }
+.concept-label { font-family: var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color: var(--azure); margin-bottom:6px; }
+.concept p { color: var(--azure); font-size:14px; margin:0; line-height:1.65; }
+
+/* DNS FLOW COMPARISON */
+.dns-compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+@media(max-width:600px){ .dns-compare { grid-template-columns:1fr; } }
+.dns-card { border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+.dns-header { padding:12px 16px; font-family: var(--mono); font-size:11px; font-weight:500; border-bottom:1px solid var(--border); }
+.dns-before .dns-header { background: var(--red-bg); color: var(--red); }
+.dns-after .dns-header { background: var(--green-bg); color: var(--green); }
+.dns-body { padding:14px 16px; background: var(--bg2); font-family: var(--mono); font-size:12px; line-height:1.9; }
+.dns-flow { color: var(--ink3); }
+.dns-flow .hop { display:block; padding-left:16px; position:relative; }
+.dns-flow .hop::before { content:'→'; position:absolute; left:0; color: var(--ink4); }
+.dns-flow .hop.bad { color: var(--red); }
+.dns-flow .hop.good { color: var(--green); }
+.dns-flow .hop.highlight { color: var(--azure2); font-weight:500; }
+
+/* NSLOOKUP PROOF */
+.proof-block { background: #0d1117; border-radius:10px; overflow:hidden; margin-top:24px; }
+.proof-header { padding:10px 16px; background: #161b27; border-bottom:1px solid #2a3347; font-family: var(--mono); font-size:11px; color:#60a5fa; display:flex; justify-content:space-between; }
+.proof-header span { color:#5a6a82; }
+pre.proof { padding:18px; font-family: var(--mono); font-size:12px; line-height:1.9; color:#e2e8f0; }
+.p-prompt { color:#5a6a82; }
+.p-cmd { color:#93c5fd; }
+.p-server { color:#94a3b8; }
+.p-key { color:#fcd34d; }
+.p-private { color:#86efac; font-weight:500; }
+.p-comment { color:#22c55e; }
+
+/* COMPARISON TABLE */
+.access-table { width:100%; border-collapse:collapse; margin-top:24px; font-size:14px; }
+.access-table th { background: var(--bg3); padding:11px 16px; text-align:left; font-weight:600; font-size:11px; color: var(--ink2); border-bottom:2px solid var(--border2); font-family: var(--mono); letter-spacing:.05em; text-transform:uppercase; }
+.access-table td { padding:11px 16px; border-bottom:1px solid var(--border); color: var(--ink2); vertical-align:top; }
+.access-table tr:last-child td { border-bottom:none; }
+.access-table tr:hover td { background: var(--bg3); }
+.access-table td:first-child { font-weight:500; color: var(--ink); }
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; font-family: var(--mono); }
+.b-green { background: var(--green-bg); color: var(--green); }
+.b-red { background: var(--red-bg); color: var(--red); }
+.b-amber { background: var(--amber-bg); color: var(--amber); }
+
+/* EMPLOYER SECTION */
+.emp-list { display:flex; flex-direction:column; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:24px; }
+.emp-item { display:flex; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border); background: var(--bg2); }
+.emp-item:last-child { border-bottom:none; }
+.emp-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.emp-title { font-size:14px; font-weight:600; color: var(--ink); margin-bottom:4px; }
+.emp-body { font-size:13px; color: var(--ink2); line-height:1.65; }
+
+/* SKILLS */
+.skills { display:flex; flex-wrap:wrap; gap:7px; margin-top:20px; }
+.skill { background: var(--azure-bg); color: var(--azure); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:500; font-family: var(--mono); border:1px solid var(--azure-lt); }
+
+/* FOOTER */
+.footer { max-width:960px; margin:0 auto; padding:28px 2rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px; color: var(--ink3); flex-wrap:wrap; gap:10px; }
+.footer a { color: var(--ink3); text-decoration:none; } .footer a:hover { color: var(--ink); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.hero h1 { animation: fadeUp .5s ease both; }
+.hero-concept { animation: fadeUp .5s .1s ease both; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><div class="nav-pip"></div>ostebovik.net</div>
+  <div class="nav-links"><a href="/">Home</a><a href="/projects">Projects</a><a href="/about">About</a><a href="/contact">Contact</a></div>
+</nav>
+
+<header class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">AZ-104 · Phase 2 · Project 6 of 11</div>
+    <h1>Azure DNS &amp;<br><em>Private Endpoints</em></h1>
+    <p class="hero-concept">Taking a storage account that was publicly accessible to anyone on the internet and making it reachable only through a private IP inside a VNet — while keeping the same hostname, DNS, and application code unchanged.</p>
+  </div>
+  <div class="hero-right">
+    <div class="key-metric">
+      <div class="km-label">The proof that matters</div>
+      <div class="km-value">10.0.1.6</div>
+      <div class="km-sub">private IP returned by nslookup — not a public IP</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-mini"><strong>2</strong><span>DNS zones</span></div>
+      <div class="stat-mini"><strong>3</strong><span>VNet links</span></div>
+      <div class="stat-mini"><strong>404</strong><span>public response</span></div>
+      <div class="stat-mini"><strong>✓</strong><span>private access</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+<!-- WHAT I BUILT -->
+<section class="section">
+  <div class="sec-label">What I built</div>
+  <h2>Two DNS zones, one private endpoint, one locked-down storage account</h2>
+  <p>This project covers two distinct capabilities that are often confused: public DNS zone management (creating authoritative records for a domain) and private endpoint networking (giving an Azure PaaS service a private IP address inside a VNet).</p>
+  <p>The end state: <code>stlabeastus001.blob.core.windows.net</code> resolves to a private IP address <code>10.0.1.6</code> when queried from inside the VNet, and returns a <code>404 WebContentNotFound</code> when queried from the public internet. Same hostname. Different DNS answer depending on where the query originates. Zero application code changes required.</p>
+
+  <div class="concept">
+    <div class="concept-label">Core concept</div>
+    <p>A private endpoint creates a NIC with a private IP in your subnet and establishes an Azure Private Link connection to a PaaS service. The private DNS zone intercepts queries for the service hostname from inside linked VNets and returns that private IP instead of the public one. Traffic never leaves your VNet. The service doesn't need to know about it. This is how enterprises move PaaS services off the public internet without changing application configuration.</p>
+  </div>
+</section>
+
+<!-- DNS RESOLUTION BEFORE AND AFTER -->
+<section class="section">
+  <div class="sec-label">What changed</div>
+  <h2>DNS resolution before and after the private endpoint</h2>
+
+  <div class="dns-compare">
+    <div class="dns-card dns-before">
+      <div class="dns-header">&#x2715; Before — public DNS resolution</div>
+      <div class="dns-body">
+        <div class="dns-flow">
+          VM queries:<br>
+          <span class="hop">stlabeastus001.blob.core.windows.net</span>
+          <span class="hop">Azure public DNS</span>
+          <span class="hop bad">→ 20.150.x.x (public IP)</span>
+          <span class="hop bad">→ Traffic leaves VNet</span>
+          <span class="hop bad">→ Travels over internet</span>
+          <span class="hop bad">→ Reaches storage publicly</span>
+        </div>
+      </div>
+    </div>
+    <div class="dns-card dns-after">
+      <div class="dns-header">&#x2713; After — private DNS resolution</div>
+      <div class="dns-body">
+        <div class="dns-flow">
+          VM queries:<br>
+          <span class="hop">stlabeastus001.blob.core.windows.net</span>
+          <span class="hop">Private DNS zone intercepts</span>
+          <span class="hop highlight">→ 10.0.1.6 (private IP) ✓</span>
+          <span class="hop good">→ Traffic stays in VNet</span>
+          <span class="hop good">→ Uses Private Link</span>
+          <span class="hop good">→ Never hits internet</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROOF -->
+<section class="section">
+  <div class="sec-label">The proof — nslookup from inside the VNet</div>
+  <h2>The single most important screenshot of Phase 2</h2>
+  <p>This nslookup was run from <code>vm-web-01</code> (in vnet-spoke/snet-web) via Azure Bastion. The response shows a private IP in the 10.0.x.x range — confirming the private DNS zone linked to both VNets is intercepting the public hostname and returning the private endpoint NIC address.</p>
+
+  <div class="proof-block">
+    <div class="proof-header">
+      <span>bash — vm-web-01 via Bastion</span>
+      <span>10.1.1.4 · vnet-spoke/snet-web</span>
+    </div>
+    <pre class="proof"><span class="p-prompt">azureuser@vm-web-01:~$</span> <span class="p-cmd">nslookup stlabeastus001.blob.core.windows.net</span>
+
+<span class="p-server">Server:    168.63.129.16</span>
+<span class="p-server">Address:   168.63.129.16#53</span>
+
+<span class="p-server">Non-authoritative answer:</span>
+<span class="p-key">Name:    stlabeastus001.privatelink.blob.core.windows.net</span>
+<span class="p-private">Address: 10.0.1.6</span>   <span class="p-comment"># ← Private IP — not a public address ✓</span>
+
+<span class="p-comment"># Compare: same query from outside the VNet returns:</span>
+<span class="p-comment"># Address: 20.150.75.x  ← public IP (internet path)</span></pre>
+  </div>
+
+  <p style="margin-top:16px;">The CNAME chain shows the resolution path: the public hostname resolves through the <code>privatelink</code> intermediate zone before returning the private IP. This is the Azure Private DNS override mechanism working exactly as designed.</p>
+</section>
+
+<!-- PUBLIC DNS ZONE -->
+<section class="section">
+  <div class="sec-label">Public DNS zone</div>
+  <h2>lab.ostebovik.net — authoritative DNS records</h2>
+  <p>Alongside the private endpoint work, this project also configured a public Azure DNS zone demonstrating real-world DNS management. The zone hosts two record types that map to resources built across Phase 2.</p>
+
+  <table class="access-table">
+    <thead>
+      <tr><th>Record</th><th>Name</th><th>Type</th><th>Value</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>www</code></td>
+        <td><span class="badge b-green">A</span></td>
+        <td><code>20.171.241.228</code></td>
+        <td>Points to pip-lb-web — the load balancer public IP from Project 5</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>storage</code></td>
+        <td><span class="badge b-amber">CNAME</span></td>
+        <td><code>stlabeastus001.blob.core.windows.net</code></td>
+        <td>Alias to the storage account — no IP to manage if storage moves</td>
+      </tr>
+      <tr>
+        <td>3–6</td>
+        <td><code>@</code></td>
+        <td><span class="badge b-red">NS</span></td>
+        <td><code>ns1-xx.azure-dns.com</code></td>
+        <td>Azure-assigned name servers — delegate at registrar to activate zone</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ACCESS COMPARISON -->
+<section class="section">
+  <div class="sec-label">Access control outcome</div>
+  <h2>Same hostname — completely different response depending on where you ask from</h2>
+
+  <table class="access-table">
+    <thead>
+      <tr><th>Source</th><th>DNS resolves to</th><th>Public access</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>vm-web-01 (vnet-spoke)</td>
+        <td><code>10.0.1.6</code> (private)</td>
+        <td>Disabled</td>
+        <td><span class="badge b-green">✓ Access granted via private link</span></td>
+      </tr>
+      <tr>
+        <td>vm-hub-test (vnet-hub)</td>
+        <td><code>10.0.1.6</code> (private)</td>
+        <td>Disabled</td>
+        <td><span class="badge b-green">✓ Access granted via private link</span></td>
+      </tr>
+      <tr>
+        <td>Local browser (public internet)</td>
+        <td>Public IP (overridden by Azure)</td>
+        <td>Disabled</td>
+        <td><span class="badge b-red">✗ 404 WebContentNotFound</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:16px;">The <code>404 WebContentNotFound</code> response (rather than 403 Unauthorized) is deliberate. Azure Storage does not acknowledge the endpoint exists when public access is disabled — from the public internet, there is nothing to authenticate against. A 403 would reveal the resource exists. A 404 reveals nothing. This is a stronger security posture.</p>
+</section>
+
+<!-- WHY IT MATTERS -->
+<section class="section">
+  <div class="sec-label">Why this matters to employers</div>
+  <h2>What private endpoints signal about security maturity</h2>
+  <div class="emp-list">
+    <div class="emp-item">
+      <div class="emp-icon" style="background:var(--azure-bg)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0072c6" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">Zero-trust network design for PaaS services</div>
+        <div class="emp-body">Private endpoints are the primary mechanism for removing PaaS services from the public internet without re-architecting applications. Any organisation subject to regulatory compliance (PCI DSS, HIPAA, ISO 27001) or enterprise security standards requires private endpoints for storage, SQL, Key Vault, and other PaaS services. Configuring and verifying this in a lab demonstrates readiness to implement it in regulated environments.</div>
+      </div>
+    </div>
+    <div class="emp-item">
+      <div class="emp-icon" style="background:var(--teal-bg)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">DNS as a security control — not just name resolution</div>
+        <div class="emp-body">This project demonstrates using DNS split-horizon to control traffic routing: same hostname resolves differently depending on network location. This is a sophisticated pattern used in enterprise environments to route internal traffic privately while keeping public-facing names unchanged. Understanding that DNS resolution and network routing are independent layers that must both be configured correctly is not an obvious insight.</div>
+      </div>
+    </div>
+    <div class="emp-item">
+      <div class="emp-icon" style="background:var(--purple-bg)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">Verified end-to-end — not just configured</div>
+        <div class="emp-body">The nslookup output showing a private IP, the 404 error from public access, and the continued private access from within the VNet together prove the entire private endpoint chain is functioning correctly: DNS zone linking, VNet peering carrying DNS queries across from spoke to hub, private endpoint NIC responding, and storage firewall enforcing the access restriction. Each component was individually verified.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section">
+  <div class="sec-label">Skills demonstrated</div>
+  <h2>AZ-104 domains: networking + storage</h2>
+  <div class="skills">
+    <span class="skill">Azure Private Endpoints</span>
+    <span class="skill">Private DNS zones</span>
+    <span class="skill">Private Link</span>
+    <span class="skill">DNS split-horizon</span>
+    <span class="skill">VNet DNS links</span>
+    <span class="skill">Auto-registration</span>
+    <span class="skill">Public DNS zones</span>
+    <span class="skill">A records</span>
+    <span class="skill">CNAME records</span>
+    <span class="skill">NS delegation</span>
+    <span class="skill">Storage firewall</span>
+    <span class="skill">Public access control</span>
+    <span class="skill">nslookup verification</span>
+    <span class="skill">Zero-trust networking</span>
+    <span class="skill">Azure CLI (Bash + PS)</span>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <span>Ste Bovik — AZ-104 Azure Administrator Portfolio</span>
+  <div style="display:flex;gap:18px"><a href="/projects">All projects</a><a href="https://github.com/ostebovik">GitHub</a><a href="/contact">Contact</a></div>
+</footer>
+</body>
+</html>

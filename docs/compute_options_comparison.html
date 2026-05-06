@@ -1,0 +1,60 @@
+
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px; }
+  .card-head { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .card-sub  { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 12px; font-family: var(--font-mono); }
+  .row { font-size: 12px; color: var(--color-text-secondary); padding: 5px 0; border-bottom: 0.5px solid var(--color-border-tertiary); line-height: 1.5; }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--color-text-tertiary); font-size: 11px; display: block; }
+  .good { color: var(--color-text-success); }
+  .bad  { color: var(--color-text-danger); }
+  .mid  { color: var(--color-text-warning); }
+  .accent-vm   { border-top: 3px solid var(--color-text-secondary); }
+  .accent-app  { border-top: 3px solid var(--color-text-info); }
+  .accent-aci  { border-top: 3px solid var(--color-text-success); }
+  .divider { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 16px 0 8px; }
+  .decision { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; line-height: 1.6; }
+  .decision strong { color: var(--color-text-primary); font-weight: 500; }
+</style>
+
+<div class="grid">
+  <div class="card accent-vm">
+    <div class="card-head">Virtual Machine</div>
+    <div class="card-sub">Microsoft.Compute/virtualMachines</div>
+    <div class="row"><span class="k">Control</span><span class="good">Full OS access</span></div>
+    <div class="row"><span class="k">Startup time</span><span class="bad">Minutes</span></div>
+    <div class="row"><span class="k">Scaling</span><span class="mid">Manual or VMSS</span></div>
+    <div class="row"><span class="k">Cost model</span>Per hour, always on</div>
+    <div class="row"><span class="k">Patching</span><span class="bad">You own it</span></div>
+    <div class="row"><span class="k">Best for</span>Legacy apps, custom OS config, lift-and-shift, domain join</div>
+  </div>
+  <div class="card accent-app">
+    <div class="card-head">App Service</div>
+    <div class="card-sub">Microsoft.Web/sites</div>
+    <div class="row"><span class="k">Control</span><span class="mid">App layer only</span></div>
+    <div class="row"><span class="k">Startup time</span><span class="good">Seconds</span></div>
+    <div class="row"><span class="k">Scaling</span><span class="good">Auto, built-in</span></div>
+    <div class="row"><span class="k">Cost model</span>Per plan (always on)</div>
+    <div class="row"><span class="k">Patching</span><span class="good">Microsoft managed</span></div>
+    <div class="row"><span class="k">Best for</span>Web apps, APIs, slots, CI/CD, managed TLS, auth</div>
+  </div>
+  <div class="card accent-aci">
+    <div class="card-head">Container Instances</div>
+    <div class="card-sub">Microsoft.ContainerInstance</div>
+    <div class="row"><span class="k">Control</span><span class="mid">Container layer</span></div>
+    <div class="row"><span class="k">Startup time</span><span class="good">Seconds</span></div>
+    <div class="row"><span class="k">Scaling</span><span class="bad">Manual only</span></div>
+    <div class="row"><span class="k">Cost model</span><span class="good">Per second, stops billing when stopped</span></div>
+    <div class="row"><span class="k">Patching</span><span class="good">Image-based</span></div>
+    <div class="row"><span class="k">Best for</span>Batch jobs, CI runners, testing, event-driven tasks</div>
+  </div>
+</div>
+
+<div class="divider">Decision flow — which one do I reach for?</div>
+
+<div class="decision"><strong>Need full OS control, custom drivers, or domain join?</strong> → VM. You're paying for infrastructure control — make sure you need it.</div>
+<div class="decision"><strong>Building a web app or API that runs continuously?</strong> → App Service. Slots, managed TLS, auth, deployment center, auto-scale — all included.</div>
+<div class="decision"><strong>Need to run something once, on a schedule, or for a short burst?</strong> → Container Instances. Spins up in seconds, bills by the second, gone when done.</div>
+<div class="decision"><strong>Running many containers that talk to each other?</strong> → AKS. Orchestration, service discovery, rolling updates — Container Instances and App Service don't coordinate at that scale.</div>
+<div class="decision"><strong>Packaging your App Service app as a container image?</strong> → Still App Service, just with container deployment mode. The platform is the same — the delivery mechanism changed.</div>

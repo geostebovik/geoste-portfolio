@@ -1,0 +1,176 @@
+<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>Azure DNS and Private Endpoint Architecture — Project 6</title>
+  <desc>Architecture diagram showing public DNS zone lab.ostebovik.net with A and CNAME records, private DNS zone privatelink.blob.core.windows.net linked to vnet-hub and vnet-spoke, private endpoint pe-storage-blob in snet-shared connecting to stlabeastus001 storage account, and public internet access blocked with 404 WebContentNotFound response.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#c40f0f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}</style>
+  </defs>
+  <rect width="900" height="640" fill="#f7f6f2"/>
+  <text x="450" y="28" text-anchor="middle" style="font-size:15px;font-weight:600;fill:#1a1a18;">Azure DNS &amp; Private Endpoint Architecture — Project 6</text>
+  <text x="450" y="46" text-anchor="middle" style="font-size:11px;fill:#6b6b64;">Public DNS zone · Private DNS zone · Private endpoint · Public access lockdown</text>
+
+  <!-- ── PUBLIC DNS ZONE (top left) ── -->
+  <rect x="30" y="62" width="240" height="148" rx="10" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1"/>
+  <rect x="30" y="62" width="240" height="26" rx="10" fill="#3B6D11"/>
+  <rect x="30" y="76" width="240" height="12" fill="#3B6D11"/>
+  <text x="50" y="79" style="font-size:11px;font-weight:600;fill:#fff;">Public DNS zone</text>
+  <text x="50" y="90" style="font-size:9px;font-family:monospace;fill:#a7d8d0;">lab.ostebovik.net</text>
+  <!-- Records -->
+  <rect x="44" y="100" width="208" height="24" rx="4" fill="#fff" fill-opacity="0.8" stroke="#639922" stroke-width="0.5"/>
+  <text x="52" y="111" style="font-size:10px;font-weight:500;fill:#27500A;">A record:</text>
+  <text x="52" y="122" style="font-size:9px;font-family:monospace;fill:#3B6D11;">www → 20.171.241.228 (pip-lb-web)</text>
+  <rect x="44" y="130" width="208" height="24" rx="4" fill="#fff" fill-opacity="0.8" stroke="#639922" stroke-width="0.5"/>
+  <text x="52" y="141" style="font-size:10px;font-weight:500;fill:#27500A;">CNAME record:</text>
+  <text x="52" y="152" style="font-size:9px;font-family:monospace;fill:#3B6D11;">storage → stlabeastus001.blob...</text>
+  <rect x="44" y="160" width="208" height="40" rx="4" fill="#EAF3DE" stroke="#639922" stroke-width="0.5"/>
+  <text x="150" y="175" text-anchor="middle" style="font-size:9px;fill:#27500A;">NS records (Azure-assigned):</text>
+  <text x="150" y="188" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#3B6D11;">ns1-xx.azure-dns.com</text>
+
+  <!-- ── INTERNET BLOCKED (top right) ── -->
+  <g transform="translate(620,58)">
+    <ellipse cx="62" cy="24" rx="56" ry="18" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="34" cy="28" rx="28" ry="13" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="88" cy="28" rx="24" ry="12" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <rect x="10" y="26" width="104" height="12" fill="#e8e8e4"/>
+    <text x="62" y="33" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#3d3d38;">Internet</text>
+  </g>
+  <!-- Blocked access -->
+  <line x1="682" y1="104" x2="734" y2="148" stroke="#c40f0f" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arr-red)"/>
+  <rect x="620" y="114" width="124" height="22" rx="11" fill="#fee2e2" stroke="#fca5a5" stroke-width="0.75"/>
+  <text x="682" y="129" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#991b1b;">✗ Public access disabled</text>
+  <!-- 403 response box -->
+  <rect x="620" y="148" width="248" height="60" rx="9" fill="#fff" fill-opacity="0.9" stroke="#c40f0f" stroke-width="1"/>
+  <text x="744" y="168" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#c40f0f;">404 WebContentNotFound</text>
+  <text x="744" y="183" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#7f1d1d;">stlabeastus001.blob.core.windows.net</text>
+  <text x="744" y="197" text-anchor="middle" style="font-size:9px;fill:#9ca3a0;">Resource not visible from public internet</text>
+
+  <!-- ── PRIVATE DNS ZONE (centre top) ── -->
+  <rect x="290" y="62" width="310" height="100" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="1.5"/>
+  <rect x="290" y="62" width="310" height="26" rx="10" fill="#534AB7"/>
+  <rect x="290" y="76" width="310" height="12" fill="#534AB7"/>
+  <text x="310" y="79" style="font-size:11px;font-weight:600;fill:#fff;">Private DNS zone</text>
+  <text x="310" y="91" style="font-size:9px;font-family:monospace;fill:#CECBF6;">privatelink.blob.core.windows.net</text>
+  <!-- Auto-created A record -->
+  <rect x="306" y="100" width="278" height="24" rx="5" fill="#fff" fill-opacity="0.8" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="316" y="111" style="font-size:10px;font-weight:500;fill:#3C3489;">Auto-created A record:</text>
+  <text x="316" y="122" style="font-size:9px;font-family:monospace;fill:#534AB7;">stlabeastus001 → 10.0.1.6 (private endpoint IP)</text>
+  <!-- VNet links -->
+  <rect x="306" y="130" width="130" height="22" rx="5" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="371" y="145" text-anchor="middle" style="font-size:9px;fill:#3C3489;">dns-link-hub (auto-reg)</text>
+  <rect x="444" y="130" width="130" height="22" rx="5" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="509" y="145" text-anchor="middle" style="font-size:9px;fill:#3C3489;">dns-link-spoke (resolve)</text>
+
+  <!-- ── VNET-HUB ── -->
+  <rect x="30" y="240" width="380" height="280" rx="14" fill="#E6F1FB" fill-opacity="0.5" stroke="#185FA5" stroke-width="1.5"/>
+  <rect x="30" y="240" width="380" height="28" rx="14" fill="#185FA5"/>
+  <rect x="30" y="256" width="380" height="12" fill="#185FA5"/>
+  <text x="50" y="258" style="font-size:12px;font-weight:600;fill:#fff;">vnet-hub  ·  10.0.0.0/16</text>
+  <text x="394" y="258" text-anchor="end" style="font-size:9px;font-weight:600;fill:#aed4f5;letter-spacing:.06em;">HUB</text>
+
+  <!-- snet-shared -->
+  <rect x="48" y="282" width="344" height="224" rx="9" fill="#fff" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+  <text x="62" y="300" style="font-size:11px;font-weight:500;fill:#185FA5;">snet-shared  ·  10.0.1.0/24</text>
+
+  <!-- Private endpoint -->
+  <rect x="62" y="310" width="312" height="80" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1.5"/>
+  <text x="218" y="330" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#3C3489;">pe-storage-blob</text>
+  <text x="218" y="346" text-anchor="middle" style="font-size:10px;font-family:monospace;fill:#534AB7;">Private endpoint · Microsoft.Storage/blob</text>
+  <rect x="76" y="354" width="148" height="28" rx="5" fill="#fff" fill-opacity="0.8" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="150" y="366" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#3C3489;">NIC: 10.0.1.6</text>
+  <text x="150" y="378" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#534AB7;">Private IP in hub subnet</text>
+  <rect x="234" y="354" width="126" height="28" rx="5" fill="#fff" fill-opacity="0.8" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="297" y="366" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#3C3489;">Connection approved</text>
+  <text x="297" y="378" text-anchor="middle" style="font-size:9px;fill:#534AB7;">pe-conn-blob</text>
+
+  <!-- vm-hub-test -->
+  <rect x="62" y="400" width="312" height="96" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.75"/>
+  <text x="218" y="420" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#185FA5;">vm-hub-test</text>
+  <text x="218" y="435" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#378ADD;">Ubuntu 22.04 · B1s · 10.0.1.4</text>
+  <rect x="76" y="444" width="284" height="44" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="218" y="460" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#166534;">nslookup result (from vm-web-01 via peering):</text>
+  <text x="218" y="474" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#166534;">stlabeastus001.blob... → 10.0.1.6 ✓</text>
+  <text x="218" y="483" text-anchor="middle" style="font-size:9px;fill:#166534;">Private IP resolved — traffic stays in VNet</text>
+
+  <!-- ── VNET-SPOKE ── -->
+  <rect x="430" y="240" width="440" height="168" rx="14" fill="#e6f5f3" fill-opacity="0.5" stroke="#0a7e6e" stroke-width="1.5"/>
+  <rect x="430" y="240" width="440" height="28" rx="14" fill="#0a7e6e"/>
+  <rect x="430" y="256" width="440" height="12" fill="#0a7e6e"/>
+  <text x="450" y="258" style="font-size:12px;font-weight:600;fill:#fff;">vnet-spoke  ·  10.1.0.0/16</text>
+  <text x="854" y="258" text-anchor="end" style="font-size:9px;font-weight:600;fill:#a7d8d0;letter-spacing:.06em;">SPOKE</text>
+
+  <!-- snet-web in spoke -->
+  <rect x="448" y="282" width="404" height="116" rx="9" fill="#fff" fill-opacity="0.7" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="462" y="300" style="font-size:11px;font-weight:500;fill:#0a7e6e;">snet-web  ·  10.1.1.0/24</text>
+  <!-- vm-web-01 in spoke -->
+  <rect x="462" y="308" width="176" height="76" rx="7" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="0.75"/>
+  <text x="550" y="326" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#085041;">vm-web-01</text>
+  <text x="550" y="340" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#0a7e6e;">10.1.1.4 · No public IP</text>
+  <rect x="474" y="350" width="152" height="26" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="550" y="361" text-anchor="middle" style="font-size:9px;font-weight:500;fill:#166534;">nslookup runs from here</text>
+  <text x="550" y="372" text-anchor="middle" style="font-size:9px;fill:#166534;">via Bastion connection</text>
+  <!-- vm-web-02 -->
+  <rect x="654" y="308" width="176" height="76" rx="7" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="0.75"/>
+  <text x="742" y="326" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#085041;">vm-web-02</text>
+  <text x="742" y="340" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#0a7e6e;">10.1.1.5 · No public IP</text>
+  <rect x="666" y="350" width="152" height="26" rx="4" fill="#e6f5f3" stroke="#9FE1CB" stroke-width="0.5"/>
+  <text x="742" y="361" text-anchor="middle" style="font-size:9px;fill:#0a7e6e;">LB backend pool</text>
+  <text x="742" y="372" text-anchor="middle" style="font-size:9px;fill:#0a7e6e;">vm-web backend</text>
+
+  <!-- ── STORAGE ACCOUNT ── -->
+  <rect x="430" y="430" width="440" height="90" rx="12" fill="#fff7ed" stroke="#b35c00" stroke-width="1.5"/>
+  <rect x="430" y="430" width="440" height="26" rx="12" fill="#b35c00"/>
+  <rect x="430" y="444" width="440" height="12" fill="#b35c00"/>
+  <text x="450" y="446" style="font-size:12px;font-weight:600;fill:#fff;">stlabeastus001</text>
+  <text x="450" y="458" style="font-size:9px;font-family:monospace;fill:#fed7aa;">Standard_LRS · East US · Public access: Disabled</text>
+  <rect x="448" y="468" width="196" height="42" rx="6" fill="#fff" fill-opacity="0.8" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="546" y="484" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#92400e;">Containers: uploads, archive, $web</text>
+  <text x="546" y="498" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#b35c00;">Static website endpoint active</text>
+  <rect x="656" y="468" width="196" height="42" rx="6" fill="#fee2e2" stroke="#fca5a5" stroke-width="0.5"/>
+  <text x="754" y="482" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#991b1b;">Public network access</text>
+  <text x="754" y="494" text-anchor="middle" style="font-size:10px;font-weight:600;fill:#c40f0f;">DISABLED</text>
+  <text x="754" y="505" text-anchor="middle" style="font-size:9px;fill:#991b1b;">Private endpoint only</text>
+
+  <!-- VNet peering connector -->
+  <rect x="368" y="310" width="64" height="50" rx="25" fill="#fff" stroke="#378ADD" stroke-width="1"/>
+  <text x="400" y="330" text-anchor="middle" style="font-size:9px;font-weight:600;fill:#185FA5;">VNet</text>
+  <text x="400" y="342" text-anchor="middle" style="font-size:9px;fill:#185FA5;">Peering</text>
+  <text x="400" y="354" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#378ADD;">✓ Sync</text>
+  <line x1="410" y1="327" x2="448" y2="320" stroke="#378ADD" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)"/>
+  <line x1="448" y1="330" x2="410" y2="337" stroke="#378ADD" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)"/>
+
+  <!-- Private endpoint → storage arrow -->
+  <line x1="430" y1="350" x2="430" y2="430" stroke="#534AB7" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="434" y="382" width="108" height="16" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="488" y="394" text-anchor="middle" style="font-size:9px;font-weight:500;fill:#3C3489;">Private link connection</text>
+
+  <!-- DNS zone → VNet links arrows -->
+  <line x1="371" y1="162" x2="220" y2="240" stroke="#534AB7" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr)" opacity="0.7"/>
+  <line x1="509" y1="162" x2="540" y2="240" stroke="#534AB7" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr)" opacity="0.7"/>
+
+  <!-- nslookup path arrow: vm-web-01 → peering → private endpoint -->
+  <path d="M 462 346 Q 400 346 400 330" fill="none" stroke="#107c10" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr)" opacity="0.8"/>
+  <text x="420" y="378" text-anchor="middle" style="font-size:9px;font-weight:500;fill:#166534;">nslookup via peering</text>
+  <text x="420" y="390" text-anchor="middle" style="font-size:9px;font-family:monospace;fill:#166534;">→ 10.0.1.6</text>
+
+  <!-- Legend -->
+  <rect x="30" y="596" width="840" height="34" rx="8" fill="#fff" stroke="#d4d3cc" stroke-width="0.75"/>
+  <rect x="46" y="607" width="10" height="10" rx="2" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="62" y="616" style="font-size:10px;fill:#3d3d38;">Hub VNet</text>
+  <rect x="130" y="607" width="10" height="10" rx="2" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="146" y="616" style="font-size:10px;fill:#3d3d38;">Spoke VNet</text>
+  <rect x="218" y="607" width="10" height="10" rx="2" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+  <text x="234" y="616" style="font-size:10px;fill:#3d3d38;">Private endpoint / DNS</text>
+  <rect x="360" y="607" width="10" height="10" rx="2" fill="#fff7ed" stroke="#b35c00" stroke-width="1"/>
+  <text x="376" y="616" style="font-size:10px;fill:#3d3d38;">Storage account</text>
+  <rect x="470" y="607" width="10" height="10" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1"/>
+  <text x="486" y="616" style="font-size:10px;fill:#3d3d38;">Public DNS zone</text>
+  <rect x="580" y="607" width="10" height="10" rx="2" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+  <text x="596" y="616" style="font-size:10px;fill:#3d3d38;">Blocked public access (404)</text>
+  <rect x="742" y="607" width="10" height="10" rx="2" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+  <text x="758" y="616" style="font-size:10px;fill:#3d3d38;">Private path (allowed)</text>
+</svg>

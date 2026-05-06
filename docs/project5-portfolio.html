@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 5: Azure Load Balancer Lab — Ste Bovik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0f14; --bg2: #141820; --bg3: #1c2230; --bg4: #232b3a;
+  --border: #2a3347; --border2: #3a4d6b;
+  --text: #e8edf5; --text2: #94a3b8; --text3: #5a6a82;
+  --azure: #3b82f6; --azure2: #60a5fa; --azure-bg: #1e3a5f; --azure-dk: #1d4ed8;
+  --green: #22c55e; --green-bg: #14532d; --green-lt: #86efac;
+  --amber: #f59e0b; --amber-bg: #451a03; --amber-lt: #fcd34d;
+  --red: #ef4444; --red-bg: #450a0a; --red-lt: #fca5a5;
+  --mono: 'DM Mono', monospace;
+  --display: 'Unbounded', sans-serif;
+  --body: 'Lora', Georgia, serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--body); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.7; }
+
+/* NAV */
+.nav { position: sticky; top:0; z-index:100; background: var(--bg2); border-bottom: 1px solid var(--border); height:52px; padding: 0 2rem; display:flex; align-items:center; justify-content:space-between; }
+.nav-brand { font-family: var(--mono); font-size:12px; color: var(--text2); display:flex; align-items:center; gap:8px; }
+.nav-pip { width:6px; height:6px; border-radius:50%; background: var(--azure); }
+.nav-links { display:flex; gap:22px; font-family: var(--mono); font-size:12px; }
+.nav-links a { color: var(--text3); text-decoration:none; transition: color .15s; }
+.nav-links a:hover { color: var(--text); }
+
+/* HERO */
+.hero { padding: 80px 2rem 60px; max-width:900px; margin:0 auto; border-bottom: 1px solid var(--border); }
+.hero-number { font-family: var(--display); font-size:11px; letter-spacing:.2em; color: var(--text3); margin-bottom:16px; display:flex; align-items:center; gap:14px; }
+.hero-number::before { content:''; flex:none; width:32px; height:1px; background: var(--border2); }
+.hero-number::after { content:''; flex:1; height:1px; background: var(--border); }
+h1 { font-family: var(--display); font-size: clamp(28px,5vw,46px); font-weight:700; line-height:1.1; letter-spacing:-.03em; margin-bottom:20px; }
+h1 .accent { color: var(--azure2); }
+.hero-lead { font-size:17px; color: var(--text2); max-width:580px; line-height:1.75; margin-bottom:32px; font-family: 'Lora', serif; font-style:italic; }
+.stat-strip { display:flex; flex-wrap:wrap; gap:2px; }
+.stat-pill { background: var(--bg3); border: 1px solid var(--border); border-radius:6px; padding:8px 16px; font-family: var(--mono); font-size:11px; color: var(--text2); }
+.stat-pill strong { display:block; font-size:18px; color: var(--text); font-family: var(--display); font-weight:600; margin-bottom:1px; letter-spacing:-.02em; }
+
+/* LAYOUT */
+.page { max-width:900px; margin:0 auto; padding: 0 2rem 100px; }
+.section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom:none; }
+.sec-tag { font-family: var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color: var(--text3); margin-bottom:16px; }
+h2 { font-family: var(--display); font-size:22px; font-weight:600; letter-spacing:-.02em; margin-bottom:14px; }
+p { color: var(--text2); line-height:1.8; margin-bottom:14px; font-size:15px; }
+p:last-child { margin-bottom:0; }
+strong { color: var(--text); font-weight:500; }
+code { font-family: var(--mono); font-size:12px; background: var(--bg3); color: var(--azure2); padding:2px 7px; border-radius:4px; border:1px solid var(--border); }
+
+/* BUILD GRID */
+.build-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:1px; background: var(--border); border-radius:10px; overflow:hidden; margin-top:24px; }
+.build-cell { background: var(--bg2); padding:20px; }
+.build-n { font-family: var(--display); font-size:30px; font-weight:700; color: var(--azure); letter-spacing:-.03em; margin-bottom:4px; }
+.build-label { font-size:13px; color: var(--text2); }
+.build-sub { font-family: var(--mono); font-size:10px; color: var(--text3); margin-top:3px; }
+
+/* TIMELINE */
+.timeline { display:flex; flex-direction:column; gap:0; margin-top:24px; }
+.tl-item { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
+.tl-item:last-child { border-bottom:none; }
+.tl-marker { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+.tl-dot { width:24px; height:24px; border-radius:6px; border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-family: var(--mono); font-size:10px; color: var(--text3); background: var(--bg3); flex-shrink:0; }
+.tl-dot.done { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+.tl-line { width:1px; flex:1; background: var(--border); margin-top:4px; }
+.tl-content { flex:1; padding-bottom:4px; }
+.tl-title { font-size:14px; font-weight:500; color: var(--text); margin-bottom:5px; font-family: var(--display); letter-spacing:-.01em; }
+.tl-body { font-size:13px; color: var(--text2); line-height:1.65; }
+
+/* EVIDENCE CARDS */
+.evidence-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; }
+@media(max-width:600px){ .evidence-grid { grid-template-columns:1fr; } }
+.ev-card { background: var(--bg2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.ev-screen { background: var(--bg); padding:16px; font-family: var(--mono); font-size:11px; line-height:1.8; min-height:100px; border-bottom:1px solid var(--border); }
+.ev-green { color: var(--green-lt); }
+.ev-blue { color: var(--azure2); }
+.ev-amber { color: var(--amber-lt); }
+.ev-muted { color: var(--text3); }
+.ev-caption { padding:12px 14px; }
+.ev-caption strong { display:block; font-size:13px; color: var(--text); font-family: var(--display); letter-spacing:-.01em; margin-bottom:2px; }
+.ev-caption span { font-size:12px; color: var(--text3); font-family: var(--mono); }
+
+/* LESSON CARDS */
+.lesson-list { display:flex; flex-direction:column; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:24px; }
+.lesson { display:flex; gap:0; border-bottom:1px solid var(--border); }
+.lesson:last-child { border-bottom:none; }
+.lesson-num { width:48px; flex-shrink:0; display:flex; align-items:flex-start; justify-content:center; padding:18px 0; }
+.lesson-num span { font-family: var(--display); font-size:22px; font-weight:700; color: var(--border2); }
+.lesson-body { flex:1; padding:18px 18px 18px 0; }
+.lesson-title { font-size:14px; font-weight:500; color: var(--text); margin-bottom:5px; font-family: var(--display); letter-spacing:-.01em; }
+.lesson-text { font-size:13px; color: var(--text2); line-height:1.65; }
+
+/* EMPLOYER SECTION */
+.employer-grid { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+.emp-card { background: var(--bg2); border:1px solid var(--border); border-radius:10px; padding:18px 20px; display:flex; gap:14px; transition: border-color .2s; }
+.emp-card:hover { border-color: var(--azure); }
+.emp-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.emp-title { font-size:14px; font-weight:500; color: var(--text); margin-bottom:4px; font-family: var(--display); letter-spacing:-.01em; }
+.emp-body { font-size:13px; color: var(--text2); line-height:1.6; }
+
+/* SKILLS */
+.skills { display:flex; flex-wrap:wrap; gap:7px; margin-top:20px; }
+.skill { background: var(--azure-bg); color: var(--azure2); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500; font-family: var(--mono); border:1px solid var(--azure-dk); }
+
+/* FOOTER */
+.footer { max-width:900px; margin:0 auto; padding:28px 2rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-family: var(--mono); font-size:12px; color: var(--text3); flex-wrap:wrap; gap:10px; }
+.footer a { color: var(--text3); text-decoration:none; }
+.footer a:hover { color: var(--text); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.hero h1 { animation: fadeUp .5s ease both; }
+.hero-lead { animation: fadeUp .5s .08s ease both; }
+.stat-strip { animation: fadeUp .5s .16s ease both; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><div class="nav-pip"></div>ostebovik.net</div>
+  <div class="nav-links"><a href="/">Home</a><a href="/projects">Projects</a><a href="/about">About</a><a href="/contact">Contact</a></div>
+</nav>
+
+<header class="hero">
+  <div class="hero-number">AZ-104 &nbsp;·&nbsp; Phase 2 &nbsp;·&nbsp; Project 5 of 11</div>
+  <h1>Azure <span class="accent">Load Balancer</span><br>&amp; High Availability</h1>
+  <p class="hero-lead">Distributing traffic across backend VMs with health probes, automatic failover, and the troubleshooting journey that exposed four separate Azure networking layers.</p>
+  <div class="stat-strip">
+    <div class="stat-pill"><strong>Standard</strong>LB SKU</div>
+    <div class="stat-pill"><strong>2</strong>Backend VMs</div>
+    <div class="stat-pill"><strong>2</strong>Fault domains</div>
+    <div class="stat-pill"><strong>4</strong>Issues resolved</div>
+    <div class="stat-pill"><strong>~$0</strong>Net cost</div>
+  </div>
+</header>
+
+<main class="page">
+
+<!-- WHAT I BUILT -->
+<section class="section">
+  <div class="sec-tag">What I built</div>
+  <h2>A production-pattern load balancer from scratch</h2>
+  <p>This project deploys a complete high-availability web tier: two nginx VMs spread across separate fault domains in an availability set, fronted by a Standard SKU Azure Load Balancer with health probe monitoring and automatic traffic rerouting when a backend goes down.</p>
+  <p>The project took significantly longer than expected due to four distinct configuration issues — each of which exposed real Azure networking behaviour that documentation often glosses over. Those issues are documented in full below and on the Phase 2 lessons learned page.</p>
+  <div class="build-grid">
+    <div class="build-cell"><div class="build-n">lb-web</div><div class="build-label">Standard Load Balancer</div><div class="build-sub">Public · Standard SKU</div></div>
+    <div class="build-cell"><div class="build-n">2</div><div class="build-label">Backend VMs</div><div class="build-sub">avset-web · separate fault domains</div></div>
+    <div class="build-cell"><div class="build-n">15s</div><div class="build-label">Probe interval</div><div class="build-sub">HTTP:80 · threshold 2</div></div>
+    <div class="build-cell"><div class="build-n">30s</div><div class="build-label">Failover time</div><div class="build-sub">Two missed probes</div></div>
+  </div>
+</section>
+
+<!-- BUILD SEQUENCE -->
+<section class="section">
+  <div class="sec-tag">Build sequence</div>
+  <h2>How it came together</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-marker"><div class="tl-dot done">1</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title">Availability set &amp; VMs</div>
+        <div class="tl-body">Created <code>avset-web</code> with 2 fault domains and 2 update domains. Deployed <code>vm-web-01</code> and <code>vm-web-02</code> (Ubuntu 22.04, B1s) into <code>vnet-spoke/snet-web</code> from Phase 2 Project 3. Azure automatically placed each VM on a separate physical rack — if one rack loses power, the other keeps running.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-marker"><div class="tl-dot done">2</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title">Standard Load Balancer</div>
+        <div class="tl-body">Created <code>lb-web</code> (Standard SKU, public) with frontend IP <code>pip-lb-web</code> at 20.171.241.228. Added backend pool <code>be-web</code>, health probe <code>probe-http</code> (HTTP:80, 15s interval), and load balancing rule <code>rule-http</code> (TCP 80→80, no session persistence for round-robin).</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-marker"><div class="tl-dot done">3</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title">Four-layer troubleshooting</div>
+        <div class="tl-body">The LB did not work immediately. Resolved in order: (1) browser HTTPS vs HTTP prefix, (2) missing <code>AzureLoadBalancer</code> NSG rule causing health probe failure, (3) missing outbound SNAT rule blocking nginx installation, (4) missing frontend IP config step before outbound rule creation. Each layer is documented with root cause and fix.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-marker"><div class="tl-dot done">4</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title">Nginx deployed &amp; verified</div>
+        <div class="tl-body">Once outbound SNAT was configured, installed nginx on both VMs via Bastion. Customised the default page to display each VM's hostname. Verified round-robin distribution using a 20-request curl loop — both VMs received traffic confirming the LB was distributing correctly.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-marker"><div class="tl-dot done">5</div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title">Failover test</div>
+        <div class="tl-body">Stopped nginx on <code>vm-web-01</code>. After two missed health probes (30 seconds), the portal showed vm-web-01 as Unhealthy and all traffic shifted to vm-web-02. Restarted nginx — vm-web-01 returned to the rotation within one probe cycle. Zero manual intervention required.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVIDENCE -->
+<section class="section">
+  <div class="sec-tag">Evidence — what the tests proved</div>
+  <h2>Testing every component, not just configuring it</h2>
+  <div class="evidence-grid">
+    <div class="ev-card">
+      <div class="ev-screen">
+        <div class="ev-muted">curl loop — 20 requests to 20.171.241.228</div>
+        <div style="margin-top:8px">
+          <span class="ev-blue">vm-web-01</span> · 10.1.1.4<br>
+          <span class="ev-green">vm-web-02</span> · 10.1.1.5<br>
+          <span class="ev-blue">vm-web-01</span> · 10.1.1.4<br>
+          <span class="ev-blue">vm-web-01</span> · 10.1.1.4<br>
+          <span class="ev-green">vm-web-02</span> · 10.1.1.5<br>
+          <span class="ev-muted">... 20 total requests</span>
+        </div>
+        <div style="margin-top:8px"><span class="ev-green">Both VMs receiving traffic ✓</span></div>
+      </div>
+      <div class="ev-caption">
+        <strong>Round-robin distribution confirmed</strong>
+        <span>curl opens fresh TCP connections — correct verification method</span>
+      </div>
+    </div>
+    <div class="ev-card">
+      <div class="ev-screen">
+        <div class="ev-muted">portal: lb-web → backend pool health</div>
+        <div style="margin-top:8px">
+          vm-web-01: <span class="ev-amber">&#x26A0; Unhealthy</span><br>
+          <span class="ev-muted">nginx stopped · probe failing</span><br><br>
+          vm-web-02: <span class="ev-green">&#x2713; Healthy</span><br>
+          <span class="ev-muted">100% traffic redirected</span>
+        </div>
+        <div style="margin-top:6px"><span class="ev-green">Automatic failover in 30s ✓</span></div>
+      </div>
+      <div class="ev-caption">
+        <strong>Health probe failover working</strong>
+        <span>No manual intervention — LB detected failure automatically</span>
+      </div>
+    </div>
+    <div class="ev-card">
+      <div class="ev-screen">
+        <div class="ev-muted">nsg-web — inbound rules</div>
+        <div style="margin-top:8px">
+          <span class="ev-green">100</span> Allow TCP 80 · Any<br>
+          <span class="ev-green">110</span> Allow TCP 443 · Any<br>
+          <span class="ev-green">120</span> Allow TCP 80 · <span class="ev-blue">AzureLoadBalancer</span><br>
+          <span class="ev-green">150</span> Allow * · VirtualNetwork<br>
+          <span class="ev-amber">400</span> Deny TCP 3389 · Internet
+        </div>
+      </div>
+      <div class="ev-caption">
+        <strong>NSG correctly configured — 5 rules</strong>
+        <span>AzureLoadBalancer rule at p.120 is the critical addition</span>
+      </div>
+    </div>
+    <div class="ev-card">
+      <div class="ev-screen">
+        <div class="ev-muted">outbound SNAT — lb-web outbound rules</div>
+        <div style="margin-top:8px">
+          Frontend: <span class="ev-blue">fe-outbound</span><br>
+          Public IP: <span class="ev-blue">pip-lb-outbound</span><br>
+          Protocol: <span class="ev-blue">All</span><br>
+          Pool: <span class="ev-blue">be-web</span><br>
+          Ports: <span class="ev-green">10,000 allocated</span>
+        </div>
+        <div style="margin-top:6px"><span class="ev-green">VMs can reach internet for updates ✓</span></div>
+      </div>
+      <div class="ev-caption">
+        <strong>Outbound SNAT configured explicitly</strong>
+        <span>Standard SKU requires this — Basic SKU provided it implicitly</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LESSONS LEARNED -->
+<section class="section">
+  <div class="sec-tag">Lessons learned</div>
+  <h2>Four issues that made this project genuinely educational</h2>
+  <div class="lesson-list">
+    <div class="lesson">
+      <div class="lesson-num"><span>01</span></div>
+      <div class="lesson-body">
+        <div class="lesson-title">Browsers silently upgrade bare IPs to HTTPS</div>
+        <div class="lesson-text">Opening <code>20.171.241.228</code> produced a "secure connections not supported" error. Chrome and Edge default to HTTPS for all addresses. Since the LB only had port 80 configured, the HTTPS attempt timed out. The fix is trivial — always type <code>http://</code> explicitly. This makes a correctly configured LB appear broken and is worth knowing immediately when testing HTTP-only backends.</div>
+      </div>
+    </div>
+    <div class="lesson">
+      <div class="lesson-num"><span>02</span></div>
+      <div class="lesson-body">
+        <div class="lesson-title">Standard LB health probes need an explicit NSG allow rule</div>
+        <div class="lesson-text">Without a rule allowing the <code>AzureLoadBalancer</code> service tag on port 80, health probes are silently dropped by the NSG. Both VMs show as Down/Unhealthy and the LB drops all inbound traffic — producing a timeout that looks identical to the LB itself being misconfigured. Basic SKU allowed probe traffic implicitly. Standard SKU does not. This is a documented but easy-to-miss breaking change between SKUs.</div>
+      </div>
+    </div>
+    <div class="lesson">
+      <div class="lesson-num"><span>03</span></div>
+      <div class="lesson-body">
+        <div class="lesson-title">Standard LB provides no implicit outbound SNAT for backend VMs</div>
+        <div class="lesson-text">VMs in a Standard LB backend pool with no public IP have zero outbound internet access by default. Running <code>sudo apt install nginx</code> appeared to succeed but silently failed to download packages — the package manager printed connection warnings but reported success. The <code>Unit nginx.service could not be found</code> error was the first indication. Fix: create a second public IP, add it as a frontend IP config, then create an outbound rule. Always verify service installation with <code>systemctl status</code>.</div>
+      </div>
+    </div>
+    <div class="lesson">
+      <div class="lesson-num"><span>04</span></div>
+      <div class="lesson-body">
+        <div class="lesson-title">The LB object model has a hidden intermediate layer the portal abstracts</div>
+        <div class="lesson-text">Outbound rules reference <strong>frontend IP configurations</strong>, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config → Rule. The CLI command failed with "not found" until the frontend IP config was created first. The portal also only shows frontend IP configs in dropdowns — not raw public IPs. Understanding this object model is necessary for CLI deployments and the AZ-104 exam.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY IT MATTERS -->
+<section class="section">
+  <div class="sec-tag">Why this matters to employers</div>
+  <h2>What this project signals beyond the configuration</h2>
+  <div class="employer-grid">
+    <div class="emp-card">
+      <div class="emp-icon" style="background:var(--azure-bg)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">Systematic troubleshooting under pressure</div>
+        <div class="emp-body">The load balancer worked after resolving four separate issues across the browser, NSG, outbound SNAT, and LB object model layers. Each was identified by reading error messages carefully, forming a hypothesis, and testing it — the same methodology used in production incident response. This project demonstrates that I don't just follow tutorials — I debug when things don't work.</div>
+      </div>
+    </div>
+    <div class="emp-card">
+      <div class="emp-icon" style="background:var(--green-bg)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">Security-first NSG design using service tags</div>
+        <div class="emp-body">All NSG rules use Azure service tags (<code>AzureLoadBalancer</code>, <code>VirtualNetwork</code>, <code>Internet</code>) rather than hard-coded IP ranges. Service tags auto-update as Azure changes infrastructure IPs. The RDP deny rule correctly targets <code>Internet</code> rather than <code>*</code> so Bastion connections through the VNet are unaffected — a distinction that matters operationally.</div>
+      </div>
+    </div>
+    <div class="emp-card">
+      <div class="emp-icon" style="background:var(--amber-bg)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="emp-title">Understanding Standard vs Basic SKU differences</div>
+        <div class="emp-body">Microsoft is retiring Basic SKU Load Balancer. Every new deployment should use Standard SKU — but Standard requires explicit configuration of things Basic provided implicitly (outbound SNAT, probe NSG rules, static public IPs). Organisations migrating existing deployments to Standard frequently hit exactly the issues documented here. Understanding the differences is immediately applicable in any Azure environment.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section">
+  <div class="sec-tag">Skills demonstrated</div>
+  <h2>AZ-104 domain: implement and manage virtual networking</h2>
+  <div class="skills">
+    <span class="skill">Standard Load Balancer</span>
+    <span class="skill">Health probes</span>
+    <span class="skill">Backend pools</span>
+    <span class="skill">Outbound SNAT</span>
+    <span class="skill">Frontend IP configs</span>
+    <span class="skill">Availability sets</span>
+    <span class="skill">Fault domains</span>
+    <span class="skill">NSG service tags</span>
+    <span class="skill">AzureLoadBalancer tag</span>
+    <span class="skill">Round-robin distribution</span>
+    <span class="skill">Health probe failover</span>
+    <span class="skill">Azure Bastion</span>
+    <span class="skill">Azure CLI (Bash + PS)</span>
+    <span class="skill">Network troubleshooting</span>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <span>Ste Bovik — AZ-104 Azure Administrator Portfolio</span>
+  <div style="display:flex;gap:18px"><a href="/projects">All projects</a><a href="https://github.com/ostebovik">GitHub</a><a href="/contact">Contact</a></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Phase 4 — Capstone & IaC Lab Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f1117;
+  --bg2:      #161b27;
+  --bg3:      #1d2435;
+  --bg4:      #242c40;
+  --border:   #2a3347;
+  --border2:  #364259;
+  --text:     #e2e8f0;
+  --text2:    #94a3b8;
+  --text3:    #64748b;
+  --azure:    #3b82f6;
+  --azure2:   #1d4ed8;
+  --azure-bg: #1e3a5f;
+  --azure-lt: #93c5fd;
+  --teal:     #14b8a6;
+  --teal-bg:  #134e4a;
+  --teal-lt:  #5eead4;
+  --amber:    #f59e0b;
+  --amber-bg: #451a03;
+  --amber-lt: #fcd34d;
+  --green:    #22c55e;
+  --green-bg: #14532d;
+  --green-lt: #86efac;
+  --purple:   #a855f7;
+  --purple-bg:#3b0764;
+  --purple-lt:#d8b4fe;
+  --red:      #ef4444;
+  --red-bg:   #450a0a;
+  --red-lt:   #fca5a5;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'Syne', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* ── HEADER ── */
+.site-header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+.header-right { display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.phase-badge { background: var(--purple-bg); color: var(--purple-lt); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+
+/* ── HERO ── */
+.hero { padding: 60px 2rem 48px; max-width: 1000px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eye { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--purple); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+.hero-eye::after { content:''; flex:1; height:1px; background:var(--border); }
+.hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 16px; }
+.hero h1 span { color: var(--purple); }
+.hero-sub { font-size: 16px; color: var(--text2); max-width: 600px; margin-bottom: 32px; line-height: 1.7; }
+.stat-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.stat strong { display: block; font-size: 20px; color: var(--text); font-family: var(--sans); font-weight: 600; margin-bottom: 2px; }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 2rem 0; }
+.progress-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.progress-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azure2), var(--purple)); width: 85%; }
+.phase-dots { display: flex; gap: 0; margin-top: 8px; }
+.phase-dot { flex: 1; text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text3); padding-top: 6px; }
+.phase-dot.done { color: var(--azure-lt); }
+.phase-dot.active { color: var(--purple-lt); font-weight: 500; }
+
+/* ── MAIN LAYOUT ── */
+.main { max-width: 1000px; margin: 0 auto; padding: 32px 2rem 80px; }
+
+/* ── PROJECT CARD ── */
+.proj-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 20px; overflow: hidden; transition: border-color .2s; }
+.proj-card:hover { border-color: var(--border2); }
+.proj-header { display: flex; align-items: flex-start; gap: 16px; padding: 20px 24px; cursor: pointer; user-select: none; }
+.proj-header:hover { background: var(--bg3); }
+.proj-num { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; font-family: var(--mono); }
+.proj-header-text { flex: 1; }
+.proj-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.proj-sub { font-size: 13px; color: var(--text3); }
+.proj-chevron { font-size: 18px; color: var(--text3); transition: transform .3s; flex-shrink: 0; margin-top: 6px; }
+.proj-card.open .proj-chevron { transform: rotate(180deg); }
+.proj-body { padding: 0 24px 24px; display: none; }
+.proj-card.open .proj-body { display: block; }
+
+/* ── MINI GRID ── */
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 24px; }
+.mini-cell { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.mini-label { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.mini-val { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ── SECTION LABEL ── */
+.sec-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin: 20px 0 10px; }
+
+/* ── CONCEPT BOX ── */
+.concept-box { background: var(--azure-bg); border: 1px solid var(--azure2); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--azure-lt); line-height: 1.65; margin-bottom: 16px; }
+.concept-box.warn { background: var(--amber-bg); border-color: var(--amber); color: var(--amber-lt); }
+.concept-box.green { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+.concept-box.purple { background: var(--purple-bg); border-color: var(--purple); color: var(--purple-lt); }
+.concept-box.red { background: var(--red-bg); border-color: var(--red); color: var(--red-lt); }
+
+/* ── STEPS ── */
+.step-list { list-style: none; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.step-item { display: flex; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-item:last-child { border-bottom: none; }
+.step-num { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+.code { font-family: var(--mono); font-size: 11px; background: var(--bg4); color: var(--azure-lt); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); white-space: nowrap; }
+.code.purple { color: var(--purple-lt); }
+
+/* ── CLI BLOCK ── */
+.cli-wrap { margin-top: 12px; border-radius: 8px; overflow: hidden; }
+.cli-header { background: var(--bg4); border: 1px solid var(--border); border-bottom: none; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; }
+.cli-lang { font-family: var(--mono); font-size: 11px; color: var(--purple); }
+.cli-copy { font-family: var(--mono); font-size: 11px; color: var(--text3); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; cursor: pointer; transition: all .15s; }
+.cli-copy:hover { background: var(--bg3); color: var(--text); }
+.cli-copy.copied { color: var(--green-lt); border-color: var(--green); }
+pre.cli { background: #0d1117; border: 1px solid var(--border); border-radius: 0 0 8px 8px; padding: 16px; font-family: var(--mono); font-size: 12px; color: #e2e8f0; line-height: 1.9; overflow-x: auto; white-space: pre; tab-size: 2; }
+.c-cmd { color: #93c5fd; }
+.c-flag { color: #a78bfa; }
+.c-str { color: #86efac; }
+.c-cmt { color: #475569; font-style: italic; }
+.c-var { color: #fcd34d; }
+.c-key { color: #f9a8d4; }
+
+/* ── PORTFOLIO BOX ── */
+.portfolio-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-top: 16px; }
+.portfolio-header { background: var(--bg4); padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.portfolio-list { list-style: none; }
+.portfolio-item { display: flex; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.portfolio-item:last-child { border-bottom: none; }
+.port-check { width: 18px; height: 18px; border: 1px solid var(--border2); border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 2px; }
+.port-check:hover { border-color: var(--purple); }
+.port-check.checked { background: var(--purple-bg); border-color: var(--purple); color: var(--purple-lt); font-size: 10px; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all .15s; text-decoration: none; }
+.btn:hover { background: var(--bg4); border-color: var(--purple); color: var(--purple-lt); }
+.btn.primary { background: var(--purple-bg); border-color: var(--purple); color: var(--purple-lt); }
+.btn.primary:hover { background: #6b21a8; color: #fff; }
+.btn-arrow { font-size: 14px; }
+
+/* ── WARN / INFO STRIP ── */
+.warn-strip { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--amber-lt); margin-top: 14px; font-family: var(--mono); }
+.info-strip { background: var(--purple-bg); border: 1px solid var(--purple); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--purple-lt); margin-top: 14px; font-family: var(--mono); }
+.red-strip { background: var(--red-bg); border: 1px solid var(--red); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--red-lt); margin-top: 14px; font-family: var(--mono); }
+
+/* ── PREREQUISITE TABLE ── */
+.prereq-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+.prereq-table th { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.prereq-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+.prereq-table tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 20px; }
+.badge-done { background: var(--green-bg); color: var(--green-lt); border: 1px solid var(--green); }
+.badge-new { background: var(--purple-bg); color: var(--purple-lt); border: 1px solid var(--purple); }
+.badge-dep { background: var(--azure-bg); color: var(--azure-lt); border: 1px solid var(--azure); }
+
+/* ── DEPRECATED TABLE ── */
+.dep-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); }
+.dep-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.dep-table tr:last-child td { border-bottom: none; }
+.dep-old { color: var(--red-lt); text-decoration: line-through; }
+.dep-new { color: var(--green-lt); }
+.dep-note { color: var(--text3); font-size: 11px; }
+
+/* ── SUMMARY ── */
+.summary-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 8px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+
+/* ── NOTES PANEL ── */
+.notes-panel { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+.notes-header { background: var(--bg4); padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--purple-lt); letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.notes-body { padding: 12px 16px; }
+.note-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.6; }
+.note-item:last-child { border-bottom: none; }
+.note-tag { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; height: fit-content; margin-top: 2px; }
+.tag-key  { background: var(--amber-bg);  color: var(--amber-lt);  border: 1px solid var(--amber); }
+.tag-warn { background: var(--red-bg);    color: var(--red-lt);    border: 1px solid var(--red); }
+.tag-tip  { background: var(--green-bg);  color: var(--green-lt);  border: 1px solid var(--green); }
+.tag-exam { background: var(--purple-bg); color: var(--purple-lt); border: 1px solid var(--purple); }
+.notes-add { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.notes-input { flex: 1; background: var(--bg4); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; font-family: var(--mono); font-size: 12px; color: var(--text); outline: none; }
+.notes-input:focus { border-color: var(--purple); }
+.notes-btn { font-family: var(--mono); font-size: 11px; background: var(--purple-bg); border: 1px solid var(--purple); color: var(--purple-lt); border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.notes-btn:hover { background: #6b21a8; color: #fff; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    ostebovik.net · az-104
+  </div>
+  <div class="header-right">
+    <span>West US 3</span>
+    <span class="phase-badge">Phase 4 — Capstone</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eye">AZ-104 · Phase 4 of 4</div>
+  <h1>Bicep IaC &amp; <span>Capstone</span></h1>
+  <p class="hero-sub">Deploy a production-aligned 3-tier application using Bicep Infrastructure as Code. This phase ties together every concept from Phases 1–3 and produces your most significant portfolio artifact.</p>
+  <div class="stat-row">
+    <div class="stat"><strong>5</strong>projects</div>
+    <div class="stat"><strong>Bicep</strong>primary IaC</div>
+    <div class="stat"><strong>3-tier</strong>capstone app</div>
+    <div class="stat"><strong>~100%</strong>AZ-104 coverage</div>
+    <div class="stat"><strong>$40–60</strong>estimated cost</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label"><span>AZ-104 progress</span><span>~85% complete</span></div>
+  <div class="progress-track"><div class="progress-fill"></div></div>
+  <div class="phase-dots">
+    <div class="phase-dot done">Phase 1<br>Identity</div>
+    <div class="phase-dot done">Phase 2<br>Networking</div>
+    <div class="phase-dot done">Phase 3<br>Compute</div>
+    <div class="phase-dot active">Phase 4<br>Capstone ◀</div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ════════════════════════════════
+     STICKY NOTES PANEL
+════════════════════════════════ -->
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-header">
+    <span>📌 Key notes from sessions — add your own</span>
+    <span style="color:var(--text3);font-size:10px;">persists in browser until cleared</span>
+  </div>
+  <div class="notes-body">
+    <div id="notesList">
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>Application Gateway v1 — deprecated. Always use v2.</div>
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>Key Vault Access Policies — use RBAC model. Access policies deprecated for new vaults.</div>
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>Azure Blueprints — deprecated. Use Deployment Stacks instead.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Bicep is the primary IaC language tested. ARM JSON still valid but Bicep is preferred in all new objectives.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Container Apps ≠ Container Instances. ACI = batch/testing. Container Apps = production workloads with scaling.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Managed identity = Azure-to-Azure (no secrets). SAS token = external-to-Azure (scoped, time-limited).</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>Policy definition IDs — never hardcode. Always: az policy definition list --query "[?displayName=='...'].name"</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>DCR association command drops -g flag. Scope derives from --resource ID which contains RG already.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>Linux data disk — never mount at /mnt. Azure temp disk owns it. Use /data or custom path.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>fstab — always use UUID not device name. Device names shift on reboot, UUIDs never do.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>disk resize = 2 steps: az disk update (block level) + resize2fs (filesystem level).</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>CSE uses service SAS only (account key). User delegation SAS fails — VM agent has no Azure AD context.</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>CRLF → LF fix for .sh files on Windows: sed -i 's/\r//' script.sh</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>az vm extension uses --vm-name (VM is parent). az vm show uses --name (VM is subject). CLI is consistent once you see the pattern.</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>Backup vault teardown: stop protection + delete backup data FIRST or az group delete will fail.</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>Logic App consumption tier = API connections tied to user auth. Use Automation Account for VM start/stop instead.</div>
+      <div class="note-item"><span class="note-tag tag-warn">COST</span>P0v3 App Service ~$41/mo. ASR replication ~$25+/mo per VM. Azure Firewall ~$140/mo. Plan before deploying.</div>
+    </div>
+    <div class="notes-add">
+      <input class="notes-input" id="noteInput" placeholder="Add a note (tag: key / warn / tip / exam)..." />
+      <select id="noteTag" style="background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:7px;font-family:var(--mono);font-size:11px;">
+        <option value="key">key</option>
+        <option value="warn">warn</option>
+        <option value="tip">tip</option>
+        <option value="exam">exam</option>
+      </select>
+      <button class="notes-btn" onclick="addNote()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PRE-PHASE 4 PREREQUISITES
+════════════════════════════════ -->
+<div class="proj-card" id="prereq">
+  <div class="proj-header" onclick="toggle('prereq')">
+    <div class="proj-num" style="background:#1d2435;color:#64748b;">00</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Pre-Phase 4 checklist — what must exist before you start</div>
+      <div class="proj-sub">Resources from previous phases required as foundation for Phase 4 projects</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="concept-box">
+      Phase 4 builds on the hub-spoke VNet from Phase 2 and the monitoring stack from Phase 3. Deploy these first — the 3-tier capstone plugs directly into the existing network topology. You do not need to redeploy everything from Phase 3, only what is listed below.
+    </div>
+
+    <div class="sec-label">Required resources — deploy in this order</div>
+    <table class="prereq-table">
+      <thead><tr><th>Resource</th><th>CAF Name</th><th>Source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Resource Group</td><td><span class="code">rg-az104-dev-wus3-01</span></td><td>Create new</td><td><span class="badge badge-new">create</span></td></tr>
+        <tr><td>Hub VNet</td><td><span class="code">vnet-hub-dev-wus3-01</span></td><td>Phase 2 pattern</td><td><span class="badge badge-dep">redeploy</span></td></tr>
+        <tr><td>Spoke VNet + peering</td><td><span class="code">vnet-spoke-dev-wus3-01</span></td><td>Phase 2 pattern</td><td><span class="badge badge-dep">redeploy</span></td></tr>
+        <tr><td>Log Analytics Workspace</td><td><span class="code">law-az104-dev-wus03-01</span></td><td>Phase 3 Project 9</td><td><span class="badge badge-dep">redeploy</span></td></tr>
+        <tr><td>Azure Container Registry</td><td><span class="code">acraz104devwus301</span></td><td>New for Phase 4</td><td><span class="badge badge-new">create</span></td></tr>
+        <tr><td>Key Vault</td><td><span class="code">kv-az104-dev-wus3-01</span></td><td>New for Phase 4</td><td><span class="badge badge-new">create</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="sec-label">Bootstrap CLI — run before starting Project 11</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">bash</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt"># Phase 4 bootstrap — run once before starting projects</span>
+<span class="c-var">SUB</span>=<span class="c-str">"343a8a7e-9911-478d-b833-74110a11b3c2"</span>
+<span class="c-var">RG</span>=<span class="c-str">"rg-az104-dev-wus3-01"</span>
+<span class="c-var">LOC</span>=<span class="c-str">"westus3"</span>
+
+<span class="c-cmd">az account set</span> <span class="c-flag">--subscription</span> <span class="c-var">$SUB</span>
+
+<span class="c-cmt"># Resource group</span>
+<span class="c-cmd">az group create</span> <span class="c-flag">-n</span> <span class="c-var">$RG</span> <span class="c-flag">-l</span> <span class="c-var">$LOC</span> \
+  <span class="c-flag">--tags</span> env=dev owner=ostebovik project=az104 phase=4
+
+<span class="c-cmt"># Log Analytics Workspace (needed by monitoring.bicep)</span>
+<span class="c-cmd">az monitor log-analytics workspace create</span> \
+  <span class="c-flag">-g</span> <span class="c-var">$RG</span> <span class="c-flag">-n</span> law-az104-dev-wus03-01 \
+  <span class="c-flag">-l</span> <span class="c-var">$LOC</span> <span class="c-flag">--retention-time</span> 30 <span class="c-flag">--sku</span> PerGB2018
+
+<span class="c-cmt"># Azure Container Registry (no hyphens — alphanumeric only)</span>
+<span class="c-cmd">az acr create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> <span class="c-flag">-n</span> acraz104devwus301 \
+  <span class="c-flag">-l</span> <span class="c-var">$LOC</span> <span class="c-flag">--sku</span> Basic \
+  <span class="c-flag">--admin-enabled</span> false
+
+<span class="c-cmt"># Key Vault — RBAC model (not legacy access policies)</span>
+<span class="c-cmd">az keyvault create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> <span class="c-flag">-n</span> kv-az104-dev-wus3-01 \
+  <span class="c-flag">-l</span> <span class="c-var">$LOC</span> <span class="c-flag">--enable-rbac-authorization</span> true \
+  <span class="c-flag">--soft-delete-retention-days</span> 7 \
+  <span class="c-flag">--sku</span> standard</pre>
+    </div>
+
+    <div class="sec-label">Deprecated services — do not use these in Phase 4</div>
+    <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+      <table class="dep-table" style="width:100%;">
+        <tr><td class="dep-old">Application Gateway v1</td><td class="dep-new">→ Application Gateway v2 (WAF_v2 SKU)</td><td class="dep-note">v1 retired</td></tr>
+        <tr><td class="dep-old">Key Vault Access Policies</td><td class="dep-new">→ RBAC authorization model</td><td class="dep-note">use --enable-rbac-authorization true</td></tr>
+        <tr><td class="dep-old">Azure Blueprints</td><td class="dep-new">→ Deployment Stacks</td><td class="dep-note">Blueprints deprecated 2026</td></tr>
+        <tr><td class="dep-old">Log Analytics Agent (MMA/LAD)</td><td class="dep-new">→ Azure Monitor Agent (AMA)</td><td class="dep-note">deprecated March 2026</td></tr>
+        <tr><td class="dep-old">Azure AD (name)</td><td class="dep-new">→ Microsoft Entra ID</td><td class="dep-note">rebranded — same service</td></tr>
+        <tr><td class="dep-old">Container Instances for web apps</td><td class="dep-new">→ Container Apps (production workloads)</td><td class="dep-note">ACI still valid for batch/testing</td></tr>
+        <tr><td class="dep-old">ARM JSON (for new work)</td><td class="dep-new">→ Bicep (preferred, exam-tested)</td><td class="dep-note">ARM JSON still valid, Bicep is primary</td></tr>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the Phase 4 bootstrap script to create rg-az104-dev-wus3-01, Log Analytics workspace, Azure Container Registry acraz104devwus301, and Key Vault kv-az104-dev-wus3-01 in westus3 with CAF tags for AZ-104 Phase 4')"><span class="btn-arrow">↗</span> Copy bootstrap script prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 11 — Bicep Fundamentals
+════════════════════════════════ -->
+<div class="proj-card" id="p11">
+  <div class="proj-header" onclick="toggle('p11')">
+    <div class="proj-num" style="background:#3b0764;color:#d8b4fe;">11</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Bicep fundamentals — syntax, modules &amp; what-if</div>
+      <div class="proj-sub">Learn Infrastructure as Code by translating CLI commands you already know into declarative Bicep templates</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Language</div><div class="mini-val">Bicep</div></div>
+      <div class="mini-cell"><div class="mini-label">Key concept</div><div class="mini-val">Declarative IaC</div></div>
+      <div class="mini-cell"><div class="mini-label">Exam weight</div><div class="mini-val">20–25%</div></div>
+      <div class="mini-cell"><div class="mini-label">Cost</div><div class="mini-val">~$0 (no new resources)</div></div>
+    </div>
+
+    <div class="concept-box">
+      <strong>Analogy:</strong> CLI commands are like giving someone step-by-step cooking instructions. Bicep is like handing them a recipe card — you describe the finished dish and Azure figures out the steps. Declarative means you define the desired end state, not the sequence of operations to get there.
+    </div>
+
+    <div class="concept-box purple">
+      <strong>Why Bicep matters for the exam:</strong> The AZ-104 objectives (updated April 2026) explicitly require you to interpret Bicep files, modify existing templates, deploy resources using Bicep, and convert ARM JSON to Bicep. Expect 3–5 questions directly on Bicep syntax and deployment.
+    </div>
+
+    <div class="sec-label">Steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Install Bicep CLI: <span class="code">az bicep install</span>. Install the Bicep extension in VS Code (publisher: Microsoft). Verify: <span class="code">az bicep version</span>. This gives you IntelliSense, syntax highlighting, and inline error detection as you type.</li>
+      <li class="step-item"><span class="step-num">2</span>Write your first Bicep file — a storage account. Create <span class="code">storage.bicep</span> with a param for name, a variable for SKU, and a resource block. Deploy with: <span class="code">az deployment group create -g rg-az104-dev-wus3-01 -f storage.bicep</span>. This is the equivalent of what you did with az storage account create.</li>
+      <li class="step-item"><span class="step-num">3</span>Add a parameters file. Create <span class="code">dev.bicepparam</span> — the new native Bicep parameter file format (replaces JSON parameter files). Reference it with <span class="code">--parameters dev.bicepparam</span>. This is how you manage environment-specific values without touching the template.</li>
+      <li class="step-item"><span class="step-num">4</span>Run what-if before every deployment: <span class="code">az deployment group what-if -g rg-az104-dev-wus3-01 -f storage.bicep</span>. What-if shows exactly what will be created, modified, or deleted before anything happens. Build this as a mandatory habit — it is the IaC equivalent of reviewing a script before running it.</li>
+      <li class="step-item"><span class="step-num">5</span>Extract a module. Move the storage account resource into <span class="code">modules/storage.bicep</span>. Call it from a <span class="code">main.bicep</span> using the module keyword. This is the lego pattern — reusable components assembled by a parent template.</li>
+      <li class="step-item"><span class="step-num">6</span>Export an existing resource to Bicep. In the portal: go to any resource → Export template → Download. Then run <span class="code">az bicep decompile --file template.json</span> to convert ARM JSON to Bicep. This is how you reverse-engineer existing infrastructure into IaC — a real-world skill for brownfield environments.</li>
+      <li class="step-item"><span class="step-num">7</span>Translate your VM deploy script to Bicep. Take <span class="code">p9-quickdeploy-2vm.sh</span> and rewrite it as Bicep. This is the highest-value exercise — you know what the output should be, so you can verify correctness. Use <span class="code">az bicep build</span> to validate syntax without deploying.</li>
+    </ul>
+
+    <div class="sec-label">Core Bicep syntax reference</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">bicep</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt">// Parameters — inputs that change between deployments</span>
+<span class="c-key">param</span> <span class="c-var">location</span> string = <span class="c-str">'westus3'</span>
+<span class="c-key">param</span> <span class="c-var">environment</span> string = <span class="c-str">'dev'</span>
+<span class="c-key">param</span> <span class="c-var">adminPassword</span> <span class="c-cmd">@secure()</span> string  <span class="c-cmt">// never logged or stored</span>
+
+<span class="c-cmt">// Variables — computed values reused within the template</span>
+<span class="c-key">var</span> <span class="c-var">rgName</span> = <span class="c-str">'rg-az104-${environment}-wus3-01'</span>
+<span class="c-key">var</span> <span class="c-var">tags</span> = { env: <span class="c-var">environment</span>, owner: <span class="c-str">'ostebovik'</span>, project: <span class="c-str">'az104'</span> }
+
+<span class="c-cmt">// Resource — declarative definition of an Azure resource</span>
+<span class="c-key">resource</span> <span class="c-var">storageAccount</span> <span class="c-str">'Microsoft.Storage/storageAccounts@2023-01-01'</span> = {
+  name: <span class="c-str">'staz104dev${uniqueString(resourceGroup().id)}'</span>
+  location: <span class="c-var">location</span>
+  sku: { name: <span class="c-str">'Standard_LRS'</span> }
+  kind: <span class="c-str">'StorageV2'</span>
+  tags: <span class="c-var">tags</span>
+  properties: {
+    allowBlobPublicAccess: false
+    minimumTlsVersion: <span class="c-str">'TLS1_2'</span>
+  }
+}
+
+<span class="c-cmt">// Module — call a child template</span>
+<span class="c-key">module</span> <span class="c-var">network</span> <span class="c-str">'modules/networking.bicep'</span> = {
+  name: <span class="c-str">'networkDeploy'</span>
+  params: {
+    location: <span class="c-var">location</span>
+    environment: <span class="c-var">environment</span>
+  }
+}
+
+<span class="c-cmt">// Output — return values from the deployment</span>
+<span class="c-key">output</span> <span class="c-var">storageAccountName</span> string = <span class="c-var">storageAccount</span>.name
+<span class="c-key">output</span> <span class="c-var">vnetId</span> string = <span class="c-var">network</span>.outputs.vnetId</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>GitHub repo showing Bicep file structure: main.bicep + modules/ folder — shows architectural thinking</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>What-if output screenshot showing planned changes before deployment — demonstrates safe IaC practice</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Side-by-side: CLI command vs equivalent Bicep resource block — shows translation ability</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Decompiled ARM JSON → Bicep conversion showing brownfield IaC migration</li>
+      </ul>
+    </div>
+    <div class="info-strip">&#128161; Bicep files are saved in your repo under Phase04/11_Bicep/. Commit after each step — the git history shows your learning progression, which is itself a portfolio artifact.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate a Bicep template that deploys a VNet with two subnets and NSGs following CAF naming conventions for AZ-104 Phase 4. Include parameters file and module structure.')"><span class="btn-arrow">↗</span> Copy Bicep VNet template prompt</button>
+      <button class="btn" onclick="copyPrompt('Translate my p9-quickdeploy-2vm.sh Bash script to a Bicep template with separate modules for networking and compute. Use CAF naming, managed identity, and westus3 region.')"><span class="btn-arrow">↗</span> Copy VM translation prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 12 — Container Registry + Container Apps
+════════════════════════════════ -->
+<div class="proj-card" id="p12">
+  <div class="proj-header" onclick="toggle('p12')">
+    <div class="proj-num" style="background:#134e4a;color:#5eead4;">12</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Container Registry &amp; Container Apps</div>
+      <div class="proj-sub">Build, push and run containerized workloads — the production-correct alternative to Container Instances for web workloads</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Registry</div><div class="mini-val">ACR Basic</div></div>
+      <div class="mini-cell"><div class="mini-label">Runtime</div><div class="mini-val">Container Apps</div></div>
+      <div class="mini-cell"><div class="mini-label">Key concept</div><div class="mini-val">Revisions + scaling</div></div>
+      <div class="mini-cell"><div class="mini-label">Cost</div><div class="mini-val">~$5–10</div></div>
+    </div>
+
+    <div class="concept-box">
+      <strong>Container Apps vs Container Instances — the exam distinction:</strong> ACI is a loading dock (bare, fast, disposable). Container Apps is a managed warehouse with auto-scaling, traffic splitting, and revision management. Both run containers — the workload pattern determines which to use. ACI = batch/testing. Container Apps = production web workloads.
+    </div>
+
+    <div class="concept-box warn">
+      <strong>⚠ Naming constraint:</strong> ACR names are alphanumeric only, no hyphens, globally unique. <span class="code warn">acraz104devwus301</span> — no separators between segments.
+    </div>
+
+    <div class="sec-label">Steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create Azure Container Registry: <span class="code">az acr create -g rg-az104-dev-wus3-01 -n acraz104devwus301 --sku Basic</span>. Basic SKU is sufficient for lab. Standard adds geo-replication, Premium adds private link support.</li>
+      <li class="step-item"><span class="step-num">2</span>Build and push a container image using ACR Tasks — no local Docker required. Create a simple <span class="code">Dockerfile</span> (nginx serving a custom page) and run: <span class="code">az acr build --registry acraz104devwus301 --image az104-web:v1 .</span> Azure builds the image in the cloud and stores it in your registry.</li>
+      <li class="step-item"><span class="step-num">3</span>Create a Container Apps environment: <span class="code">az containerapp env create -n cae-az104-dev-wus3-01 -g rg-az104-dev-wus3-01 -l westus3</span>. The environment is the shared infrastructure that hosts one or more Container Apps — similar to an App Service Plan for App Service.</li>
+      <li class="step-item"><span class="step-num">4</span>Deploy a Container App from ACR: <span class="code">az containerapp create</span> pointing to your ACR image. Assign a system managed identity and grant it AcrPull role on the registry — no admin credentials needed.</li>
+      <li class="step-item"><span class="step-num">5</span>Configure HTTP scaling: set min replicas to 0 (scales to zero when idle — no cost) and max to 3. This is the key cost advantage of Container Apps over App Service — you only pay when traffic exists.</li>
+      <li class="step-item"><span class="step-num">6</span>Deploy a new revision: update the Dockerfile, rebuild with <span class="code">:v2</span> tag, create a new revision. Configure traffic splitting: 80% to v1, 20% to v2. This is the Container Apps equivalent of App Service deployment slots — canary deployments without downtime.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">bash</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt"># Build image in ACR (no local Docker needed)</span>
+<span class="c-cmd">az acr build</span> <span class="c-flag">--registry</span> acraz104devwus301 \
+  <span class="c-flag">--image</span> az104-web:v1 .
+
+<span class="c-cmt"># Create Container Apps environment</span>
+<span class="c-cmd">az containerapp env create</span> \
+  <span class="c-flag">-n</span> cae-az104-dev-wus3-01 \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-l</span> westus3
+
+<span class="c-cmt"># Deploy Container App with managed identity (no admin creds)</span>
+<span class="c-cmd">az containerapp create</span> \
+  <span class="c-flag">-n</span> ca-az104-dev-wus3-01 \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">--environment</span> cae-az104-dev-wus3-01 \
+  <span class="c-flag">--image</span> acraz104devwus301.azurecr.io/az104-web:v1 \
+  <span class="c-flag">--registry-server</span> acraz104devwus301.azurecr.io \
+  <span class="c-flag">--min-replicas</span> 0 <span class="c-flag">--max-replicas</span> 3 \
+  <span class="c-flag">--ingress</span> external <span class="c-flag">--target-port</span> 80 \
+  <span class="c-flag">--assign-identity</span> <span class="c-str">"[system]"</span>
+
+<span class="c-cmt"># Traffic split — 80/20 canary between revisions</span>
+<span class="c-cmd">az containerapp ingress traffic set</span> \
+  <span class="c-flag">-n</span> ca-az104-dev-wus3-01 \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">--revision-weight</span> v1=80 v2=20</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>ACR repository showing pushed image tags v1 and v2</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Container App running — screenshot of live URL serving content</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Traffic splitting configuration showing 80/20 revision split</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Scaling configuration showing min 0, max 3 replicas</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: ACR Basic ~$5/mo. Container Apps charges per vCPU-second and memory-GiB-second when replicas > 0. Min replicas = 0 means zero cost at idle. Delete the environment when done — it hosts the billing.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 12 Container Registry and Container Apps: create ACR, build and push image, create Container Apps environment, deploy app with managed identity, configure scaling and traffic splitting for AZ-104 Phase 4')"><span class="btn-arrow">↗</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 12 showing ACR acraz104devwus301 feeding Container Apps environment cae-az104-dev-wus3-01 running ca-az104-dev-wus3-01 with traffic splitting between v1 and v2 revisions for my AZ-104 portfolio')"><span class="btn-arrow">↗</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 13 — Advanced Networking
+════════════════════════════════ -->
+<div class="proj-card" id="p13">
+  <div class="proj-header" onclick="toggle('p13')">
+    <div class="proj-num" style="background:#1e3a5f;color:#93c5fd;">13</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Advanced networking — Application Gateway, Bastion &amp; Network Watcher</div>
+      <div class="proj-sub">Layer-7 load balancing, secure VM access without public IPs, and network diagnostics</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Load balancer</div><div class="mini-val">App Gateway v2</div></div>
+      <div class="mini-cell"><div class="mini-label">VM access</div><div class="mini-val">Bastion Standard</div></div>
+      <div class="mini-cell"><div class="mini-label">Diagnostics</div><div class="mini-val">Network Watcher</div></div>
+      <div class="mini-cell"><div class="mini-label">Cost</div><div class="mini-val">~$5–10 (short lab)</div></div>
+    </div>
+
+    <div class="concept-box warn">
+      <strong>⚠ Cost warning:</strong> Application Gateway v2 costs ~$0.007/hr + data processing even at idle. Azure Bastion Standard costs ~$0.19/hr. Deploy these for the lab exercise then delete immediately after — do not leave running overnight.
+    </div>
+
+    <div class="concept-box">
+      <strong>App Gateway vs Load Balancer:</strong> The Phase 2 load balancer operates at Layer 4 (TCP/UDP) — it routes based on IP and port. Application Gateway operates at Layer 7 (HTTP/HTTPS) — it can route based on URL path, host header, cookies, and SSL certificates. Think of it as the difference between a traffic light (L4) and a traffic cop who reads your destination sign and directs you accordingly (L7).
+    </div>
+
+    <div class="sec-label">Steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Deploy Application Gateway v2 with WAF policy. Always use v2 (WAF_v2 or Standard_v2 SKU) — v1 is retired. Create a dedicated subnet <span class="code">snet-appgw-dev-wus3-01</span> with minimum /24. Application Gateway requires its own subnet — it cannot share with VMs or other resources.</li>
+      <li class="step-item"><span class="step-num">2</span>Configure backend pool pointing to your App Service or VM. Configure HTTP settings (port 80 or 443), health probe (GET / every 30s), and listener. The health probe is how App Gateway determines if a backend is healthy before sending traffic.</li>
+      <li class="step-item"><span class="step-num">3</span>Deploy Azure Bastion Standard SKU. Create <span class="code">snet-AzureBastionSubnet</span> with minimum /26 — the subnet name must be exactly this. Standard SKU supports native RDP/SSH in browser and file transfer. Connect to vm-win-dev-01 via Bastion and verify BGInfo wallpaper.</li>
+      <li class="step-item"><span class="step-num">4</span>Enable Network Watcher (auto-enabled per region — verify it exists): Monitor → Network Watcher. Run IP flow verify between your VMs to confirm NSG rules allow expected traffic. This is a diagnostic tool, not a resource you manage.</li>
+      <li class="step-item"><span class="step-num">5</span>Create a Connection Monitor to test connectivity from vm-linux-dev-01 to vm-win-dev-01. Monitor the test for 5 minutes. Connection Monitor shows latency, packet loss, and topology — the operational view of your network.</li>
+      <li class="step-item"><span class="step-num">6</span>Configure a user-defined route (UDR) to force traffic through a next-hop. Create a route table, add a route for <span class="code">0.0.0.0/0</span> with next-hop type VirtualAppliance. Attach to a subnet. This is how you force traffic through Azure Firewall or an NVA in production hub-spoke topologies.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">bash</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt"># Deploy Application Gateway v2 (WAF_v2 SKU)</span>
+<span class="c-cmd">az network application-gateway create</span> \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> agw-az104-dev-wus3-01 \
+  <span class="c-flag">--sku</span> WAF_v2 <span class="c-flag">--capacity</span> 1 \
+  <span class="c-flag">--vnet-name</span> vnet-spoke-dev-wus3-01 \
+  <span class="c-flag">--subnet</span> snet-appgw-dev-wus3-01 \
+  <span class="c-flag">--public-ip-address</span> pip-agw-dev-wus3-01 \
+  <span class="c-flag">--priority</span> 100
+
+<span class="c-cmt"># Deploy Bastion (Standard SKU, exact subnet name required)</span>
+<span class="c-cmd">az network bastion create</span> \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> bas-az104-dev-wus3-01 \
+  <span class="c-flag">--vnet-name</span> vnet-hub-dev-wus3-01 \
+  <span class="c-flag">--public-ip-address</span> pip-bas-dev-wus3-01 \
+  <span class="c-flag">--sku</span> Standard \
+  <span class="c-flag">-l</span> westus3
+
+<span class="c-cmt"># IP flow verify — does NSG allow this traffic?</span>
+<span class="c-cmd">az network watcher test-ip-flow</span> \
+  <span class="c-flag">--vm</span> vm-linux-dev-01 \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">--direction</span> Outbound \
+  <span class="c-flag">--protocol</span> TCP \
+  <span class="c-flag">--local</span> 10.0.2.4:60000 \
+  <span class="c-flag">--remote</span> 10.0.1.4:22
+
+<span class="c-cmt"># Create user-defined route table</span>
+<span class="c-cmd">az network route-table create</span> \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> rt-az104-dev-wus3-01
+
+<span class="c-cmd">az network route-table route create</span> \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">--route-table-name</span> rt-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> route-to-nva \
+  <span class="c-flag">--address-prefix</span> 0.0.0.0/0 \
+  <span class="c-flag">--next-hop-type</span> VirtualAppliance \
+  <span class="c-flag">--next-hop-ip-address</span> 10.0.0.4</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Application Gateway overview showing WAF_v2 SKU, backend pool, and health probe status</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Bastion connection to VM in browser — no public IP, no local RDP client needed</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>IP flow verify result showing Allow or Deny with the specific NSG rule that matched</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Connection Monitor topology view showing VM-to-VM path with latency</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Route table showing UDR overriding system routes — with explanation of when this applies</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: App Gateway v2 ~$0.007/hr minimum + $0.008/CU. Bastion Standard ~$0.19/hr. Delete both immediately after screenshots. Connection Monitor has no cost. Network Watcher itself is free — only flow logs incur storage cost.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 13: Application Gateway v2 WAF_v2 SKU, Azure Bastion Standard, Network Watcher IP flow verify, Connection Monitor, and user-defined route table in rg-az104-dev-wus3-01 westus3 for AZ-104 Phase 4')"><span class="btn-arrow">↗</span> Copy CLI script prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for Project 13 showing Application Gateway v2 in front of App Service, Azure Bastion in hub VNet for VM access, and Network Watcher monitoring connectivity between subnets for my AZ-104 portfolio')"><span class="btn-arrow">↗</span> Copy diagram prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 14 — Key Vault + Managed Identity
+════════════════════════════════ -->
+<div class="proj-card" id="p14">
+  <div class="proj-header" onclick="toggle('p14')">
+    <div class="proj-num" style="background:#451a03;color:#fcd34d;">14</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Key Vault &amp; managed identity — zero-credential architecture</div>
+      <div class="proj-sub">Store and retrieve secrets without credentials in code, scripts, or environment variables</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Auth model</div><div class="mini-val">RBAC (not policies)</div></div>
+      <div class="mini-cell"><div class="mini-label">Access pattern</div><div class="mini-val">Managed identity</div></div>
+      <div class="mini-cell"><div class="mini-label">App integration</div><div class="mini-val">KV references</div></div>
+      <div class="mini-cell"><div class="mini-label">Cost</div><div class="mini-val">~$0 (10k ops free)</div></div>
+    </div>
+
+    <div class="concept-box">
+      <strong>Analogy:</strong> Key Vault is a bank vault. Your managed identity is your ID badge — you show it to get in without carrying a key. The old approach (access policies) was like giving everyone a physical key to the vault and hoping they don't lose it. RBAC + managed identity means nobody carries a key at all.
+    </div>
+
+    <div class="concept-box red">
+      <strong>⚠ Access Policies are deprecated for new vaults.</strong> Always create Key Vault with <span class="code">--enable-rbac-authorization true</span>. If your guide says "Access Policies → Add", it is outdated. Use IAM → Add role assignment → Key Vault Secrets User instead.
+    </div>
+
+    <div class="sec-label">Steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Create Key Vault with RBAC authorization enabled (already done in bootstrap). Verify: portal → kv-az104-dev-wus3-01 → Access configuration → Permission model = Azure role-based access control.</li>
+      <li class="step-item"><span class="step-num">2</span>Store secrets: <span class="code">az keyvault secret set --vault-name kv-az104-dev-wus3-01 --name db-connection-string --value "Server=..."</span>. Also store an admin password. These are the secrets your applications will need — never put these in code or environment variables directly.</li>
+      <li class="step-item"><span class="step-num">3</span>Assign Key Vault Secrets User role to your App Service managed identity. This gives the App Service read-only access to secrets — it cannot create, modify, or delete. Least privilege applied correctly.</li>
+      <li class="step-item"><span class="step-num">4</span>Configure Key Vault references in App Service: in App Settings, add a setting with value <span class="code">@Microsoft.KeyVault(SecretUri=https://kv-az104-dev-wus3-01.vault.azure.net/secrets/db-connection-string/)</span>. The App Service resolves this at runtime — the actual secret value never appears in the portal or in logs.</li>
+      <li class="step-item"><span class="step-num">5</span>Verify the reference resolved: App Service → Configuration → the setting should show a green checkmark and "Key Vault Reference" status. A red X means the managed identity doesn't have access — check the role assignment.</li>
+      <li class="step-item"><span class="step-num">6</span>Enable Key Vault diagnostic settings → send audit logs to your Log Analytics workspace. Every secret access is now logged — you can query who accessed what secret and when. This is security auditing at the data access level.</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">bash</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt"># Store secrets (never hardcode these values in scripts you commit)</span>
+<span class="c-cmd">az keyvault secret set</span> \
+  <span class="c-flag">--vault-name</span> kv-az104-dev-wus3-01 \
+  <span class="c-flag">--name</span> db-connection-string \
+  <span class="c-flag">--value</span> <span class="c-str">"Server=sql-az104-dev-wus3-01.database.windows.net;..."</span>
+
+<span class="c-cmt"># Get App Service managed identity principal ID</span>
+<span class="c-var">PRINCIPAL</span>=$(az webapp identity show \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> app-az104-dev-wus3-01 \
+  <span class="c-flag">--query</span> principalId <span class="c-flag">-o</span> tsv)
+
+<span class="c-cmt"># Get Key Vault resource ID</span>
+<span class="c-var">KV_ID</span>=$(az keyvault show \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> kv-az104-dev-wus3-01 \
+  <span class="c-flag">--query</span> id <span class="c-flag">-o</span> tsv)
+
+<span class="c-cmt"># Assign Key Vault Secrets User (read-only) to App Service identity</span>
+<span class="c-cmd">az role assignment create</span> \
+  <span class="c-flag">--assignee</span> <span class="c-var">$PRINCIPAL</span> \
+  <span class="c-flag">--role</span> <span class="c-str">"Key Vault Secrets User"</span> \
+  <span class="c-flag">--scope</span> <span class="c-var">$KV_ID</span>
+
+<span class="c-cmt"># Set Key Vault reference in App Service settings</span>
+<span class="c-cmd">az webapp config appsettings set</span> \
+  <span class="c-flag">-g</span> rg-az104-dev-wus3-01 \
+  <span class="c-flag">-n</span> app-az104-dev-wus3-01 \
+  <span class="c-flag">--settings</span> \
+  <span class="c-str">"DB_CONNECTION=@Microsoft.KeyVault(SecretUri=https://kv-az104-dev-wus3-01.vault.azure.net/secrets/db-connection-string/)"</span>
+
+<span class="c-cmt"># Query secret access audit log in LAW</span>
+<span class="c-cmt"># Run this KQL in law-az104-dev-wus03-01 → Logs:</span>
+<span class="c-cmt"># AzureDiagnostics</span>
+<span class="c-cmt"># | where ResourceType == "VAULTS"</span>
+<span class="c-cmt"># | where OperationName == "SecretGet"</span>
+<span class="c-cmt"># | project TimeGenerated, CallerIPAddress, identity_claim_oid_g</span></pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Key Vault Access configuration showing RBAC model (not Access Policies)</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>App Service Configuration showing Key Vault reference with green resolved status</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>IAM role assignments on Key Vault showing managed identity with Secrets User role</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>KQL query result showing secret access audit log — proves end-to-end security auditing</li>
+      </ul>
+    </div>
+    <div class="info-strip">&#128161; Key Vault charges per 10,000 operations. For a lab with a handful of secret reads the cost rounds to zero. Soft delete is enabled by default — deleted secrets are retained 7 days (set in bootstrap). This means you cannot immediately reuse a secret name after deletion.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the full Azure CLI script for Project 14: store secrets in kv-az104-dev-wus3-01 using RBAC model, assign Key Vault Secrets User to App Service managed identity, configure Key Vault references in App Service settings, and enable diagnostic logging to Log Analytics for AZ-104 Phase 4')"><span class="btn-arrow">↗</span> Copy CLI script prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 15 — Capstone
+════════════════════════════════ -->
+<div class="proj-card" id="p15">
+  <div class="proj-header" onclick="toggle('p15')">
+    <div class="proj-num" style="background:#14532d;color:#86efac;">15</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Capstone — 3-tier application deployed via Bicep IaC</div>
+      <div class="proj-sub">Deploy a complete production-aligned architecture using modular Bicep templates. This is your portfolio centerpiece.</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Tiers</div><div class="mini-val">Web / API / Data</div></div>
+      <div class="mini-cell"><div class="mini-label">IaC</div><div class="mini-val">Bicep modules</div></div>
+      <div class="mini-cell"><div class="mini-label">Auth</div><div class="mini-val">Managed identity</div></div>
+      <div class="mini-cell"><div class="mini-label">Network</div><div class="mini-val">Private endpoints</div></div>
+      <div class="mini-cell"><div class="mini-label">Secrets</div><div class="mini-val">Key Vault refs</div></div>
+      <div class="mini-cell"><div class="mini-label">Cost</div><div class="mini-val">~$20–30 (1 week)</div></div>
+    </div>
+
+    <div class="concept-box green">
+      <strong>What makes this the portfolio centerpiece:</strong> Anyone can deploy a VM. This architecture demonstrates you understand how services connect, why each design decision was made, and how to encode those decisions as repeatable, version-controlled code. The design decisions write-up is more valuable than the deployment itself.
+    </div>
+
+    <div class="sec-label">Architecture</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">architecture</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli">Internet
+    ↓
+<span class="c-cmd">Application Gateway v2 (WAF)</span>       ← agw-az104-dev-wus3-01
+    ↓  public HTTPS only
+<span class="c-cmd">Web Tier — App Service (frontend)</span>   ← app-web-az104-dev-wus3-01
+    ↓  VNet integration (outbound)     ← snet-web-dev-wus3-01
+<span class="c-cmd">API Tier — App Service (backend)</span>    ← app-api-az104-dev-wus3-01
+    ↓  private endpoint only           ← snet-api-dev-wus3-01
+<span class="c-cmd">Data Tier — Azure SQL Database</span>      ← sql-az104-dev-wus3-01
+    ↓  private endpoint only           ← snet-data-dev-wus3-01
+<span class="c-cmd">Key Vault</span>                           ← kv-az104-dev-wus3-01
+    ↓  all tiers read secrets via
+       managed identity — no credentials
+<span class="c-cmd">Log Analytics</span>                       ← law-az104-dev-wus03-01
+    ↓  all tiers send diagnostics</pre>
+    </div>
+
+    <div class="sec-label">Bicep module structure</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">file structure</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli">Phase04/15_Capstone/
+  <span class="c-cmd">main.bicep</span>              ← orchestrates all modules, defines params
+  parameters/
+    <span class="c-var">dev.bicepparam</span>          ← environment values (region, SKUs, names)
+  modules/
+    <span class="c-var">networking.bicep</span>        ← VNet, subnets, NSGs, App Gateway, private DNS
+    <span class="c-var">keyvault.bicep</span>          ← KV, secrets, RBAC assignments
+    <span class="c-var">web-tier.bicep</span>          ← App Service Plan + frontend app + slot
+    <span class="c-var">api-tier.bicep</span>          ← App Service Plan + API app + private endpoint
+    <span class="c-var">data-tier.bicep</span>         ← SQL server + database + private endpoint
+    <span class="c-var">monitoring.bicep</span>        ← diagnostic settings, alerts, action group</pre>
+    </div>
+
+    <div class="sec-label">Steps</div>
+    <ul class="step-list">
+      <li class="step-item"><span class="step-num">1</span>Write <span class="code">networking.bicep</span> first — everything depends on the network. Define the spoke VNet with four subnets: web, api, data, and appgw. Each subnet gets its own NSG. Add private DNS zones for SQL and App Service. Run what-if before deploying.</li>
+      <li class="step-item"><span class="step-num">2</span>Write <span class="code">keyvault.bicep</span>. Create Key Vault with RBAC enabled and soft delete. Use Bicep's <span class="code">@secure()</span> decorator for any parameter containing a secret value — this prevents the value from appearing in deployment logs.</li>
+      <li class="step-item"><span class="step-num">3</span>Write <span class="code">data-tier.bicep</span>. Deploy Azure SQL Server with Microsoft Entra admin (no SQL auth). Add the database with serverless tier to minimise cost. Configure private endpoint in the data subnet. Disable public network access.</li>
+      <li class="step-item"><span class="step-num">4</span>Write <span class="code">api-tier.bicep</span>. Deploy App Service Plan and API app with system managed identity. Configure VNet integration for outbound traffic. Create private endpoint so the web tier reaches the API internally. Add Key Vault reference for the SQL connection string.</li>
+      <li class="step-item"><span class="step-num">5</span>Write <span class="code">web-tier.bicep</span>. Deploy frontend App Service with system managed identity. Configure VNet integration. Add HTTPS-only and disable FTP. Create a staging slot. The frontend calls the API via its private endpoint — never directly to SQL.</li>
+      <li class="step-item"><span class="step-num">6</span>Write <span class="code">monitoring.bicep</span>. Add diagnostic settings on every resource pointing to your LAW. Create CPU alert on both App Service plans. Create failed request alert. Reuse the action group from Project 9.</li>
+      <li class="step-item"><span class="step-num">7</span>Write <span class="code">main.bicep</span> to orchestrate all modules in dependency order. Use Bicep's implicit dependency (symbolic names) rather than dependsOn wherever possible. Deploy the full stack: <span class="code">az deployment group create -g rg-az104-dev-wus3-01 -f main.bicep -p parameters/dev.bicepparam</span></li>
+      <li class="step-item"><span class="step-num">8</span>Write the design decisions document. For each architectural choice, answer: what did I choose, what alternatives existed, why did I choose this, and what would I change at production scale. This document is the most valuable portfolio artifact — it proves architectural judgment, not just execution.</li>
+    </ul>
+
+    <div class="sec-label">Design decisions to document</div>
+    <div class="cli-wrap">
+      <div class="cli-header"><span class="cli-lang">decisions</span><button class="cli-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre class="cli"><span class="c-cmt">Why App Service instead of VMs for web/api tiers?</span>
+  → Managed runtime, deployment slots, auto-scale
+  → No OS patching, no agent management
+  → Scale: would use AKS for microservices at enterprise scale
+
+<span class="c-cmt">Why private endpoints on SQL and API?</span>
+  → Traffic never leaves Azure backbone
+  → No public internet exposure for data tier
+  → Scale: same pattern, add Azure Firewall in hub for east-west inspection
+
+<span class="c-cmt">Why serverless SQL tier?</span>
+  → Pauses when idle — zero compute cost during lab off-hours
+  → Scale: General Purpose or Business Critical for production SLA
+
+<span class="c-cmt">Why Key Vault references instead of app settings?</span>
+  → Secrets never appear in portal, deployment logs, or git history
+  → Centralised rotation — update KV secret, all apps get new value on restart
+  → Scale: same pattern, add certificate management for TLS
+
+<span class="c-cmt">Why system-assigned over user-assigned managed identity?</span>
+  → Lifecycle tied to resource — identity deleted with resource
+  → Scale: user-assigned identity when multiple services share the same identity
+           or when identity must exist before the resource (e.g. AKS node pools)</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio items — ostebovik.net (capstone)</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Full architecture diagram showing all tiers, network boundaries, and data flows</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>GitHub repo: main.bicep + all modules — clean, commented, CAF naming throughout</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Bicep what-if output showing planned deployment before execution</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Portal screenshot: all resources deployed, all Key Vault references resolved (green)</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Working web app URL serving content end-to-end through all three tiers</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Private endpoint configuration showing SQL and API with no public access</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span>Log Analytics workbook showing metrics from all three tiers in one view</li>
+        <li class="portfolio-item"><span class="port-check" onclick="check(this)"></span><strong>Design decisions write-up</strong> — why each choice was made and what changes at scale</li>
+      </ul>
+    </div>
+    <div class="warn-strip">&#9888; Cost: App Service P0v3 x2 ~$82/mo combined. Azure SQL serverless pauses when idle — minimal cost. App Gateway ~$0.007/hr. Deploy for the lab duration then tear down. Teardown order: SQL → private endpoints → API tier → web tier → App Gateway → networking.</div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="copyPrompt('Generate the complete Bicep capstone deployment for AZ-104 Phase 4: main.bicep orchestrating modules for networking (VNet 4 subnets, NSGs, App Gateway, private DNS), keyvault, web-tier (App Service + staging slot), api-tier (App Service + private endpoint), data-tier (Azure SQL serverless + private endpoint), and monitoring (diagnostic settings + alerts). Use CAF naming, managed identity, Key Vault references, westus3, rg-az104-dev-wus3-01.')"><span class="btn-arrow">↗</span> Copy full capstone Bicep prompt</button>
+      <button class="btn" onclick="copyPrompt('Generate an SVG architecture diagram for AZ-104 Phase 4 capstone showing Application Gateway fronting web tier App Service with VNet integration to API tier App Service via private endpoint to Azure SQL Database, all secrets in Key Vault accessed via managed identity, diagnostics flowing to Log Analytics workspace, for ostebovik.net portfolio')"><span class="btn-arrow">↗</span> Copy capstone diagram prompt</button>
+      <button class="btn" onclick="copyPrompt('Write the AZ-104 Phase 4 capstone design decisions document covering: why App Service over VMs, why private endpoints on SQL and API tier, why serverless SQL, why Key Vault references over app settings, why system-assigned over user-assigned managed identity. Include what would change at production scale for each decision.')"><span class="btn-arrow">↗</span> Copy design decisions prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PHASE 4 SUMMARY
+════════════════════════════════ -->
+<div class="summary-card">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">When you finish Phase 4</div>
+  <div class="summary-grid">
+    <div class="mini-cell"><div class="mini-label">AZ-104 coverage</div><div class="mini-val" style="color:var(--purple-lt);">~100% cumulative</div></div>
+    <div class="mini-cell"><div class="mini-label">Phase 4 cost</div><div class="mini-val" style="color:var(--amber-lt);">$40–60 total</div></div>
+    <div class="mini-cell"><div class="mini-label">Portfolio items added</div><div class="mini-val" style="color:var(--green-lt);">~25 items</div></div>
+    <div class="mini-cell"><div class="mini-label">Next step</div><div class="mini-val">Exam + portfolio site</div></div>
+  </div>
+  <div style="font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:16px;">
+    Teardown order: SQL private endpoint → SQL server → API private endpoint → API App Service → Web App Service → App Service Plans → App Gateway → Bastion → VNets → Container Apps → ACR → Key Vault (purge after soft-delete period) → Log Analytics → Resource group.
+  </div>
+  <div style="font-size:13px;color:var(--purple-lt);font-family:var(--mono);margin-bottom:16px;">
+    Remember: az group delete will fail if Key Vault still has soft-deleted secrets. Run az keyvault purge first, or wait 7 days for automatic purge.
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="copyPrompt('Give me the Phase 4 teardown script to safely delete all resources from Projects 11 through 15 in the correct dependency order, including purging Key Vault soft-deleted secrets before resource group deletion')"><span class="btn-arrow">↗</span> Copy teardown prompt</button>
+    <button class="btn" onclick="copyPrompt('I have completed AZ-104 Phases 1 through 4. Help me build the ostebovik.net portfolio site as a static HTML page hosted on Azure Static Web Apps, with phase cards containing project summaries, architecture diagrams, deployment scripts, and write-ups. Include GitHub Actions CI/CD for automatic deployment on commit.')"><span class="btn-arrow">↗</span> Copy portfolio site prompt</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+function toggle(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.cli-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyPrompt(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const note = document.createElement('div');
+    note.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#6b21a8;color:#fff;padding:10px 18px;border-radius:8px;font-family:monospace;font-size:12px;z-index:9999;';
+    note.textContent = 'Prompt copied — paste into Claude';
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 2500);
+  });
+}
+
+function check(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+  el.closest('.portfolio-item').style.opacity = el.classList.contains('checked') ? '0.5' : '1';
+  saveChecks();
+}
+
+// Notes system with localStorage
+function addNote() {
+  const input = document.getElementById('noteInput');
+  const tag = document.getElementById('noteTag').value;
+  const text = input.value.trim();
+  if (!text) return;
+
+  const item = document.createElement('div');
+  item.className = 'note-item';
+  item.innerHTML = `<span class="note-tag tag-${tag}">${tag}</span>${text} <span style="margin-left:auto;color:var(--text3);font-size:11px;cursor:pointer;font-family:var(--mono);" onclick="this.parentElement.remove();saveNotes()">✕</span>`;
+  document.getElementById('notesList').appendChild(item);
+  input.value = '';
+  saveNotes();
+}
+
+document.getElementById('noteInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') addNote();
+});
+
+function saveNotes() {
+  const notes = [];
+  document.querySelectorAll('#notesList .note-item').forEach(item => {
+    const tag = item.querySelector('.note-tag')?.className.replace('note-tag tag-','') || 'key';
+    const text = item.childNodes[1]?.textContent?.trim() || item.textContent.trim();
+    if (text) notes.push({ tag, text });
+  });
+  try { localStorage.setItem('az104-phase4-notes', JSON.stringify(notes)); } catch(e) {}
+}
+
+function loadNotes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('az104-phase4-notes') || '[]');
+    if (saved.length === 0) return;
+    // append saved notes below defaults
+    saved.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'note-item';
+      item.innerHTML = `<span class="note-tag tag-${n.tag}">${n.tag}</span>${n.text} <span style="margin-left:auto;color:var(--text3);font-size:11px;cursor:pointer;font-family:var(--mono);" onclick="this.parentElement.remove();saveNotes()">✕</span>`;
+      document.getElementById('notesList').appendChild(item);
+    });
+  } catch(e) {}
+}
+
+function saveChecks() {
+  const checks = {};
+  document.querySelectorAll('.port-check').forEach((el, i) => {
+    checks[i] = el.classList.contains('checked');
+  });
+  try { localStorage.setItem('az104-phase4-checks', JSON.stringify(checks)); } catch(e) {}
+}
+
+function loadChecks() {
+  try {
+    const checks = JSON.parse(localStorage.getItem('az104-phase4-checks') || '{}');
+    document.querySelectorAll('.port-check').forEach((el, i) => {
+      if (checks[i]) {
+        el.classList.add('checked');
+        el.textContent = '✓';
+        el.closest('.portfolio-item').style.opacity = '0.5';
+      }
+    });
+  } catch(e) {}
+}
+
+// Open prereq and first project by default
+document.getElementById('prereq').classList.add('open');
+document.getElementById('p11').classList.add('open');
+
+// Load persisted state
+loadNotes();
+loadChecks();
+</script>
+</body>
+</html>

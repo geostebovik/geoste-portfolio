@@ -1,0 +1,307 @@
+<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Azure Hub-Spoke VNet Topology — Project 3</title>
+  <desc>Architecture diagram showing vnet-hub and vnet-spoke connected via VNet peering. vnet-hub contains AzureBastionSubnet and snet-shared. vnet-spoke contains snet-web with nsg-web and snet-db with nsg-db. A test VM sits in snet-web and a hub test VM sits in snet-shared. Internet traffic enters through NSG boundaries.</desc>
+
+  <defs>
+    <!-- Arrow markers -->
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#378ADD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-blue-rev" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M9 1L1 5L9 9" fill="none" stroke="#378ADD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#107c10" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#b35c00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#c40f0f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="125%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000018"/>
+    </filter>
+
+    <!-- Subtle grid pattern for VNet backgrounds -->
+    <pattern id="grid-blue" width="12" height="12" patternUnits="userSpaceOnUse">
+      <path d="M12 0H0V12" fill="none" stroke="#378ADD" stroke-width="0.3" opacity="0.25"/>
+    </pattern>
+    <pattern id="grid-teal" width="12" height="12" patternUnits="userSpaceOnUse">
+      <path d="M12 0H0V12" fill="none" stroke="#0a7e6e" stroke-width="0.3" opacity="0.25"/>
+    </pattern>
+
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .vnet-label  { font-size:13px; font-weight:600; }
+      .subnet-label{ font-size:11px; font-weight:500; }
+      .cidr        { font-size:10px; font-family: "SF Mono", "Fira Mono", monospace; }
+      .nsg-label   { font-size:10px; font-weight:500; }
+      .vm-label    { font-size:10px; font-weight:500; }
+      .vm-ip       { font-size:9px;  font-family: "SF Mono", "Fira Mono", monospace; }
+      .flow-label  { font-size:10px; font-weight:500; }
+      .legend-txt  { font-size:11px; }
+      .section-tag { font-size:9px;  font-weight:600; letter-spacing:.08em; }
+    </style>
+  </defs>
+
+  <!-- ── BACKGROUND ── -->
+  <rect width="900" height="640" fill="#f7f6f2"/>
+
+  <!-- ── TITLE ── -->
+  <text x="450" y="30" text-anchor="middle" style="font-size:15px;font-weight:600;fill:#1a1a18;">Azure Hub-Spoke Network Topology — Project 3</text>
+  <text x="450" y="48" text-anchor="middle" style="font-size:11px;fill:#6b6b64;">vnet-hub (10.0.0.0/16) peered with vnet-spoke (10.1.0.0/16)</text>
+
+  <!-- ═══════════════════════════════════════════════
+       INTERNET CLOUD
+  ═══════════════════════════════════════════════ -->
+  <g transform="translate(388,64)">
+    <!-- Cloud shape -->
+    <ellipse cx="62" cy="28" rx="58" ry="22" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="34" cy="32" rx="30" ry="16" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <ellipse cx="88" cy="32" rx="26" ry="14" fill="#e8e8e4" stroke="#b4b2a9" stroke-width="1"/>
+    <rect x="10" y="30" width="104" height="16" fill="#e8e8e4"/>
+    <text x="62" y="38" text-anchor="middle" style="font-size:12px;font-weight:600;fill:#3d3d38;">Internet</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════
+       VNET-HUB  (left column)
+  ═══════════════════════════════════════════════ -->
+
+  <!-- Hub VNet outer border -->
+  <rect x="38" y="120" width="310" height="450" rx="14"
+        fill="url(#grid-blue)" stroke="#185FA5" stroke-width="1.5"
+        filter="url(#shadow)"/>
+  <rect x="38" y="120" width="310" height="450" rx="14"
+        fill="#E6F1FB" fill-opacity="0.55" stroke="none"/>
+  <rect x="38" y="120" width="310" height="32" rx="14" fill="#185FA5"/>
+  <rect x="38" y="138" width="310" height="14" fill="#185FA5"/>
+  <text x="56" y="140" class="vnet-label" fill="#ffffff">vnet-hub</text>
+  <text x="56" y="155" class="cidr" fill="#aed4f5">10.0.0.0/16  ·  East US</text>
+  <text x="330" y="140" text-anchor="end" class="section-tag" fill="#aed4f5">HUB</text>
+
+  <!-- ── AzureBastionSubnet ── -->
+  <rect x="58" y="168" width="270" height="108" rx="9"
+        fill="#ffffff" fill-opacity="0.7" stroke="#0072c6" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="72" y="186" class="subnet-label" fill="#0072c6">AzureBastionSubnet</text>
+  <text x="72" y="200" class="cidr" fill="#378ADD">10.0.2.0/26  ·  /26 minimum required</text>
+
+  <!-- Bastion icon box -->
+  <rect x="72" y="210" width="230" height="52" rx="7" fill="#E6F1FB" stroke="#0072c6" stroke-width="0.75"/>
+  <!-- Shield icon -->
+  <g transform="translate(86,222)">
+    <path d="M10 0L20 4V11C20 16 14 20 10 22C6 20 0 16 0 11V4Z" fill="#0072c6" opacity="0.15" stroke="#0072c6" stroke-width="1.2"/>
+    <path d="M6 11L9 14L14 9" fill="none" stroke="#0072c6" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <text x="116" y="232" class="vm-label" fill="#185FA5">Azure Bastion (Basic SKU)</text>
+  <text x="116" y="246" class="vm-ip" fill="#378ADD">Browser-based RDP/SSH · No public IP on VMs</text>
+  <text x="116" y="257" class="vm-ip" fill="#378ADD">pip-bastion → HTTPS 443 inbound only</text>
+
+  <!-- ── snet-shared ── -->
+  <rect x="58" y="292" width="270" height="152" rx="9"
+        fill="#ffffff" fill-opacity="0.7" stroke="#185FA5" stroke-width="1"/>
+  <text x="72" y="310" class="subnet-label" fill="#185FA5">snet-shared</text>
+  <text x="72" y="324" class="cidr" fill="#378ADD">10.0.1.0/24  ·  Shared services subnet</text>
+
+  <!-- Hub test VM -->
+  <rect x="72" y="334" width="230" height="56" rx="7" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.75"/>
+  <!-- VM icon -->
+  <g transform="translate(84,344)">
+    <rect x="0" y="0" width="22" height="16" rx="2" fill="#185FA5" opacity="0.2" stroke="#185FA5" stroke-width="1"/>
+    <rect x="3" y="3" width="16" height="10" rx="1" fill="#185FA5" opacity="0.4"/>
+    <rect x="8" y="16" width="6" height="3" fill="#185FA5" opacity="0.4"/>
+    <rect x="5" y="19" width="12" height="2" rx="1" fill="#185FA5" opacity="0.4"/>
+  </g>
+  <text x="116" y="354" class="vm-label" fill="#185FA5">vm-hub-test</text>
+  <text x="116" y="367" class="vm-ip" fill="#378ADD">Ubuntu 22.04 LTS · Standard_B1s</text>
+  <text x="116" y="378" class="vm-ip" fill="#378ADD">Private IP: 10.0.1.4</text>
+
+  <!-- Note about shared services -->
+  <rect x="72" y="398" width="230" height="34" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.5"/>
+  <text x="86" y="413" class="vm-ip" fill="#1d4ed8">Production use: DNS forwarders,</text>
+  <text x="86" y="425" class="vm-ip" fill="#1d4ed8">NVAs, management jump hosts</text>
+
+  <!-- ── No NSG label for hub ── -->
+  <text x="193" y="464" text-anchor="middle" class="nsg-label" fill="#6b6b64">No NSG on hub subnets in this lab</text>
+  <text x="193" y="477" text-anchor="middle" style="font-size:9px;fill:#9ca3a0;">(Bastion manages its own security)</text>
+
+  <!-- ═══════════════════════════════════════════════
+       VNET PEERING  (center)
+  ═══════════════════════════════════════════════ -->
+
+  <!-- Peering connector background pill -->
+  <rect x="355" y="295" width="190" height="60" rx="30" fill="#fff" stroke="#378ADD" stroke-width="1" filter="url(#shadow)"/>
+
+  <!-- Bidirectional arrows -->
+  <line x1="348" y1="318" x2="452" y2="318" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="452" y1="330" x2="348" y2="330" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arr-blue-rev)"/>
+
+  <text x="450" y="312" text-anchor="middle" style="font-size:11px;font-weight:600;fill:#185FA5;">VNet Peering</text>
+  <text x="450" y="326" text-anchor="middle" class="cidr" fill="#378ADD">hub-to-spoke</text>
+  <text x="450" y="340" text-anchor="middle" class="cidr" fill="#378ADD">spoke-to-hub</text>
+  <text x="450" y="354" text-anchor="middle" style="font-size:9px;fill:#6b6b64;">FullyInSync · Connected</text>
+
+  <!-- Peering lines to VNets -->
+  <line x1="348" y1="324" x2="355" y2="324" stroke="#378ADD" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="545" y1="324" x2="552" y2="324" stroke="#378ADD" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- ═══════════════════════════════════════════════
+       VNET-SPOKE  (right column)
+  ═══════════════════════════════════════════════ -->
+
+  <!-- Spoke VNet outer border -->
+  <rect x="552" y="120" width="310" height="450" rx="14"
+        fill="url(#grid-teal)" stroke="#0a7e6e" stroke-width="1.5"
+        filter="url(#shadow)"/>
+  <rect x="552" y="120" width="310" height="450" rx="14"
+        fill="#e6f5f3" fill-opacity="0.55" stroke="none"/>
+  <rect x="552" y="120" width="310" height="32" rx="14" fill="#0a7e6e"/>
+  <rect x="552" y="138" width="310" height="14" fill="#0a7e6e"/>
+  <text x="570" y="140" class="vnet-label" fill="#ffffff">vnet-spoke</text>
+  <text x="570" y="155" class="cidr" fill="#a7d8d0">10.1.0.0/16  ·  East US</text>
+  <text x="844" y="140" text-anchor="end" class="section-tag" fill="#a7d8d0">SPOKE</text>
+
+  <!-- ── NSG-WEB boundary ── -->
+  <!-- NSG shield indicator -->
+  <rect x="572" y="165" width="272" height="200" rx="9"
+        fill="#fff7ed" stroke="#b35c00" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- NSG badge -->
+  <rect x="572" y="158" width="70" height="16" rx="8" fill="#b35c00"/>
+  <text x="607" y="170" text-anchor="middle" class="nsg-label" fill="#ffffff">nsg-web</text>
+
+  <!-- snet-web inner -->
+  <rect x="582" y="178" width="252" height="177" rx="7"
+        fill="#ffffff" fill-opacity="0.8" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="596" y="196" class="subnet-label" fill="#0a7e6e">snet-web</text>
+  <text x="596" y="210" class="cidr" fill="#0a7e6e">10.1.1.0/24  ·  Web tier</text>
+
+  <!-- Web VM -->
+  <rect x="596" y="218" width="224" height="62" rx="7" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="0.75"/>
+  <g transform="translate(608,228)">
+    <rect x="0" y="0" width="22" height="16" rx="2" fill="#0a7e6e" opacity="0.2" stroke="#0a7e6e" stroke-width="1"/>
+    <rect x="3" y="3" width="16" height="10" rx="1" fill="#0a7e6e" opacity="0.4"/>
+    <rect x="8" y="16" width="6" height="3" fill="#0a7e6e" opacity="0.4"/>
+    <rect x="5" y="19" width="12" height="2" rx="1" fill="#0a7e6e" opacity="0.4"/>
+  </g>
+  <text x="640" y="238" class="vm-label" fill="#085041">vm-spoke-web</text>
+  <text x="640" y="251" class="vm-ip" fill="#0a7e6e">Ubuntu 22.04 LTS · Standard_B1s</text>
+  <text x="640" y="262" class="vm-ip" fill="#0a7e6e">Private IP: 10.1.1.4 · No public IP</text>
+  <text x="640" y="273" class="vm-ip" fill="#0a7e6e">Access via Bastion only</text>
+
+  <!-- NSG rule summary for web -->
+  <rect x="596" y="288" width="224" height="58" rx="6" fill="#fff7ed" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="608" y="302" class="nsg-label" fill="#92400e">NSG Rules (nsg-web):</text>
+  <text x="608" y="315" class="vm-ip" fill="#78350f">✓ Allow TCP 80 inbound (Any → Any) p.100</text>
+  <text x="608" y="326" class="vm-ip" fill="#78350f">✓ Allow TCP 443 inbound (Any → Any) p.110</text>
+  <text x="608" y="337" class="vm-ip" fill="#78350f">✓ Allow VirtualNetwork inbound p.150</text>
+  <text x="608" y="347" class="vm-ip" fill="#c0392b">✗ Deny TCP 3389 from Internet p.200</text>
+
+  <!-- ── NSG-DB boundary ── -->
+  <rect x="572" y="378" width="272" height="178" rx="9"
+        fill="#fef2f2" stroke="#c40f0f" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- NSG badge -->
+  <rect x="572" y="371" width="62" height="16" rx="8" fill="#c40f0f"/>
+  <text x="603" y="383" text-anchor="middle" class="nsg-label" fill="#ffffff">nsg-db</text>
+
+  <!-- snet-db inner -->
+  <rect x="582" y="391" width="252" height="155" rx="7"
+        fill="#ffffff" fill-opacity="0.8" stroke="#7f1d1d" stroke-width="1"/>
+  <text x="596" y="409" class="subnet-label" fill="#7f1d1d">snet-db</text>
+  <text x="596" y="423" class="cidr" fill="#7f1d1d">10.1.2.0/24  ·  Database tier</text>
+
+  <!-- DB placeholder -->
+  <rect x="596" y="431" width="224" height="46" rx="7" fill="#fef2f2" stroke="#7f1d1d" stroke-width="0.75" stroke-dasharray="4 2"/>
+  <!-- DB cylinder icon -->
+  <g transform="translate(609,441)">
+    <ellipse cx="10" cy="4" rx="10" ry="4" fill="#7f1d1d" opacity="0.2" stroke="#7f1d1d" stroke-width="1"/>
+    <rect x="0" y="4" width="20" height="14" fill="#7f1d1d" opacity="0.1"/>
+    <rect x="0" y="4" width="20" height="14" fill="none" stroke="#7f1d1d" stroke-width="1"/>
+    <ellipse cx="10" cy="18" rx="10" ry="4" fill="#7f1d1d" opacity="0.15" stroke="#7f1d1d" stroke-width="1"/>
+  </g>
+  <text x="640" y="451" class="vm-label" fill="#7f1d1d">DB VM (not deployed in lab)</text>
+  <text x="640" y="464" class="vm-ip" fill="#7f1d1d">Reserved for Phase 3 compute lab</text>
+  <text x="640" y="472" class="vm-ip" fill="#9ca3a0">10.1.2.4 when deployed</text>
+
+  <!-- NSG rule summary for db -->
+  <rect x="596" y="484" width="224" height="50" rx="6" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.5"/>
+  <text x="608" y="498" class="nsg-label" fill="#7f1d1d">NSG Rules (nsg-db):</text>
+  <text x="608" y="511" class="vm-ip" fill="#78350f">✓ Allow TCP 1433 from 10.1.1.0/24 only p.100</text>
+  <text x="608" y="522" class="vm-ip" fill="#78350f">✓ Allow VirtualNetwork inbound p.150</text>
+  <text x="608" y="532" class="vm-ip" fill="#c0392b">✗ Deny all Internet inbound p.4000</text>
+
+  <!-- ═══════════════════════════════════════════════
+       INTERNET TRAFFIC FLOWS
+  ═══════════════════════════════════════════════ -->
+
+  <!-- Internet → Bastion (allowed HTTPS) -->
+  <line x1="450" y1="112" x2="193" y2="168" stroke="#107c10" stroke-width="1.5"
+        stroke-dasharray="6 3" marker-end="url(#arr-green)"/>
+  <rect x="270" y="118" width="112" height="16" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="326" y="130" text-anchor="middle" class="flow-label" fill="#166534">✓ HTTPS 443 → Bastion</text>
+
+  <!-- Internet → snet-web (HTTP/HTTPS allowed) -->
+  <line x1="476" y1="112" x2="708" y2="178" stroke="#107c10" stroke-width="1.5"
+        stroke-dasharray="6 3" marker-end="url(#arr-green)"/>
+  <rect x="514" y="118" width="130" height="16" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="0.5"/>
+  <text x="579" y="130" text-anchor="middle" class="flow-label" fill="#166534">✓ HTTP/HTTPS → snet-web</text>
+
+  <!-- Internet → snet-db (DENIED) -->
+  <line x1="490" y1="112" x2="780" y2="371" stroke="#c40f0f" stroke-width="1.5"
+        stroke-dasharray="4 3" marker-end="url(#arr-red)" opacity="0.7"/>
+  <rect x="620" y="220" width="116" height="16" rx="8" fill="#fee2e2" stroke="#fca5a5" stroke-width="0.5"/>
+  <text x="678" y="232" text-anchor="middle" class="flow-label" fill="#991b1b">✗ Internet → snet-db</text>
+
+  <!-- Bastion → VM SSH flow -->
+  <line x1="193" y1="262" x2="193" y2="334" stroke="#0072c6" stroke-width="1.5"
+        stroke-dasharray="4 2" marker-end="url(#arr-blue)" opacity="0.8"/>
+  <text x="205" y="303" class="vm-ip" fill="#0072c6">SSH via</text>
+  <text x="205" y="314" class="vm-ip" fill="#0072c6">Bastion</text>
+
+  <!-- Bastion cross-peering to spoke VM (via peering) -->
+  <path d="M 305 240 Q 450 190 596 240" fill="none" stroke="#0072c6" stroke-width="1"
+        stroke-dasharray="4 3" marker-end="url(#arr-blue)" opacity="0.6"/>
+  <text x="450" y="210" text-anchor="middle" class="vm-ip" fill="#0072c6">Bastion → vm-spoke-web (via peering)</text>
+
+  <!-- DB only reachable from web subnet arrow -->
+  <line x1="708" y1="355" x2="708" y2="431" stroke="#b35c00" stroke-width="1.5"
+        stroke-dasharray="4 2" marker-end="url(#arr-orange)"/>
+  <text x="720" y="396" class="vm-ip" fill="#92400e">SQL 1433</text>
+  <text x="720" y="407" class="vm-ip" fill="#92400e">only from</text>
+  <text x="720" y="418" class="vm-ip" fill="#92400e">10.1.1.0/24</text>
+
+  <!-- ═══════════════════════════════════════════════
+       LEGEND
+  ═══════════════════════════════════════════════ -->
+  <rect x="38" y="582" width="824" height="46" rx="8" fill="#ffffff" stroke="#d4d3cc" stroke-width="0.75"/>
+
+  <!-- Legend items -->
+  <rect x="54" y="596" width="14" height="10" rx="2" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+  <text x="74" y="605" class="legend-txt" fill="#3d3d38">Hub VNet</text>
+
+  <rect x="154" y="596" width="14" height="10" rx="2" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="174" y="605" class="legend-txt" fill="#3d3d38">Spoke VNet</text>
+
+  <rect x="264" y="596" width="14" height="10" rx="2" fill="#fff7ed" stroke="#b35c00" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="284" y="605" class="legend-txt" fill="#3d3d38">NSG boundary</text>
+
+  <line x1="394" y1="601" x2="416" y2="601" stroke="#107c10" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <text x="422" y="605" class="legend-txt" fill="#3d3d38">Allowed traffic</text>
+
+  <line x1="524" y1="601" x2="546" y2="601" stroke="#c40f0f" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="552" y="605" class="legend-txt" fill="#3d3d38">Denied traffic</text>
+
+  <line x1="644" y1="601" x2="666" y2="601" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="672" y="605" class="legend-txt" fill="#3d3d38">VNet peering / Bastion</text>
+
+  <!-- Second legend row -->
+  <rect x="54" y="611" width="14" height="10" rx="2" fill="#e6f5f3" stroke="#0a7e6e" stroke-width="1"/>
+  <text x="74" y="620" class="legend-txt" fill="#6b6b64">Subnet</text>
+
+  <rect x="154" y="611" width="14" height="10" rx="2" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.75"/>
+  <text x="174" y="620" class="legend-txt" fill="#6b6b64">VM resource</text>
+
+  <text x="284" y="620" class="legend-txt" fill="#6b6b64">Address spaces: hub 10.0.0.0/16 · spoke 10.1.0.0/16 · no overlap</text>
+
+</svg>

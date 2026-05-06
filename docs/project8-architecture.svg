@@ -1,0 +1,148 @@
+<svg width="100%" viewBox="0 0 680 660" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <title>AZ-104 Phase 3 Project 8 — App Service &amp; Container Instance Architecture</title>
+  <desc>Architecture showing App Service Plan containing a web app with production and staging deployment slots, plus a separate Azure Container Instance running nginx, all within rg-az104-dev-wus3-01.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text  { font-family: Segoe UI, system-ui, sans-serif; }
+      .caption   { font-size: 11px; fill: #9a9890; }
+      .lbl-main  { font-size: 13px; font-weight: 500; }
+      .lbl-sub   { font-size: 11px; }
+      .lbl-mono  { font-size: 10px; font-family: Consolas, monospace; }
+      .conn      { stroke: #b4b2a9; stroke-width: 0.5; fill: none; }
+      .conn-dash { stroke: #b4b2a9; stroke-width: 0.5; fill: none; stroke-dasharray: 4 3; }
+
+      .box-rg    { fill: #f1efe8; stroke: #888780; }
+      .box-asp   { fill: #e6f1fb; stroke: #185fa5; }
+      .box-app   { fill: #d3d1c7; stroke: #5f5e5a; }
+      .box-prod  { fill: #eaf3de; stroke: #3b6d11; }
+      .box-stag  { fill: #faeeda; stroke: #854f0b; }
+      .box-aci   { fill: #faece7; stroke: #993c1d; }
+      .box-pol   { fill: #eeedfe; stroke: #534ab7; }
+      .box-user  { fill: #f1efe8; stroke: #5f5e5a; }
+
+      .txt-rg    { fill: #2c2c2a; }
+      .txt-asp   { fill: #0c447c; }
+      .txt-app   { fill: #2c2c2a; }
+      .txt-prod  { fill: #27500a; }
+      .txt-stag  { fill: #633806; }
+      .txt-aci   { fill: #712b13; }
+      .txt-pol   { fill: #3c3489; }
+      .txt-muted { fill: #6b6860; }
+      .txt-mono  { fill: #5f5e5a; font-family: Consolas, monospace; font-size: 10px; }
+    </style>
+  </defs>
+
+  <text x="340" y="18" text-anchor="middle" class="caption">AZ-104 · Phase 3 · Project 8 · West US 3</text>
+
+  <!-- Resource Group -->
+  <rect x="30" y="28" width="620" height="570" rx="16" class="box-rg" stroke-width="0.5"/>
+  <text x="52" y="52" class="lbl-main txt-rg">rg-az104-dev-wus3-01</text>
+  <text x="52" y="67" class="lbl-sub txt-muted">resource group · West US 3</text>
+
+  <!-- Policy badge -->
+  <rect x="460" y="36" width="178" height="38" rx="8" class="box-pol" stroke-width="0.5"/>
+  <text x="549" y="52" text-anchor="middle" class="lbl-main txt-pol">10 policies assigned</text>
+  <text x="549" y="66" text-anchor="middle" class="lbl-sub txt-pol">require tags · locations · App Service</text>
+
+  <!-- ── APP SERVICE PLAN ── -->
+  <rect x="50" y="86" width="380" height="420" rx="12" class="box-asp" stroke-width="0.5"/>
+  <text x="70" y="110" class="lbl-main txt-asp">asp-az104-dev-wus3-01</text>
+  <text x="70" y="125" class="lbl-sub txt-asp">App Service Plan · Linux · P0v3 · ~$41/mo</text>
+
+  <!-- Web App container -->
+  <rect x="70" y="138" width="340" height="348" rx="8" class="box-app" stroke-width="0.5"/>
+  <text x="240" y="160" text-anchor="middle" class="lbl-main txt-app">app-az104-dev-wus3-01</text>
+  <text x="240" y="175" text-anchor="middle" class="lbl-sub txt-muted">Web App · Python 3.11 · Linux · HTTPS only</text>
+
+  <!-- Managed identity badge -->
+  <rect x="88" y="182" width="140" height="28" rx="6" class="box-pol" stroke-width="0.5"/>
+  <text x="158" y="200" text-anchor="middle" class="lbl-sub txt-pol">system managed identity</text>
+
+  <!-- App settings -->
+  <rect x="238" y="182" width="154" height="28" rx="6" class="box-pol" stroke-width="0.5"/>
+  <text x="315" y="200" text-anchor="middle" class="lbl-sub txt-pol">app settings · env vars</text>
+
+  <!-- Production slot -->
+  <rect x="88" y="224" width="300" height="112" rx="8" class="box-prod" stroke-width="0.5"/>
+  <text x="238" y="246" text-anchor="middle" class="lbl-main txt-prod">production slot</text>
+  <text x="238" y="261" text-anchor="middle" class="lbl-sub txt-prod">ENVIRONMENT=production · version 1 → version 2 after swap</text>
+  <rect x="104" y="272" width="268" height="22" rx="4" fill="#c0dd97" stroke="#3b6d11" stroke-width="0.5"/>
+  <text x="238" y="287" text-anchor="middle" class="txt-mono txt-prod">app-az104-dev-wus3-01-c8azd6d...azurewebsites.net</text>
+  <rect x="104" y="300" width="128" height="22" rx="4" fill="#c0dd97" stroke="#3b6d11" stroke-width="0.5"/>
+  <text x="168" y="315" text-anchor="middle" class="lbl-sub txt-prod">gunicorn · Flask</text>
+  <rect x="240" y="300" width="132" height="22" rx="4" fill="#c0dd97" stroke="#3b6d11" stroke-width="0.5"/>
+  <text x="306" y="315" text-anchor="middle" class="lbl-sub txt-prod">zip deploy · Kudu</text>
+
+  <!-- Swap arrow -->
+  <text x="238" y="356" text-anchor="middle" class="lbl-sub txt-muted">⟷ slot swap — zero downtime, instant rollback</text>
+
+  <!-- Staging slot -->
+  <rect x="88" y="366" width="300" height="100" rx="8" class="box-stag" stroke-width="0.5"/>
+  <text x="238" y="388" text-anchor="middle" class="lbl-main txt-stag">staging slot</text>
+  <text x="238" y="403" text-anchor="middle" class="lbl-sub txt-stag">ENVIRONMENT=staging · version 2 before swap</text>
+  <rect x="104" y="412" width="268" height="22" rx="4" fill="#fac775" stroke="#854f0b" stroke-width="0.5"/>
+  <text x="238" y="427" text-anchor="middle" class="txt-mono txt-stag">app-az104-dev-wus3-01-staging-...azurewebsites.net</text>
+  <rect x="104" y="440" width="128" height="22" rx="4" fill="#fac775" stroke="#854f0b" stroke-width="0.5"/>
+  <text x="168" y="455" text-anchor="middle" class="lbl-sub txt-stag">isolated traffic</text>
+  <rect x="240" y="440" width="132" height="22" rx="4" fill="#fac775" stroke="#854f0b" stroke-width="0.5"/>
+  <text x="306" y="455" text-anchor="middle" class="lbl-sub txt-stag">pre-production test</text>
+
+  <!-- Startup command note -->
+  <rect x="88" y="474" width="300" height="22" rx="4" fill="#b5d4f4" stroke="#185fa5" stroke-width="0.5"/>
+  <text x="238" y="489" text-anchor="middle" class="txt-mono txt-asp">startup: gunicorn --bind=0.0.0.0 --timeout 600 app:app</text>
+
+  <!-- ── CONTAINER INSTANCE ── -->
+  <rect x="450" y="86" width="200" height="200" rx="12" class="box-aci" stroke-width="0.5"/>
+  <text x="550" y="110" text-anchor="middle" class="lbl-main txt-aci">aci-az104-dev-wus3-01</text>
+  <text x="550" y="125" text-anchor="middle" class="lbl-sub txt-aci">Container Instance</text>
+
+  <rect x="468" y="136" width="164" height="36" rx="6" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="550" y="152" text-anchor="middle" class="lbl-main txt-aci">nginx:latest</text>
+  <text x="550" y="166" text-anchor="middle" class="lbl-sub txt-aci">Docker Hub · public image</text>
+
+  <rect x="468" y="180" width="164" height="22" rx="4" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="550" y="195" text-anchor="middle" class="lbl-sub txt-aci">CPU: 1 · Memory: 1.5 GB</text>
+
+  <rect x="468" y="210" width="164" height="22" rx="4" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="550" y="225" text-anchor="middle" class="lbl-sub txt-aci">OS: Linux · port 80</text>
+
+  <rect x="468" y="240" width="164" height="22" rx="4" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="550" y="255" text-anchor="middle" class="txt-mono txt-aci">aci-az104-ostebovik</text>
+
+  <rect x="468" y="268" width="164" height="14" rx="4" fill="#f5c4b3" stroke="#993c1d" stroke-width="0.5"/>
+  <text x="550" y="279" text-anchor="middle" class="txt-mono txt-aci">.westus3.azurecontainer.io</text>
+
+  <!-- Comparison callout -->
+  <rect x="450" y="298" width="200" height="130" rx="8" fill="#faf8f3" stroke="#d3d1c7" stroke-width="0.5"/>
+  <text x="550" y="317" text-anchor="middle" class="lbl-sub txt-muted">vs App Service</text>
+  <line x1="466" y1="323" x2="634" y2="323" stroke="#d3d1c7" stroke-width="0.5"/>
+  <text x="466" y="338" class="lbl-sub txt-prod">✓  pay per second</text>
+  <text x="466" y="354" class="lbl-sub txt-prod">✓  no plan needed</text>
+  <text x="466" y="370" class="lbl-sub txt-prod">✓  seconds to start</text>
+  <text x="466" y="386" class="lbl-sub txt-aci">✗  no slots/swap</text>
+  <text x="466" y="402" class="lbl-sub txt-aci">✗  no auto-scale</text>
+  <text x="466" y="418" class="lbl-sub txt-aci">✗  no managed TLS</text>
+
+  <!-- Users -->
+  <rect x="50" y="526" width="130" height="44" rx="8" class="box-user" stroke-width="0.5"/>
+  <text x="115" y="544" text-anchor="middle" class="lbl-main txt-app">Users</text>
+  <text x="115" y="559" text-anchor="middle" class="lbl-sub txt-muted">HTTPS · port 443</text>
+
+  <rect x="500" y="526" width="130" height="44" rx="8" class="box-user" stroke-width="0.5"/>
+  <text x="565" y="544" text-anchor="middle" class="lbl-main txt-app">Users</text>
+  <text x="565" y="559" text-anchor="middle" class="lbl-sub txt-muted">HTTP · port 80</text>
+
+  <!-- Connectors -->
+  <line x1="115" y1="526" x2="160" y2="470" class="conn" marker-end="url(#arrow)"/>
+  <line x1="565" y1="526" x2="565" y2="430" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- Dashed separator between ASP and ACI -->
+  <line x1="440" y1="120" x2="440" y2="440" class="conn-dash"/>
+  <text x="440" y="450" text-anchor="middle" class="caption">independent resources</text>
+
+  <text x="340" y="642" text-anchor="middle" class="caption">ostebovik.net · AZ-104 Phase 3 · Project 8</text>
+</svg>
