@@ -15,7 +15,7 @@ RG="rg-geoste-prod-wus3-01"
 LOC="westus3"
 DEPLOYMENT_NAME="portfolio-$(date +%Y%m%d-%H%M)"
 KV_NAME="kv-geoste-prod-wus3-01"
-# ST_NAME="stgeostewus301"
+ST_NAME="stgeostewus301"
 
 echo "=============================================="
 echo " ostebovik.net Portfolio — Bootstrap"
@@ -45,18 +45,28 @@ echo "    Resource group ready."
 echo ""
 echo "==> Checking globally unique resource names..."
 
-KV_CHECK=$(az keyvault check-name --name $KV_NAME --query nameAvailable -o tsv)
-# ST_CHECK=$(az storage account check-name --name $ST_NAME --query nameAvailable -o tsv)
+ST_EXISTS=$(az storage account show --name $ST_NAME \
+  --query "name" -o tsv 2>/dev/null)
+KV_EXISTS=$(az keyvault show --name $KV_NAME \
+  --query "name" -o tsv 2>/dev/null)
 
-if [[ "$KV_CHECK" != "true" ]]; then
-  echo "ERROR: Key Vault name '$KV_NAME' is not available. Update prod.bicepparam."
-  exit 1
+if [[ -z "$ST_EXISTS" ]]; then
+  ST_CHECK=$(az storage account check-name --name $ST_NAME \
+    --query nameAvailable -o tsv)
+  if [[ "$ST_CHECK" != "true" ]]; then
+    echo "ERROR: Storage name '$ST_NAME' is taken by another account."
+    exit 1
+  fi
 fi
 
-# if [[ "$ST_CHECK" != "true" ]]; then
-#  echo "ERROR: Storage account name '$ST_NAME' is not available. Update prod.bicepparam."
-#  exit 1
-# fi
+if [[ -z "$KV_EXISTS" ]]; then
+  KV_CHECK=$(az keyvault check-name --name $KV_NAME \
+    --query nameAvailable -o tsv)
+  if [[ "$KV_CHECK" != "true" ]]; then
+    echo "ERROR: KV name '$KV_NAME' is taken by another account."
+    exit 1
+  fi
+fi
 
 echo "    All names available."
 
