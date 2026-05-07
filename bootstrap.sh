@@ -15,7 +15,7 @@ RG="rg-geoste-prod-wus3-01"
 LOC="westus3"
 DEPLOYMENT_NAME="portfolio-$(date +%Y%m%d-%H%M)"
 KV_NAME="kv-geoste-prod-wus3-01"
-ST_NAME="stgeostewus301"
+# ST_NAME="stgeostewus301"
 
 echo "=============================================="
 echo " ostebovik.net Portfolio — Bootstrap"
@@ -46,7 +46,7 @@ echo ""
 echo "==> Checking globally unique resource names..."
 
 KV_CHECK=$(az keyvault check-name --name $KV_NAME --query nameAvailable -o tsv)
-ST_CHECK=$(az storage account check-name --name $ST_NAME --query nameAvailable -o tsv)
+# ST_CHECK=$(az storage account check-name --name $ST_NAME --query nameAvailable -o tsv)
 
 if [[ "$KV_CHECK" != "true" ]]; then
   echo "ERROR: Key Vault name '$KV_NAME' is not available. Update prod.bicepparam."
