@@ -5,7 +5,7 @@
 // =============================================================================
 
 param staticWebAppName string
-param location string
+param swaLocation string
 param tags object
 param githubRepoUrl string
 param githubBranch string
@@ -20,21 +20,21 @@ param appInsightsInstrumentationKey string
 // outputLocation: build output folder — '.' means output is at root (no build step)
 resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   name: staticWebAppName
-  location: location
+  location: swaLocation
   tags: tags
   sku: {
-    name: 'Standard'    // Required for custom domain support
+    name: 'Standard' // Required for custom domain support
     tier: 'Standard'
   }
   properties: {
     repositoryUrl: githubRepoUrl
     branch: githubBranch
     buildProperties: {
-      appLocation: '/'          // Root of repo
-      outputLocation: '.'       // No build step — static HTML/MD served directly
-      skipGithubActionWorkflowGeneration: false  // Auto-generate GitHub Actions workflow
+      appLocation: '/' // Root of repo
+      outputLocation: '.' // No build step — static HTML/MD served directly
+      skipGithubActionWorkflowGeneration: false // Auto-generate GitHub Actions workflow
     }
-    stagingEnvironmentPolicy: 'Enabled'   // Allows PR preview environments
+    stagingEnvironmentPolicy: 'Enabled' // Allows PR preview environments
   }
 }
 

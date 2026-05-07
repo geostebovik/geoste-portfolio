@@ -14,6 +14,8 @@ set -e  # exit on first error
 RG="rg-ostebovik-prod-wus3-01"
 LOC="westus3"
 DEPLOYMENT_NAME="portfolio-$(date +%Y%m%d-%H%M)"
+KV_NAME="kv-geost-prod-wus3-01"
+ST_NAME="stgeostwus301"
 
 echo "=============================================="
 echo " ostebovik.net Portfolio — Bootstrap"
@@ -38,6 +40,25 @@ az group create \
     project=portfolio
 
 echo "    Resource group ready."
+
+# --- Preflight: check globally unique resource names ----------------------
+echo ""
+echo "==> Checking globally unique resource names..."
+
+KV_CHECK=$(az keyvault check-name --name $KV_NAME --query nameAvailable -o tsv)
+ST_CHECK=$(az storage account check-name --name $ST_NAME --query nameAvailable -o tsv)
+
+if [[ "$KV_CHECK" != "true" ]]; then
+  echo "ERROR: Key Vault name '$KV_NAME' is not available. Update prod.bicepparam."
+  exit 1
+fi
+
+if [[ "$ST_CHECK" != "true" ]]; then
+  echo "ERROR: Storage account name '$ST_NAME' is not available. Update prod.bicepparam."
+  exit 1
+fi
+
+echo "    All names available."
 
 # --- Step 2: What-if (dry run) -----------------------------------------------
 # Always run what-if before deploying. Review the output before proceeding.
