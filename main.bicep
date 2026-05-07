@@ -7,9 +7,9 @@
 targetScope = 'resourceGroup'
 
 // --- Parameters --------------------------------------------------------------
-param environment string
+// param environment string
 param location string = resourceGroup().location
-param appName string
+// param appName string
 param tags object
 
 // Resource names — passed in from param file, enforces CAF naming
@@ -100,7 +100,6 @@ module frontdoor 'modules/frontdoor.bicep' = {
   name: 'deploy-frontdoor'
   params: {
     frontDoorName: frontDoorName
-    location: location
     tags: tags
     customDomain: customDomain
     staticWebAppHostname: staticwebapp.outputs.defaultHostname
