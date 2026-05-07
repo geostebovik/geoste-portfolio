@@ -14,7 +14,7 @@ param swaLocation = 'westus2'
 // --- Tags --------------------------------------------------------------------
 // Applied to all resources via modules
 param tags = {
-  owner: 'ostebovik'
+  owner: 'geoste'
   env: 'prod'
   region: 'wus3'
   project: 'portfolio'

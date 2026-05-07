@@ -11,7 +11,7 @@
 set -e  # exit on first error
 
 # --- Configuration -----------------------------------------------------------
-RG="rg-ostebovik-prod-wus3-01"
+RG="rg-geoste-prod-wus3-01"
 LOC="westus3"
 DEPLOYMENT_NAME="portfolio-$(date +%Y%m%d-%H%M)"
 KV_NAME="kv-geoste-prod-wus3-01"
@@ -33,7 +33,7 @@ az group create \
   --name $RG \
   --location $LOC \
   --tags \
-    owner=ostebovik \
+    owner=geoste \
     env=prod \
     region=wus3 \
     managed-by=bicep \
