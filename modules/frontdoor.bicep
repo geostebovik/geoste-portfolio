@@ -79,6 +79,10 @@ resource endpoint 'Microsoft.Cdn/profiles/afdEndpoints@2023-05-01' = {
 resource route 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
   parent: endpoint
   name: 'route-portfolio'
+  dependsOn: [
+    // Ensure origin group is created before the route
+    origin
+  ]
   properties: {
     originGroup: {
       id: originGroup.id
