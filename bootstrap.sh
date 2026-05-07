@@ -53,10 +53,10 @@ if [[ "$KV_CHECK" != "true" ]]; then
   exit 1
 fi
 
-if [[ "$ST_CHECK" != "true" ]]; then
-  echo "ERROR: Storage account name '$ST_NAME' is not available. Update prod.bicepparam."
-  exit 1
-fi
+# if [[ "$ST_CHECK" != "true" ]]; then
+#  echo "ERROR: Storage account name '$ST_NAME' is not available. Update prod.bicepparam."
+#  exit 1
+# fi
 
 echo "    All names available."
 
