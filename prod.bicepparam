@@ -23,8 +23,8 @@ param tags = {
 
 // --- Resource Names (CAF standard) ------------------------------------------
 param staticWebAppName = 'swa-prod-wus3-01'
-param storageAccountName = 'stgeostwus301' // must be globally unique, 3-24 chars, lowercase letters and numbers only
-param keyVaultName = 'kv-geost-prod-wus3-01'
+param storageAccountName = 'stgeostewus301' // must be globally unique, 3-24 chars, lowercase letters and numbers only
+param keyVaultName = 'kv-geoste-prod-wus3-01'
 param logAnalyticsName = 'law-prod-wus3-01'
 param appInsightsName = 'appi-prod-wus3-01'
 param frontDoorName = 'afd-prod-wus3-01'

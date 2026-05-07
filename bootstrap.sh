@@ -14,8 +14,8 @@ set -e  # exit on first error
 RG="rg-ostebovik-prod-wus3-01"
 LOC="westus3"
 DEPLOYMENT_NAME="portfolio-$(date +%Y%m%d-%H%M)"
-KV_NAME="kv-geost-prod-wus3-01"
-ST_NAME="stgeostwus301"
+KV_NAME="kv-geoste-prod-wus3-01"
+ST_NAME="stgeostewus301"
 
 echo "=============================================="
 echo " ostebovik.net Portfolio — Bootstrap"
