@@ -1,13 +1,826 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <title>AZ-104 Project 12</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerard Ostebovik — Azure Cloud Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --black-soft: #111111;
+      --black-card: #161616;
+      --black-border: #222222;
+      --orange: #FD5A1E;
+      --orange-dim: rgba(253, 90, 30, 0.15);
+      --orange-glow: rgba(253, 90, 30, 0.06);
+      --cream: #EFE4B0;
+      --cream-dim: rgba(239, 228, 176, 0.7);
+      --cream-muted: rgba(239, 228, 176, 0.35);
+      --white: #f5f0e8;
+      --muted: #5a5a5a;
+      --muted-light: #888;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body: 'Barlow', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--black-border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--orange);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--orange);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(253, 90, 30, 0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: 'AZURE';
+      position: absolute;
+      bottom: -20px;
+      right: -10px;
+      font-family: var(--font-display);
+      font-size: clamp(120px, 18vw, 240px);
+      font-weight: 800;
+      color: rgba(253, 90, 30, 0.04);
+      letter-spacing: -0.02em;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 8vw, 112px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.35s;
+    }
+
+    .hero-name span {
+      color: var(--orange);
+      display: block;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-body);
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 300;
+      color: var(--cream-dim);
+      max-width: 560px;
+      line-height: 1.5;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.5s;
+    }
+
+    .hero-tagline strong {
+      color: var(--cream);
+      font-weight: 500;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.65s;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--orange);
+      color: var(--black);
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--cream);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--cream-dim);
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--black-border);
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      transform: translateY(-2px);
+    }
+
+    /* ── Section structure ── */
+    section {
+      padding: 100px 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--orange);
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--cream);
+      line-height: 1;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--black-border);
+      margin-left: 20px;
+    }
+
+    /* ── Skills grid ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2px;
+    }
+
+    .skill-card {
+      background: var(--black-card);
+      padding: 40px;
+      border: 1px solid var(--black-border);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: default;
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--orange);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .skill-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .skill-card:hover {
+      background: #1a1a1a;
+      border-color: #333;
+    }
+
+    .skill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid var(--black-border);
+      margin-bottom: 20px;
+    }
+
+    .skill-badge-text {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+    }
+
+    .skill-badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .skill-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .skill-desc {
+      font-size: 13px;
+      color: var(--muted-light);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--orange);
+      background: var(--orange-dim);
+      padding: 3px 8px;
+      border: 1px solid rgba(253, 90, 30, 0.2);
+    }
+
+    .skill-link {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .skill-link::after {
+      content: '→';
+      transition: transform 0.2s;
+    }
+
+    .skill-link:hover {
+      color: var(--orange);
+    }
+
+    .skill-link:hover::after {
+      transform: translateX(4px);
+    }
+
+    .skill-card.coming-soon {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .skill-card.coming-soon:hover {
+      background: var(--black-card);
+    }
+
+    .skill-card.coming-soon:hover::before {
+      transform: scaleX(0);
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      background: var(--black-card);
+      border-top: 1px solid var(--black-border);
+      border-bottom: 1px solid var(--black-border);
+      padding: 40px 48px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+
+    .stat {
+      padding: 0 40px;
+      border-right: 1px solid var(--black-border);
+    }
+
+    .stat:first-child {
+      padding-left: 0;
+    }
+
+    .stat:last-child {
+      border-right: none;
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--orange);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+    }
+
+    /* ── About strip ── */
+    .about-strip {
+      padding: 80px 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      border-top: 1px solid var(--black-border);
+    }
+
+    .about-heading {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--cream);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+    }
+
+    .about-heading em {
+      color: var(--orange);
+      font-style: normal;
+      display: block;
+    }
+
+    .about-body {
+      font-size: 15px;
+      color: var(--cream-muted);
+      line-height: 1.8;
+    }
+
+    .about-body p+p {
+      margin-top: 16px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 40px 48px;
+      border-top: 1px solid var(--black-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-left span {
+      color: var(--orange);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--orange);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav {
+        padding: 16px 24px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero,
+      section {
+        padding: 100px 24px 60px;
+      }
+
+      .stats-bar {
+        grid-template-columns: 1fr 1fr;
+        padding: 32px 24px;
+        gap: 32px;
+      }
+
+      .stat {
+        border-right: none;
+        padding: 0;
+      }
+
+      .about-strip {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 60px 24px;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 16px;
+        padding: 32px 24px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Placeholder for final project deployment</h1>
-  <p>GitHub deployed.</p>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="/" class="nav-logo">G<span>.</span>Ostebovik</a>
+    <ul class="nav-links">
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-eyebrow">Azure Cloud Portfolio · AZ-104</p>
+    <h1 class="hero-name">
+      Gerard
+      <span>Ostebovik</span>
+    </h1>
+    <p class="hero-tagline">
+      From billing support to <strong>building production-grade cloud infrastructure on Azure</strong> — one real
+      deployment at a time.
+    </p>
+    <div class="hero-cta">
+      <a href="#skills" class="btn-primary">View my work</a>
+      <a href="https://github.com/geostebovik/geoste-portfolio" target="_blank" class="btn-secondary">GitHub →</a>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat reveal">
+      <div class="stat-number">14</div>
+      <div class="stat-label">Projects deployed</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-number">4</div>
+      <div class="stat-label">Azure skill domains</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-number">40+</div>
+      <div class="stat-label">Resources in production</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-number">1</div>
+      <div class="stat-label">Certification in progress</div>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <section id="skills">
+    <div class="section-header">
+      <span class="section-label">01</span>
+      <h2 class="section-title">Skill Domains</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="skills-grid">
+
+      <!-- Identity & Governance -->
+      <div class="skill-card reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">IaaS · PaaS Foundation</span>
+        </div>
+        <h3 class="skill-title">Identity &amp;<br>Governance</h3>
+        <p class="skill-desc">Role-based access control, Entra ID configuration, Azure Policy enforcement, and
+          Management Group hierarchy — the security and compliance layer everything else runs on.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">RBAC</span>
+          <span class="skill-tag">Entra ID</span>
+          <span class="skill-tag">Azure Policy</span>
+          <span class="skill-tag">Zero Trust</span>
+          <span class="skill-tag">Management Groups</span>
+        </div>
+        <a href="#" class="skill-link">View projects</a>
+      </div>
+
+      <!-- Networking -->
+      <div class="skill-card reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">IaaS</span>
+        </div>
+        <h3 class="skill-title">Networking</h3>
+        <p class="skill-desc">Hub-spoke VNet architecture, NSG design, load balancing, private endpoints, DNS,
+          Application Gateway with WAF, and Bastion — production network topology built from scratch.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">VNet</span>
+          <span class="skill-tag">NSG</span>
+          <span class="skill-tag">Private Endpoints</span>
+          <span class="skill-tag">App Gateway</span>
+          <span class="skill-tag">WAF</span>
+          <span class="skill-tag">Bastion</span>
+        </div>
+        <a href="#" class="skill-link">View projects</a>
+      </div>
+
+      <!-- Compute & Storage -->
+      <div class="skill-card reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">IaaS · PaaS</span>
+        </div>
+        <h3 class="skill-title">Compute &amp;<br>Storage</h3>
+        <p class="skill-desc">Windows and Linux VMs, App Service, Container Registry and Container Apps, blob storage,
+          backup, and site recovery — the full compute and data tier.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Virtual Machines</span>
+          <span class="skill-tag">App Service</span>
+          <span class="skill-tag">Container Apps</span>
+          <span class="skill-tag">ACR</span>
+          <span class="skill-tag">Blob Storage</span>
+        </div>
+        <a href="#" class="skill-link">View projects</a>
+      </div>
+
+      <!-- Infrastructure as Code -->
+      <div class="skill-card reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">IaC</span>
+        </div>
+        <h3 class="skill-title">Infrastructure<br>as Code</h3>
+        <p class="skill-desc">Modular Bicep deployments, Key Vault with managed identity for zero-credential
+          architecture, CI/CD pipelines, and parameterized multi-environment deployments.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Bicep</span>
+          <span class="skill-tag">Key Vault</span>
+          <span class="skill-tag">Managed Identity</span>
+          <span class="skill-tag">CI/CD</span>
+          <span class="skill-tag">GitHub Actions</span>
+        </div>
+        <a href="#" class="skill-link">View projects</a>
+      </div>
+
+      <!-- Monitoring & Security -->
+      <div class="skill-card reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">PaaS</span>
+        </div>
+        <h3 class="skill-title">Monitoring &amp;<br>Security</h3>
+        <p class="skill-desc">Log Analytics workspaces, KQL queries, Application Insights, diagnostic settings,
+          Microsoft Defender for Cloud, and alert rules — full observability across the stack.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Log Analytics</span>
+          <span class="skill-tag">KQL</span>
+          <span class="skill-tag">App Insights</span>
+          <span class="skill-tag">Defender</span>
+          <span class="skill-tag">DCR</span>
+        </div>
+        <a href="#" class="skill-link">View projects</a>
+      </div>
+
+      <!-- AI & Automation — coming soon -->
+      <div class="skill-card coming-soon reveal">
+        <div class="skill-badge">
+          <div class="skill-badge-dot"></div>
+          <span class="skill-badge-text">PaaS · AI</span>
+        </div>
+        <h3 class="skill-title">AI &amp;<br>Automation</h3>
+        <p class="skill-desc">Azure OpenAI, AI-integrated monitoring, Copilot-assisted infrastructure, and intelligent
+          automation pipelines. Coming next.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Azure OpenAI</span>
+          <span class="skill-tag">Copilot</span>
+          <span class="skill-tag">Automation</span>
+        </div>
+        <span class="skill-link" style="cursor:default">Coming soon</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- About -->
+  <div class="about-strip" id="about">
+    <div>
+      <h2 class="about-heading">
+        Real work.<br>
+        Real Azure.<br>
+        <em>Real results.</em>
+      </h2>
+    </div>
+    <div class="about-body reveal">
+      <p>This portfolio documents a deliberate journey through Azure infrastructure — not tutorials, not sandboxes, but
+        production-pattern deployments built from scratch using Azure CLI, Bicep, and GitHub Actions.</p>
+      <p>Every project here reflects a real architectural decision: why this service over that one, what the tradeoffs
+        are at scale, and what I would do differently next time. The lessons learned sections are honest.</p>
+      <p>Currently pursuing the <strong style="color:var(--cream)">AZ-104 Microsoft Certified: Azure Administrator
+          Associate</strong> certification, with Security and Identity specializations planned next.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+      ostebovik<span>.net</span> · Built on Azure · Deployed via Bicep
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a>
+      <a href="www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank">LinkedIn</a>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
 </body>
 
 </html>
