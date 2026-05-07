@@ -4,7 +4,6 @@
 // =============================================================================
 
 param frontDoorName string
-param location string = 'global' // Front Door is always global
 param tags object
 param customDomain string // ostebovik.net
 param staticWebAppHostname string // *.azurestaticapps.net — the origin

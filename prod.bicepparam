@@ -7,9 +7,9 @@
 using './main.bicep'
 
 // --- Environment -------------------------------------------------------------
-param environment = 'prod'
+// param environment = 'prod'
 param location = 'westus3'
-param appName = 'ostebovik'
+// param appName = 'ostebovik'
 
 // --- Tags --------------------------------------------------------------------
 // Applied to all resources via modules
@@ -23,7 +23,7 @@ param tags = {
 
 // --- Resource Names (CAF standard) ------------------------------------------
 param staticWebAppName = 'swa-prod-wus3-01'
-param storageAccountName = 'stprodwus301'
+param storageAccountName = 'stgeostwus301' // must be globally unique, 3-24 chars, lowercase letters and numbers only
 param keyVaultName = 'kv-prod-wus3-01'
 param logAnalyticsName = 'law-prod-wus3-01'
 param appInsightsName = 'appi-prod-wus3-01'
