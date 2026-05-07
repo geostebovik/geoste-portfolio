@@ -9,6 +9,7 @@ targetScope = 'resourceGroup'
 // --- Parameters --------------------------------------------------------------
 // param environment string
 param location string = resourceGroup().location
+param swaLocation string
 // param appName string
 param tags object
 
@@ -82,7 +83,7 @@ module staticwebapp 'modules/staticwebapp.bicep' = {
   name: 'deploy-staticwebapp'
   params: {
     staticWebAppName: staticWebAppName
-    location: location
+    swaLocation: swaLocation
     tags: tags
     githubRepoUrl: githubRepoUrl
     githubBranch: githubBranch
