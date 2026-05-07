@@ -39,5 +39,4 @@ param customDomain = 'ostebovik.net'
 // --- Key Vault Admin ---------------------------------------------------------
 // Your Entra ID object ID — grants you Secrets Officer role at deploy time
 // Find it: az ad signed-in-user show --query id -o tsv
-// Fill this in before deploying — do not leave as empty string
-param kvAdminObjectId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59' // <-- YOU MUST FILL THIS IN
+param kvAdminObjectId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'
