@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Whiteboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f5f2eb;
+    --paper:    #faf8f3;
+    --ink:      #2a2820;
+    --muted:    #7a7568;
+    --faint:    #e8e4da;
+    --rule:     #d8d4c8;
+    --blue:     #2a5caa;
+    --green:    #2a7a4a;
+    --amber:    #a06010;
+    --red:      #9a2a2a;
+    --teal:     #1a6a6a;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── layout ── */
+  .board {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 28px 40px;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+  }
+  header h1 { font-size: 18px; font-weight: 500; letter-spacing: 0.03em; }
+  header .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ── card ── */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 16px 18px;
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+  .card.blue::before   { background: var(--blue); }
+  .card.green::before  { background: var(--green); }
+  .card.amber::before  { background: var(--amber); }
+  .card.teal::before   { background: var(--teal); }
+  .card.red::before    { background: var(--red); }
+  .card.ink::before    { background: var(--ink); }
+
+  .card-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── naming formula ── */
+  .formula {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--faint);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+  .formula .seg-type  { color: var(--blue); }
+  .formula .seg-work  { color: var(--green); }
+  .formula .seg-env   { color: var(--amber); }
+  .formula .seg-reg   { color: var(--red); }
+  .formula .seg-inst  { color: var(--muted); }
+  .formula .sep       { color: var(--rule); }
+
+  .seg-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+  .seg-item { font-size: 12px; }
+  .seg-item .label { color: var(--muted); font-size: 11px; }
+  .seg-item code { font-family: var(--mono); font-size: 11px; }
+
+  /* ── tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 8px 6px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  td {
+    padding: 5px 8px 5px 0;
+    border-bottom: 1px solid var(--faint);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  .abbr { font-family: var(--mono); color: var(--blue); font-size: 11px; font-weight: 500; }
+  .ex   { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .warn { font-size: 11px; color: var(--red); }
+
+  /* ── examples strip ── */
+  .ex-strip { display: flex; flex-direction: column; gap: 6px; }
+  .ex-line { font-family: var(--mono); font-size: 12px; padding: 6px 10px; background: var(--faint); border-radius: 2px; display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .ex-line .t { color: var(--blue); }
+  .ex-line .w { color: var(--green); }
+  .ex-line .e { color: var(--amber); }
+  .ex-line .r { color: var(--red); }
+  .ex-line .i { color: var(--muted); }
+  .ex-line .d { color: var(--rule); }
+  .ex-line .desc { margin-left: auto; font-size: 10px; color: var(--muted); font-family: var(--sans); }
+
+  /* ── notes / scratch area ── */
+  .scratch {
+    width: 100%;
+    min-height: 120px;
+    border: 1px dashed var(--rule);
+    border-radius: 2px;
+    background: transparent;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+    padding: 10px 12px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.7;
+  }
+  .scratch::placeholder { color: var(--rule); }
+  .scratch:focus { border-color: var(--muted); }
+
+  /* ── rules list ── */
+  .rules { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .rules li { font-size: 12px; line-height: 1.5; padding-left: 14px; position: relative; }
+  .rules li::before { content: '—'; position: absolute; left: 0; color: var(--muted); }
+  .rules li strong { font-weight: 500; }
+
+  /* ── lab context ── */
+  .ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .ctx-item { background: var(--faint); padding: 8px 10px; border-radius: 2px; }
+  .ctx-item .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .ctx-item .v { font-family: var(--mono); font-size: 13px; font-weight: 500; margin-top: 2px; }
+
+  /* ── span helpers ── */
+  .span2 { grid-column: span 2; }
+  .span3 { grid-column: span 3; }
+
+  /* ── editable hint ── */
+  .edit-hint { font-size: 10px; color: var(--muted); text-align: right; margin-top: 20px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="board">
+
+  <header>
+    <h1>Azure naming &amp; conventions whiteboard</h1>
+    <span class="meta">ostebovik.net &nbsp;·&nbsp; Phase 3 &nbsp;·&nbsp; open in browser, pin tab to second monitor</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- naming formula -->
+    <div class="card blue span3">
+      <div class="card-title">CAF naming formula</div>
+      <div class="formula">
+        <span class="seg-type">{type}</span><span class="sep">-</span><span class="seg-work">{workload}</span><span class="sep">-</span><span class="seg-env">{env}</span><span class="sep">-</span><span class="seg-reg">{region}</span><span class="sep">-</span><span class="seg-inst">{instance}</span>
+      </div>
+      <div class="seg-list">
+        <div class="seg-item"><span class="label">type &nbsp;&nbsp;</span> <code style="color:var(--blue)">vm / vnet / rg / st / nsg</code> — always first, enables filtering</div>
+        <div class="seg-item"><span class="label">env &nbsp;&nbsp;&nbsp;</span> <code style="color:var(--amber)">prod / dev / test / stg</code></div>
+        <div class="seg-item"><span class="label">workload</span> <code style="color:var(--green)">hub / spoke / web / az104</code> — what this resource serves</div>
+        <div class="seg-item"><span class="label">region &nbsp;</span> <code style="color:var(--red)">eus / wus / eus2 / neu / weu</code></div>
+        <div class="seg-item"><span class="label">instance</span> <code style="color:var(--muted)">01 / 02</code> — zero-padded, always include</div>
+        <div class="seg-item"><span class="warn">storage: no hyphens — concatenate: staz104devwus301</span></div>
+      </div>
+    </div>
+
+    <!-- resource abbreviations -->
+    <div class="card blue">
+      <div class="card-title">Resource type abbreviations</div>
+      <table>
+        <thead><tr><th>Resource</th><th>Abbr</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Resource group</td>          <td class="abbr">rg</td>    <td></td></tr>
+          <tr><td>Virtual network</td>         <td class="abbr">vnet</td>  <td></td></tr>
+          <tr><td>Subnet</td>                  <td class="abbr">snet</td>  <td></td></tr>
+          <tr><td>NSG</td>                     <td class="abbr">nsg</td>   <td></td></tr>
+          <tr><td>VM (Windows)</td>            <td class="abbr">vm</td>    <td class="warn">max 15 chars</td></tr>
+          <tr><td>Storage account</td>         <td class="abbr">st</td>    <td class="warn">no hyphens</td></tr>
+          <tr><td>Load balancer ext</td>       <td class="abbr">lbe</td>   <td></td></tr>
+          <tr><td>Load balancer int</td>       <td class="abbr">lbi</td>   <td></td></tr>
+          <tr><td>Public IP</td>               <td class="abbr">pip</td>   <td></td></tr>
+          <tr><td>Key vault</td>               <td class="abbr">kv</td>    <td></td></tr>
+          <tr><td>App service</td>             <td class="abbr">app</td>   <td></td></tr>
+          <tr><td>Recovery vault</td>          <td class="abbr">rsv</td>   <td></td></tr>
+          <tr><td>Private endpoint</td>        <td class="abbr">pep</td>   <td></td></tr>
+          <tr><td>Network interface</td>       <td class="abbr">nic</td>   <td></td></tr>
+          <tr><td>Disk (managed)</td>          <td class="abbr">disk</td>  <td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- live examples -->
+    <div class="card green">
+      <div class="card-title">Lab examples — Phase 3 (az104 / dev / wus3)</div>
+      <div class="ex-strip">
+        <div class="ex-line"><span class="t">rg</span><span class="d">-</span><span class="w">az104</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">resource group</span></div>
+        <div class="ex-line"><span class="t">vnet</span><span class="d">-</span><span class="w">hub</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">hub vnet</span></div>
+        <div class="ex-line"><span class="t">vnet</span><span class="d">-</span><span class="w">spoke</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">spoke vnet</span></div>
+        <div class="ex-line"><span class="t">vm</span><span class="d">-</span><span class="w">win</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="i">01</span><span class="desc">windows vm (15 char limit)</span></div>
+        <div class="ex-line"><span class="t">nsg</span><span class="d">-</span><span class="w">web</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">nsg</span></div>
+        <div class="ex-line"><span class="t">st</span><span class="w">az104</span><span class="e">dev</span><span class="r">wus3</span><span class="i">01</span><span class="desc">storage (no hyphens)</span></div>
+        <div class="ex-line"><span class="t">pip</span><span class="d">-</span><span class="w">web</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">public ip</span></div>
+        <div class="ex-line"><span class="t">kv</span><span class="d">-</span><span class="w">az104</span><span class="d">-</span><span class="e">dev</span><span class="d">-</span><span class="r">wus3</span><span class="d">-</span><span class="i">01</span><span class="desc">key vault</span></div>
+      </div>
+    </div>
+
+    <!-- rules -->
+    <div class="card amber">
+      <div class="card-title">Rules to remember</div>
+      <ul class="rules">
+        <li><strong>Type prefix always first</strong> — enables filtering in portal and CLI</li>
+        <li><strong>Lowercase, hyphens only</strong> — no underscores, no spaces</li>
+        <li><strong>Storage = no hyphens</strong> — concatenate all segments, lowercase only</li>
+        <li><strong>Windows VM = 15 char max</strong> — drop region or shorten workload</li>
+        <li><strong>prod stands out immediately</strong> — never abbreviate to p, use full word</li>
+        <li><strong>Always pad instance numbers</strong> — 01 not 1, so sorting works correctly</li>
+        <li><strong>Globally unique resources</strong> — kv, app, st need unique names across all of Azure, not just your sub</li>
+        <li><strong>Tags complement names</strong> — use tags for owner, cost-center, project; names for topology</li>
+      </ul>
+    </div>
+
+    <!-- lab context -->
+    <div class="card teal">
+      <div class="card-title">Lab context — Phase 3</div>
+      <div class="ctx-grid">
+        <div class="ctx-item"><div class="k">workload</div><div class="v">az104</div></div>
+        <div class="ctx-item"><div class="k">environment</div><div class="v">dev</div></div>
+        <div class="ctx-item"><div class="k">region</div><div class="v">wus3</div></div>
+        <div class="ctx-item"><div class="k">instance</div><div class="v">01</div></div>
+        <div class="ctx-item"><div class="k">subscription</div><div class="v">343a8a7e-9911-478d-b833-74110a11b3c2</div></div>
+        <div class="ctx-item"><div class="k">resource group</div><div class="v">rg-az104-dev-wus3-01</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="card-title" style="margin-bottom:6px">Region shortcodes</div>
+        <table>
+          <thead><tr><th>Region</th><th>Code</th><th>Region</th><th>Code</th></tr></thead>
+          <tbody>
+            <tr><td>East US</td><td class="abbr">eus</td><td>North Europe</td><td class="abbr">neu</td></tr>
+            <tr><td>East US 2</td><td class="abbr">eus2</td><td>West Europe</td><td class="abbr">weu</td></tr>
+            <tr><td>West US</td><td class="abbr">wus</td><td>UK South</td><td class="abbr">uks</td></tr>
+            <tr><td>West US 3</td><td class="abbr">wus3</td><td>Central US</td><td class="abbr">cus</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- scratch / notes -->
+    <div class="card ink span2">
+      <div class="card-title">Notes &amp; scratch — type here, it stays until you close the tab</div>
+      <textarea class="scratch" placeholder="paste commands, jot questions, track decisions...&#10;&#10;e.g. storage account for CSE scripts → staz104deveus01&#10;container name → scripts&#10;SAS token expires → 2025-xx-xx"></textarea>
+    </div>
+
+  </div>
+
+  <div class="edit-hint">to add a section permanently — open in text editor, duplicate a .card block &nbsp;·&nbsp; scratch area resets on tab close — paste keeper notes into a .txt file</div>
+
+</div>
+</body>
+</html>
