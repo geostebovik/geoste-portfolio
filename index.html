@@ -16,10 +16,10 @@
     --orange-dim: rgba(253, 90, 30, 0.15);
     --cream: #EFE4B0;
     --cream-dim: rgba(239, 228, 176, 0.7);
-    --cream-muted: rgba(239, 228, 176, 0.35);
+    --cream-muted: rgba(239, 228, 176, 0.65);
     --white: #f5f0e8;
-    --muted: #5a5a5a;
-    --muted-light: #888;
+    --muted: #888880;
+    --muted-light: #a8a49c;
     --font-display: 'Barlow Condensed', sans-serif;
     --font-body: 'Barlow', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
@@ -32,7 +32,7 @@
     background: var(--black);
     color: var(--white);
     font-family: var(--font-body);
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1.6;
     overflow-x: hidden;
   }
@@ -149,7 +149,7 @@
 
   .hero-tagline {
     font-size: clamp(14px, 1.4vw, 17px);
-    font-weight: 300;
+    font-weight: 400;
     color: var(--cream-dim);
     max-width: 420px;
     line-height: 1.6;
@@ -397,6 +397,20 @@
   .skill-card.coming-soon:hover { background: var(--black-card); }
   .skill-card.coming-soon:hover::before { transform: scaleX(0); }
 
+  .skill-link-soon {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 12px;
+    border: 1px solid var(--black-border);
+    cursor: default;
+    user-select: none;
+  }
+
   /* ── Footer ── */
   footer {
     padding: 40px 48px;
@@ -528,34 +542,34 @@
 
   <div class="skills-grid">
 
-    <div class="skill-card reveal">
+    <div class="skill-card coming-soon reveal">
       <div class="skill-badge"><div class="skill-badge-dot"></div><span class="skill-badge-text">IaaS · PaaS Foundation</span></div>
       <h3 class="skill-title">Identity &amp;<br>Governance</h3>
       <p class="skill-desc">Role-based access control, Entra ID configuration, Azure Policy enforcement, and Management Group hierarchy — the security and compliance layer everything else runs on.</p>
       <div class="skill-tags">
         <span class="skill-tag">RBAC</span><span class="skill-tag">Entra ID</span><span class="skill-tag">Azure Policy</span><span class="skill-tag">Zero Trust</span><span class="skill-tag">Management Groups</span>
       </div>
-      <a href="/az-104/identity-governance/" class="skill-link">View projects</a>
+      <span class="skill-link-soon">Coming soon</span>
     </div>
 
-    <div class="skill-card reveal">
+    <div class="skill-card coming-soon reveal">
       <div class="skill-badge"><div class="skill-badge-dot"></div><span class="skill-badge-text">IaaS</span></div>
       <h3 class="skill-title">Networking</h3>
       <p class="skill-desc">Hub-spoke VNet architecture, NSG design, load balancing, private endpoints, DNS, Application Gateway with WAF, and Bastion — production network topology built from scratch.</p>
       <div class="skill-tags">
         <span class="skill-tag">VNet</span><span class="skill-tag">NSG</span><span class="skill-tag">Private Endpoints</span><span class="skill-tag">App Gateway</span><span class="skill-tag">WAF</span><span class="skill-tag">Bastion</span>
       </div>
-      <a href="/az-104/networking/" class="skill-link">View projects</a>
+      <span class="skill-link-soon">Coming soon</span>
     </div>
 
-    <div class="skill-card reveal">
+    <div class="skill-card coming-soon reveal">
       <div class="skill-badge"><div class="skill-badge-dot"></div><span class="skill-badge-text">IaaS · PaaS</span></div>
       <h3 class="skill-title">Compute &amp;<br>Storage</h3>
       <p class="skill-desc">Windows and Linux VMs, App Service, Container Registry and Container Apps, blob storage, backup, and site recovery — the full compute and data tier.</p>
       <div class="skill-tags">
         <span class="skill-tag">Virtual Machines</span><span class="skill-tag">App Service</span><span class="skill-tag">Container Apps</span><span class="skill-tag">ACR</span><span class="skill-tag">Blob Storage</span>
       </div>
-      <a href="/az-104/compute-storage/" class="skill-link">View projects</a>
+      <span class="skill-link-soon">Coming soon</span>
     </div>
 
     <div class="skill-card reveal">
@@ -568,14 +582,14 @@
       <a href="/az-104/infrastructure-as-code/" class="skill-link">View projects</a>
     </div>
 
-    <div class="skill-card reveal">
+    <div class="skill-card coming-soon reveal">
       <div class="skill-badge"><div class="skill-badge-dot"></div><span class="skill-badge-text">PaaS</span></div>
       <h3 class="skill-title">Monitoring &amp;<br>Security</h3>
       <p class="skill-desc">Log Analytics workspaces, KQL queries, Application Insights, diagnostic settings, Microsoft Defender for Cloud, and alert rules — full observability across the stack.</p>
       <div class="skill-tags">
         <span class="skill-tag">Log Analytics</span><span class="skill-tag">KQL</span><span class="skill-tag">App Insights</span><span class="skill-tag">Defender</span><span class="skill-tag">DCR</span>
       </div>
-      <a href="/az-104/monitoring-security/" class="skill-link">View projects</a>
+      <span class="skill-link-soon">Coming soon</span>
     </div>
 
     <div class="skill-card coming-soon reveal">
