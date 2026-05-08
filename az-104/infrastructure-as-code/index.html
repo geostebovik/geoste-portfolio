@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infrastructure as Code — ostebovik.net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --black:       #0a0a0a;
+      --orange:      #FD5A1E;
+      --orange-dim:  #c44415;
+      --cream:       #EFE4B0;
+      --cream-dim:   #b8ad84;
+      --surface-1:   #111213;
+      --surface-2:   #16181c;
+      --surface-3:   #1e2128;
+      --surface-4:   #252830;
+      --border:      #2a2d35;
+      --border-lit:  #3a3d47;
+      --text-primary:   #e8e4d8;
+      --text-secondary: #a8a49c;
+      --text-dim:       #706c66;
+      --blue:   #4a9eff;
+      --teal:   #2dd4bf;
+      --amber:  #f59e0b;
+      --purple: #a78bfa;
+      --green:  #34d399;
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain overlay ─────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: var(--cream);
+    }
+
+    .nav-brand span { color: var(--orange); }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--orange); }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      padding: 140px 2rem 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 1px;
+      background: var(--orange);
+    }
+
+    .hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--orange);
+      display: block;
+    }
+
+    .hero-description {
+      max-width: 580px;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── Section layout ────────────────────────────────────────── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 80px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-number {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    /* ── Project cards ─────────────────────────────────────────── */
+    .project-grid {
+      display: grid;
+      gap: 1.5px;
+    }
+
+    .project-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .project-card:hover { border-color: var(--border-lit); }
+
+    .project-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.5rem 1.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .project-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--orange);
+      opacity: 0.25;
+      min-width: 3.5rem;
+      transition: opacity 0.2s;
+    }
+
+    .project-card:hover .project-num,
+    .project-card.open .project-num { opacity: 1; }
+
+    .project-meta { flex: 1; }
+
+    .project-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .tag-bicep    { background: rgba(74,158,255,0.12); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
+    .tag-containers { background: rgba(45,212,191,0.12); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
+    .tag-security { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+    .tag-capstone { background: rgba(253,90,30,0.12); color: var(--orange); border: 1px solid rgba(253,90,30,0.2); }
+
+    .project-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 0.3rem;
+    }
+
+    .project-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .project-toggle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      transition: color 0.2s, transform 0.3s;
+      display: inline-block;
+    }
+
+    .project-card.open .project-toggle { color: var(--orange); transform: rotate(180deg); }
+
+    /* ── Project body ──────────────────────────────────────────── */
+    .project-body {
+      display: none;
+      padding: 0 1.75rem 1.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .project-card.open .project-body { display: block; }
+
+    .project-body-inner {
+      padding-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .project-body-inner { grid-template-columns: 1fr; }
+    }
+
+    .body-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .body-text {
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Tech pill list ────────────────────────────────────────── */
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tech-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 2px;
+    }
+
+    /* ── Decision list ─────────────────────────────────────────── */
+    .decision-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .decision-list li {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .decision-list li::before {
+      content: '→';
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--orange);
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+    }
+
+    /* ── Code block ────────────────────────────────────────────── */
+    .code-block {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      color: var(--cream-dim);
+      white-space: pre;
+    }
+
+    .code-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.75rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+
+    /* ── Gotcha callout ────────────────────────────────────────── */
+    .gotcha {
+      background: rgba(253,90,30,0.06);
+      border: 1px solid rgba(253,90,30,0.2);
+      border-left: 3px solid var(--orange);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+    }
+
+    .gotcha-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.4rem;
+    }
+
+    .gotcha p {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Architecture diagram placeholder ──────────────────────── */
+    .diagram-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 1rem;
+    }
+
+    .diagram-link:hover { border-color: var(--orange); color: var(--orange); }
+
+    .diagram-link-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      color: var(--orange);
+    }
+
+    /* ── Module map ────────────────────────────────────────────── */
+    .module-map {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .module-box {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .module-box-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--blue);
+      margin-bottom: 0.25rem;
+    }
+
+    .module-box-desc {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Lessons learned strip ─────────────────────────────────── */
+    .lessons-strip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2rem 1.75rem;
+      margin-top: 1.5px;
+    }
+
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .lesson-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .lesson-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .lesson-body {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-brand span { color: var(--orange); }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--orange); }
+
+    /* ── Scroll reveal ─────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/az-104/identity-governance/">Identity</a></li>
+      <li><a href="/az-104/networking/">Networking</a></li>
+      <li><a href="/az-104/compute-storage/">Compute</a></li>
+      <li><a href="/az-104/infrastructure-as-code/" class="active">IaC</a></li>
+      <li><a href="/az-104/monitoring-security/">Monitoring</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">AZ-104 · Skill Domain</div>
+    <h1>Infrastructure<em>as Code</em></h1>
+    <p class="hero-description">
+      Modular Bicep templates, bootstrap patterns, container deployments,
+      secret management via Key Vault, and a production-grade portfolio site —
+      all built to CAF naming conventions with zero stored credentials.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-value">4</span>
+        <span class="stat-label">Projects</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">8</span>
+        <span class="stat-label">Bicep Modules</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">0</span>
+        <span class="stat-label">Stored Credentials</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">P11–P15</span>
+        <span class="stat-label">Phase 4</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Projects</h2>
+    </div>
+
+    <div class="project-grid">
+
+      <!-- P11 — Bicep -->
+      <div class="project-card reveal" id="p11">
+        <div class="project-header" onclick="toggleCard('p11')">
+          <div class="project-num">11</div>
+          <div class="project-meta">
+            <span class="project-tag tag-bicep">Bicep · IaC</span>
+            <div class="project-title">Modular Bicep Infrastructure</div>
+            <div class="project-subtitle">Bootstrap pattern · 8 modules · policy-enforced tags · secret injection via .bicepparam</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Replaced ad-hoc CLI scripts with a modular Bicep stack orchestrated by
+                <code>main.bicep</code>. A bootstrap shell script handles pre-flight
+                work that Bicep cannot — resource group creation, Key Vault secret seeding,
+                and subnet delegation — then hands off to Bicep for all infrastructure
+                resources. Every deploy is idempotent; <code>--what-if</code> runs before
+                every apply.
+              </p>
+
+              <div class="body-section-label">Module Structure</div>
+              <div class="module-map">
+                <div class="module-box">
+                  <div class="module-box-name">networking.bicep</div>
+                  <div class="module-box-desc">VNet, subnets, NSGs</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">vm-linux.bicep</div>
+                  <div class="module-box-desc">Ubuntu VM + NIC</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">vm-win.bicep</div>
+                  <div class="module-box-desc">Windows VM + NIC</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">storage.bicep</div>
+                  <div class="module-box-desc">Storage account</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">acr.bicep</div>
+                  <div class="module-box-desc">Container Registry</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">appgw.bicep</div>
+                  <div class="module-box-desc">Application Gateway</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">bastion.bicep</div>
+                  <div class="module-box-desc">Bastion + condition flag</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">ca.bicep / cae.bicep</div>
+                  <div class="module-box-desc">Container Apps</div>
+                </div>
+              </div>
+
+              <div class="code-block">
+                <div class="code-label">dev.bicepparam — secret injection</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>using 'main.bicep'
+
+param adminPassword = az.getSecret(
+  '343a8a7e-...',
+  'rg-az104-dev-wus3-01',
+  'kv-az104-dev-wus3-01',
+  'vm-admin-password'
+)
+
+param tags = {
+  env: 'dev'
+  owner: 'geoste'
+  managed-by: 'bicep'
+}</pre>
+              </div>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Bootstrap + Bicep split</strong> — Bootstrap handles what Bicep cannot: RG creation (Bicep can't create its own target RG), KV secret seeding, subnet delegation flags. Bicep owns all infrastructure resources.</li>
+                <li><strong>Secrets via getSecret(), never in templates</strong> — <code>.bicepparam</code> resolves secrets from Key Vault at deploy time. Credentials never appear in template files, parameter files, or CLI args.</li>
+                <li><strong>Policy-enforced tag inheritance</strong> — <code>require-tag-env</code> and <code>require-tag-owner</code> deny assignments on the RG. <code>inherit-tag-*</code> policies push tags from RG to all child resources automatically. Manual tagging is inconsistent and breaks.</li>
+                <li><strong>Bastion condition flag</strong> — <code>deployBastionHost bool</code> parameter controls whether the host deploys. Standard SKU costs ~$140/mo; delete between lab phases.</li>
+                <li><strong>guid() with stable inputs</strong> — Role assignment names use <code>guid()</code> seeded with static param values, not module outputs. Module outputs aren't known at deployment start.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Windows computerName limit</div>
+                <p>Azure resource names can be any valid length but Windows OS hostnames are hard-limited to 15 characters. <code>vm-win-dev-wus3-01</code> is 18 chars and fails at provisioning. Pass <code>computerName</code> as a separate explicit parameter — never rely on <code>take(vmName, 15)</code> for multi-VM deployments as it produces duplicate hostnames.</p>
+              </div>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — .bicepparam no interpolation</div>
+                <p>Cannot reference other parameters within the same <code>.bicepparam</code> file. <code>param tags = &#123; env: env &#125;</code> fails — use literals only.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Bicep</span>
+                <span class="tech-pill">Azure CLI</span>
+                <span class="tech-pill">Key Vault</span>
+                <span class="tech-pill">Azure Policy</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Bash</span>
+                <span class="tech-pill">PowerShell</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P12 — Container Apps -->
+      <div class="project-card reveal" id="p12">
+        <div class="project-header" onclick="toggleCard('p12')">
+          <div class="project-num">12</div>
+          <div class="project-meta">
+            <span class="project-tag tag-containers">Containers · ACR · ACA</span>
+            <div class="project-title">Container Apps Deployment</div>
+            <div class="project-subtitle">ACR · Container Apps Environment · blue/green traffic split · scale to zero</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Built a complete container delivery pipeline: images built and pushed to
+                Azure Container Registry, deployed via Bicep to an internal Container Apps
+                Environment on a delegated /23 subnet. Two image versions deployed
+                simultaneously with an 80/20 traffic split — demonstrating blue/green
+                rollout patterns without downtime. Scale-to-zero configured with
+                <code>minReplicas: 0</code>.
+              </p>
+
+              <div class="code-block">
+                <div class="code-label">Traffic split — CLI post-deploy</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>az containerapp ingress traffic set \
+  --name ca-dev-wus3-01 \
+  --resource-group rg-az104-dev-wus3-01 \
+  --revision-weight \
+    latest=80 \
+    ca-dev-wus3-01--v1=20</pre>
+              </div>
+
+              <div class="body-section-label">Architecture</div>
+              <p class="body-text">
+                Container Apps Environment sits on <code>snet-capp-dev-wus3-01</code>
+                (10.0.8.0/23, delegated to <code>Microsoft.App/environments</code>).
+                Internal ingress only — no public endpoint. ACR admin access disabled;
+                all pulls use AcrPull role on the managed identity.
+              </p>
+
+              <a class="diagram-link" href="../diagrams/project12-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project12-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>activeRevisionsMode: Multiple</strong> — required for traffic splitting between revisions. Single mode replaces the active revision on every deploy — no split possible.</li>
+                <li><strong>minReplicas: 0</strong> — scale to zero when idle. First request cold-starts in seconds. Eliminates compute cost during inactive periods.</li>
+                <li><strong>Traffic weights via CLI, not Bicep</strong> — revision names are auto-generated at deploy time and unknown to Bicep. Set weights post-deploy via CLI; attempting to set them in Bicep requires hardcoding revision names that don't exist yet.</li>
+                <li><strong>User-assigned MI preferred over system-assigned</strong> — system-assigned identity only exists after the Container App is created, creating a role-assignment timing window. User-assigned MI is created as infrastructure ahead of time with AcrPull pre-assigned.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Subnet delegation required</div>
+                <p><code>snet-capp-dev-wus3-01</code> must be delegated to <code>Microsoft.App/environments</code> before the Container Apps Environment can deploy. Minimum subnet size /23 (512 addresses). Delegation cannot be added after subnet creation if resources are attached.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Azure Container Registry</span>
+                <span class="tech-pill">Container Apps</span>
+                <span class="tech-pill">Bicep</span>
+                <span class="tech-pill">Docker</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">RBAC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P14 — Key Vault + MI -->
+      <div class="project-card reveal" id="p14">
+        <div class="project-header" onclick="toggleCard('p14')">
+          <div class="project-num">14</div>
+          <div class="project-meta">
+            <span class="project-tag tag-security">Key Vault · Managed Identity</span>
+            <div class="project-title">Zero-Credential Secret Management</div>
+            <div class="project-subtitle">RBAC model · system-assigned MI · KV references in App Service · audit via KQL</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed Key Vault with RBAC authorization model, assigned system-managed
+                identities to both VM and App Service, and wired App Service configuration
+                to pull secrets via KV reference strings — no credentials stored anywhere
+                in code or config. Diagnostic logs routed to Log Analytics; KQL queries
+                used to audit every secret access event.
+              </p>
+
+              <div class="code-block">
+                <div class="code-label">KV reference string in App Service config</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>@Microsoft.KeyVault(
+  VaultName=kv-az104-dev-wus3-01;
+  SecretName=vm-admin-password
+)</pre>
+              </div>
+
+              <div class="code-block">
+                <div class="code-label">KQL — secret access audit</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>AzureDiagnostics
+| where ResourceType == "VAULTS"
+| where OperationName == "SecretGet"
+| project TimeGenerated,
+          CallerIPAddress,
+          OperationName,
+          ResultType
+| order by TimeGenerated desc</pre>
+              </div>
+
+              <a class="diagram-link" href="../diagrams/project14-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project14-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>RBAC model, never Access Policies</strong> — KV created with <code>--enable-rbac-authorization true</code>. Access Policies are deprecated for new vaults. RBAC provides per-secret granularity with full audit trail in Entra ID.</li>
+                <li><strong>Two separate access grants required</strong> — (1) creator needs <code>Key Vault Secrets Officer</code> to write secrets; (2) ARM needs <code>--enabled-for-template-deployment true</code> to resolve <code>getSecret()</code> in Bicep. Neither is implied by the other.</li>
+                <li><strong>System-assigned MI at creation time</strong> — <code>--assign-identity "[system]"</code> passed during resource creation. Post-creation assignment introduces a timing window where RBAC assignment may fail before the identity GUID propagates in Entra ID.</li>
+                <li><strong>KV reference strings — use Cloud Shell</strong> — The <code>@</code> and parentheses in KV reference values cause PowerShell parsing failures even inside quotes. Always use Cloud Shell Bash for <code>az webapp config appsettings set</code> with KV references.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Soft delete blocks name reuse</div>
+                <p>Deleted secrets are retained for 7 days by default. Attempting to reuse a secret name during the retention window fails. Purge explicitly: <code>az keyvault secret purge --vault-name kv-az104-dev-wus3-01 --name secret-name</code></p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Key Vault</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">RBAC</span>
+                <span class="tech-pill">App Service</span>
+                <span class="tech-pill">Log Analytics</span>
+                <span class="tech-pill">KQL</span>
+                <span class="tech-pill">Bicep</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P15 — Capstone -->
+      <div class="project-card reveal" id="p15">
+        <div class="project-header" onclick="toggleCard('p15')">
+          <div class="project-num">15</div>
+          <div class="project-meta">
+            <span class="project-tag tag-capstone">Capstone · Production</span>
+            <div class="project-title">Portfolio Site Infrastructure</div>
+            <div class="project-subtitle">Front Door · WAF · Static Web App · 5-module Bicep · GitHub Actions CI/CD · ostebovik.net</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                The capstone project <em>is this site</em>. A production-grade Azure stack
+                deployed entirely via Bicep: Front Door with WAF policy, Static Web App
+                with GitHub Actions CI/CD, Key Vault, storage account for static assets,
+                and Log Analytics with Application Insights. Custom domain
+                <code>ostebovik.net</code> with managed TLS certificate — all provisioned
+                from a single <code>az deployment group create</code> command.
+              </p>
+
+              <div class="body-section-label">Stack</div>
+              <div class="module-map">
+                <div class="module-box">
+                  <div class="module-box-name">monitoring.bicep</div>
+                  <div class="module-box-desc">LAW + App Insights</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">keyvault.bicep</div>
+                  <div class="module-box-desc">RBAC · soft-delete · purge protection</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">storage.bicep</div>
+                  <div class="module-box-desc">Static assets</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">staticwebapp.bicep</div>
+                  <div class="module-box-desc">SWA + GitHub CI/CD</div>
+                </div>
+                <div class="module-box">
+                  <div class="module-box-name">frontdoor.bicep</div>
+                  <div class="module-box-desc">CDN · WAF · custom domain · TLS</div>
+                </div>
+              </div>
+
+              <div class="code-block">
+                <div class="code-label">Deploy from bootstrap.sh</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>az deployment group create \
+  --resource-group rg-geoste-prod-wus3-01 \
+  --template-file main.bicep \
+  --parameters prod.bicepparam \
+  --what-if</pre>
+              </div>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Front Door as perimeter, not App Gateway</strong> — Front Door operates at the edge (global CDN + WAF), appropriate for a static site with no backend compute. App Gateway sits inside a VNet and is designed for internal load balancing — wrong tool at this scale.</li>
+                <li><strong>SWA serves from GitHub, not storage</strong> — Static Web App requires content in a GitHub repo; Storage Account holds referenced assets (diagrams, screenshots). Push to <code>main</code> → GitHub Action → deployed in under 60 seconds.</li>
+                <li><strong>GitHub Actions workflow created manually</strong> — <code>skipGithubActionWorkflowGeneration: false</code> requires Azure write access to the repo at deploy time. If not granted, the workflow file is never auto-generated. Added manually to <code>.github/workflows/</code> with deployment token in repo secrets.</li>
+                <li><strong>Managed TLS certificate</strong> — <code>certificateType: 'ManagedCertificate'</code> on the Front Door custom domain. Free, auto-renewed — no certificate management overhead.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Storage account global uniqueness</div>
+                <p><code>stprodwus301</code> and <code>stgeostwus301</code> were both taken across all Azure tenants globally. Always include an owner-specific string. Final working name: <code>stgeostewus301</code>.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Azure Front Door</span>
+                <span class="tech-pill">WAF</span>
+                <span class="tech-pill">Static Web App</span>
+                <span class="tech-pill">Bicep</span>
+                <span class="tech-pill">GitHub Actions</span>
+                <span class="tech-pill">Key Vault</span>
+                <span class="tech-pill">Application Insights</span>
+                <span class="tech-pill">Log Analytics</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /project-grid -->
+  </section>
+
+  <!-- LESSONS LEARNED -->
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Lessons Learned</h2>
+    </div>
+
+    <div class="lessons-strip reveal">
+      <div class="lessons-grid">
+        <div class="lesson-item">
+          <div class="lesson-title">Bicep is idempotent — use it</div>
+          <div class="lesson-body">Re-running after a partial failure is safe. Bicep skips resources that already exist and creates only what's missing. Always run <code>--what-if</code> first to see exactly what will change before committing.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">CRLF kills shell scripts</div>
+          <div class="lesson-body">VS Code on Windows saves files with <code>\r\n</code>. Cloud Shell expects <code>\n</code> only. Symptom: <code>$'\r': command not found</code> on every line. Fix: <code>sed -i 's/\r//' script.sh</code>. Prevention: set <code>"files.eol": "\n"</code> globally in VS Code.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Policy remediation needs a wait</div>
+          <div class="lesson-body">Remediation tasks fail immediately after policy assignment because the managed identity needs 30–60 seconds to propagate through Entra ID. Wait 60 seconds, use unique names for retry attempts. Fallback: <code>az resource tag --is-incremental</code>.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Local Bash corrupts KV reference strings</div>
+          <div class="lesson-body">The <code>@</code> symbol and parentheses in Key Vault reference values cause parsing failures in local PowerShell and Git Bash. Always use Azure Cloud Shell for any command passing KV reference strings as flag values.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">dependsOn has legitimate uses</div>
+          <div class="lesson-body">When Bicep can't infer a dependency because the dependent resource doesn't reference the dependency in its properties — Bastion host depending on NSG rules, Front Door route depending on origin — explicit <code>dependsOn</code> is correct, not a code smell.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Inline NSG rules solve the Bastion compliance check</div>
+          <div class="lesson-body">NSG rules defined inside <code>securityRules: [...]</code> on the NSG resource deploy atomically with it. Separate child rule resources deploy in parallel and may not be complete when the compliance check runs. The <code>deployBastionHost bool</code> condition flag exists for cost control (~$140/mo Standard SKU) — not to work around a deployment ordering problem.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Container App role assignment timing</div>
+          <div class="lesson-body">System-assigned MI only exists after the Container App is created, so an AcrPull role assignment in the same deployment pass fails. The condition flag pattern gates it to a second pass. The cleaner fix: user-assigned MI created ahead of time with the role pre-assigned — no timing dependency.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      oste<span>bovik</span>.net · AZ-104 Phase 4 · Projects 11–15
+    </div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank">LinkedIn</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // ── Card toggle ───────────────────────────────────────────────
+    function toggleCard(id) {
+      const card = document.getElementById(id);
+      card.classList.toggle('open');
+    }
+
+    // ── Copy button ───────────────────────────────────────────────
+    function copyCode(btn) {
+      const pre = btn.nextElementSibling;
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'copied';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'var(--green)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 1800);
+      });
+    }
+
+    // ── Scroll reveal ─────────────────────────────────────────────
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.08 }
+    );
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
