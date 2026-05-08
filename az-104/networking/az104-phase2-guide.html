@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Phase 2 — Networking &amp; Storage Lab Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f1117;
+  --bg2:      #161b27;
+  --bg3:      #1d2435;
+  --bg4:      #242c40;
+  --border:   #2a3347;
+  --border2:  #364259;
+  --text:     #e2e8f0;
+  --text2:    #94a3b8;
+  --text3:    #64748b;
+  --azure:    #3b82f6;
+  --azure2:   #1d4ed8;
+  --azure-bg: #1e3a5f;
+  --azure-lt: #93c5fd;
+  --teal:     #14b8a6;
+  --teal-bg:  #134e4a;
+  --teal-lt:  #5eead4;
+  --amber:    #f59e0b;
+  --amber-bg: #451a03;
+  --amber-lt: #fcd34d;
+  --green:    #22c55e;
+  --green-bg: #14532d;
+  --green-lt: #86efac;
+  --purple:   #a855f7;
+  --purple-bg:#3b0764;
+  --purple-lt:#d8b4fe;
+  --red:      #ef4444;
+  --red-bg:   #450a0a;
+  --red-lt:   #fca5a5;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'Syne', sans-serif;
+  --phase-color: var(--azure);
+  --phase-bg:    var(--azure-bg);
+  --phase-lt:    var(--azure-lt);
+  --phase-badge-bg: #1e3a5f;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* ── HEADER ── */
+.site-header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--azure); }
+.header-right { display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.phase-badge { background: var(--phase-badge-bg); color: var(--azure-lt); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid var(--azure2); }
+
+/* ── HERO ── */
+.hero { padding: 60px 2rem 48px; max-width: 1000px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eye { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--azure); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+.hero-eye::after { content:''; flex:1; height:1px; background:var(--border); }
+.hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 16px; }
+.hero h1 span { color: var(--azure); }
+.hero-sub { font-size: 16px; color: var(--text2); max-width: 600px; margin-bottom: 32px; line-height: 1.7; }
+.stat-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.stat strong { display: block; font-size: 20px; color: var(--text); font-family: var(--sans); font-weight: 600; margin-bottom: 2px; }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 2rem 0; }
+.progress-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.progress-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azure2), var(--azure)); width: 40%; }
+.phase-dots { display: flex; gap: 0; margin-top: 8px; }
+.phase-dot { flex: 1; text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text3); padding-top: 6px; }
+.phase-dot.done { color: var(--azure-lt); }
+.phase-dot.active { color: var(--azure-lt); font-weight: 500; }
+
+/* ── MAIN LAYOUT ── */
+.main { max-width: 1000px; margin: 0 auto; padding: 32px 2rem 80px; }
+
+/* ── PROJECT CARD ── */
+.proj-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 20px; overflow: hidden; transition: border-color .2s; }
+.proj-card:hover { border-color: var(--border2); }
+.proj-header { display: flex; align-items: flex-start; gap: 16px; padding: 20px 24px; cursor: pointer; user-select: none; }
+.proj-header:hover { background: var(--bg3); }
+.proj-num { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; font-family: var(--mono); }
+.proj-header-text { flex: 1; }
+.proj-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.proj-sub { font-size: 13px; color: var(--text3); }
+.proj-chevron { font-size: 18px; color: var(--text3); transition: transform .3s; flex-shrink: 0; margin-top: 6px; }
+.proj-card.open .proj-chevron { transform: rotate(180deg); }
+.proj-body { padding: 0 24px 24px; display: none; }
+.proj-card.open .proj-body { display: block; }
+
+/* ── MINI GRID ── */
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 24px; }
+.mini-cell { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.mini-label { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.mini-val { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ── SECTION LABEL ── */
+.sec-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin: 20px 0 10px; }
+
+/* ── CONCEPT BOX ── */
+.concept-box { background: var(--azure-bg); border: 1px solid var(--azure2); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--azure-lt); line-height: 1.65; margin-bottom: 16px; }
+.concept-box.warn { background: var(--amber-bg); border-color: var(--amber); color: var(--amber-lt); }
+.concept-box.green { background: var(--green-bg); border-color: var(--green); color: var(--green-lt); }
+.concept-box.purple { background: var(--purple-bg); border-color: var(--purple); color: var(--purple-lt); }
+.concept-box.red { background: var(--red-bg); border-color: var(--red); color: var(--red-lt); }
+
+/* ── STEPS ── */
+.step-list { list-style: none; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.step-item { display: flex; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-item:last-child { border-bottom: none; }
+.step-num { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+.code { font-family: var(--mono); font-size: 11px; background: var(--bg4); color: var(--azure-lt); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); white-space: nowrap; }
+
+/* ── CLI BLOCK ── */
+.cli-wrap { margin-top: 12px; border-radius: 8px; overflow: hidden; }
+.cli-header { background: var(--bg4); border: 1px solid var(--border); border-bottom: none; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0; }
+.cli-lang { font-family: var(--mono); font-size: 11px; color: var(--azure); }
+.cli-copy { font-family: var(--mono); font-size: 11px; color: var(--text3); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; cursor: pointer; transition: all .15s; }
+.cli-copy:hover { background: var(--bg3); color: var(--text); }
+.cli-copy.copied { color: var(--green-lt); border-color: var(--green); }
+pre.cli { background: #0d1117; border: 1px solid var(--border); border-radius: 0 0 8px 8px; padding: 16px; font-family: var(--mono); font-size: 12px; color: #e2e8f0; line-height: 1.9; overflow-x: auto; white-space: pre; tab-size: 2; }
+.c-cmd { color: #93c5fd; }
+.c-flag { color: #a78bfa; }
+.c-str { color: #86efac; }
+.c-cmt { color: #475569; font-style: italic; }
+.c-var { color: #fcd34d; }
+
+/* ── PORTFOLIO BOX ── */
+.portfolio-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-top: 16px; }
+.portfolio-header { background: var(--bg4); padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.portfolio-list { list-style: none; }
+.portfolio-item { display: flex; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.portfolio-item:last-child { border-bottom: none; }
+.port-check { width: 18px; height: 18px; border: 1px solid var(--border2); border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 2px; }
+.port-check:hover { border-color: var(--azure); }
+.port-check.checked { background: var(--azure-bg); border-color: var(--azure); color: var(--azure-lt); font-size: 10px; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all .15s; text-decoration: none; }
+.btn:hover { background: var(--bg4); border-color: var(--azure); color: var(--azure-lt); }
+.btn.primary { background: var(--azure-bg); border-color: var(--azure); color: var(--azure-lt); }
+.btn.primary:hover { background: var(--azure2); color: #fff; }
+
+/* ── WARN / INFO STRIP ── */
+.warn-strip { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--amber-lt); margin-top: 14px; font-family: var(--mono); }
+.info-strip { background: var(--azure-bg); border: 1px solid var(--azure); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--azure-lt); margin-top: 14px; font-family: var(--mono); }
+
+/* ── NOTES PANEL ── */
+.notes-panel { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+.notes-header { background: var(--bg4); padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--azure-lt); letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.notes-body { padding: 12px 16px; }
+.note-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.6; }
+.note-item:last-child { border-bottom: none; }
+.note-tag { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; height: fit-content; margin-top: 2px; }
+.tag-key  { background: var(--amber-bg);  color: var(--amber-lt);  border: 1px solid var(--amber); }
+.tag-warn { background: var(--red-bg);    color: var(--red-lt);    border: 1px solid var(--red); }
+.tag-tip  { background: var(--green-bg);  color: var(--green-lt);  border: 1px solid var(--green); }
+.tag-exam { background: var(--azure-bg);  color: var(--azure-lt);  border: 1px solid var(--azure); }
+.notes-add { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.notes-input { flex: 1; background: var(--bg4); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; font-family: var(--mono); font-size: 12px; color: var(--text); outline: none; }
+.notes-input:focus { border-color: var(--azure); }
+.notes-btn { font-family: var(--mono); font-size: 11px; background: var(--azure-bg); border: 1px solid var(--azure); color: var(--azure-lt); border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.notes-btn:hover { background: var(--azure2); color: #fff; }
+
+/* ── SUMMARY ── */
+.summary-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 8px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    ostebovik.net · az-104
+  </div>
+  <div class="header-right">
+    <span>West US 3</span>
+    <span class="phase-badge">Phase 2 — Networking &amp; Storage</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eye">AZ-104 · Phase 2 of 4</div>
+  <h1>Networking &amp; <span>Storage</span></h1>
+  <p class="hero-sub">Four projects covering Azure networking fundamentals and storage access control: hub-spoke VNets, NSGs, load balancing, DNS, private endpoints, and blob storage with SAS tokens and lifecycle management.</p>
+  <div class="stat-row">
+    <div class="stat"><strong>4</strong>projects</div>
+    <div class="stat"><strong>Hub-spoke</strong>VNet topology</div>
+    <div class="stat"><strong>~35%</strong>AZ-104 coverage</div>
+    <div class="stat"><strong>20+</strong>portfolio items</div>
+    <div class="stat"><strong>~$12</strong>estimated cost</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label"><span>AZ-104 progress</span><span>~40% complete</span></div>
+  <div class="progress-track"><div class="progress-fill"></div></div>
+  <div class="phase-dots">
+    <div class="phase-dot done">Phase 1<br>Identity ✓</div>
+    <div class="phase-dot active">Phase 2<br>Networking ◀</div>
+    <div class="phase-dot">Phase 3<br>Compute</div>
+    <div class="phase-dot">Phase 4<br>Capstone</div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ════════════════════════════════
+     STICKY NOTES PANEL
+════════════════════════════════ -->
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-header">
+    <span>📌 Key notes from sessions — add your own</span>
+    <span style="color:var(--text3);font-size:10px;">persists in browser until cleared</span>
+  </div>
+  <div class="notes-body">
+    <div id="notesList">
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>VNet peering is non-transitive. Hub-spoke requires peering from each spoke to hub — spokes cannot reach each other through the hub without NVA or Azure Firewall.</div>
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>NSG rule priorities are per-direction. Priority 130 inbound and 130 outbound do not conflict — Azure evaluates them in separate queues.</div>
+      <div class="note-item"><span class="note-tag tag-warn">AVOID</span>User delegation SAS fails for VM agent context — CSE uses service SAS (account key) only. VM agent has no Azure AD context.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Standard Load Balancer requires explicit outbound rules or NAT Gateway for outbound internet access. Basic SKU had implicit outbound — Standard does not.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Private endpoint DNS: requires private DNS zone linked to VNet. Without it, FQDN resolves to public IP even though traffic goes through private endpoint.</div>
+      <div class="note-item"><span class="note-tag tag-exam">EXAM</span>Split-horizon DNS: same FQDN resolves to private IP inside VNet, public IP outside. Achieved with private DNS zone + VNet link.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>--nsg null detaches NSG from subnet. --nsg "" fails. --remove networkSecurityGroup also works.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>Static private IPs on VMs: declare in Bicep AND set via CLI on existing NICs. CLI alone is overwritten on next Bicep deploy.</div>
+      <div class="note-item"><span class="note-tag tag-key">KEY</span>Storage lifecycle policy tiers: Hot → Cool → Cold → Archive. Archive requires rehydrate before access (hours delay).</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>Health probe failure = LB stops sending traffic to that backend. Test by stopping IIS/nginx on one VM and verifying traffic shifts.</div>
+      <div class="note-item"><span class="note-tag tag-tip">TIP</span>SAS token scope: account SAS (all services), service SAS (one service), user delegation SAS (Entra ID backed — most secure for human access).</div>
+    </div>
+    <div class="notes-add">
+      <input class="notes-input" id="noteInput" placeholder="Add a note (tag: key / warn / tip / exam)..." />
+      <select id="noteTag" style="background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:7px;font-family:var(--mono);font-size:11px;">
+        <option value="key">key</option>
+        <option value="warn">warn</option>
+        <option value="tip">tip</option>
+        <option value="exam">exam</option>
+      </select>
+      <button class="notes-btn" onclick="addNote()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 3 — VNets, NSGs, Peering
+════════════════════════════════ -->
+<div class="proj-card" id="proj03">
+  <div class="proj-header" onclick="toggle('proj03')">
+    <div class="proj-num" style="background:var(--azure-bg);color:var(--azure-lt);">03</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Virtual Networks, Subnets, NSGs &amp; VNet Peering</div>
+      <div class="proj-sub">Hub-spoke topology · bidirectional peering · NSG layered security · four subnets</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Skill domain</div><div class="mini-val">Networking</div></div>
+      <div class="mini-cell"><div class="mini-label">Service model</div><div class="mini-val">IaaS</div></div>
+      <div class="mini-cell"><div class="mini-label">Est. cost</div><div class="mini-val">~$2</div></div>
+      <div class="mini-cell"><div class="mini-label">Status</div><div class="mini-val" style="color:var(--green-lt)">Complete</div></div>
+    </div>
+
+    <div class="concept-box">
+      Hub-spoke is the foundational Azure network pattern. The hub VNet hosts shared services (Bastion, firewall, DNS). Spoke VNets host workloads and peer back to the hub. Spokes cannot communicate directly — all inter-spoke traffic routes through the hub. NSGs at the subnet level enforce traffic rules independent of VNet peering.
+    </div>
+
+    <div class="sec-label">What was built</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div>Hub VNet <span class="code">vnet-hub-dev-wus3-01</span> with four subnets: web, api, data, bastion</li>
+      <li class="step-item"><div class="step-num">2</div>Spoke VNet <span class="code">vnet-spoke-dev-wus3-01</span> peered bidirectionally to hub</li>
+      <li class="step-item"><div class="step-num">3</div>NSG per subnet with layered inbound/outbound rules — deny-all default with explicit allows</li>
+      <li class="step-item"><div class="step-num">4</div>Azure Bastion in hub for secure VM access without public IPs</li>
+      <li class="step-item"><div class="step-num">5</div>Verified cross-VNet connectivity and NSG blocking behavior</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Create hub VNet</span>
+<span class="c-cmd">az network vnet create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> <span class="c-flag">-n</span> <span class="c-str">vnet-hub-dev-wus3-01</span> \
+  <span class="c-flag">--address-prefix</span> <span class="c-str">10.0.0.0/16</span> <span class="c-flag">-l</span> <span class="c-var">$LOC</span>
+
+<span class="c-cmt"># Create subnet with NSG attached</span>
+<span class="c-cmd">az network vnet subnet create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> \
+  <span class="c-flag">--vnet-name</span> <span class="c-str">vnet-hub-dev-wus3-01</span> \
+  <span class="c-flag">-n</span> <span class="c-str">snet-web-dev-wus3-01</span> \
+  <span class="c-flag">--address-prefix</span> <span class="c-str">10.0.1.0/24</span> \
+  <span class="c-flag">--network-security-group</span> <span class="c-str">nsg-web-dev-wus3-01</span>
+
+<span class="c-cmt"># Peer hub to spoke (bidirectional — run for both directions)</span>
+<span class="c-cmd">az network vnet peering create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> \
+  <span class="c-flag">-n</span> <span class="c-str">peer-hub-to-spoke</span> \
+  <span class="c-flag">--vnet-name</span> <span class="c-str">vnet-hub-dev-wus3-01</span> \
+  <span class="c-flag">--remote-vnet</span> <span class="c-str">vnet-spoke-dev-wus3-01</span> \
+  <span class="c-flag">--allow-vnet-access</span></pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio deliverables</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Hub-spoke architecture SVG diagram</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>NSG rule matrix screenshot (inbound + outbound)</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>VNet peering status screenshot (Connected state)</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Deployment script (.sh) with inline explanations</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Write-up: hub-spoke design decisions and tradeoffs</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 4 — Storage
+════════════════════════════════ -->
+<div class="proj-card" id="proj04">
+  <div class="proj-header" onclick="toggle('proj04')">
+    <div class="proj-num" style="background:var(--teal-bg);color:var(--teal-lt);">04</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Storage Accounts — Blobs, SAS, Lifecycle &amp; Static Website</div>
+      <div class="proj-sub">LRS vs GRS · SAS tokens · lifecycle tiering · soft delete · key rotation · static portfolio page</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Skill domain</div><div class="mini-val">Compute &amp; Storage</div></div>
+      <div class="mini-cell"><div class="mini-label">Service model</div><div class="mini-val">PaaS</div></div>
+      <div class="mini-cell"><div class="mini-label">Est. cost</div><div class="mini-val">~$1</div></div>
+      <div class="mini-cell"><div class="mini-label">Status</div><div class="mini-val" style="color:var(--green-lt)">Complete</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--teal-bg);border-color:var(--teal);color:var(--teal-lt);">
+      Storage accounts are the foundation of Azure data services. Redundancy (LRS/GRS/ZRS) determines availability guarantees. SAS tokens scope access without exposing account keys. Lifecycle policies automate cost management by tiering blobs from Hot to Cool to Archive based on last-modified date.
+    </div>
+
+    <div class="sec-label">What was built</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div>LRS storage account for cost-optimized lab storage — <span class="code">stdevwus301</span></li>
+      <li class="step-item"><div class="step-num">2</div>Blob container with public access disabled — SAS token required for access</li>
+      <li class="step-item"><div class="step-num">3</div>Service SAS token scoped to blob read — time-limited, no account key exposure</li>
+      <li class="step-item"><div class="step-num">4</div>Lifecycle policy: Hot → Cool after 30 days, Cool → Archive after 90 days</li>
+      <li class="step-item"><div class="step-num">5</div>Soft delete enabled — 7-day recovery window</li>
+      <li class="step-item"><div class="step-num">6</div>Static website hosting enabled — <span class="code">$web</span> container serves index.html</li>
+    </ul>
+
+    <div class="warn-strip">⚠ SAS token scope matters: user delegation SAS (Entra ID backed) is most secure for human access. Service SAS (account key) required for VM agent context (CSE). Never use account keys directly in application code.</div>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Generate service SAS for blob read</span>
+<span class="c-cmd">az storage blob generate-sas</span> \
+  <span class="c-flag">--account-name</span> <span class="c-str">stdevwus301</span> \
+  <span class="c-flag">--container-name</span> <span class="c-str">content</span> \
+  <span class="c-flag">--name</span> <span class="c-str">file.txt</span> \
+  <span class="c-flag">--permissions</span> <span class="c-str">r</span> \
+  <span class="c-flag">--expiry</span> <span class="c-str">2026-01-01</span> \
+  <span class="c-flag">--auth-mode</span> <span class="c-str">login</span> <span class="c-flag">-o</span> tsv
+
+<span class="c-cmt"># Enable static website hosting</span>
+<span class="c-cmd">az storage blob service-properties update</span> \
+  <span class="c-flag">--account-name</span> <span class="c-str">stdevwus301</span> \
+  <span class="c-flag">--static-website</span> \
+  <span class="c-flag">--index-document</span> <span class="c-str">index.html</span> \
+  <span class="c-flag">--404-document</span> <span class="c-str">404.html</span></pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio deliverables</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Storage account configuration screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Lifecycle policy JSON and portal screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>SAS token generation and verified blob access</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Static website live URL screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Deployment script (.sh) with inline explanations</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 5 — Load Balancer
+════════════════════════════════ -->
+<div class="proj-card" id="proj05">
+  <div class="proj-header" onclick="toggle('proj05')">
+    <div class="proj-num" style="background:var(--purple-bg);color:var(--purple-lt);">05</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Azure Load Balancer &amp; High Availability</div>
+      <div class="proj-sub">Standard SKU · availability set · health probes · failover testing · outbound SNAT</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Skill domain</div><div class="mini-val">Networking</div></div>
+      <div class="mini-cell"><div class="mini-label">Service model</div><div class="mini-val">IaaS</div></div>
+      <div class="mini-cell"><div class="mini-label">Est. cost</div><div class="mini-val">~$5</div></div>
+      <div class="mini-cell"><div class="mini-label">Status</div><div class="mini-val" style="color:var(--green-lt)">Complete</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--purple-bg);border-color:var(--purple);color:var(--purple-lt);">
+      Azure Load Balancer operates at Layer 4 (TCP/UDP). Standard SKU is zone-redundant and required for production. Health probes determine which backend instances receive traffic — a failed probe removes the instance from rotation automatically. Standard SKU requires explicit outbound rules; unlike Basic SKU there is no implicit outbound internet access.
+    </div>
+
+    <div class="sec-label">What was built</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div>Standard SKU public load balancer <span class="code">lb-web-dev-wus3-01</span> with frontend IP</li>
+      <li class="step-item"><div class="step-num">2</div>Backend pool with two VMs in availability set — ensures VMs are on separate fault domains</li>
+      <li class="step-item"><div class="step-num">3</div>HTTP health probe on port 80 — 15s interval, 2 unhealthy threshold</li>
+      <li class="step-item"><div class="step-num">4</div>Load balancing rule: frontend port 80 → backend port 80</li>
+      <li class="step-item"><div class="step-num">5</div>Outbound rule for SNAT — explicit outbound internet access for backend VMs</li>
+      <li class="step-item"><div class="step-num">6</div>Failover test: stopped IIS on VM1, verified all traffic routed to VM2</li>
+    </ul>
+
+    <div class="warn-strip">⚠ Load Balancer vs Application Gateway: LB is Layer 4 (IP/port routing only). App Gateway is Layer 7 (HTTP/HTTPS, path-based routing, WAF). Use LB for non-HTTP workloads or when you need the lowest latency. Use App Gateway when you need SSL termination, URL routing, or WAF.</div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio deliverables</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Load balancer architecture SVG diagram</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Health probe configuration screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Failover test evidence — traffic shift screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Deployment script (.sh) with inline explanations</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Write-up: LB vs App Gateway decision framework</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PROJECT 6 — DNS & Private Endpoints
+════════════════════════════════ -->
+<div class="proj-card" id="proj06">
+  <div class="proj-header" onclick="toggle('proj06')">
+    <div class="proj-num" style="background:var(--amber-bg);color:var(--amber-lt);">06</div>
+    <div class="proj-header-text">
+      <div class="proj-title">Azure DNS &amp; Private Endpoints</div>
+      <div class="proj-sub">Public + private DNS zones · private endpoint for blob · split-horizon resolution · public access lockdown</div>
+    </div>
+    <div class="proj-chevron">⌄</div>
+  </div>
+  <div class="proj-body">
+
+    <div class="mini-grid">
+      <div class="mini-cell"><div class="mini-label">Skill domain</div><div class="mini-val">Networking</div></div>
+      <div class="mini-cell"><div class="mini-label">Service model</div><div class="mini-val">IaaS · PaaS</div></div>
+      <div class="mini-cell"><div class="mini-label">Est. cost</div><div class="mini-val">~$4</div></div>
+      <div class="mini-cell"><div class="mini-label">Status</div><div class="mini-val" style="color:var(--green-lt)">Complete</div></div>
+    </div>
+
+    <div class="concept-box" style="background:var(--amber-bg);border-color:var(--amber);color:var(--amber-lt);">
+      Private endpoints give PaaS services (Storage, SQL, Key Vault) a private IP inside your VNet. Traffic never leaves the Microsoft backbone. Split-horizon DNS means the same FQDN resolves to a private IP inside the VNet and a public IP outside — achieved with a private DNS zone linked to the VNet and Azure DNS resolver integration.
+    </div>
+
+    <div class="sec-label">What was built</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div>Public DNS zone <span class="code">ostebovik.net</span> delegated to Azure DNS</li>
+      <li class="step-item"><div class="step-num">2</div>Private endpoint for <span class="code">stdevwus301</span> blob service — private IP in VNet</li>
+      <li class="step-item"><div class="step-num">3</div>Private DNS zone <span class="code">privatelink.blob.core.windows.net</span> linked to VNet</li>
+      <li class="step-item"><div class="step-num">4</div>Public blob access disabled — storage firewall set to deny all</li>
+      <li class="step-item"><div class="step-num">5</div>Verified: nslookup from inside VNet resolves to private IP, from outside resolves to public IP</li>
+    </ul>
+
+    <div class="sec-label">Key CLI commands</div>
+    <div class="cli-wrap">
+      <div class="cli-header">
+        <span class="cli-lang">bash</span>
+        <button class="cli-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="cli"><span class="c-cmt"># Create private endpoint for storage blob</span>
+<span class="c-cmd">az network private-endpoint create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> \
+  <span class="c-flag">-n</span> <span class="c-str">pep-st-dev-wus3-01</span> \
+  <span class="c-flag">--vnet-name</span> <span class="c-str">vnet-hub-dev-wus3-01</span> \
+  <span class="c-flag">--subnet</span> <span class="c-str">snet-data-dev-wus3-01</span> \
+  <span class="c-flag">--private-connection-resource-id</span> <span class="c-var">$ST_ID</span> \
+  <span class="c-flag">--group-id</span> <span class="c-str">blob</span> \
+  <span class="c-flag">--connection-name</span> <span class="c-str">conn-st-blob</span>
+
+<span class="c-cmt"># Link private DNS zone to VNet</span>
+<span class="c-cmd">az network private-dns link vnet create</span> <span class="c-flag">-g</span> <span class="c-var">$RG</span> \
+  <span class="c-flag">-n</span> <span class="c-str">link-blob-vnet</span> \
+  <span class="c-flag">--zone-name</span> <span class="c-str">privatelink.blob.core.windows.net</span> \
+  <span class="c-flag">--virtual-network</span> <span class="c-str">vnet-hub-dev-wus3-01</span> \
+  <span class="c-flag">--registration-enabled</span> false</pre>
+    </div>
+
+    <div class="portfolio-box">
+      <div class="portfolio-header">Portfolio deliverables</div>
+      <ul class="portfolio-list">
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Private endpoint + DNS architecture SVG diagram</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>nslookup split-horizon evidence screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Storage firewall deny-all configuration screenshot</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Deployment script (.sh) with inline explanations</li>
+        <li class="portfolio-item"><div class="port-check" onclick="this.classList.toggle('checked');this.textContent=this.classList.contains('checked')?'✓':''"></div>Write-up: zero-trust network access pattern</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PHASE SUMMARY
+════════════════════════════════ -->
+<div class="summary-card" style="margin-top:32px;">
+  <div class="sec-label">Phase 2 summary</div>
+  <div class="summary-grid">
+    <div class="mini-cell"><div class="mini-label">Projects</div><div class="mini-val">4 complete</div></div>
+    <div class="mini-cell"><div class="mini-label">Exam coverage</div><div class="mini-val">~35%</div></div>
+    <div class="mini-cell"><div class="mini-label">Gotchas documented</div><div class="mini-val">11</div></div>
+    <div class="mini-cell"><div class="mini-label">Total lab cost</div><div class="mini-val">~$12</div></div>
+    <div class="mini-cell"><div class="mini-label">Portfolio items</div><div class="mini-val">20+</div></div>
+    <div class="mini-cell"><div class="mini-label">Primary skills</div><div class="mini-val">Networking · Storage</div></div>
+  </div>
+  <div class="btn-row">
+    <a href="/az-104/networking/" class="btn primary">View Networking projects →</a>
+    <a href="/az-104/compute-storage/" class="btn">View Storage projects →</a>
+    <a href="/" class="btn">← Back to portfolio</a>
+  </div>
+</div>
+
+</main>
+
+<footer style="max-width:1000px;margin:0 auto;padding:28px 2rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;color:var(--text3);flex-wrap:wrap;gap:10px;">
+  <span style="font-family:var(--mono);">ostebovik.net · AZ-104 Phase 2 · Networking &amp; Storage</span>
+  <div style="display:flex;gap:18px;">
+    <a href="/" style="color:var(--text3);text-decoration:none;">Home</a>
+    <a href="https://github.com/geostebovik/geoste-portfolio" style="color:var(--text3);text-decoration:none;">GitHub</a>
+  </div>
+</footer>
+
+<script>
+function toggle(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.cli-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function addNote() {
+  const input = document.getElementById('noteInput');
+  const tag = document.getElementById('noteTag').value;
+  const text = input.value.trim();
+  if (!text) return;
+  const item = document.createElement('div');
+  item.className = 'note-item';
+  item.innerHTML = `<span class="note-tag tag-${tag}">${tag}</span>${text}`;
+  document.getElementById('notesList').appendChild(item);
+  input.value = '';
+}
+</script>
+
+</body>
+</html>
