@@ -745,7 +745,7 @@ geoste-portfolio/
 - [ ] Operating hours WAF rule — upgrade JS check to proper Front Door Rule Set
 - [ ] Dynamic log display page — surface Application Insights / LAW data on portfolio page
 - [ ] `/resources/` page — RPO vs RTO write-up, PowerShell vs Bash syntax reference, AZ-104 whiteboard, other reference docs
-- [ ] AZ-104 exam — schedule and sit
+- [ ] AZ-104 exam — schedule and sit - https://learn.microsoft.com/en-us/credentials/certifications/exams/az-104/
 - [ ] Azure AI Fundamentals (Exam AI-901) - https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-901/
 - [ ] AZ-305: Designing Microsoft Azure Infrastructure Solutions - https://learn.microsoft.com/en-us/credentials/certifications/exams/az-305/
 
