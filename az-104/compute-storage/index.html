@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compute &amp; Storage — ostebovik.net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --black:       #0a0a0a;
+      --orange:      #FD5A1E;
+      --orange-dim:  #c44415;
+      --cream:       #EFE4B0;
+      --cream-dim:   #b8ad84;
+      --surface-1:   #111213;
+      --surface-2:   #16181c;
+      --surface-3:   #1e2128;
+      --surface-4:   #252830;
+      --border:      #2a2d35;
+      --border-lit:  #3a3d47;
+      --text-primary:   #e8e4d8;
+      --text-secondary: #a8a49c;
+      --text-dim:       #706c66;
+      --blue:   #4a9eff;
+      --teal:   #2dd4bf;
+      --amber:  #f59e0b;
+      --purple: #a78bfa;
+      --green:  #34d399;
+      --red:    #f87171;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: var(--cream);
+    }
+    .nav-brand span { color: var(--orange); }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--orange); }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      padding: 140px 2rem 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px; height: 1px;
+      background: var(--orange);
+    }
+
+    .hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--orange); display: block; }
+
+    .hero-description {
+      max-width: 580px;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+    .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+    .stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem; font-weight: 700;
+      color: var(--cream); line-height: 1;
+    }
+    .stat-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+
+    /* ── Section layout ────────────────────────────────────────── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 80px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-number { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; }
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    /* ── Project cards ─────────────────────────────────────────── */
+    .project-grid { display: grid; gap: 1.5px; }
+
+    .project-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .project-card:hover { border-color: var(--border-lit); }
+
+    .project-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.5rem 1.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .project-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.8rem; font-weight: 800;
+      line-height: 1; color: var(--orange);
+      opacity: 0.25; min-width: 3.5rem;
+      transition: opacity 0.2s;
+    }
+    .project-card:hover .project-num,
+    .project-card.open .project-num { opacity: 1; }
+
+    .project-meta { flex: 1; }
+
+    .project-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 0.2rem 0.6rem;
+      border-radius: 2px; margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+    .tag-storage  { background: rgba(245,158,11,0.12); color: var(--amber);  border: 1px solid rgba(245,158,11,0.2); }
+    .tag-compute  { background: rgba(74,158,255,0.12); color: var(--blue);   border: 1px solid rgba(74,158,255,0.2); }
+    .tag-appsvc   { background: rgba(45,212,191,0.12); color: var(--teal);   border: 1px solid rgba(45,212,191,0.2); }
+    .tag-container{ background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+
+    .project-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem; font-weight: 600;
+      letter-spacing: 0.03em; text-transform: uppercase;
+      color: var(--cream); margin-bottom: 0.3rem;
+    }
+    .project-subtitle { font-size: 0.82rem; color: var(--text-secondary); font-weight: 400; }
+
+    .project-toggle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem; color: var(--text-dim);
+      transition: color 0.2s, transform 0.3s;
+      display: inline-block;
+    }
+    .project-card.open .project-toggle { color: var(--orange); transform: rotate(180deg); }
+
+    /* ── Project body ──────────────────────────────────────────── */
+    .project-body {
+      display: none;
+      padding: 0 1.75rem 1.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .project-card.open .project-body { display: block; }
+
+    .project-body-inner {
+      padding-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 700px) { .project-body-inner { grid-template-columns: 1fr; } }
+
+    .body-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .body-text {
+      font-size: 0.88rem; font-weight: 400;
+      color: var(--text-secondary); line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Decision list ─────────────────────────────────────────── */
+    .decision-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+    .decision-list li {
+      display: flex; gap: 0.75rem;
+      font-size: 0.85rem; font-weight: 400;
+      color: var(--text-secondary); line-height: 1.55;
+    }
+    .decision-list li::before {
+      content: '→';
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--orange); flex-shrink: 0; margin-top: 0.05rem;
+    }
+
+    /* ── Tech pills ────────────────────────────────────────────── */
+    .tech-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .tech-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      background: var(--surface-3); border: 1px solid var(--border);
+      color: var(--text-secondary); border-radius: 2px;
+    }
+
+    /* ── Code block ────────────────────────────────────────────── */
+    .code-block {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      position: relative; overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem; line-height: 1.7;
+      color: var(--cream-dim); white-space: pre;
+    }
+    .code-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+    .copy-btn {
+      position: absolute; top: 0.6rem; right: 0.75rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+      background: none; border: 1px solid var(--border);
+      color: var(--text-dim); padding: 0.2rem 0.5rem;
+      cursor: pointer; transition: color 0.2s, border-color 0.2s;
+    }
+    .copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+
+    /* ── Gotcha callout ────────────────────────────────────────── */
+    .gotcha {
+      background: rgba(253,90,30,0.06);
+      border: 1px solid rgba(253,90,30,0.2);
+      border-left: 3px solid var(--orange);
+      padding: 0.9rem 1.1rem; margin: 1rem 0;
+    }
+    .gotcha-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 0.4rem;
+    }
+    .gotcha p { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ── Info callout ──────────────────────────────────────────── */
+    .info {
+      background: rgba(74,158,255,0.06);
+      border: 1px solid rgba(74,158,255,0.2);
+      border-left: 3px solid var(--blue);
+      padding: 0.9rem 1.1rem; margin: 1rem 0;
+    }
+    .info-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 0.4rem;
+    }
+    .info p { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ── Diagram link ──────────────────────────────────────────── */
+    .diagram-link {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface-3); border: 1px solid var(--border);
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 0.82rem;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 1rem;
+    }
+    .diagram-link:hover { border-color: var(--orange); color: var(--orange); }
+    .diagram-link-icon { font-family: 'IBM Plex Mono', monospace; font-size: 1rem; color: var(--orange); }
+
+    /* ── Comparison table ──────────────────────────────────────── */
+    .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.8rem; }
+    .compare-table th {
+      background: var(--surface-3); padding: 0.6rem 0.9rem;
+      text-align: left; font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-dim); border-bottom: 1px solid var(--border);
+    }
+    .compare-table td {
+      padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border);
+      color: var(--text-secondary); vertical-align: top;
+      line-height: 1.5;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td:first-child {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem; color: var(--cream);
+    }
+
+    /* ── Lessons strip ─────────────────────────────────────────── */
+    .lessons-strip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2rem 1.75rem;
+      margin-top: 1.5px;
+    }
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem; margin-top: 1.5rem;
+    }
+    .lesson-item { display: flex; flex-direction: column; gap: 0.4rem; }
+    .lesson-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--cream);
+    }
+    .lesson-body { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-brand { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.08em; }
+    .footer-brand span { color: var(--orange); }
+    .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+    .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--orange); }
+
+    /* ── Scroll reveal ─────────────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/az-104/identity-governance/">Identity</a></li>
+      <li><a href="/az-104/networking/">Networking</a></li>
+      <li><a href="/az-104/compute-storage/" class="active">Compute</a></li>
+      <li><a href="/az-104/infrastructure-as-code/">IaC</a></li>
+      <li><a href="/az-104/monitoring-security/">Monitoring</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">AZ-104 · Skill Domain</div>
+    <h1>Compute &amp;<em>Storage</em></h1>
+    <p class="hero-description">
+      Windows and Linux VMs, managed disks, App Service with blue/green deployment slots,
+      Azure Blob Storage with private endpoints, Container Registry, and Container Apps
+      with traffic splitting and scale-to-zero — the full compute and data tier.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-value">4</span><span class="stat-label">Projects</span></div>
+      <div class="stat"><span class="stat-value">0</span><span class="stat-label">Stored credentials</span></div>
+      <div class="stat"><span class="stat-value">2</span><span class="stat-label">Container images</span></div>
+      <div class="stat"><span class="stat-value">P4–P12</span><span class="stat-label">Phase 2 + 3 + 4</span></div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Projects</h2>
+    </div>
+
+    <div class="project-grid">
+
+      <!-- P4 — Storage -->
+      <div class="project-card reveal" id="p4">
+        <div class="project-header" onclick="toggleCard('p4')">
+          <div class="project-num">04</div>
+          <div class="project-meta">
+            <span class="project-tag tag-storage">Blob Storage · SAS · Lifecycle · Private Endpoint</span>
+            <div class="project-title">Azure Blob Storage</div>
+            <div class="project-subtitle">LRS + GRS redundancy · SAS tokens · lifecycle policies · static website · private endpoint lockdown</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed two storage accounts demonstrating different redundancy tiers —
+                LRS for active workloads, GRS for disaster recovery — then built out
+                the full access control surface: SAS tokens, stored access policies,
+                lifecycle management rules, and a static website. Finished by removing
+                the storage account from the public internet entirely using a private
+                endpoint and split-horizon DNS, confirming that the same hostname
+                resolves to a private IP inside the VNet and returns a 404 (not 403)
+                from the public internet.
+              </p>
+
+              <div class="body-section-label">SAS Token Security Model</div>
+              <p class="body-text">
+                Two SAS token types with fundamentally different security postures:
+              </p>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Type</th><th>Auth basis</th><th>Revocable?</th><th>Use case</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ad-hoc SAS</td>
+                    <td>Account key</td>
+                    <td>No — must rotate account key</td>
+                    <td>Never in production</td>
+                  </tr>
+                  <tr>
+                    <td>Policy-linked SAS</td>
+                    <td>Stored access policy</td>
+                    <td>Yes — delete the policy</td>
+                    <td>All production use</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="body-text">
+                Ad-hoc SAS is like cash — once issued, it cannot be recalled before expiry.
+                Policy-linked SAS is like a credit card — compromise means deleting the
+                policy, not disrupting all other applications sharing the account key.
+              </p>
+
+              <a class="diagram-link" href="diagrams/project4-storage-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project4-storage-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Storage account names — no hyphens, globally unique</strong> — Names must be lowercase, 3–24 chars, no hyphens, unique across all of Azure. <code>st-az104-dev-wus3-01</code> is invalid. <code>staz104devwus301</code> is correct. Include an owner prefix to avoid collisions with other tenants.</li>
+                <li><strong>Confirm-then-lockdown sequence for private endpoints</strong> — Deploy endpoint → verify private IP resolution via <code>nslookup</code> → disable public access → verify public returns 404. Re-enable before teardown — CLI commands from Cloud Shell cannot reach a storage account with public access disabled.</li>
+                <li><strong>404 is the stronger security posture</strong> — When public access is disabled, Azure Storage returns 404, not 403. A 403 reveals the resource exists. A 404 reveals nothing. This is intentional Azure behavior.</li>
+                <li><strong>Soft delete — re-enable before testing deletion</strong> — With soft delete enabled, deleted blobs are retained for the retention period and can be undeleted. Demonstrated by deleting a blob, viewing it in the soft-deleted state, and restoring it via the undelete operation.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Private DNS zone must link to ALL VNets</div>
+                <p>Linking only to vnet-hub means vnet-spoke VMs query Azure DNS without the private zone override and receive the public IP. DNS resolution and network routing are independent — peering establishes the route; VNet DNS zone links determine which IP is returned. Both must be configured.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Blob Storage</span>
+                <span class="tech-pill">LRS / GRS</span>
+                <span class="tech-pill">SAS Tokens</span>
+                <span class="tech-pill">Stored Access Policies</span>
+                <span class="tech-pill">Lifecycle Management</span>
+                <span class="tech-pill">Static Website</span>
+                <span class="tech-pill">Private Endpoint</span>
+                <span class="tech-pill">Soft Delete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P7 — Virtual Machines -->
+      <div class="project-card reveal" id="p7">
+        <div class="project-header" onclick="toggleCard('p7')">
+          <div class="project-num">07</div>
+          <div class="project-meta">
+            <span class="project-tag tag-compute">VM · Extensions · Disk Management · Availability</span>
+            <div class="project-title">Virtual Machines &amp; Extensions</div>
+            <div class="project-subtitle">Windows + Linux · Custom Script Extension · BGInfo · disk attach/resize/snapshot · availability zones</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed a cross-zone pair of VMs — Windows Server 2025 Azure Edition
+                in Zone 1, Ubuntu 24.04 in Zone 2 — demonstrating zone-redundant
+                architecture. Both VMs deployed with no public IPs; all access via
+                Bastion or <code>az vm run-command</code>. Extensions automated
+                post-deployment configuration without requiring interactive access:
+                Custom Script Extension installed IIS on Windows, BGInfo wrote
+                system metadata to the desktop wallpaper. Disk operations covered
+                attach, UUID-based mount (never device name), online resize, and snapshot.
+              </p>
+
+              <div class="body-section-label">VM Extensions — Automation Without Login</div>
+              <p class="body-text">
+                Extensions are agents that run inside the VM after deployment.
+                The Azure platform delivers them without requiring any interactive session:
+              </p>
+              <ul class="decision-list">
+                <li><strong>Custom Script Extension</strong> — Fetches a script from a storage blob and executes it. Used to install IIS and configure a test page. The CSE agent makes an anonymous HTTP fetch — use service SAS (account key auth), not user delegation SAS, or the download returns 403.</li>
+                <li><strong>BGInfo</strong> — Writes hostname, IP address, OS version, and uptime to the desktop wallpaper. No longer in the portal marketplace; deploy via CLI only: <code>az vm extension set --name BGInfo --publisher Microsoft.Compute</code>.</li>
+                <li><strong>MDE.Windows / MDE.Linux</strong> — Microsoft Defender for Endpoint deploys automatically on Visual Studio subscriptions via Defender for Cloud. Leave in place — it provides security telemetry.</li>
+              </ul>
+
+              <a class="diagram-link" href="diagrams/project7-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project7-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Windows computerName — 15 character limit</strong> — Azure resource name can be any length, but Windows OS hostname is hard-limited to 15 characters. <code>vm-win-dev-wus3-01</code> is 18 chars and fails at provisioning. Pass <code>computerName</code> as a separate explicit parameter in Bicep — do not rely on <code>take(vmName, 15)</code> for multi-VM deployments, which produces duplicate names.</li>
+                <li><strong>Linux disk mount — UUID, never device name</strong> — Device names (<code>/dev/sda</code>, <code>/dev/sdb</code>) can shift on reboot or when another disk is added. UUID never changes. Always use UUID in fstab with the <code>nofail</code> flag — without it, a missing disk prevents the VM from booting.</li>
+                <li><strong>Disk resize is two separate steps</strong> — <code>az disk update --size-gb</code> expands the block device at the Azure layer. <code>sudo resize2fs</code> expands the filesystem inside the OS to use the new space. One without the other leaves the disk unusable at the expanded size.</li>
+                <li><strong>Never mount data disks at /mnt</strong> — Azure Linux agent mounts the temporary disk at <code>/mnt</code> by default. Mounting a data disk there creates a conflict — after reboot the temp disk wins. Use <code>/data</code> or any other path.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Windows Server 2025 hotpatch settings</div>
+                <p><code>patchMode: 'AutomaticByOS'</code> fails with <code>InvalidParameter</code> on Windows Server 2025 Azure Edition. Required config: <code>patchMode: 'AutomaticByPlatform'</code>, <code>enableHotpatching: true</code> inside <code>patchSettings</code>, with <code>rebootSetting: 'IfRequired'</code>. The <code>enableHotpatching</code> property belongs inside <code>patchSettings</code>, not directly in <code>windowsConfiguration</code>.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Virtual Machines</span>
+                <span class="tech-pill">Availability Zones</span>
+                <span class="tech-pill">Custom Script Extension</span>
+                <span class="tech-pill">BGInfo</span>
+                <span class="tech-pill">Managed Disks</span>
+                <span class="tech-pill">Disk Snapshots</span>
+                <span class="tech-pill">Azure Bastion</span>
+                <span class="tech-pill">Run Command</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P8 — App Service & Containers -->
+      <div class="project-card reveal" id="p8">
+        <div class="project-header" onclick="toggleCard('p8')">
+          <div class="project-num">08</div>
+          <div class="project-meta">
+            <span class="project-tag tag-appsvc">App Service · Deployment Slots · Container Instances</span>
+            <div class="project-title">App Service &amp; Container Instances</div>
+            <div class="project-subtitle">P0v3 plan · staging slot · blue/green swap · slot-sticky settings · ACI nginx · zero-downtime deployment</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed an App Service plan with a Python 3.11 web app and a staging
+                deployment slot, demonstrating blue/green deployment: deploy a new
+                version to staging, validate it, then swap to production in under
+                30 seconds with zero downtime. Slot-sticky app settings stay with
+                the slot during swaps — so the <code>ENVIRONMENT</code> variable
+                always reflects the correct environment regardless of which code
+                revision is running. Also deployed an Azure Container Instance running
+                nginx to demonstrate the lightest-weight compute option in Azure:
+                no VM, no plan, a running container in under 60 seconds.
+              </p>
+
+              <div class="body-section-label">Deployment Slot Swap — How It Works</div>
+              <p class="body-text">
+                App Service is like a managed apartment building — Azure handles
+                infrastructure; you move in your app. A deployment slot is a second
+                apartment in the same building. Swapping exchanges the front doors:
+                staging becomes production and production becomes staging.
+                No one notices the move happened.
+              </p>
+
+              <div class="code-block">
+                <div class="code-label">Swap staging → production</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>az webapp deployment slot swap \
+  -g rg-az104-dev-wus3-01 \
+  -n app-az104-dev-wus3-01 \
+  --slot staging \
+  --target-slot production</pre>
+              </div>
+
+              <a class="diagram-link" href="diagrams/project8-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project8-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>P0v3 minimum for deployment slots</strong> — Deployment slots require Standard tier or higher. P0v3 is the smallest non-legacy tier that supports slots (~$41/mo). Free and Basic tiers are shown as "Legacy" in the current portal — Standard is the correct starting point for any production-pattern deployment.</li>
+                <li><strong>Slot-sticky settings stay with the slot</strong> — The <code>ENVIRONMENT</code> app setting is marked as a slot setting so it doesn't swap with the code. Production always shows <code>ENVIRONMENT=production</code> and staging always shows <code>ENVIRONMENT=staging</code> regardless of which version is deployed where. This is how you track what's running where without hardcoding it in the application.</li>
+                <li><strong>Managed identity at creation time</strong> — <code>--assign-identity "[system]"</code> at <code>az webapp create</code> time. Assigning after creation introduces a timing window where an RBAC assignment might be attempted before the identity GUID exists in Entra ID.</li>
+                <li><strong>KV reference strings — use Cloud Shell, not PowerShell</strong> — The <code>@</code> symbol and parentheses in Key Vault reference values cause parsing failures in PowerShell even inside quotes. Use Cloud Shell Bash for any <code>az webapp config appsettings set</code> commands containing KV references.</li>
+              </ul>
+
+              <div class="info">
+                <div class="info-label">Container Instances vs App Service vs VMs</div>
+                <p><strong>ACI</strong> — Single container, job-style or short-lived workloads. No persistent storage, no autoscale. Fastest cold start. <strong>App Service</strong> — Platform-managed PaaS. Ideal for web apps and APIs where you want deployment slots, autoscale, and built-in CI/CD without managing infrastructure. <strong>VMs</strong> — Full OS control required, legacy software, non-HTTP workloads, or when you need to configure the network stack directly.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">App Service</span>
+                <span class="tech-pill">Deployment Slots</span>
+                <span class="tech-pill">Blue/Green Deploy</span>
+                <span class="tech-pill">Slot-Sticky Settings</span>
+                <span class="tech-pill">Container Instances</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Key Vault References</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P12 — Container Registry & Container Apps -->
+      <div class="project-card reveal" id="p12">
+        <div class="project-header" onclick="toggleCard('p12')">
+          <div class="project-num">12</div>
+          <div class="project-meta">
+            <span class="project-tag tag-container">ACR · Container Apps · Traffic Splitting · Scale-to-Zero</span>
+            <div class="project-title">Container Registry &amp; Container Apps</div>
+            <div class="project-subtitle">ACR · CAE VNet-injected · managed identity · 80/20 traffic split · min 0 replicas · Bicep throughout</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed a complete container workload using infrastructure-as-code
+                throughout — no portal clicks for resource creation. The stack:
+                Azure Container Registry (<code>acrdevwus301</code>) storing two image
+                versions built via different methods, a VNet-injected Container Apps
+                Environment on a dedicated <code>/23</code> subnet delegated to
+                <code>Microsoft.App/environments</code>, and a Container App running
+                nginx with a system-assigned managed identity, scale-to-zero
+                configuration, and an 80/20 canary traffic split between revisions.
+                No credentials stored anywhere in the deployment chain.
+              </p>
+
+              <div class="body-section-label">Two Build Methods — Same Result, Different Context</div>
+              <ul class="decision-list">
+                <li><strong>Local Docker build + push (v1)</strong> — Build happens on the local machine. Docker Engine stamps the image, tags it with the full registry path, pushes each layer to ACR. Layers from prior pushes are reused. Requires Docker Desktop running locally.</li>
+                <li><strong>ACR Tasks cloud build (v2)</strong> — <code>az acr build</code> uploads the Dockerfile and context to Azure. ACR spins up a build agent, executes the Dockerfile, pushes the result — all in the cloud. No local Docker daemon required. This is how CI/CD pipelines build images.</li>
+              </ul>
+
+              <a class="diagram-link" href="diagrams/project12-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project12-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Scale to zero — minReplicas: 0</strong> — The Container App runs zero instances when idle. Cost drops to zero. First request cold-starts a new instance in seconds. For workloads with uneven demand — internal tools, APIs called during business hours — this is a significant cost advantage over App Service, which idles at a fixed price regardless of traffic.</li>
+                <li><strong>Canary deployment via traffic splitting</strong> — 80% of requests route to the stable v1 revision, 20% to the new v2 revision. If v2 shows problems, shift 100% back to v1 without redeployment. Traffic weights are managed via CLI post-deploy (<code>az containerapp ingress traffic set</code>) — not in Bicep, because revision names are auto-generated at deploy time and unknown at template authoring time.</li>
+                <li><strong>Two-pass deployment for role assignment</strong> — System-assigned managed identity only exists after the Container App is created, so the AcrPull role assignment cannot happen in the same deployment pass. Production-grade solution: user-assigned managed identity created as infrastructure before the app, with the role pre-assigned. The identity exists independently of any app.</li>
+                <li><strong>Internal CAE is immutable</strong> — The Container Apps Environment was declared internal at creation time and cannot be changed afterward. Redeploy required to change to external. This was a deliberate design choice following the no-public-IP posture established across all lab resources.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — subnet delegation is a prerequisite</div>
+                <p>The target subnet must be delegated to <code>Microsoft.App/environments</code> before the Container Apps Environment can be created. Minimum subnet size is /23 (512 addresses). Delegation belongs in the subnet creation command and bootstrap script — not discovered at deploy time from a failed provisioning attempt.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Azure Container Registry</span>
+                <span class="tech-pill">ACR Tasks</span>
+                <span class="tech-pill">Container Apps</span>
+                <span class="tech-pill">Container Apps Environment</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Traffic Splitting</span>
+                <span class="tech-pill">Scale-to-Zero</span>
+                <span class="tech-pill">VNet Injection</span>
+                <span class="tech-pill">Bicep</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /project-grid -->
+  </section>
+
+  <!-- LESSONS LEARNED -->
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Lessons Learned</h2>
+    </div>
+
+    <div class="lessons-strip reveal">
+      <div class="lessons-grid">
+        <div class="lesson-item">
+          <div class="lesson-title">Ad-hoc SAS cannot be revoked</div>
+          <div class="lesson-body">A compromised ad-hoc SAS token cannot be cancelled — it remains valid until expiry. The only remediation is rotating the storage account key, which breaks every other application using that key. Policy-linked SAS ties to a stored access policy that can be deleted instantly, revoking all tokens derived from it without touching the account key.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Device names shift; UUIDs never do</div>
+          <div class="lesson-body">Linux device names (<code>/dev/sda</code>, <code>/dev/sdb</code>) are assigned at boot time and can change when disks are added or removed. A fstab entry using a device name can cause a VM to fail to boot after adding a second disk. UUID-based mounts are stable across reboots and disk topology changes. Always use UUID with the <code>nofail</code> flag.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">CSE agent cannot use user delegation SAS</div>
+          <div class="lesson-body">The Custom Script Extension agent makes an anonymous HTTP fetch to download script blobs. User delegation SAS tokens require an Entra ID token to be presented — the CSE agent has no AD context and returns 403. Use service SAS (account key auth) for CSE downloads. Production pattern: managed identity with Storage Blob Data Reader role.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Slot-sticky settings are independent of code</div>
+          <div class="lesson-body">Deployment slot swaps move code between slots. Slot-sticky settings stay with their slot regardless of which code version is running. This is how you maintain environment-aware configuration — <code>ENVIRONMENT=production</code> always lives in the production slot, not in the application code. Forgetting to mark a setting as slot-sticky causes it to follow the code into production during a swap.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Container Apps traffic weights belong in CLI, not Bicep</div>
+          <div class="lesson-body">Bicep traffic weight configuration requires hardcoding the current revision name, which is auto-generated by Azure at deploy time. This means you cannot know the name when authoring the template. Traffic splitting is an operational concern that changes frequently — it belongs in <code>az containerapp ingress traffic set</code> post-deploy, not in the infrastructure definition.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Verify installation; never trust exit codes alone</div>
+          <div class="lesson-body"><code>apt install nginx</code> can exit 0 while silently failing to download packages when there's no outbound internet. The Standard Load Balancer SNAT issue in Project 5 was only discovered via <code>systemctl status nginx</code> — the install appeared successful. This pattern applies everywhere: always verify service state, not just package manager exit status, after installing software on a newly provisioned VM.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">oste<span>bovik</span>.net · AZ-104 Phase 2 + 3 + 4 · Projects 4, 7, 8, 12</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank">LinkedIn</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    function toggleCard(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    function copyCode(btn) {
+      const pre = btn.nextElementSibling;
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'copied';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'var(--green)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 1800);
+      });
+    }
+
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      }),
+      { threshold: 0.08 }
+    );
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
