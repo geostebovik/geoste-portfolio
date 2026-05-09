@@ -4,41 +4,77 @@
 ---
 
 ## ⚡ SESSION HANDOFF — READ THIS FIRST
+Last updated: May 9, 2026
+Completed (do NOT re-ask about these)
 
-**Last updated:** May 9, 2026
+All AZ-104 projects complete: P1–P15
+Portfolio live at ostebovik.net — Front Door → SWA, CI/CD working
+Lab RG rg-az104-dev-wus3-01 torn down and deleted May 8, 2026
+Repo fully reorganized into skill domain folder structure
+All files in az-104/resources/ renamed to kebab-case with reference- prefix convention
+Screenshots routed to correct skill domain folders
+All five skill domain pages live:
 
-### Completed (do NOT re-ask about these)
-- All AZ-104 projects complete: P3–P15
-- Portfolio live at ostebovik.net — Front Door → SWA, CI/CD working
-- Lab RG `rg-az104-dev-wus3-01` torn down and deleted May 8, 2026
-- Repo fully reorganized into skill domain folder structure
-- All files renamed to kebab-case with `reference-` prefix convention
-- Screenshots routed to correct skill domain folders
-- **IaC skill domain page** — live and accurate
-- **Networking skill domain page** — live, all four projects (P3, P5, P6, P13)
-- **Landing page** — contrast fixed, coming-soon cards, certifications section, stats bar updated
-- `www` DNS CNAME added at registrar
+/az-104/identity-governance/ — P1, P2
+/az-104/networking/ — P3, P5, P6, P13
+/az-104/compute-storage/ — P4, P7, P8, P12
+/az-104/infrastructure-as-code/ — P11, P12, P14, P15
+/az-104/monitoring-security/ — P9, P10, P14
 
-### Next Tasks (in priority order)
-1. Verify architecture diagram SVG links resolve correctly through Front Door/SWA (SVGs already in skill domain folders — confirm relative paths)
-2. Upload assets to `stgeostewus301` via `az storage blob upload-batch`
-3. Build **Compute & Storage** skill domain page
-4. Build **Monitoring & Security** skill domain page
+Landing page — all five domain cards wired, certifications section live
+www DNS CNAME added at registrar
+Architecture diagram paths fixed on all domain pages (relative paths)
+P12 diagram consolidated to IaC folder; compute-storage links cross-reference it
+Storage account stgeostewus301 — content container created, public blob access enabled
+All assets uploaded to storage: screenshots, SVGs, diagrams, reference docs
+Storage Blob Data Contributor role assigned to Gerard's account (fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59)
+Screenshot wiring instructions delivered (screenshot-wiring.md) — IN PROGRESS as of end of May 9
 
-### Still Pending (further out)
-- Identity & Governance domain page (Phase 1 backfill)
-- Resume page or download link
-- Resources page (PS vs Bash reference, RPO/RTO write-up, AZ-104 whiteboard)
-- Wire "View projects" links on landing page to domain pages
-- Operating hours WAF rule (upgrade JS check to Front Door Rule Set)
-- AZ-104 exam — schedule and sit
-- AI-901 and AZ-305 (future certs)
+Next Tasks (in priority order)
 
-### Do NOT ask about
-- What projects are complete — all of them (P3–P15)
-- What the next domain page to build is — Compute & Storage
-- Whether the lab RG still exists — deleted May 8, 2026
-- What design system the site uses — Giants palette, Barlow Condensed, IBM Plex Mono (all documented in §1)
+Verify screenshot wiring is complete and live — confirm lightbox works on all five domain pages
+Wire GitHub file links into IaC domain page — link Bicep module files directly to repo
+Build /resources/ page — surface reference docs already in storage:
+
+az-104/resources/powershell-vs-bash-syntax.html
+az-104/resources/reference-rpo-rto.md
+az-104/resources/reference-compute-options.html
+az-104/resources/reference-az104-whiteboard.html
+az-104/resources/reference-compute-comparison.md
+
+Add resume link — dedicated page or downloadable PDF
+
+
+Still Pending (further out)
+Light-theme SVGs need dark-theme replacements: project2, project3, project5, project6, project9
+Dynamic log display page — surface Application Insights / LAW data
+Schedule AZ-104 exam — https://learn.microsoft.com/en-us/credentials/certifications/exams/az-104/
+AI-901 and AZ-305 (future certs)
+
+Do NOT ask about
+
+What projects are complete — all of them (P1–P15)
+What skill domain pages exist — all five are live (see above)
+Whether the lab RG still exists — deleted May 8, 2026
+What the design system is — Giants palette (#0a0a0a, #FD5A1E, #EFE4B0), Barlow Condensed, IBM Plex Mono
+What storage account holds assets — stgeostewus301, container: content, public blob access enabled
+What the repo URL is — https://github.com/geostebovik/geoste-portfolio
+
+What to have ready at session start
+
+This master reference doc in the project Files (already there — re-upload when updated)
+Upload any domain page index.html files if we are editing them that session
+No other files needed unless building something new
+
+Key IDs and values
+
+Subscription ID: 343a8a7e-9911-478d-b833-74110a11b3c2
+Portfolio RG: rg-geoste-prod-wus3-01 (westus3)
+Storage account: stgeostewus301
+Storage blob base URL: https://stgeostewus301.blob.core.windows.net/content
+Gerard's Entra object ID: fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59
+Front Door endpoint: ep-portfolio-bbgjdthdagbvawhc.z01.azurefd.net
+GitHub repo: https://github.com/geostebovik/geoste-portfolio
 
 ---
 
@@ -740,6 +776,12 @@ Behavior: push to `main` → deployed in <60 seconds
 - Landing page (`index.html`) deployed and serving — Giants color palette, skill domain cards, stats bar, scroll reveal animations
 - GitHub Actions CI/CD working — push to `main` = live in <60 seconds
 - All infrastructure resources deployed and healthy in `rg-geoste-prod-wus3-01`
+- Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
+- Build skill domain pages — start with `infrastructure-as-code/index.html` (strongest content, highest interviewer impact)
+- Wire "View projects" links on landing page to actual skill domain pages
+- Upload assets to `stgeostewus301` via `az storage blob upload-batch` (CLI, not portal drag-and-drop)
+- Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
+- Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
 
 ### Repo Structure (Target)
 ```
@@ -770,15 +812,8 @@ geoste-portfolio/
 ```
 
 ### Immediately Actionable Pending Work
-- [ ] Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
-- [ ] Build skill domain pages — start with `infrastructure-as-code/index.html` (strongest content, highest interviewer impact)
-- [ ] Wire "View projects" links on landing page to actual skill domain pages
-- [ ] Upload assets to `stgeostewus301` via `az storage blob upload-batch` (CLI, not portal drag-and-drop)
-- [ ] Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
-- [ ] Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
+
 - [ ] Add resume link — dedicated page or linked PDF
-- [ ] Backfill Identity & Governance domain — no projects mapped yet (Phase 1 content)
-- [ ] Reformat Phase 2 guide to match Phase 3 & 4 format (requires Phase 4 guide as template reference)
 
 ### Future / Planned
 - [ ] Delete `rg-az104-dev-wus3-01` — after all evidence captured and skill domain pages populated (target: next week)
