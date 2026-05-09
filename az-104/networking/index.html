@@ -1,39 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Networking — ostebovik.net</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <style>
     /* ── Design tokens ─────────────────────────────────────────── */
     :root {
-      --black:       #0a0a0a;
-      --orange:      #FD5A1E;
-      --orange-dim:  #c44415;
-      --cream:       #EFE4B0;
-      --cream-dim:   #b8ad84;
-      --surface-1:   #111213;
-      --surface-2:   #16181c;
-      --surface-3:   #1e2128;
-      --surface-4:   #252830;
-      --border:      #2a2d35;
-      --border-lit:  #3a3d47;
-      --text-primary:   #e8e4d8;
+      --black: #0a0a0a;
+      --orange: #FD5A1E;
+      --orange-dim: #c44415;
+      --cream: #EFE4B0;
+      --cream-dim: #b8ad84;
+      --surface-1: #111213;
+      --surface-2: #16181c;
+      --surface-3: #1e2128;
+      --surface-4: #252830;
+      --border: #2a2d35;
+      --border-lit: #3a3d47;
+      --text-primary: #e8e4d8;
       --text-secondary: #a8a49c;
-      --text-dim:       #706c66;
-      --blue:   #4a9eff;
-      --teal:   #2dd4bf;
-      --amber:  #f59e0b;
+      --text-dim: #706c66;
+      --blue: #4a9eff;
+      --teal: #2dd4bf;
+      --amber: #f59e0b;
       --purple: #a78bfa;
-      --green:  #34d399;
-      --red:    #f87171;
+      --green: #34d399;
+      --red: #f87171;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       background: var(--black);
@@ -58,14 +70,16 @@
     /* ── Nav ───────────────────────────────────────────────────── */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 2rem;
       height: 56px;
-      background: rgba(10,10,10,0.92);
+      background: rgba(10, 10, 10, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
@@ -78,9 +92,17 @@
       text-decoration: none;
       color: var(--cream);
     }
-    .nav-brand span { color: var(--orange); }
 
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-brand span {
+      color: var(--orange);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
     .nav-links a {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 0.7rem;
@@ -91,7 +113,11 @@
       color: var(--text-secondary);
       transition: color 0.2s;
     }
-    .nav-links a:hover, .nav-links a.active { color: var(--orange); }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--orange);
+    }
 
     /* ── Hero ──────────────────────────────────────────────────── */
     .hero {
@@ -112,10 +138,12 @@
       align-items: center;
       gap: 0.75rem;
     }
+
     .hero-eyebrow::before {
       content: '';
       display: inline-block;
-      width: 32px; height: 1px;
+      width: 32px;
+      height: 1px;
       background: var(--orange);
     }
 
@@ -129,7 +157,12 @@
       color: var(--cream);
       margin-bottom: 1.5rem;
     }
-    .hero h1 em { font-style: normal; color: var(--orange); display: block; }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--orange);
+      display: block;
+    }
 
     .hero-description {
       max-width: 580px;
@@ -140,17 +173,32 @@
       margin-bottom: 2.5rem;
     }
 
-    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
-    .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
     .stat-value {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 2rem; font-weight: 700;
-      color: var(--cream); line-height: 1;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
     }
+
     .stat-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--text-dim);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
     }
 
     /* ── Section layout ────────────────────────────────────────── */
@@ -168,16 +216,28 @@
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border);
     }
-    .section-number { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+    .section-number {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
     .section-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.6rem; font-weight: 700;
-      letter-spacing: 0.04em; text-transform: uppercase;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: var(--cream);
     }
 
     /* ── Project cards ─────────────────────────────────────────── */
-    .project-grid { display: grid; gap: 1.5px; }
+    .project-grid {
+      display: grid;
+      gap: 1.5px;
+    }
 
     .project-card {
       background: var(--surface-2);
@@ -185,7 +245,10 @@
       overflow: hidden;
       transition: border-color 0.2s;
     }
-    .project-card:hover { border-color: var(--border-lit); }
+
+    .project-card:hover {
+      border-color: var(--border-lit);
+    }
 
     .project-header {
       display: grid;
@@ -199,43 +262,87 @@
 
     .project-num {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 2.8rem; font-weight: 800;
-      line-height: 1; color: var(--orange);
-      opacity: 0.25; min-width: 3.5rem;
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--orange);
+      opacity: 0.25;
+      min-width: 3.5rem;
       transition: opacity 0.2s;
     }
-    .project-card:hover .project-num,
-    .project-card.open .project-num { opacity: 1; }
 
-    .project-meta { flex: 1; }
+    .project-card:hover .project-num,
+    .project-card.open .project-num {
+      opacity: 1;
+    }
+
+    .project-meta {
+      flex: 1;
+    }
 
     .project-tag {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.62rem; letter-spacing: 0.12em;
-      text-transform: uppercase; padding: 0.2rem 0.6rem;
-      border-radius: 2px; margin-bottom: 0.5rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      margin-bottom: 0.5rem;
       display: inline-block;
     }
-    .tag-network  { background: rgba(74,158,255,0.12); color: var(--blue);   border: 1px solid rgba(74,158,255,0.2); }
-    .tag-lb       { background: rgba(45,212,191,0.12); color: var(--teal);   border: 1px solid rgba(45,212,191,0.2); }
-    .tag-dns      { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
-    .tag-appgw    { background: rgba(245,158,11,0.12); color: var(--amber);  border: 1px solid rgba(245,158,11,0.2); }
+
+    .tag-network {
+      background: rgba(74, 158, 255, 0.12);
+      color: var(--blue);
+      border: 1px solid rgba(74, 158, 255, 0.2);
+    }
+
+    .tag-lb {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--teal);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+    }
+
+    .tag-dns {
+      background: rgba(167, 139, 250, 0.12);
+      color: var(--purple);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    .tag-appgw {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
 
     .project-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.3rem; font-weight: 600;
-      letter-spacing: 0.03em; text-transform: uppercase;
-      color: var(--cream); margin-bottom: 0.3rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 0.3rem;
     }
-    .project-subtitle { font-size: 0.82rem; color: var(--text-secondary); font-weight: 400; }
+
+    .project-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
 
     .project-toggle {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.75rem; color: var(--text-dim);
+      font-size: 0.75rem;
+      color: var(--text-dim);
       transition: color 0.2s, transform 0.3s;
       display: inline-block;
     }
-    .project-card.open .project-toggle { color: var(--orange); transform: rotate(180deg); }
+
+    .project-card.open .project-toggle {
+      color: var(--orange);
+      transform: rotate(180deg);
+    }
 
     /* ── Project body ──────────────────────────────────────────── */
     .project-body {
@@ -243,7 +350,10 @@
       padding: 0 1.75rem 1.75rem;
       border-top: 1px solid var(--border);
     }
-    .project-card.open .project-body { display: block; }
+
+    .project-card.open .project-body {
+      display: block;
+    }
 
     .project-body-inner {
       padding-top: 1.5rem;
@@ -251,42 +361,72 @@
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
     }
-    @media (max-width: 700px) { .project-body-inner { grid-template-columns: 1fr; } }
+
+    @media (max-width: 700px) {
+      .project-body-inner {
+        grid-template-columns: 1fr;
+      }
+    }
 
     .body-section-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.62rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--text-dim);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
       margin-bottom: 0.75rem;
     }
 
     .body-text {
-      font-size: 0.88rem; font-weight: 400;
-      color: var(--text-secondary); line-height: 1.7;
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.7;
       margin-bottom: 1.25rem;
     }
 
     /* ── Decision list ─────────────────────────────────────────── */
-    .decision-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
-    .decision-list li {
-      display: flex; gap: 0.75rem;
-      font-size: 0.85rem; font-weight: 400;
-      color: var(--text-secondary); line-height: 1.55;
+    .decision-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
+
+    .decision-list li {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
     .decision-list li::before {
       content: '→';
       font-family: 'IBM Plex Mono', monospace;
-      color: var(--orange); flex-shrink: 0; margin-top: 0.05rem;
+      color: var(--orange);
+      flex-shrink: 0;
+      margin-top: 0.05rem;
     }
 
     /* ── Tech pills ────────────────────────────────────────────── */
-    .tech-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+    }
+
     .tech-pill {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.05em;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
       padding: 0.25rem 0.65rem;
-      background: var(--surface-3); border: 1px solid var(--border);
-      color: var(--text-secondary); border-radius: 2px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 2px;
     }
 
     /* ── Code block ────────────────────────────────────────────── */
@@ -296,118 +436,248 @@
       border-left: 3px solid var(--orange);
       padding: 1rem 1.25rem;
       margin: 1rem 0;
-      position: relative; overflow-x: auto;
+      position: relative;
+      overflow-x: auto;
     }
+
     .code-block pre {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem; line-height: 1.7;
-      color: var(--cream-dim); white-space: pre;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      color: var(--cream-dim);
+      white-space: pre;
     }
+
     .code-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--text-dim);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
       margin-bottom: 0.5rem;
     }
+
     .copy-btn {
-      position: absolute; top: 0.6rem; right: 0.75rem;
+      position: absolute;
+      top: 0.6rem;
+      right: 0.75rem;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
-      background: none; border: 1px solid var(--border);
-      color: var(--text-dim); padding: 0.2rem 0.5rem;
-      cursor: pointer; transition: color 0.2s, border-color 0.2s;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
     }
-    .copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+
+    .copy-btn:hover {
+      color: var(--orange);
+      border-color: var(--orange);
+    }
 
     /* ── Gotcha callout ────────────────────────────────────────── */
     .gotcha {
-      background: rgba(253,90,30,0.06);
-      border: 1px solid rgba(253,90,30,0.2);
+      background: rgba(253, 90, 30, 0.06);
+      border: 1px solid rgba(253, 90, 30, 0.2);
       border-left: 3px solid var(--orange);
-      padding: 0.9rem 1.1rem; margin: 1rem 0;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
     }
+
     .gotcha-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--orange); margin-bottom: 0.4rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.4rem;
     }
-    .gotcha p { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    .gotcha p {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
 
     /* ── Info callout ──────────────────────────────────────────── */
     .info {
-      background: rgba(74,158,255,0.06);
-      border: 1px solid rgba(74,158,255,0.2);
+      background: rgba(74, 158, 255, 0.06);
+      border: 1px solid rgba(74, 158, 255, 0.2);
       border-left: 3px solid var(--blue);
-      padding: 0.9rem 1.1rem; margin: 1rem 0;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
     }
+
     .info-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--blue); margin-bottom: 0.4rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.4rem;
     }
-    .info p { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    .info p {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
 
     /* ── Diagram link ──────────────────────────────────────────── */
     .diagram-link {
-      display: flex; align-items: center; gap: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       padding: 1rem 1.25rem;
-      background: var(--surface-3); border: 1px solid var(--border);
-      text-decoration: none; color: var(--text-secondary);
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text-secondary);
       font-size: 0.82rem;
       transition: border-color 0.2s, color 0.2s;
       margin-top: 1rem;
     }
-    .diagram-link:hover { border-color: var(--orange); color: var(--orange); }
-    .diagram-link-icon { font-family: 'IBM Plex Mono', monospace; font-size: 1rem; color: var(--orange); }
+
+    .diagram-link:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .diagram-link-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      color: var(--orange);
+    }
 
     /* ── DNS comparison grid ───────────────────────────────────── */
     .dns-compare {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 1px; background: var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
       margin: 1rem 0;
     }
-    @media (max-width: 600px) { .dns-compare { grid-template-columns: 1fr; } }
 
-    .dns-card { background: var(--surface-2); overflow: hidden; }
+    @media (max-width: 600px) {
+      .dns-compare {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dns-card {
+      background: var(--surface-2);
+      overflow: hidden;
+    }
+
     .dns-card-header {
       padding: 0.6rem 1rem;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       border-bottom: 1px solid var(--border);
     }
-    .dns-card-header.bad  { background: rgba(248,113,113,0.08); color: var(--red); }
-    .dns-card-header.good { background: rgba(52,211,153,0.08);  color: var(--green); }
+
+    .dns-card-header.bad {
+      background: rgba(248, 113, 113, 0.08);
+      color: var(--red);
+    }
+
+    .dns-card-header.good {
+      background: rgba(52, 211, 153, 0.08);
+      color: var(--green);
+    }
+
     .dns-card-body {
       padding: 1rem;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.7rem; line-height: 2; color: var(--text-dim);
+      font-size: 0.7rem;
+      line-height: 2;
+      color: var(--text-dim);
     }
-    .dns-hop { display: block; padding-left: 1rem; position: relative; }
-    .dns-hop::before { content: '→'; position: absolute; left: 0; color: var(--text-dim); }
-    .dns-hop.bad  { color: var(--red); }
-    .dns-hop.good { color: var(--green); }
-    .dns-hop.key  { color: var(--blue); }
+
+    .dns-hop {
+      display: block;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .dns-hop::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--text-dim);
+    }
+
+    .dns-hop.bad {
+      color: var(--red);
+    }
+
+    .dns-hop.good {
+      color: var(--green);
+    }
+
+    .dns-hop.key {
+      color: var(--blue);
+    }
 
     /* ── Access outcome table ──────────────────────────────────── */
-    .outcome-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.8rem; }
+    .outcome-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.8rem;
+    }
+
     .outcome-table th {
-      background: var(--surface-3); padding: 0.6rem 0.9rem;
-      text-align: left; font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text-dim); border-bottom: 1px solid var(--border);
+      background: var(--surface-3);
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
     }
+
     .outcome-table td {
-      padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border);
-      color: var(--text-secondary); vertical-align: top;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      vertical-align: top;
     }
-    .outcome-table tr:last-child td { border-bottom: none; }
+
+    .outcome-table tr:last-child td {
+      border-bottom: none;
+    }
+
     .badge {
-      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 2px;
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem;
-      font-weight: 500; letter-spacing: 0.05em;
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
     }
-    .badge-green { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
-    .badge-red   { background: rgba(248,113,113,0.12); color: var(--red);   border: 1px solid rgba(248,113,113,0.2); }
+
+    .badge-green {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .badge-red {
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
 
     /* ── Lessons strip ─────────────────────────────────────────── */
     .lessons-strip {
@@ -416,41 +686,91 @@
       padding: 2rem 1.75rem;
       margin-top: 1.5px;
     }
+
     .lessons-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem; margin-top: 1.5rem;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
-    .lesson-item { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .lesson-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
     .lesson-title {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.7rem; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--cream);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
     }
-    .lesson-body { font-size: 0.82rem; font-weight: 400; color: var(--text-secondary); line-height: 1.6; }
+
+    .lesson-body {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
 
     /* ── Footer ────────────────────────────────────────────────── */
     footer {
       border-top: 1px solid var(--border);
       padding: 2rem;
-      display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .footer-brand { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.08em; }
-    .footer-brand span { color: var(--orange); }
-    .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+
+    .footer-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-brand span {
+      color: var(--orange);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
     .footer-links a {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--text-dim); text-decoration: none; transition: color 0.2s;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
     }
-    .footer-links a:hover { color: var(--orange); }
+
+    .footer-links a:hover {
+      color: var(--orange);
+    }
 
     /* ── Scroll reveal ─────────────────────────────────────────── */
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
-    .reveal.visible { opacity: 1; transform: none; }
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- NAV -->
@@ -499,7 +819,8 @@
           <div class="project-meta">
             <span class="project-tag tag-network">VNet · NSG · Peering</span>
             <div class="project-title">Hub-Spoke Network Topology</div>
-            <div class="project-subtitle">Two VNets · bidirectional peering · subnet-level NSGs · no public IPs on VMs</div>
+            <div class="project-subtitle">Two VNets · bidirectional peering · subnet-level NSGs · no public IPs on VMs
+            </div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -527,10 +848,12 @@
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — ip route show is not a valid peering diagnostic</div>
-                <p>Azure SDN handles peered VNet routes at the hypervisor layer. The guest OS routing table will never show peering routes — they will always appear missing even when peering is fully functional. Always test with actual connectivity: ping a real VM IP across the peering, never the subnet gateway.</p>
+                <p>Azure SDN handles peered VNet routes at the hypervisor layer. The guest OS routing table will never
+                  show peering routes — they will always appear missing even when peering is fully functional. Always
+                  test with actual connectivity: ping a real VM IP across the peering, never the subnet gateway.</p>
               </div>
 
-              <a class="diagram-link" href="../diagrams/project3-network-topology.svg" target="_blank">
+              <a class="diagram-link" href="diagrams/project3-network-topology.svg" target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project3-network-topology.svg
               </a>
@@ -539,10 +862,18 @@
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>No public IPs on VMs</strong> — <code>--public-ip-address ""</code> at creation time. Eliminates the attack surface entirely. All access routes through Bastion (interactive) or run-command (automation).</li>
-                <li><strong>NSG at subnet level, not NIC level</strong> — <code>az network vnet subnet create --nsg</code> attaches the NSG to the subnet. Protects all resources in the subnet including future additions. Single management point vs. per-VM NIC rules.</li>
-                <li><strong>Service tags over IP ranges</strong> — <code>AzureLoadBalancer</code>, <code>VirtualNetwork</code>, <code>Internet</code> rather than hardcoded IP ranges. Microsoft maintains service tags automatically — hardcoded IPs break when Azure infrastructure changes.</li>
-                <li><strong>Internet vs * in NSG deny rules</strong> — <code>Internet</code> blocks public traffic only. <code>*</code> blocks everything including Bastion connections through the VNet. Using <code>*</code> to deny RDP/SSH would silently block Bastion.</li>
+                <li><strong>No public IPs on VMs</strong> — <code>--public-ip-address ""</code> at creation time.
+                  Eliminates the attack surface entirely. All access routes through Bastion (interactive) or run-command
+                  (automation).</li>
+                <li><strong>NSG at subnet level, not NIC level</strong> —
+                  <code>az network vnet subnet create --nsg</code> attaches the NSG to the subnet. Protects all
+                  resources in the subnet including future additions. Single management point vs. per-VM NIC rules.</li>
+                <li><strong>Service tags over IP ranges</strong> — <code>AzureLoadBalancer</code>,
+                  <code>VirtualNetwork</code>, <code>Internet</code> rather than hardcoded IP ranges. Microsoft
+                  maintains service tags automatically — hardcoded IPs break when Azure infrastructure changes.</li>
+                <li><strong>Internet vs * in NSG deny rules</strong> — <code>Internet</code> blocks public traffic only.
+                  <code>*</code> blocks everything including Bastion connections through the VNet. Using <code>*</code>
+                  to deny RDP/SSH would silently block Bastion.</li>
               </ul>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -566,7 +897,8 @@
           <div class="project-meta">
             <span class="project-tag tag-lb">Load Balancer · SNAT · Availability</span>
             <div class="project-title">Standard Load Balancer</div>
-            <div class="project-subtitle">Standard SKU · health probes · explicit outbound SNAT · availability set · round-robin distribution</div>
+            <div class="project-subtitle">Standard SKU · health probes · explicit outbound SNAT · availability set ·
+              round-robin distribution</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -585,10 +917,19 @@
 
               <div class="body-section-label">The Four Issues</div>
               <ul class="decision-list">
-                <li><strong>Browsers silently upgrade bare IPs to HTTPS</strong> — Chrome and Edge default to HTTPS for all addresses. The LB only had port 80 configured, so the attempt timed out and looked like an LB misconfiguration. Always type <code>http://</code> explicitly when testing HTTP-only backends.</li>
-                <li><strong>Health probes blocked by NSG</strong> — Without a rule allowing the <code>AzureLoadBalancer</code> service tag on port 80, probes are silently dropped. Both VMs show as Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.</li>
-                <li><strong>No implicit outbound SNAT</strong> — VMs in the backend pool with no public IP had zero internet access. <code>apt install nginx</code> appeared to succeed but silently failed. <code>systemctl status nginx</code> revealed the service didn't exist. Fix: second public IP, frontend IP config, outbound rule.</li>
-                <li><strong>Frontend IP config is an intermediate layer</strong> — Outbound rules reference frontend IP configurations, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config → Rule. Portal abstracts this; CLI does not.</li>
+                <li><strong>Browsers silently upgrade bare IPs to HTTPS</strong> — Chrome and Edge default to HTTPS for
+                  all addresses. The LB only had port 80 configured, so the attempt timed out and looked like an LB
+                  misconfiguration. Always type <code>http://</code> explicitly when testing HTTP-only backends.</li>
+                <li><strong>Health probes blocked by NSG</strong> — Without a rule allowing the
+                  <code>AzureLoadBalancer</code> service tag on port 80, probes are silently dropped. Both VMs show as
+                  Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.</li>
+                <li><strong>No implicit outbound SNAT</strong> — VMs in the backend pool with no public IP had zero
+                  internet access. <code>apt install nginx</code> appeared to succeed but silently failed.
+                  <code>systemctl status nginx</code> revealed the service didn't exist. Fix: second public IP, frontend
+                  IP config, outbound rule.</li>
+                <li><strong>Frontend IP config is an intermediate layer</strong> — Outbound rules reference frontend IP
+                  configurations, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config →
+                  Rule. Portal abstracts this; CLI does not.</li>
               </ul>
 
               <div class="code-block">
@@ -599,7 +940,7 @@
 done | sort | uniq -c</pre>
               </div>
 
-              <a class="diagram-link" href="../diagrams/project5-lb-architecture.svg" target="_blank">
+              <a class="diagram-link" href="diagrams/project5-lb-architecture.svg" target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project5-lb-architecture.svg
               </a>
@@ -608,15 +949,24 @@ done | sort | uniq -c</pre>
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>Standard SKU — no exceptions</strong> — Basic SKU Load Balancer is being retired. Standard is zone-redundant, supports outbound rules and multiple frontend IPs. Every new deployment uses Standard.</li>
-                <li><strong>Availability set for fault domain separation</strong> — Two VMs in separate fault domains means a single rack failure doesn't take both offline. Minimum viable HA for a two-VM pool.</li>
-                <li><strong>Dedicated outbound public IP</strong> — Separate from the inbound frontend IP. Keeps outbound SNAT traffic on a distinct IP, simplifying firewall rules and preserving the inbound IP for load-balanced traffic only.</li>
-                <li><strong>Round-robin is not strictly alternating</strong> — Standard LB uses a 5-tuple hash. Browser HTTP keep-alive reuses TCP connections, so the same VM serves multiple requests in a row. Expect uneven distribution (e.g., 13/7), not exactly 10/10.</li>
+                <li><strong>Standard SKU — no exceptions</strong> — Basic SKU Load Balancer is being retired. Standard
+                  is zone-redundant, supports outbound rules and multiple frontend IPs. Every new deployment uses
+                  Standard.</li>
+                <li><strong>Availability set for fault domain separation</strong> — Two VMs in separate fault domains
+                  means a single rack failure doesn't take both offline. Minimum viable HA for a two-VM pool.</li>
+                <li><strong>Dedicated outbound public IP</strong> — Separate from the inbound frontend IP. Keeps
+                  outbound SNAT traffic on a distinct IP, simplifying firewall rules and preserving the inbound IP for
+                  load-balanced traffic only.</li>
+                <li><strong>Round-robin is not strictly alternating</strong> — Standard LB uses a 5-tuple hash. Browser
+                  HTTP keep-alive reuses TCP connections, so the same VM serves multiple requests in a row. Expect
+                  uneven distribution (e.g., 13/7), not exactly 10/10.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — apt install can silently fail</div>
-                <p>Without outbound SNAT, <code>apt install nginx</code> printed connection warnings but reported success — exit code 0. Never trust package manager exit status alone on a newly provisioned VM. Always verify with <code>systemctl status nginx</code>.</p>
+                <p>Without outbound SNAT, <code>apt install nginx</code> printed connection warnings but reported
+                  success — exit code 0. Never trust package manager exit status alone on a newly provisioned VM. Always
+                  verify with <code>systemctl status nginx</code>.</p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -641,7 +991,8 @@ done | sort | uniq -c</pre>
           <div class="project-meta">
             <span class="project-tag tag-dns">DNS · Private Endpoints · Zero Trust</span>
             <div class="project-title">Private Endpoints &amp; Split-Horizon DNS</div>
-            <div class="project-subtitle">Private Link · Private DNS zone · VNet DNS links · public access disabled · same hostname, different resolution</div>
+            <div class="project-subtitle">Private Link · Private DNS zone · VNet DNS links · public access disabled ·
+              same hostname, different resolution</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -685,7 +1036,11 @@ done | sort | uniq -c</pre>
               <div class="body-section-label" style="margin-top:1.25rem;">Access Outcome</div>
               <table class="outcome-table">
                 <thead>
-                  <tr><th>Source</th><th>Resolves to</th><th>Result</th></tr>
+                  <tr>
+                    <th>Source</th>
+                    <th>Resolves to</th>
+                    <th>Result</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -706,7 +1061,7 @@ done | sort | uniq -c</pre>
                 </tbody>
               </table>
 
-              <a class="diagram-link" href="../diagrams/project6-dns-private-endpoint.svg" target="_blank">
+              <a class="diagram-link" href="diagrams/project6-dns-private-endpoint.svg" target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project6-dns-private-endpoint.svg
               </a>
@@ -715,15 +1070,27 @@ done | sort | uniq -c</pre>
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>Private DNS zone linked to ALL VNets</strong> — Linking only to vnet-hub means vnet-spoke VMs query Azure DNS without the private zone override and receive the public IP. DNS resolution and network routing are independent — peering establishes the route; VNet DNS zone links determine which DNS response is returned. Both must be configured.</li>
-                <li><strong>Private DNS zone names are fixed</strong> — The zone name for each Private Link service is mandated by Azure. Any other name prevents automatic A record creation. Blob Storage must be <code>privatelink.blob.core.windows.net</code>.</li>
-                <li><strong>Disable public access only after private connectivity confirmed</strong> — Confirm-then-lockdown: deploy endpoint → verify private IP resolution via nslookup → disable public access → verify public is blocked. Re-enable before teardown — CLI delete commands from Cloud Shell cannot reach storage with public access disabled.</li>
-                <li><strong>404 is the stronger security posture</strong> — When public network access is disabled, Azure Storage returns 404, not 403. A 403 would reveal the resource exists. A 404 reveals nothing. This is intentional Azure behavior, not a misconfiguration.</li>
+                <li><strong>Private DNS zone linked to ALL VNets</strong> — Linking only to vnet-hub means vnet-spoke
+                  VMs query Azure DNS without the private zone override and receive the public IP. DNS resolution and
+                  network routing are independent — peering establishes the route; VNet DNS zone links determine which
+                  DNS response is returned. Both must be configured.</li>
+                <li><strong>Private DNS zone names are fixed</strong> — The zone name for each Private Link service is
+                  mandated by Azure. Any other name prevents automatic A record creation. Blob Storage must be
+                  <code>privatelink.blob.core.windows.net</code>.</li>
+                <li><strong>Disable public access only after private connectivity confirmed</strong> —
+                  Confirm-then-lockdown: deploy endpoint → verify private IP resolution via nslookup → disable public
+                  access → verify public is blocked. Re-enable before teardown — CLI delete commands from Cloud Shell
+                  cannot reach storage with public access disabled.</li>
+                <li><strong>404 is the stronger security posture</strong> — When public network access is disabled,
+                  Azure Storage returns 404, not 403. A 403 would reveal the resource exists. A 404 reveals nothing.
+                  This is intentional Azure behavior, not a misconfiguration.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Private DNS zone name is not configurable</div>
-                <p>Common mistake: creating the private DNS zone with a custom name. Azure requires the exact mandated name per service type or the private endpoint NIC's A record will not be auto-registered. Always verify the zone name matches the Private Link DNS zone table before deployment.</p>
+                <p>Common mistake: creating the private DNS zone with a custom name. Azure requires the exact mandated
+                  name per service type or the private endpoint NIC's A record will not be auto-registered. Always
+                  verify the zone name matches the Private Link DNS zone table before deployment.</p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -748,7 +1115,8 @@ done | sort | uniq -c</pre>
           <div class="project-meta">
             <span class="project-tag tag-appgw">App Gateway · WAF · Bastion</span>
             <div class="project-title">Application Gateway &amp; Bastion</div>
-            <div class="project-subtitle">Standard_v2 · WAF policy · dedicated subnet · AzureBastionSubnet · inline NSG rules</div>
+            <div class="project-subtitle">Standard_v2 · WAF policy · dedicated subnet · AzureBastionSubnet · inline NSG
+              rules</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -768,29 +1136,46 @@ done | sort | uniq -c</pre>
 
               <div class="body-section-label">App Gateway NSG — Three Non-Negotiable Rules</div>
               <ul class="decision-list">
-                <li><strong>GatewayManager → ports 65200–65535 (priority 100)</strong> — Control plane traffic from Azure infrastructure. Without this, the gateway fails health checks and will not provision.</li>
-                <li><strong>AzureLoadBalancer → any (priority 200)</strong> — Azure internal health probing. Required for Standard_v2.</li>
-                <li><strong>Internet → ports 80, 443 (priority 300)</strong> — Inbound client traffic. Restrict source to known ranges in production.</li>
+                <li><strong>GatewayManager → ports 65200–65535 (priority 100)</strong> — Control plane traffic from
+                  Azure infrastructure. Without this, the gateway fails health checks and will not provision.</li>
+                <li><strong>AzureLoadBalancer → any (priority 200)</strong> — Azure internal health probing. Required
+                  for Standard_v2.</li>
+                <li><strong>Internet → ports 80, 443 (priority 300)</strong> — Inbound client traffic. Restrict source
+                  to known ranges in production.</li>
               </ul>
 
               <div class="info">
                 <div class="info-label">Bastion — inline NSG rules are required</div>
-                <p>NSG rules for <code>AzureBastionSubnet</code> must be defined inside <code>properties.securityRules: [...]</code> on the NSG resource, not as separate child resources. Separate child resources deploy in parallel and may not be complete when the compliance check runs at subnet attachment time.</p>
+                <p>NSG rules for <code>AzureBastionSubnet</code> must be defined inside
+                  <code>properties.securityRules: [...]</code> on the NSG resource, not as separate child resources.
+                  Separate child resources deploy in parallel and may not be complete when the compliance check runs at
+                  subnet attachment time.</p>
               </div>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — AzureBastionSubnet exact name required</div>
-                <p>The subnet must be named exactly <code>AzureBastionSubnet</code> — no CAF naming, no variations. Minimum size /26. Any deviation and Bastion will not provision regardless of all other configuration being correct.</p>
+                <p>The subnet must be named exactly <code>AzureBastionSubnet</code> — no CAF naming, no variations.
+                  Minimum size /26. Any deviation and Bastion will not provision regardless of all other configuration
+                  being correct.</p>
               </div>
             </div>
 
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>App Gateway requires a dedicated subnet</strong> — Cannot share a subnet with any other resource type. Minimum /27 for lab, /24 for production. This is a hard platform requirement, not a recommendation.</li>
-                <li><strong>deployBastionHost condition flag</strong> — Bastion Standard SKU costs ~$0.19/hr (~$140/mo). A <code>deployBastionHost bool</code> parameter in Bicep allows the NSG, subnet, and all rules to deploy in place while the host itself is only created when needed. Cost control pattern for lab environments.</li>
-                <li><strong>Bastion target VM NSG rule required</strong> — Bastion can connect to the VM but the VM's NSG must allow inbound SSH (22) or RDP (3389) from the <code>AzureBastionSubnet</code> range (<code>10.0.7.0/26</code>). No clear error is surfaced — the connection simply fails silently.</li>
-                <li><strong>WAF over NSG for L7 protection</strong> — NSGs operate at L3/L4 — they can block IPs and ports but cannot inspect HTTP payloads. WAF policy on Application Gateway provides OWASP ruleset enforcement, SQL injection protection, and custom rules at the application layer.</li>
+                <li><strong>App Gateway requires a dedicated subnet</strong> — Cannot share a subnet with any other
+                  resource type. Minimum /27 for lab, /24 for production. This is a hard platform requirement, not a
+                  recommendation.</li>
+                <li><strong>deployBastionHost condition flag</strong> — Bastion Standard SKU costs ~$0.19/hr (~$140/mo).
+                  A <code>deployBastionHost bool</code> parameter in Bicep allows the NSG, subnet, and all rules to
+                  deploy in place while the host itself is only created when needed. Cost control pattern for lab
+                  environments.</li>
+                <li><strong>Bastion target VM NSG rule required</strong> — Bastion can connect to the VM but the VM's
+                  NSG must allow inbound SSH (22) or RDP (3389) from the <code>AzureBastionSubnet</code> range
+                  (<code>10.0.7.0/26</code>). No clear error is surfaced — the connection simply fails silently.</li>
+                <li><strong>WAF over NSG for L7 protection</strong> — NSGs operate at L3/L4 — they can block IPs and
+                  ports but cannot inspect HTTP payloads. WAF policy on Application Gateway provides OWASP ruleset
+                  enforcement, SQL injection protection, and custom rules at the application layer.</li>
               </ul>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -822,27 +1207,45 @@ done | sort | uniq -c</pre>
       <div class="lessons-grid">
         <div class="lesson-item">
           <div class="lesson-title">DNS and routing are independent layers</div>
-          <div class="lesson-body">VNet peering establishes the network route. Private DNS zone links determine what IP a hostname resolves to. Configuring one without the other produces confusing failures — traffic can route correctly but DNS returns the wrong IP, or DNS resolves correctly but there's no route to the private IP. Both must be verified independently.</div>
+          <div class="lesson-body">VNet peering establishes the network route. Private DNS zone links determine what IP
+            a hostname resolves to. Configuring one without the other produces confusing failures — traffic can route
+            correctly but DNS returns the wrong IP, or DNS resolves correctly but there's no route to the private IP.
+            Both must be verified independently.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Standard SKU requires explicit configuration</div>
-          <div class="lesson-body">Basic SKU Load Balancer provided implicit outbound SNAT and allowed health probe traffic through NSGs without rules. Standard SKU does neither — everything must be configured explicitly. This is correct behavior: implicit allowances obscure what's actually happening on your network. Microsoft is retiring Basic SKU; all new deployments use Standard.</div>
+          <div class="lesson-body">Basic SKU Load Balancer provided implicit outbound SNAT and allowed health probe
+            traffic through NSGs without rules. Standard SKU does neither — everything must be configured explicitly.
+            This is correct behavior: implicit allowances obscure what's actually happening on your network. Microsoft
+            is retiring Basic SKU; all new deployments use Standard.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Subnet gateway IPs never respond to ping</div>
-          <div class="lesson-body">The <code>.1</code> address in each subnet (e.g., <code>10.0.1.1</code>) is an Azure infrastructure address that never responds to ICMP. A common first debugging step is pinging the gateway to test connectivity — it will always time out even when everything is working. Always test peering by pinging a VM's private IP.</div>
+          <div class="lesson-body">The <code>.1</code> address in each subnet (e.g., <code>10.0.1.1</code>) is an Azure
+            infrastructure address that never responds to ICMP. A common first debugging step is pinging the gateway to
+            test connectivity — it will always time out even when everything is working. Always test peering by pinging
+            a VM's private IP.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Bastion NSG rules must be inline</div>
-          <div class="lesson-body">Defining Bastion NSG rules as separate child resources triggers a race condition — the compliance check at subnet attachment time may run before all rules are deployed. Rules inside <code>securityRules: [...]</code> on the NSG resource deploy atomically and pass the compliance check reliably every time.</div>
+          <div class="lesson-body">Defining Bastion NSG rules as separate child resources triggers a race condition —
+            the compliance check at subnet attachment time may run before all rules are deployed. Rules inside
+            <code>securityRules: [...]</code> on the NSG resource deploy atomically and pass the compliance check
+            reliably every time.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Verify installation, don't trust exit codes</div>
-          <div class="lesson-body"><code>apt install</code> can exit 0 while silently failing to download packages when there's no outbound internet access. The Standard LB SNAT issue was only discovered via <code>systemctl status nginx</code> — the install appeared successful. Always verify service state after package installation on a newly provisioned VM.</div>
+          <div class="lesson-body"><code>apt install</code> can exit 0 while silently failing to download packages when
+            there's no outbound internet access. The Standard LB SNAT issue was only discovered via
+            <code>systemctl status nginx</code> — the install appeared successful. Always verify service state after
+            package installation on a newly provisioned VM.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">404 is stronger than 403 for locked storage</div>
-          <div class="lesson-body">When Azure Storage public access is disabled, it returns 404, not 403. A 403 Unauthorized tells an attacker the resource exists and they lack permission. A 404 reveals nothing. This is intentional Azure behavior — understanding the difference between "access denied" and "does not exist" matters when hardening PaaS services.</div>
+          <div class="lesson-body">When Azure Storage public access is disabled, it returns 404, not 403. A 403
+            Unauthorized tells an attacker the resource exists and they lack permission. A 404 reveals nothing. This is
+            intentional Azure behavior — understanding the difference between "access denied" and "does not exist"
+            matters when hardening PaaS services.</div>
         </div>
       </div>
     </div>
@@ -888,4 +1291,5 @@ done | sort | uniq -c</pre>
   </script>
 
 </body>
+
 </html>

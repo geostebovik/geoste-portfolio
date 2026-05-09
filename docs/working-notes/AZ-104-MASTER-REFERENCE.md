@@ -1,6 +1,47 @@
 # AZ-104 Master Reference Document
 ### ostebovik.net Portfolio — Gerard Ostebovik
 
+---
+
+## ⚡ SESSION HANDOFF — READ THIS FIRST
+
+**Last updated:** May 9, 2026
+
+### Completed (do NOT re-ask about these)
+- All AZ-104 projects complete: P3–P15
+- Portfolio live at ostebovik.net — Front Door → SWA, CI/CD working
+- Lab RG `rg-az104-dev-wus3-01` torn down and deleted May 8, 2026
+- Repo fully reorganized into skill domain folder structure
+- All files renamed to kebab-case with `reference-` prefix convention
+- Screenshots routed to correct skill domain folders
+- **IaC skill domain page** — live and accurate
+- **Networking skill domain page** — live, all four projects (P3, P5, P6, P13)
+- **Landing page** — contrast fixed, coming-soon cards, certifications section, stats bar updated
+- `www` DNS CNAME added at registrar
+
+### Next Tasks (in priority order)
+1. Verify architecture diagram SVG links resolve correctly through Front Door/SWA (SVGs already in skill domain folders — confirm relative paths)
+2. Upload assets to `stgeostewus301` via `az storage blob upload-batch`
+3. Build **Compute & Storage** skill domain page
+4. Build **Monitoring & Security** skill domain page
+
+### Still Pending (further out)
+- Identity & Governance domain page (Phase 1 backfill)
+- Resume page or download link
+- Resources page (PS vs Bash reference, RPO/RTO write-up, AZ-104 whiteboard)
+- Wire "View projects" links on landing page to domain pages
+- Operating hours WAF rule (upgrade JS check to Front Door Rule Set)
+- AZ-104 exam — schedule and sit
+- AI-901 and AZ-305 (future certs)
+
+### Do NOT ask about
+- What projects are complete — all of them (P3–P15)
+- What the next domain page to build is — Compute & Storage
+- Whether the lab RG still exists — deleted May 8, 2026
+- What design system the site uses — Giants palette, Barlow Condensed, IBM Plex Mono (all documented in §1)
+
+---
+
 > **Compiled from:** Phase 2 session notes, Phase 3 session notes, Phase 4 session notes (PHASE04-NOTES.md), and the Phase 4 + Portfolio Build session summary.  
 > **Status:** All AZ-104 projects complete (P3–P15). Portfolio live at ostebovik.net. Exam pending.  
 > **Use this document:** Bring into every new session. Supersedes all individual phase notes.
@@ -503,7 +544,7 @@ Old SWA content cached by browser. Test in incognito/private window with `Ctrl+S
 ## 5. Resource Inventory — AZ-104 Lab
 
 ### Resource Group: `rg-az104-dev-wus3-01` (westus3)
-  note: rg-az104-dev-wus3-01 deleted May 8, 2026
+
 > Phase 2 resources were torn down in East US. Phase 3–4 resources are in westus3 in this RG.
 
 **Networking**
@@ -699,11 +740,6 @@ Behavior: push to `main` → deployed in <60 seconds
 - Landing page (`index.html`) deployed and serving — Giants color palette, skill domain cards, stats bar, scroll reveal animations
 - GitHub Actions CI/CD working — push to `main` = live in <60 seconds
 - All infrastructure resources deployed and healthy in `rg-geoste-prod-wus3-01`
-- Delete `rg-az104-dev-wus3-01` — after all evidence captured and skill domain pages populated (target: next week)
-- Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
-- Reformat Phase 2 guide to match Phase 3 & 4 format (requires Phase 4 guide as template reference)
-- Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
-- [ ] Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
 
 ### Repo Structure (Target)
 ```
@@ -734,20 +770,23 @@ geoste-portfolio/
 ```
 
 ### Immediately Actionable Pending Work
-
-- [ ] Build remaining skill domain pages
+- [ ] Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
+- [ ] Build skill domain pages — start with `infrastructure-as-code/index.html` (strongest content, highest interviewer impact)
 - [ ] Wire "View projects" links on landing page to actual skill domain pages
 - [ ] Upload assets to `stgeostewus301` via `az storage blob upload-batch` (CLI, not portal drag-and-drop)
+- [ ] Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
+- [ ] Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
 - [ ] Add resume link — dedicated page or linked PDF
 - [ ] Backfill Identity & Governance domain — no projects mapped yet (Phase 1 content)
+- [ ] Reformat Phase 2 guide to match Phase 3 & 4 format (requires Phase 4 guide as template reference)
 
 ### Future / Planned
+- [ ] Delete `rg-az104-dev-wus3-01` — after all evidence captured and skill domain pages populated (target: next week)
 - [ ] Operating hours WAF rule — upgrade JS check to proper Front Door Rule Set
 - [ ] Dynamic log display page — surface Application Insights / LAW data on portfolio page
 - [ ] `/resources/` page — RPO vs RTO write-up, PowerShell vs Bash syntax reference, AZ-104 whiteboard, other reference docs
-- [ ] AZ-104 exam — schedule and sit - https://learn.microsoft.com/en-us/credentials/certifications/exams/az-104/
-- [ ] Azure AI Fundamentals (Exam AI-901) - https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-901/
-- [ ] AZ-305: Designing Microsoft Azure Infrastructure Solutions - https://learn.microsoft.com/en-us/credentials/certifications/exams/az-305/
+- [ ] AZ-104 exam — schedule and sit
+- [ ] AZ-500 (Security) — next certification path
 
 ---
 

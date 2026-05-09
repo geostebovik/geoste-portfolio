@@ -1,39 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Infrastructure as Code — ostebovik.net</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <style>
     /* ── Design tokens ─────────────────────────────────────────── */
     :root {
-      --black:       #0a0a0a;
-      --orange:      #FD5A1E;
-      --orange-dim:  #c44415;
-      --cream:       #EFE4B0;
-      --cream-dim:   #b8ad84;
-      --surface-1:   #111213;
-      --surface-2:   #16181c;
-      --surface-3:   #1e2128;
-      --surface-4:   #252830;
-      --border:      #2a2d35;
-      --border-lit:  #3a3d47;
-      --text-primary:   #e8e4d8;
+      --black: #0a0a0a;
+      --orange: #FD5A1E;
+      --orange-dim: #c44415;
+      --cream: #EFE4B0;
+      --cream-dim: #b8ad84;
+      --surface-1: #111213;
+      --surface-2: #16181c;
+      --surface-3: #1e2128;
+      --surface-4: #252830;
+      --border: #2a2d35;
+      --border-lit: #3a3d47;
+      --text-primary: #e8e4d8;
       --text-secondary: #a8a49c;
-      --text-dim:       #706c66;
-      --blue:   #4a9eff;
-      --teal:   #2dd4bf;
-      --amber:  #f59e0b;
+      --text-dim: #706c66;
+      --blue: #4a9eff;
+      --teal: #2dd4bf;
+      --amber: #f59e0b;
       --purple: #a78bfa;
-      --green:  #34d399;
+      --green: #34d399;
     }
 
     /* ── Reset ─────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       background: var(--black);
@@ -59,14 +71,16 @@
     /* ── Nav ───────────────────────────────────────────────────── */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 2rem;
       height: 56px;
-      background: rgba(10,10,10,0.92);
+      background: rgba(10, 10, 10, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
@@ -80,7 +94,9 @@
       color: var(--cream);
     }
 
-    .nav-brand span { color: var(--orange); }
+    .nav-brand span {
+      color: var(--orange);
+    }
 
     .nav-links {
       display: flex;
@@ -100,7 +116,9 @@
     }
 
     .nav-links a:hover,
-    .nav-links a.active { color: var(--orange); }
+    .nav-links a.active {
+      color: var(--orange);
+    }
 
     /* ── Hero ──────────────────────────────────────────────────── */
     .hero {
@@ -230,7 +248,9 @@
       transition: border-color 0.2s;
     }
 
-    .project-card:hover { border-color: var(--border-lit); }
+    .project-card:hover {
+      border-color: var(--border-lit);
+    }
 
     .project-header {
       display: grid;
@@ -254,9 +274,13 @@
     }
 
     .project-card:hover .project-num,
-    .project-card.open .project-num { opacity: 1; }
+    .project-card.open .project-num {
+      opacity: 1;
+    }
 
-    .project-meta { flex: 1; }
+    .project-meta {
+      flex: 1;
+    }
 
     .project-tag {
       font-family: 'IBM Plex Mono', monospace;
@@ -269,10 +293,29 @@
       display: inline-block;
     }
 
-    .tag-bicep    { background: rgba(74,158,255,0.12); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
-    .tag-containers { background: rgba(45,212,191,0.12); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
-    .tag-security { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
-    .tag-capstone { background: rgba(253,90,30,0.12); color: var(--orange); border: 1px solid rgba(253,90,30,0.2); }
+    .tag-bicep {
+      background: rgba(74, 158, 255, 0.12);
+      color: var(--blue);
+      border: 1px solid rgba(74, 158, 255, 0.2);
+    }
+
+    .tag-containers {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--teal);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+    }
+
+    .tag-security {
+      background: rgba(167, 139, 250, 0.12);
+      color: var(--purple);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    .tag-capstone {
+      background: rgba(253, 90, 30, 0.12);
+      color: var(--orange);
+      border: 1px solid rgba(253, 90, 30, 0.2);
+    }
 
     .project-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -298,7 +341,10 @@
       display: inline-block;
     }
 
-    .project-card.open .project-toggle { color: var(--orange); transform: rotate(180deg); }
+    .project-card.open .project-toggle {
+      color: var(--orange);
+      transform: rotate(180deg);
+    }
 
     /* ── Project body ──────────────────────────────────────────── */
     .project-body {
@@ -307,7 +353,9 @@
       border-top: 1px solid var(--border);
     }
 
-    .project-card.open .project-body { display: block; }
+    .project-card.open .project-body {
+      display: block;
+    }
 
     .project-body-inner {
       padding-top: 1.5rem;
@@ -317,7 +365,9 @@
     }
 
     @media (max-width: 700px) {
-      .project-body-inner { grid-template-columns: 1fr; }
+      .project-body-inner {
+        grid-template-columns: 1fr;
+      }
     }
 
     .body-section-label {
@@ -425,12 +475,15 @@
       transition: color 0.2s, border-color 0.2s;
     }
 
-    .copy-btn:hover { color: var(--orange); border-color: var(--orange); }
+    .copy-btn:hover {
+      color: var(--orange);
+      border-color: var(--orange);
+    }
 
     /* ── Gotcha callout ────────────────────────────────────────── */
     .gotcha {
-      background: rgba(253,90,30,0.06);
-      border: 1px solid rgba(253,90,30,0.2);
+      background: rgba(253, 90, 30, 0.06);
+      border: 1px solid rgba(253, 90, 30, 0.2);
       border-left: 3px solid var(--orange);
       padding: 0.9rem 1.1rem;
       margin: 1rem 0;
@@ -467,7 +520,10 @@
       margin-top: 1rem;
     }
 
-    .diagram-link:hover { border-color: var(--orange); color: var(--orange); }
+    .diagram-link:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
 
     .diagram-link-icon {
       font-family: 'IBM Plex Mono', monospace;
@@ -556,7 +612,9 @@
       letter-spacing: 0.08em;
     }
 
-    .footer-brand span { color: var(--orange); }
+    .footer-brand span {
+      color: var(--orange);
+    }
 
     .footer-links {
       display: flex;
@@ -574,7 +632,9 @@
       transition: color 0.2s;
     }
 
-    .footer-links a:hover { color: var(--orange); }
+    .footer-links a:hover {
+      color: var(--orange);
+    }
 
     /* ── Scroll reveal ─────────────────────────────────────────── */
     .reveal {
@@ -589,6 +649,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- NAV -->
@@ -649,7 +710,8 @@
           <div class="project-meta">
             <span class="project-tag tag-bicep">Bicep · IaC</span>
             <div class="project-title">Modular Bicep Infrastructure</div>
-            <div class="project-subtitle">Bootstrap pattern · 8 modules · policy-enforced tags · secret injection via .bicepparam</div>
+            <div class="project-subtitle">Bootstrap pattern · 8 modules · policy-enforced tags · secret injection via
+              .bicepparam</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -725,21 +787,33 @@ param tags = {
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>Bootstrap + Bicep split</strong> — Bootstrap handles what Bicep cannot: RG creation (Bicep can't create its own target RG), KV secret seeding, subnet delegation flags. Bicep owns all infrastructure resources.</li>
-                <li><strong>Secrets via getSecret(), never in templates</strong> — <code>.bicepparam</code> resolves secrets from Key Vault at deploy time. Credentials never appear in template files, parameter files, or CLI args.</li>
-                <li><strong>Policy-enforced tag inheritance</strong> — <code>require-tag-env</code> and <code>require-tag-owner</code> deny assignments on the RG. <code>inherit-tag-*</code> policies push tags from RG to all child resources automatically. Manual tagging is inconsistent and breaks.</li>
-                <li><strong>Bastion condition flag</strong> — <code>deployBastionHost bool</code> parameter controls whether the host deploys. Standard SKU costs ~$140/mo; delete between lab phases.</li>
-                <li><strong>guid() with stable inputs</strong> — Role assignment names use <code>guid()</code> seeded with static param values, not module outputs. Module outputs aren't known at deployment start.</li>
+                <li><strong>Bootstrap + Bicep split</strong> — Bootstrap handles what Bicep cannot: RG creation (Bicep
+                  can't create its own target RG), KV secret seeding, subnet delegation flags. Bicep owns all
+                  infrastructure resources.</li>
+                <li><strong>Secrets via getSecret(), never in templates</strong> — <code>.bicepparam</code> resolves
+                  secrets from Key Vault at deploy time. Credentials never appear in template files, parameter files, or
+                  CLI args.</li>
+                <li><strong>Policy-enforced tag inheritance</strong> — <code>require-tag-env</code> and
+                  <code>require-tag-owner</code> deny assignments on the RG. <code>inherit-tag-*</code> policies push
+                  tags from RG to all child resources automatically. Manual tagging is inconsistent and breaks.</li>
+                <li><strong>Bastion condition flag</strong> — <code>deployBastionHost bool</code> parameter controls
+                  whether the host deploys. Standard SKU costs ~$140/mo; delete between lab phases.</li>
+                <li><strong>guid() with stable inputs</strong> — Role assignment names use <code>guid()</code> seeded
+                  with static param values, not module outputs. Module outputs aren't known at deployment start.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Windows computerName limit</div>
-                <p>Azure resource names can be any valid length but Windows OS hostnames are hard-limited to 15 characters. <code>vm-win-dev-wus3-01</code> is 18 chars and fails at provisioning. Pass <code>computerName</code> as a separate explicit parameter — never rely on <code>take(vmName, 15)</code> for multi-VM deployments as it produces duplicate hostnames.</p>
+                <p>Azure resource names can be any valid length but Windows OS hostnames are hard-limited to 15
+                  characters. <code>vm-win-dev-wus3-01</code> is 18 chars and fails at provisioning. Pass
+                  <code>computerName</code> as a separate explicit parameter — never rely on
+                  <code>take(vmName, 15)</code> for multi-VM deployments as it produces duplicate hostnames.</p>
               </div>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — .bicepparam no interpolation</div>
-                <p>Cannot reference other parameters within the same <code>.bicepparam</code> file. <code>param tags = &#123; env: env &#125;</code> fails — use literals only.</p>
+                <p>Cannot reference other parameters within the same <code>.bicepparam</code> file.
+                  <code>param tags = &#123; env: env &#125;</code> fails — use literals only.</p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -764,7 +838,8 @@ param tags = {
           <div class="project-meta">
             <span class="project-tag tag-containers">Containers · ACR · ACA</span>
             <div class="project-title">Container Apps Deployment</div>
-            <div class="project-subtitle">ACR · Container Apps Environment · blue/green traffic split · scale to zero</div>
+            <div class="project-subtitle">ACR · Container Apps Environment · blue/green traffic split · scale to zero
+            </div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -800,7 +875,7 @@ param tags = {
                 all pulls use AcrPull role on the managed identity.
               </p>
 
-              <a class="diagram-link" href="../diagrams/project12-architecture.svg" target="_blank">
+              <a class="diagram-link" href="diagrams/project12-architecture.svg" target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project12-architecture.svg
               </a>
@@ -809,15 +884,23 @@ param tags = {
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>activeRevisionsMode: Multiple</strong> — required for traffic splitting between revisions. Single mode replaces the active revision on every deploy — no split possible.</li>
-                <li><strong>minReplicas: 0</strong> — scale to zero when idle. First request cold-starts in seconds. Eliminates compute cost during inactive periods.</li>
-                <li><strong>Traffic weights via CLI, not Bicep</strong> — revision names are auto-generated at deploy time and unknown to Bicep. Set weights post-deploy via CLI; attempting to set them in Bicep requires hardcoding revision names that don't exist yet.</li>
-                <li><strong>User-assigned MI preferred over system-assigned</strong> — system-assigned identity only exists after the Container App is created, creating a role-assignment timing window. User-assigned MI is created as infrastructure ahead of time with AcrPull pre-assigned.</li>
+                <li><strong>activeRevisionsMode: Multiple</strong> — required for traffic splitting between revisions.
+                  Single mode replaces the active revision on every deploy — no split possible.</li>
+                <li><strong>minReplicas: 0</strong> — scale to zero when idle. First request cold-starts in seconds.
+                  Eliminates compute cost during inactive periods.</li>
+                <li><strong>Traffic weights via CLI, not Bicep</strong> — revision names are auto-generated at deploy
+                  time and unknown to Bicep. Set weights post-deploy via CLI; attempting to set them in Bicep requires
+                  hardcoding revision names that don't exist yet.</li>
+                <li><strong>User-assigned MI preferred over system-assigned</strong> — system-assigned identity only
+                  exists after the Container App is created, creating a role-assignment timing window. User-assigned MI
+                  is created as infrastructure ahead of time with AcrPull pre-assigned.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Subnet delegation required</div>
-                <p><code>snet-capp-dev-wus3-01</code> must be delegated to <code>Microsoft.App/environments</code> before the Container Apps Environment can deploy. Minimum subnet size /23 (512 addresses). Delegation cannot be added after subnet creation if resources are attached.</p>
+                <p><code>snet-capp-dev-wus3-01</code> must be delegated to <code>Microsoft.App/environments</code>
+                  before the Container Apps Environment can deploy. Minimum subnet size /23 (512 addresses). Delegation
+                  cannot be added after subnet creation if resources are attached.</p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -841,7 +924,8 @@ param tags = {
           <div class="project-meta">
             <span class="project-tag tag-security">Key Vault · Managed Identity</span>
             <div class="project-title">Zero-Credential Secret Management</div>
-            <div class="project-subtitle">RBAC model · system-assigned MI · KV references in App Service · audit via KQL</div>
+            <div class="project-subtitle">RBAC model · system-assigned MI · KV references in App Service · audit via KQL
+            </div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -879,7 +963,7 @@ param tags = {
 | order by TimeGenerated desc</pre>
               </div>
 
-              <a class="diagram-link" href="../diagrams/project14-architecture.svg" target="_blank">
+              <a class="diagram-link" href="diagrams/project14-architecture.svg" target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project14-architecture.svg
               </a>
@@ -888,15 +972,26 @@ param tags = {
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>RBAC model, never Access Policies</strong> — KV created with <code>--enable-rbac-authorization true</code>. Access Policies are deprecated for new vaults. RBAC provides per-secret granularity with full audit trail in Entra ID.</li>
-                <li><strong>Two separate access grants required</strong> — (1) creator needs <code>Key Vault Secrets Officer</code> to write secrets; (2) ARM needs <code>--enabled-for-template-deployment true</code> to resolve <code>getSecret()</code> in Bicep. Neither is implied by the other.</li>
-                <li><strong>System-assigned MI at creation time</strong> — <code>--assign-identity "[system]"</code> passed during resource creation. Post-creation assignment introduces a timing window where RBAC assignment may fail before the identity GUID propagates in Entra ID.</li>
-                <li><strong>KV reference strings — use Cloud Shell</strong> — The <code>@</code> and parentheses in KV reference values cause PowerShell parsing failures even inside quotes. Always use Cloud Shell Bash for <code>az webapp config appsettings set</code> with KV references.</li>
+                <li><strong>RBAC model, never Access Policies</strong> — KV created with
+                  <code>--enable-rbac-authorization true</code>. Access Policies are deprecated for new vaults. RBAC
+                  provides per-secret granularity with full audit trail in Entra ID.</li>
+                <li><strong>Two separate access grants required</strong> — (1) creator needs
+                  <code>Key Vault Secrets Officer</code> to write secrets; (2) ARM needs
+                  <code>--enabled-for-template-deployment true</code> to resolve <code>getSecret()</code> in Bicep.
+                  Neither is implied by the other.</li>
+                <li><strong>System-assigned MI at creation time</strong> — <code>--assign-identity "[system]"</code>
+                  passed during resource creation. Post-creation assignment introduces a timing window where RBAC
+                  assignment may fail before the identity GUID propagates in Entra ID.</li>
+                <li><strong>KV reference strings — use Cloud Shell</strong> — The <code>@</code> and parentheses in KV
+                  reference values cause PowerShell parsing failures even inside quotes. Always use Cloud Shell Bash for
+                  <code>az webapp config appsettings set</code> with KV references.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Soft delete blocks name reuse</div>
-                <p>Deleted secrets are retained for 7 days by default. Attempting to reuse a secret name during the retention window fails. Purge explicitly: <code>az keyvault secret purge --vault-name kv-az104-dev-wus3-01 --name secret-name</code></p>
+                <p>Deleted secrets are retained for 7 days by default. Attempting to reuse a secret name during the
+                  retention window fails. Purge explicitly:
+                  <code>az keyvault secret purge --vault-name kv-az104-dev-wus3-01 --name secret-name</code></p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -921,7 +1016,8 @@ param tags = {
           <div class="project-meta">
             <span class="project-tag tag-capstone">Capstone · Production</span>
             <div class="project-title">Portfolio Site Infrastructure</div>
-            <div class="project-subtitle">Front Door · WAF · Static Web App · 5-module Bicep · GitHub Actions CI/CD · ostebovik.net</div>
+            <div class="project-subtitle">Front Door · WAF · Static Web App · 5-module Bicep · GitHub Actions CI/CD ·
+              ostebovik.net</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -976,15 +1072,25 @@ param tags = {
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>Front Door as perimeter, not App Gateway</strong> — Front Door operates at the edge (global CDN + WAF), appropriate for a static site with no backend compute. App Gateway sits inside a VNet and is designed for internal load balancing — wrong tool at this scale.</li>
-                <li><strong>SWA serves from GitHub, not storage</strong> — Static Web App requires content in a GitHub repo; Storage Account holds referenced assets (diagrams, screenshots). Push to <code>main</code> → GitHub Action → deployed in under 60 seconds.</li>
-                <li><strong>GitHub Actions workflow created manually</strong> — <code>skipGithubActionWorkflowGeneration: false</code> requires Azure write access to the repo at deploy time. If not granted, the workflow file is never auto-generated. Added manually to <code>.github/workflows/</code> with deployment token in repo secrets.</li>
-                <li><strong>Managed TLS certificate</strong> — <code>certificateType: 'ManagedCertificate'</code> on the Front Door custom domain. Free, auto-renewed — no certificate management overhead.</li>
+                <li><strong>Front Door as perimeter, not App Gateway</strong> — Front Door operates at the edge (global
+                  CDN + WAF), appropriate for a static site with no backend compute. App Gateway sits inside a VNet and
+                  is designed for internal load balancing — wrong tool at this scale.</li>
+                <li><strong>SWA serves from GitHub, not storage</strong> — Static Web App requires content in a GitHub
+                  repo; Storage Account holds referenced assets (diagrams, screenshots). Push to <code>main</code> →
+                  GitHub Action → deployed in under 60 seconds.</li>
+                <li><strong>GitHub Actions workflow created manually</strong> —
+                  <code>skipGithubActionWorkflowGeneration: false</code> requires Azure write access to the repo at
+                  deploy time. If not granted, the workflow file is never auto-generated. Added manually to
+                  <code>.github/workflows/</code> with deployment token in repo secrets.</li>
+                <li><strong>Managed TLS certificate</strong> — <code>certificateType: 'ManagedCertificate'</code> on the
+                  Front Door custom domain. Free, auto-renewed — no certificate management overhead.</li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Storage account global uniqueness</div>
-                <p><code>stprodwus301</code> and <code>stgeostwus301</code> were both taken across all Azure tenants globally. Always include an owner-specific string. Final working name: <code>stgeostewus301</code>.</p>
+                <p><code>stprodwus301</code> and <code>stgeostwus301</code> were both taken across all Azure tenants
+                  globally. Always include an owner-specific string. Final working name: <code>stgeostewus301</code>.
+                </p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -1017,31 +1123,47 @@ param tags = {
       <div class="lessons-grid">
         <div class="lesson-item">
           <div class="lesson-title">Bicep is idempotent — use it</div>
-          <div class="lesson-body">Re-running after a partial failure is safe. Bicep skips resources that already exist and creates only what's missing. Always run <code>--what-if</code> first to see exactly what will change before committing.</div>
+          <div class="lesson-body">Re-running after a partial failure is safe. Bicep skips resources that already exist
+            and creates only what's missing. Always run <code>--what-if</code> first to see exactly what will change
+            before committing.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">CRLF kills shell scripts</div>
-          <div class="lesson-body">VS Code on Windows saves files with <code>\r\n</code>. Cloud Shell expects <code>\n</code> only. Symptom: <code>$'\r': command not found</code> on every line. Fix: <code>sed -i 's/\r//' script.sh</code>. Prevention: set <code>"files.eol": "\n"</code> globally in VS Code.</div>
+          <div class="lesson-body">VS Code on Windows saves files with <code>\r\n</code>. Cloud Shell expects
+            <code>\n</code> only. Symptom: <code>$'\r': command not found</code> on every line. Fix:
+            <code>sed -i 's/\r//' script.sh</code>. Prevention: set <code>"files.eol": "\n"</code> globally in VS Code.
+          </div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Policy remediation needs a wait</div>
-          <div class="lesson-body">Remediation tasks fail immediately after policy assignment because the managed identity needs 30–60 seconds to propagate through Entra ID. Wait 60 seconds, use unique names for retry attempts. Fallback: <code>az resource tag --is-incremental</code>.</div>
+          <div class="lesson-body">Remediation tasks fail immediately after policy assignment because the managed
+            identity needs 30–60 seconds to propagate through Entra ID. Wait 60 seconds, use unique names for retry
+            attempts. Fallback: <code>az resource tag --is-incremental</code>.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Local Bash corrupts KV reference strings</div>
-          <div class="lesson-body">The <code>@</code> symbol and parentheses in Key Vault reference values cause parsing failures in local PowerShell and Git Bash. Always use Azure Cloud Shell for any command passing KV reference strings as flag values.</div>
+          <div class="lesson-body">The <code>@</code> symbol and parentheses in Key Vault reference values cause parsing
+            failures in local PowerShell and Git Bash. Always use Azure Cloud Shell for any command passing KV reference
+            strings as flag values.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">dependsOn has legitimate uses</div>
-          <div class="lesson-body">When Bicep can't infer a dependency because the dependent resource doesn't reference the dependency in its properties — Bastion host depending on NSG rules, Front Door route depending on origin — explicit <code>dependsOn</code> is correct, not a code smell.</div>
+          <div class="lesson-body">When Bicep can't infer a dependency because the dependent resource doesn't reference
+            the dependency in its properties — Bastion host depending on NSG rules, Front Door route depending on origin
+            — explicit <code>dependsOn</code> is correct, not a code smell.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Inline NSG rules solve the Bastion compliance check</div>
-          <div class="lesson-body">NSG rules defined inside <code>securityRules: [...]</code> on the NSG resource deploy atomically with it. Separate child rule resources deploy in parallel and may not be complete when the compliance check runs. The <code>deployBastionHost bool</code> condition flag exists for cost control (~$140/mo Standard SKU) — not to work around a deployment ordering problem.</div>
+          <div class="lesson-body">NSG rules defined inside <code>securityRules: [...]</code> on the NSG resource deploy
+            atomically with it. Separate child rule resources deploy in parallel and may not be complete when the
+            compliance check runs. The <code>deployBastionHost bool</code> condition flag exists for cost control
+            (~$140/mo Standard SKU) — not to work around a deployment ordering problem.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Container App role assignment timing</div>
-          <div class="lesson-body">System-assigned MI only exists after the Container App is created, so an AcrPull role assignment in the same deployment pass fails. The condition flag pattern gates it to a second pass. The cleaner fix: user-assigned MI created ahead of time with the role pre-assigned — no timing dependency.</div>
+          <div class="lesson-body">System-assigned MI only exists after the Container App is created, so an AcrPull role
+            assignment in the same deployment pass fails. The condition flag pattern gates it to a second pass. The
+            cleaner fix: user-assigned MI created ahead of time with the role pre-assigned — no timing dependency.</div>
         </div>
       </div>
     </div>
@@ -1097,4 +1219,5 @@ param tags = {
   </script>
 
 </body>
+
 </html>
