@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identity &amp; Governance — ostebovik.net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:#0a0a0a;--orange:#FD5A1E;--orange-dim:#c44415;--cream:#EFE4B0;--cream-dim:#b8ad84;
+      --surface-1:#111213;--surface-2:#16181c;--surface-3:#1e2128;--surface-4:#252830;
+      --border:#2a2d35;--border-lit:#3a3d47;--text-primary:#e8e4d8;--text-secondary:#a8a49c;
+      --text-dim:#706c66;--blue:#4a9eff;--teal:#2dd4bf;--amber:#f59e0b;--purple:#a78bfa;
+      --green:#34d399;--red:#f87171;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--black);color:var(--text-primary);font-family:'Barlow',sans-serif;font-weight:400;line-height:1.6;min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-brand{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:0.05em;text-decoration:none;color:var(--cream)}
+    .nav-brand span{color:var(--orange)}
+    .nav-links{display:flex;gap:2rem;list-style:none}
+    .nav-links a{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;color:var(--text-secondary);transition:color 0.2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--orange)}
+    .hero{position:relative;padding:140px 2rem 80px;max-width:1100px;margin:0 auto}
+    .hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--orange);margin-bottom:1.2rem;display:flex;align-items:center;gap:0.75rem}
+    .hero-eyebrow::before{content:'';display:inline-block;width:32px;height:1px;background:var(--orange)}
+    .hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(3.5rem,8vw,6.5rem);font-weight:800;line-height:0.92;letter-spacing:-0.01em;text-transform:uppercase;color:var(--cream);margin-bottom:1.5rem}
+    .hero h1 em{font-style:normal;color:var(--orange);display:block}
+    .hero-description{max-width:580px;font-size:1rem;font-weight:400;color:var(--text-secondary);line-height:1.75;margin-bottom:2.5rem}
+    .hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap}
+    .stat{display:flex;flex-direction:column;gap:0.2rem}
+    .stat-value{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:700;color:var(--cream);line-height:1}
+    .stat-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)}
+    .section{max-width:1100px;margin:0 auto;padding:0 2rem 80px}
+    .section-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:2.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+    .section-number{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:0.1em}
+    .section-title{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--cream)}
+    .project-grid{display:grid;gap:1.5px}
+    .project-card{background:var(--surface-2);border:1px solid var(--border);overflow:hidden;transition:border-color 0.2s}
+    .project-card:hover{border-color:var(--border-lit)}
+    .project-header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1.25rem;padding:1.5rem 1.75rem;cursor:pointer;user-select:none}
+    .project-num{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:800;line-height:1;color:var(--orange);opacity:0.25;min-width:3.5rem;transition:opacity 0.2s}
+    .project-card:hover .project-num,.project-card.open .project-num{opacity:1}
+    .project-tag{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:2px;margin-bottom:0.5rem;display:inline-block}
+    .tag-rbac{background:rgba(74,158,255,0.12);color:var(--blue);border:1px solid rgba(74,158,255,0.2)}
+    .tag-policy{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+    .project-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;color:var(--cream);margin-bottom:0.3rem}
+    .project-subtitle{font-size:0.82rem;color:var(--text-secondary);font-weight:400}
+    .project-toggle{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--text-dim);transition:color 0.2s,transform 0.3s;display:inline-block}
+    .project-card.open .project-toggle{color:var(--orange);transform:rotate(180deg)}
+    .project-body{display:none;padding:0 1.75rem 1.75rem;border-top:1px solid var(--border)}
+    .project-card.open .project-body{display:block}
+    .project-body-inner{padding-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+    @media(max-width:700px){.project-body-inner{grid-template-columns:1fr}}
+    .body-section-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.75rem}
+    .body-text{font-size:0.88rem;font-weight:400;color:var(--text-secondary);line-height:1.7;margin-bottom:1.25rem}
+    .decision-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem}
+    .decision-list li{display:flex;gap:0.75rem;font-size:0.85rem;font-weight:400;color:var(--text-secondary);line-height:1.55}
+    .decision-list li::before{content:'→';font-family:'IBM Plex Mono',monospace;color:var(--orange);flex-shrink:0;margin-top:0.05rem}
+    .tech-list{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem}
+    .tech-pill{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;padding:0.25rem 0.65rem;background:var(--surface-3);border:1px solid var(--border);color:var(--text-secondary);border-radius:2px}
+    .code-block{background:var(--surface-1);border:1px solid var(--border);border-left:3px solid var(--orange);padding:1rem 1.25rem;margin:1rem 0;position:relative;overflow-x:auto}
+    .code-block pre{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;line-height:1.7;color:var(--cream-dim);white-space:pre}
+    .code-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem}
+    .copy-btn{position:absolute;top:0.6rem;right:0.75rem;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.2rem 0.5rem;cursor:pointer;transition:color 0.2s,border-color 0.2s}
+    .copy-btn:hover{color:var(--orange);border-color:var(--orange)}
+    .gotcha{background:rgba(253,90,30,0.06);border:1px solid rgba(253,90,30,0.2);border-left:3px solid var(--orange);padding:0.9rem 1.1rem;margin:1rem 0}
+    .gotcha-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange);margin-bottom:0.4rem}
+    .gotcha p{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
+    .info{background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-left:3px solid var(--blue);padding:0.9rem 1.1rem;margin:1rem 0}
+    .info-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin-bottom:0.4rem}
+    .info p{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
+    .diagram-link{display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:var(--surface-3);border:1px solid var(--border);text-decoration:none;color:var(--text-secondary);font-size:0.82rem;transition:border-color 0.2s,color 0.2s;margin-top:1rem}
+    .diagram-link:hover{border-color:var(--orange);color:var(--orange)}
+    .diagram-link-icon{font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--orange)}
+    /* Policy assignments table */
+    .policy-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.8rem}
+    .policy-table th{background:var(--surface-3);padding:0.6rem 0.9rem;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border)}
+    .policy-table td{padding:0.6rem 0.9rem;border-bottom:1px solid var(--border);color:var(--text-secondary);vertical-align:top;font-size:0.78rem}
+    .policy-table tr:last-child td{border-bottom:none}
+    .policy-table td:first-child{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--cream)}
+    .badge{display:inline-block;padding:0.15rem 0.5rem;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:500;letter-spacing:0.05em}
+    .badge-deny{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+    .badge-inherit{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+    .badge-audit{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+    /* RBAC scope diagram */
+    .scope-chain{display:flex;flex-direction:column;gap:0;margin:1rem 0}
+    .scope-level{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:var(--surface-3);border:1px solid var(--border);border-bottom:none;position:relative}
+    .scope-level:last-child{border-bottom:1px solid var(--border)}
+    .scope-level::before{content:'';position:absolute;left:1.75rem;top:100%;width:1px;height:100%;background:var(--border);z-index:1}
+    .scope-level:last-child::before{display:none}
+    .scope-icon{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--orange);width:1.25rem;flex-shrink:0}
+    .scope-name{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--cream)}
+    .scope-desc{font-size:0.75rem;color:var(--text-dim);margin-left:auto}
+    /* Lessons */
+    .lessons-strip{background:var(--surface-2);border:1px solid var(--border);padding:2rem 1.75rem;margin-top:1.5px}
+    .lessons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem}
+    .lesson-item{display:flex;flex-direction:column;gap:0.4rem}
+    .lesson-title{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--cream)}
+    .lesson-body{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
+    footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .footer-brand{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:0.08em}
+    .footer-brand span{color:var(--orange)}
+    .footer-links{display:flex;gap:1.5rem;list-style:none}
+    .footer-links a{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;transition:color 0.2s}
+    .footer-links a:hover{color:var(--orange)}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s ease}
+    .reveal.visible{opacity:1;transform:none}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/az-104/identity-governance/" class="active">Identity</a></li>
+      <li><a href="/az-104/networking/">Networking</a></li>
+      <li><a href="/az-104/compute-storage/">Compute</a></li>
+      <li><a href="/az-104/infrastructure-as-code/">IaC</a></li>
+      <li><a href="/az-104/monitoring-security/">Monitoring</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-eyebrow">AZ-104 · Skill Domain</div>
+    <h1>Identity &amp;<em>Governance</em></h1>
+    <p class="hero-description">
+      Entra ID user and group management, least-privilege RBAC assignments,
+      custom role definitions, Azure Policy initiatives, resource locks,
+      and cost management — the security and compliance layer that everything
+      else runs on top of.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-value">2</span><span class="stat-label">Projects</span></div>
+      <div class="stat"><span class="stat-value">10</span><span class="stat-label">Policy assignments</span></div>
+      <div class="stat"><span class="stat-value">3</span><span class="stat-label">RBAC groups</span></div>
+      <div class="stat"><span class="stat-value">P1–P2</span><span class="stat-label">Phase 1</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Projects</h2>
+    </div>
+    <div class="project-grid">
+
+      <!-- P1 — Entra ID / RBAC -->
+      <div class="project-card reveal" id="p1">
+        <div class="project-header" onclick="toggleCard('p1')">
+          <div class="project-num">01</div>
+          <div class="project-meta">
+            <span class="project-tag tag-rbac">Entra ID · RBAC · Custom Roles · MFA</span>
+            <div class="project-title">Entra ID &amp; Role-Based Access Control</div>
+            <div class="project-subtitle">User + group provisioning · least-privilege role assignments · custom role definition · MFA · sign-in audit logs</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Simulated enterprise user onboarding by provisioning four Entra ID
+                accounts across three security groups, assigning built-in roles at
+                resource group scope using the principle of least privilege, and
+                creating a custom role definition for a Storage Blob Reader Plus
+                permission set that didn't exist in the built-in catalog.
+                Verified the assignments by signing in as each test user and
+                confirming the access boundaries held. Enabled MFA on all accounts
+                and reviewed Entra ID sign-in audit logs.
+              </p>
+
+              <div class="body-section-label">RBAC Scope Hierarchy</div>
+              <div class="scope-chain">
+                <div class="scope-level">
+                  <span class="scope-icon">▸</span>
+                  <span class="scope-name">Management Group</span>
+                  <span class="scope-desc">Inherits down</span>
+                </div>
+                <div class="scope-level">
+                  <span class="scope-icon">▸</span>
+                  <span class="scope-name">Subscription</span>
+                  <span class="scope-desc">343a8a7e-… (VSE)</span>
+                </div>
+                <div class="scope-level">
+                  <span class="scope-icon">▸</span>
+                  <span class="scope-name">Resource Group</span>
+                  <span class="scope-desc">rg-phase1-lab — assignments here</span>
+                </div>
+                <div class="scope-level">
+                  <span class="scope-icon">▸</span>
+                  <span class="scope-name">Resource</span>
+                  <span class="scope-desc">Most granular scope</span>
+                </div>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Role Assignments</div>
+              <table class="policy-table">
+                <thead><tr><th>Group</th><th>Role</th><th>Scope</th></tr></thead>
+                <tbody>
+                  <tr><td>grp-developers</td><td>Contributor</td><td>RG</td></tr>
+                  <tr><td>grp-ops</td><td>VM Contributor</td><td>RG</td></tr>
+                  <tr><td>grp-readonly</td><td>Reader</td><td>RG</td></tr>
+                  <tr><td>dev1</td><td>Storage Blob Reader Plus (custom)</td><td>RG</td></tr>
+                </tbody>
+              </table>
+
+              <a class="diagram-link" href="diagrams/project2-rbac-hierarchy.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View RBAC hierarchy diagram — project2-rbac-hierarchy.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Groups, not individual users</strong> — Role assignments are on security groups, not individual accounts. Adding a new developer means adding them to <code>grp-developers</code> — no new role assignments required. This is the correct enterprise pattern: manage group membership, not role assignments, as the team evolves.</li>
+                <li><strong>Resource group scope, not subscription</strong> — Assignments scoped to <code>rg-phase1-lab</code> only. Scoping to subscription would give <code>grp-developers</code> Contributor access to every resource in the subscription — a significant blast radius for a lab. Narrowest scope that satisfies the requirement.</li>
+                <li><strong>Custom role for gaps in built-in catalog</strong> — No built-in role provided exactly Storage Blob read access without additional permissions. Rather than assigning a broader role than necessary, a custom role was created with exactly the required action. This is the least-privilege approach applied at the permission level.</li>
+                <li><strong>Test every assignment before declaring done</strong> — Signed in as each test user in a private browser session and verified access boundaries. A role assignment that hasn't been tested is an assumption, not a control.</li>
+              </ul>
+
+              <div class="info">
+                <div class="info-label">Why group-based RBAC matters at scale</div>
+                <p>An organization with 200 Azure resources and 50 engineers can't maintain individual role assignments — the combination count grows faster than anyone can manage. Group-based RBAC means access is controlled in one place (group membership) and role assignments are stable infrastructure. New hire: add to group. Offboarding: remove from group. All access changes flow from that one action.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Microsoft Entra ID</span>
+                <span class="tech-pill">RBAC</span>
+                <span class="tech-pill">Security Groups</span>
+                <span class="tech-pill">Custom Roles</span>
+                <span class="tech-pill">MFA</span>
+                <span class="tech-pill">Sign-in Audit Logs</span>
+                <span class="tech-pill">Least Privilege</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P2 — Policy / Locks / Cost -->
+      <div class="project-card reveal" id="p2">
+        <div class="project-header" onclick="toggleCard('p2')">
+          <div class="project-num">02</div>
+          <div class="project-meta">
+            <span class="project-tag tag-policy">Azure Policy · Resource Locks · Cost Management</span>
+            <div class="project-title">Azure Policy, Locks &amp; Cost Management</div>
+            <div class="project-subtitle">Policy initiative · Deny + Audit + Inherit effects · resource locks · budget alerts · 10 assignments on lab RG</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Built a governance baseline using Azure Policy — three policies
+                bundled into an initiative, deployed with Deny effect to prevent
+                out-of-region resources and enforce required tags, and Audit effect
+                for non-destructive compliance reporting. Verified the controls by
+                deliberately triggering the location policy denial and the resource
+                lock block, capturing both as evidence. Configured budget alerts
+                at 80% actual and 100% forecast to prevent cost overruns.
+                The governance pattern established here was extended in Phase 4:
+                the lab resource group carried 10 active policy assignments
+                throughout all subsequent projects.
+              </p>
+
+              <div class="body-section-label">Phase 4 Policy Assignments — Lab RG</div>
+              <table class="policy-table">
+                <thead><tr><th>Assignment</th><th>Effect</th></tr></thead>
+                <tbody>
+                  <tr><td>require-tag-env</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>require-tag-owner</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>allowed-locations-wus3</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>appsvc-https-only</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>appsvc-managed-identity</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>appsvc-no-remote-debug</td><td><span class="badge badge-deny">Deny</span></td></tr>
+                  <tr><td>inherit-tag-env</td><td><span class="badge badge-inherit">Inherit</span></td></tr>
+                  <tr><td>inherit-tag-owner</td><td><span class="badge badge-inherit">Inherit</span></td></tr>
+                  <tr><td>inherit-tag-project</td><td><span class="badge badge-inherit">Inherit</span></td></tr>
+                  <tr><td>inherit-tag-phase</td><td><span class="badge badge-inherit">Inherit</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Audit before Deny for new policies</strong> — The managed-disk audit policy was intentionally set to Audit rather than Deny. Switching an existing environment to Deny without first understanding the compliance state causes unexpected deployment failures. Audit → review → Deny is the production-safe rollout sequence.</li>
+                <li><strong>Initiatives over standalone assignments</strong> — Even with three policies, bundling into an initiative made compliance reporting cleaner and assignment to new scopes a single action. Always start with an initiative — standalone assignments don't scale beyond a handful of policies.</li>
+                <li><strong>Tag inheritance via policy, not manual tagging</strong> — Tags on the resource group propagate automatically to all resources via <code>inherit-tag-*</code> policy assignments. Manual tagging is inconsistent and breaks. Policy-enforced inheritance is the only reliable approach at scale.</li>
+                <li><strong>Policy definition IDs — never hardcode</strong> — Policy definition GUIDs change between CLI versions. Always query: <code>az policy definition list --query "[?displayName=='Allowed locations'].name" -o tsv</code>. One character difference caused significant debugging time.</li>
+                <li><strong>Forecast alert over actual spend alert</strong> — A 100% actual spend alert tells you money has already been spent. A 100% forecast alert fires before you hit the limit and leaves time to react. In production the forecast alert is the one that matters.</li>
+              </ul>
+
+              <div class="code-block">
+                <div class="code-label">Policy initiative — exported definition</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>{
+  "name": "initiative-baseline-governance",
+  "properties": {
+    "displayName": "Baseline Governance Initiative",
+    "description": "Location, tagging, and disk compliance",
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/
+  policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4f",
+        "parameters": {
+          "listOfAllowedLocations": {
+            "value": ["westus3"]
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/
+  policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025",
+        "parameters": {
+          "tagName": { "value": "environment" }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/
+  policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d"
+      }
+    ]
+  }
+}</pre>
+              </div>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — policy remediation has a propagation delay</div>
+                <p>Remediation tasks fail immediately after policy assignment because the managed identity needs 30–60 seconds to propagate through Entra ID. Wait 60 seconds and use unique names for retry attempts. Fallback: <code>az resource tag --is-incremental</code> for immediate tagging without waiting on remediation.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Azure Policy</span>
+                <span class="tech-pill">Policy Initiatives</span>
+                <span class="tech-pill">Deny Effect</span>
+                <span class="tech-pill">Audit Effect</span>
+                <span class="tech-pill">Tag Inheritance</span>
+                <span class="tech-pill">Resource Locks</span>
+                <span class="tech-pill">Cost Management</span>
+                <span class="tech-pill">Budget Alerts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LESSONS LEARNED -->
+  <section class="section">
+    <div class="section-header reveal">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Lessons Learned</h2>
+    </div>
+    <div class="lessons-strip reveal">
+      <div class="lessons-grid">
+        <div class="lesson-item">
+          <div class="lesson-title">Governance is infrastructure, not afterthought</div>
+          <div class="lesson-body">Configuring policy assignments, RBAC groups, and budget alerts before deploying any workload — not after — is the correct sequence. Retrofitting governance onto an existing environment is harder, riskier, and produces gaps. The P2 governance baseline was active for every project in Phases 3 and 4, enforcing location and tagging compliance automatically without any manual intervention.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">ReadOnly locks block more than expected</div>
+          <div class="lesson-body">A ReadOnly lock prevents writes to resource properties but also blocks operations that internally require write access to metadata — including some operations that appear read-only, such as listing storage account keys. Understanding the full scope of what a lock blocks before applying it in production prevents unexpected application failures.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Policy evaluation is asynchronous</div>
+          <div class="lesson-body">After assigning a policy, Azure evaluates existing resources asynchronously — the compliance dashboard takes 5–15 minutes to reflect the current state. A policy that appears to have no effect immediately after assignment is likely still propagating. Trigger immediate evaluation with <code>az policy state trigger-scan</code> rather than assuming misconfiguration.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">RBAC and governance work together</div>
+          <div class="lesson-body">RBAC controls what a principal can do. Azure Policy controls what can be deployed, regardless of who deploys it. A Contributor with full RBAC access cannot deploy a resource to a blocked region — the policy evaluation happens before the deployment is accepted. These are complementary controls, not alternatives: RBAC handles identity; Policy handles compliance.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Initiatives scale; standalone assignments don't</div>
+          <div class="lesson-body">An initiative exported as JSON can be applied to hundreds of subscriptions in a single pipeline run. A collection of standalone policy assignments must be individually re-applied to each scope. Starting with an initiative from day one — even when only managing three policies — is the correct pattern because it costs nothing extra and makes the governance layer portable.</div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-title">Test every control you deploy</div>
+          <div class="lesson-body">Deliberately triggering the location policy denial and the resource lock block — and capturing both as evidence — demonstrates that the controls actually work. An untested policy is an assumption, not a control. In a production environment, unverified governance is the same as no governance: it provides false confidence without providing actual protection.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">oste<span>bovik</span>.net · AZ-104 Phase 1 · Projects 1, 2</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank">LinkedIn</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    function toggleCard(id){document.getElementById(id).classList.toggle('open')}
+    function copyCode(btn){
+      const pre=btn.nextElementSibling;
+      navigator.clipboard.writeText(pre.textContent).then(()=>{
+        const orig=btn.textContent;btn.textContent='copied';
+        btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
+        setTimeout(()=>{btn.textContent=orig;btn.style.color='';btn.style.borderColor=''},1800);
+      });
+    }
+    const observer=new IntersectionObserver(
+      entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),
+      {threshold:0.08}
+    );
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+  </script>
+</body>
+</html>
