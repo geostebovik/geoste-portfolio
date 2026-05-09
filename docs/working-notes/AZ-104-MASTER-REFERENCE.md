@@ -503,7 +503,7 @@ Old SWA content cached by browser. Test in incognito/private window with `Ctrl+S
 ## 5. Resource Inventory — AZ-104 Lab
 
 ### Resource Group: `rg-az104-dev-wus3-01` (westus3)
-
+  note: rg-az104-dev-wus3-01 deleted May 8, 2026
 > Phase 2 resources were torn down in East US. Phase 3–4 resources are in westus3 in this RG.
 
 **Networking**
@@ -699,6 +699,11 @@ Behavior: push to `main` → deployed in <60 seconds
 - Landing page (`index.html`) deployed and serving — Giants color palette, skill domain cards, stats bar, scroll reveal animations
 - GitHub Actions CI/CD working — push to `main` = live in <60 seconds
 - All infrastructure resources deployed and healthy in `rg-geoste-prod-wus3-01`
+- Delete `rg-az104-dev-wus3-01` — after all evidence captured and skill domain pages populated (target: next week)
+- Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
+- Reformat Phase 2 guide to match Phase 3 & 4 format (requires Phase 4 guide as template reference)
+- Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
+- [ ] Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
 
 ### Repo Structure (Target)
 ```
@@ -729,23 +734,20 @@ geoste-portfolio/
 ```
 
 ### Immediately Actionable Pending Work
-- [ ] Reorganize repo to match target folder structure above — move infrastructure files, create skill domain folders
-- [ ] Build skill domain pages — start with `infrastructure-as-code/index.html` (strongest content, highest interviewer impact)
+
+- [ ] Build remaining skill domain pages
 - [ ] Wire "View projects" links on landing page to actual skill domain pages
 - [ ] Upload assets to `stgeostewus301` via `az storage blob upload-batch` (CLI, not portal drag-and-drop)
-- [ ] Capture all evidence from `rg-az104-dev-wus3-01` before deletion: Container App screenshots, VNet topology, ACR, all Phase 4 project artifacts
-- [ ] Add Certifications section to landing page: Credly badges for AZ-900, CC (ISC2), AZ-104 (in-progress), AI-900 (planned) — between Skills and footer
 - [ ] Add resume link — dedicated page or linked PDF
 - [ ] Backfill Identity & Governance domain — no projects mapped yet (Phase 1 content)
-- [ ] Reformat Phase 2 guide to match Phase 3 & 4 format (requires Phase 4 guide as template reference)
 
 ### Future / Planned
-- [ ] Delete `rg-az104-dev-wus3-01` — after all evidence captured and skill domain pages populated (target: next week)
 - [ ] Operating hours WAF rule — upgrade JS check to proper Front Door Rule Set
 - [ ] Dynamic log display page — surface Application Insights / LAW data on portfolio page
 - [ ] `/resources/` page — RPO vs RTO write-up, PowerShell vs Bash syntax reference, AZ-104 whiteboard, other reference docs
 - [ ] AZ-104 exam — schedule and sit
-- [ ] AZ-500 (Security) — next certification path
+- [ ] Azure AI Fundamentals (Exam AI-901) - https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-901/
+- [ ] AZ-305: Designing Microsoft Azure Infrastructure Solutions - https://learn.microsoft.com/en-us/credentials/certifications/exams/az-305/
 
 ---
 
