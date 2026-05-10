@@ -924,419 +924,423 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- P7 — Virtual Machines -->
-          <div class="project-card reveal" id="p7">
-            <div class="project-header" onclick="toggleCard('p7')">
-              <div class="project-num">07</div>
-              <div class="project-meta">
-                <span class="project-tag tag-compute">VM · Extensions · Disk Management · Availability</span>
-                <div class="project-title">Virtual Machines &amp; Extensions</div>
-                <div class="project-subtitle">Windows + Linux · Custom Script Extension · BGInfo · disk
-                  attach/resize/snapshot · availability zones</div>
-              </div>
-              <span class="project-toggle">▾</span>
+      <!-- P7 — Virtual Machines -->
+      <div class="project-card reveal" id="p7">
+        <div class="project-header" onclick="toggleCard('p7')">
+          <div class="project-num">07</div>
+          <div class="project-meta">
+            <span class="project-tag tag-compute">VM · Extensions · Disk Management · Availability</span>
+            <div class="project-title">Virtual Machines &amp; Extensions</div>
+            <div class="project-subtitle">Windows + Linux · Custom Script Extension · BGInfo · disk
+              attach/resize/snapshot · availability zones</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed a cross-zone pair of VMs — Windows Server 2025 Azure Edition
+                in Zone 1, Ubuntu 24.04 in Zone 2 — demonstrating zone-redundant
+                architecture. Both VMs deployed with no public IPs; all access via
+                Bastion or <code>az vm run-command</code>. Extensions automated
+                post-deployment configuration without requiring interactive access:
+                Custom Script Extension installed IIS on Windows, BGInfo wrote
+                system metadata to the desktop wallpaper. Disk operations covered
+                attach, UUID-based mount (never device name), online resize, and snapshot.
+              </p>
+
+              <div class="body-section-label">VM Extensions — Automation Without Login</div>
+              <p class="body-text">
+                Extensions are agents that run inside the VM after deployment.
+                The Azure platform delivers them without requiring any interactive session:
+              </p>
+              <ul class="decision-list">
+                <li><strong>Custom Script Extension</strong> — Fetches a script from a storage blob and executes it.
+                  Used to install IIS and configure a test page. The CSE agent makes an anonymous HTTP fetch — use
+                  service SAS (account key auth), not user delegation SAS, or the download returns 403.</li>
+                <li><strong>BGInfo</strong> — Writes hostname, IP address, OS version, and uptime to the desktop
+                  wallpaper. No longer in the portal marketplace; deploy via CLI only:
+                  <code>az vm extension set --name BGInfo --publisher Microsoft.Compute</code>.
+                </li>
+                <li><strong>MDE.Windows / MDE.Linux</strong> — Microsoft Defender for Endpoint deploys automatically
+                  on
+                  Visual Studio subscriptions via Defender for Cloud. Leave in place — it provides security
+                  telemetry.
+                </li>
+              </ul>
+
+              <a class="diagram-link" href="diagrams/project7-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project7-architecture.svg
+              </a>
             </div>
-            <div class="project-body">
-              <div class="project-body-inner">
-                <div>
-                  <div class="body-section-label">Overview</div>
-                  <p class="body-text">
-                    Deployed a cross-zone pair of VMs — Windows Server 2025 Azure Edition
-                    in Zone 1, Ubuntu 24.04 in Zone 2 — demonstrating zone-redundant
-                    architecture. Both VMs deployed with no public IPs; all access via
-                    Bastion or <code>az vm run-command</code>. Extensions automated
-                    post-deployment configuration without requiring interactive access:
-                    Custom Script Extension installed IIS on Windows, BGInfo wrote
-                    system metadata to the desktop wallpaper. Disk operations covered
-                    attach, UUID-based mount (never device name), online resize, and snapshot.
-                  </p>
 
-                  <div class="body-section-label">VM Extensions — Automation Without Login</div>
-                  <p class="body-text">
-                    Extensions are agents that run inside the VM after deployment.
-                    The Azure platform delivers them without requiring any interactive session:
-                  </p>
-                  <ul class="decision-list">
-                    <li><strong>Custom Script Extension</strong> — Fetches a script from a storage blob and executes it.
-                      Used to install IIS and configure a test page. The CSE agent makes an anonymous HTTP fetch — use
-                      service SAS (account key auth), not user delegation SAS, or the download returns 403.</li>
-                    <li><strong>BGInfo</strong> — Writes hostname, IP address, OS version, and uptime to the desktop
-                      wallpaper. No longer in the portal marketplace; deploy via CLI only:
-                      <code>az vm extension set --name BGInfo --publisher Microsoft.Compute</code>.
-                    </li>
-                    <li><strong>MDE.Windows / MDE.Linux</strong> — Microsoft Defender for Endpoint deploys automatically
-                      on
-                      Visual Studio subscriptions via Defender for Cloud. Leave in place — it provides security
-                      telemetry.
-                    </li>
-                  </ul>
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Windows computerName — 15 character limit</strong> — Azure resource name can be any
+                  length,
+                  but Windows OS hostname is hard-limited to 15 characters. <code>vm-win-dev-wus3-01</code> is 18
+                  chars
+                  and fails at provisioning. Pass <code>computerName</code> as a separate explicit parameter in
+                  Bicep —
+                  do not rely on <code>take(vmName, 15)</code> for multi-VM deployments, which produces duplicate
+                  names.
+                </li>
+                <li><strong>Linux disk mount — UUID, never device name</strong> — Device names
+                  (<code>/dev/sda</code>,
+                  <code>/dev/sdb</code>) can shift on reboot or when another disk is added. UUID never changes.
+                  Always
+                  use UUID in fstab with the <code>nofail</code> flag — without it, a missing disk prevents the VM
+                  from
+                  booting.
+                </li>
+                <li><strong>Disk resize is two separate steps</strong> — <code>az disk update --size-gb</code>
+                  expands
+                  the block device at the Azure layer. <code>sudo resize2fs</code> expands the filesystem inside the
+                  OS
+                  to use the new space. One without the other leaves the disk unusable at the expanded size.</li>
+                <li><strong>Never mount data disks at /mnt</strong> — Azure Linux agent mounts the temporary disk at
+                  <code>/mnt</code> by default. Mounting a data disk there creates a conflict — after reboot the
+                  temp
+                  disk wins. Use <code>/data</code> or any other path.
+                </li>
+              </ul>
 
-                  <a class="diagram-link" href="diagrams/project7-architecture.svg" target="_blank">
-                    <span class="diagram-link-icon">⬡</span>
-                    View architecture diagram — project7-architecture.svg
-                  </a>
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Windows Server 2025 hotpatch settings</div>
+                <p><code>patchMode: 'AutomaticByOS'</code> fails with <code>InvalidParameter</code> on Windows
+                  Server
+                  2025 Azure Edition. Required config: <code>patchMode: 'AutomaticByPlatform'</code>,
+                  <code>enableHotpatching: true</code> inside <code>patchSettings</code>, with
+                  <code>rebootSetting: 'IfRequired'</code>. The <code>enableHotpatching</code> property belongs
+                  inside
+                  <code>patchSettings</code>, not directly in <code>windowsConfiguration</code>.
+                </p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Virtual Machines</span>
+                <span class="tech-pill">Availability Zones</span>
+                <span class="tech-pill">Custom Script Extension</span>
+                <span class="tech-pill">BGInfo</span>
+                <span class="tech-pill">Managed Disks</span>
+                <span class="tech-pill">Disk Snapshots</span>
+                <span class="tech-pill">Azure Bastion</span>
+                <span class="tech-pill">Run Command</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P8 — App Service & Containers -->
+      <div class="project-card reveal" id="p8">
+        <div class="project-header" onclick="toggleCard('p8')">
+          <div class="project-num">08</div>
+          <div class="project-meta">
+            <span class="project-tag tag-appsvc">App Service · Deployment Slots · Container Instances</span>
+            <div class="project-title">App Service &amp; Container Instances</div>
+            <div class="project-subtitle">P0v3 plan · staging slot · blue/green swap · slot-sticky settings · ACI
+              nginx
+              · zero-downtime deployment</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed an App Service plan with a Python 3.11 web app and a staging
+                deployment slot, demonstrating blue/green deployment: deploy a new
+                version to staging, validate it, then swap to production in under
+                30 seconds with zero downtime. Slot-sticky app settings stay with
+                the slot during swaps — so the <code>ENVIRONMENT</code> variable
+                always reflects the correct environment regardless of which code
+                revision is running. Also deployed an Azure Container Instance running
+                nginx to demonstrate the lightest-weight compute option in Azure:
+                no VM, no plan, a running container in under 60 seconds.
+              </p>
+
+              <div class="body-section-label">Deployment Slot Swap — How It Works</div>
+              <p class="body-text">
+                App Service is like a managed apartment building — Azure handles
+                infrastructure; you move in your app. A deployment slot is a second
+                apartment in the same building. Swapping exchanges the front doors:
+                staging becomes production and production becomes staging.
+                No one notices the move happened.
+              </p>
+
+              <div class="code-block">
+                <div class="code-label">Swap staging → production</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>az webapp deployment slot swap \
+-g rg-az104-dev-wus3-01 \
+-n app-az104-dev-wus3-01 \
+--slot staging \
+--target-slot production</pre>
+              </div>
+
+              <a class="diagram-link" href="diagrams/project8-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project8-architecture.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>P0v3 minimum for deployment slots</strong> — Deployment slots require Standard tier or
+                  higher. P0v3 is the smallest non-legacy tier that supports slots (~$41/mo). Free and Basic tiers
+                  are
+                  shown as "Legacy" in the current portal — Standard is the correct starting point for any
+                  production-pattern deployment.</li>
+                <li><strong>Slot-sticky settings stay with the slot</strong> — The <code>ENVIRONMENT</code> app
+                  setting
+                  is marked as a slot setting so it doesn't swap with the code. Production always shows
+                  <code>ENVIRONMENT=production</code> and staging always shows <code>ENVIRONMENT=staging</code>
+                  regardless of which version is deployed where. This is how you track what's running where without
+                  hardcoding it in the application.
+                </li>
+                <li><strong>Managed identity at creation time</strong> — <code>--assign-identity "[system]"</code>
+                  at
+                  <code>az webapp create</code> time. Assigning after creation introduces a timing window where an
+                  RBAC
+                  assignment might be attempted before the identity GUID exists in Entra ID.
+                </li>
+                <li><strong>KV reference strings — use Cloud Shell, not PowerShell</strong> — The <code>@</code>
+                  symbol
+                  and parentheses in Key Vault reference values cause parsing failures in PowerShell even inside
+                  quotes.
+                  Use Cloud Shell Bash for any <code>az webapp config appsettings set</code> commands containing KV
+                  references.</li>
+              </ul>
+
+              <div class="info">
+                <div class="info-label">Container Instances vs App Service vs VMs</div>
+                <p><strong>ACI</strong> — Single container, job-style or short-lived workloads. No persistent
+                  storage,
+                  no autoscale. Fastest cold start. <strong>App Service</strong> — Platform-managed PaaS. Ideal for
+                  web
+                  apps and APIs where you want deployment slots, autoscale, and built-in CI/CD without managing
+                  infrastructure. <strong>VMs</strong> — Full OS control required, legacy software, non-HTTP
+                  workloads,
+                  or when you need to configure the network stack directly.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">App Service</span>
+                <span class="tech-pill">Deployment Slots</span>
+                <span class="tech-pill">Blue/Green Deploy</span>
+                <span class="tech-pill">Slot-Sticky Settings</span>
+                <span class="tech-pill">Container Instances</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Key Vault References</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slots.png','Deployment slots — production and staging')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slots.png"
+                    alt="App Service slots" loading="lazy" />
+                  <div class="screenshot-caption">Production + staging slots</div>
                 </div>
-
-                <div>
-                  <div class="body-section-label">Key Design Decisions</div>
-                  <ul class="decision-list">
-                    <li><strong>Windows computerName — 15 character limit</strong> — Azure resource name can be any
-                      length,
-                      but Windows OS hostname is hard-limited to 15 characters. <code>vm-win-dev-wus3-01</code> is 18
-                      chars
-                      and fails at provisioning. Pass <code>computerName</code> as a separate explicit parameter in
-                      Bicep —
-                      do not rely on <code>take(vmName, 15)</code> for multi-VM deployments, which produces duplicate
-                      names.
-                    </li>
-                    <li><strong>Linux disk mount — UUID, never device name</strong> — Device names
-                      (<code>/dev/sda</code>,
-                      <code>/dev/sdb</code>) can shift on reboot or when another disk is added. UUID never changes.
-                      Always
-                      use UUID in fstab with the <code>nofail</code> flag — without it, a missing disk prevents the VM
-                      from
-                      booting.
-                    </li>
-                    <li><strong>Disk resize is two separate steps</strong> — <code>az disk update --size-gb</code>
-                      expands
-                      the block device at the Azure layer. <code>sudo resize2fs</code> expands the filesystem inside the
-                      OS
-                      to use the new space. One without the other leaves the disk unusable at the expanded size.</li>
-                    <li><strong>Never mount data disks at /mnt</strong> — Azure Linux agent mounts the temporary disk at
-                      <code>/mnt</code> by default. Mounting a data disk there creates a conflict — after reboot the
-                      temp
-                      disk wins. Use <code>/data</code> or any other path.
-                    </li>
-                  </ul>
-
-                  <div class="gotcha">
-                    <div class="gotcha-label">⚠ Gotcha — Windows Server 2025 hotpatch settings</div>
-                    <p><code>patchMode: 'AutomaticByOS'</code> fails with <code>InvalidParameter</code> on Windows
-                      Server
-                      2025 Azure Edition. Required config: <code>patchMode: 'AutomaticByPlatform'</code>,
-                      <code>enableHotpatching: true</code> inside <code>patchSettings</code>, with
-                      <code>rebootSetting: 'IfRequired'</code>. The <code>enableHotpatching</code> property belongs
-                      inside
-                      <code>patchSettings</code>, not directly in <code>windowsConfiguration</code>.
-                    </p>
-                  </div>
-
-                  <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                  <div class="tech-list">
-                    <span class="tech-pill">Virtual Machines</span>
-                    <span class="tech-pill">Availability Zones</span>
-                    <span class="tech-pill">Custom Script Extension</span>
-                    <span class="tech-pill">BGInfo</span>
-                    <span class="tech-pill">Managed Disks</span>
-                    <span class="tech-pill">Disk Snapshots</span>
-                    <span class="tech-pill">Azure Bastion</span>
-                    <span class="tech-pill">Run Command</span>
-                  </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slot-sticky-env-variable.png','Slot-sticky environment variable configuration')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slot-sticky-env-variable.png"
+                    alt="Slot sticky setting" loading="lazy" />
+                  <div class="screenshot-caption">Slot-sticky env variable</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-deployed-swapped.png','App after slot swap — version promoted to production')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-deployed-swapped.png"
+                    alt="App after slot swap" loading="lazy" />
+                  <div class="screenshot-caption">Post-swap — production promoted</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/aci-nginx-access-logs.png','ACI nginx container access logs')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/aci-nginx-access-logs.png"
+                    alt="ACI nginx logs" loading="lazy" />
+                  <div class="screenshot-caption">ACI nginx access logs</div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- P8 — App Service & Containers -->
-          <div class="project-card reveal" id="p8">
-            <div class="project-header" onclick="toggleCard('p8')">
-              <div class="project-num">08</div>
-              <div class="project-meta">
-                <span class="project-tag tag-appsvc">App Service · Deployment Slots · Container Instances</span>
-                <div class="project-title">App Service &amp; Container Instances</div>
-                <div class="project-subtitle">P0v3 plan · staging slot · blue/green swap · slot-sticky settings · ACI
-                  nginx
-                  · zero-downtime deployment</div>
-              </div>
-              <span class="project-toggle">▾</span>
+      <!-- P12 — Container Registry & Container Apps -->
+      <div class="project-card reveal" id="p12">
+        <div class="project-header" onclick="toggleCard('p12')">
+          <div class="project-num">12</div>
+          <div class="project-meta">
+            <span class="project-tag tag-container">ACR · Container Apps · Traffic Splitting ·
+              Scale-to-Zero</span>
+            <div class="project-title">Container Registry &amp; Container Apps</div>
+            <div class="project-subtitle">ACR · CAE VNet-injected · managed identity · 80/20 traffic split · min
+              0
+              replicas · Bicep throughout</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed a complete container workload using infrastructure-as-code
+                throughout — no portal clicks for resource creation. The stack:
+                Azure Container Registry (<code>acrdevwus301</code>) storing two image
+                versions built via different methods, a VNet-injected Container Apps
+                Environment on a dedicated <code>/23</code> subnet delegated to
+                <code>Microsoft.App/environments</code>, and a Container App running
+                nginx with a system-assigned managed identity, scale-to-zero
+                configuration, and an 80/20 canary traffic split between revisions.
+                No credentials stored anywhere in the deployment chain.
+              </p>
+
+              <div class="body-section-label">Two Build Methods — Same Result, Different Context</div>
+              <ul class="decision-list">
+                <li><strong>Local Docker build + push (v1)</strong> — Build happens on the local machine. Docker
+                  Engine
+                  stamps the image, tags it with the full registry path, pushes each layer to ACR. Layers from
+                  prior
+                  pushes are reused. Requires Docker Desktop running locally.</li>
+                <li><strong>ACR Tasks cloud build (v2)</strong> — <code>az acr build</code> uploads the
+                  Dockerfile
+                  and
+                  context to Azure. ACR spins up a build agent, executes the Dockerfile, pushes the result — all
+                  in
+                  the
+                  cloud. No local Docker daemon required. This is how CI/CD pipelines build images.</li>
+              </ul>
+
+              <a class="diagram-link" href="../infrastructure-as-code/diagrams/project12-architecture.svg"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project12-architecture.svg
+              </a>
             </div>
-            <div class="project-body">
-              <div class="project-body-inner">
-                <div>
-                  <div class="body-section-label">Overview</div>
-                  <p class="body-text">
-                    Deployed an App Service plan with a Python 3.11 web app and a staging
-                    deployment slot, demonstrating blue/green deployment: deploy a new
-                    version to staging, validate it, then swap to production in under
-                    30 seconds with zero downtime. Slot-sticky app settings stay with
-                    the slot during swaps — so the <code>ENVIRONMENT</code> variable
-                    always reflects the correct environment regardless of which code
-                    revision is running. Also deployed an Azure Container Instance running
-                    nginx to demonstrate the lightest-weight compute option in Azure:
-                    no VM, no plan, a running container in under 60 seconds.
-                  </p>
 
-                  <div class="body-section-label">Deployment Slot Swap — How It Works</div>
-                  <p class="body-text">
-                    App Service is like a managed apartment building — Azure handles
-                    infrastructure; you move in your app. A deployment slot is a second
-                    apartment in the same building. Swapping exchanges the front doors:
-                    staging becomes production and production becomes staging.
-                    No one notices the move happened.
-                  </p>
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Scale to zero — minReplicas: 0</strong> — The Container App runs zero instances when
+                  idle.
+                  Cost drops to zero. First request cold-starts a new instance in seconds. For workloads with
+                  uneven
+                  demand — internal tools, APIs called during business hours — this is a significant cost
+                  advantage
+                  over
+                  App Service, which idles at a fixed price regardless of traffic.</li>
+                <li><strong>Canary deployment via traffic splitting</strong> — 80% of requests route to the
+                  stable
+                  v1
+                  revision, 20% to the new v2 revision. If v2 shows problems, shift 100% back to v1 without
+                  redeployment. Traffic weights are managed via CLI post-deploy
+                  (<code>az containerapp ingress traffic set</code>) — not in Bicep, because revision names are
+                  auto-generated at deploy time and unknown at template authoring time.</li>
+                <li><strong>Two-pass deployment for role assignment</strong> — System-assigned managed identity
+                  only
+                  exists after the Container App is created, so the AcrPull role assignment cannot happen in the
+                  same
+                  deployment pass. Production-grade solution: user-assigned managed identity created as
+                  infrastructure
+                  before the app, with the role pre-assigned. The identity exists independently of any app.</li>
+                <li><strong>Internal CAE is immutable</strong> — The Container Apps Environment was declared
+                  internal at
+                  creation time and cannot be changed afterward. Redeploy required to change to external. This
+                  was a
+                  deliberate design choice following the no-public-IP posture established across all lab
+                  resources.
+                </li>
+              </ul>
 
-                  <div class="code-block">
-                    <div class="code-label">Swap staging → production</div>
-                    <button class="copy-btn" onclick="copyCode(this)">copy</button>
-                    <pre>az webapp deployment slot swap \
-  -g rg-az104-dev-wus3-01 \
-  -n app-az104-dev-wus3-01 \
-  --slot staging \
-  --target-slot production</pre>
-                  </div>
-
-                  <a class="diagram-link" href="diagrams/project8-architecture.svg" target="_blank">
-                    <span class="diagram-link-icon">⬡</span>
-                    View architecture diagram — project8-architecture.svg
-                  </a>
-                </div>
-
-                <div>
-                  <div class="body-section-label">Key Design Decisions</div>
-                  <ul class="decision-list">
-                    <li><strong>P0v3 minimum for deployment slots</strong> — Deployment slots require Standard tier or
-                      higher. P0v3 is the smallest non-legacy tier that supports slots (~$41/mo). Free and Basic tiers
-                      are
-                      shown as "Legacy" in the current portal — Standard is the correct starting point for any
-                      production-pattern deployment.</li>
-                    <li><strong>Slot-sticky settings stay with the slot</strong> — The <code>ENVIRONMENT</code> app
-                      setting
-                      is marked as a slot setting so it doesn't swap with the code. Production always shows
-                      <code>ENVIRONMENT=production</code> and staging always shows <code>ENVIRONMENT=staging</code>
-                      regardless of which version is deployed where. This is how you track what's running where without
-                      hardcoding it in the application.
-                    </li>
-                    <li><strong>Managed identity at creation time</strong> — <code>--assign-identity "[system]"</code>
-                      at
-                      <code>az webapp create</code> time. Assigning after creation introduces a timing window where an
-                      RBAC
-                      assignment might be attempted before the identity GUID exists in Entra ID.
-                    </li>
-                    <li><strong>KV reference strings — use Cloud Shell, not PowerShell</strong> — The <code>@</code>
-                      symbol
-                      and parentheses in Key Vault reference values cause parsing failures in PowerShell even inside
-                      quotes.
-                      Use Cloud Shell Bash for any <code>az webapp config appsettings set</code> commands containing KV
-                      references.</li>
-                  </ul>
-
-                  <div class="info">
-                    <div class="info-label">Container Instances vs App Service vs VMs</div>
-                    <p><strong>ACI</strong> — Single container, job-style or short-lived workloads. No persistent
-                      storage,
-                      no autoscale. Fastest cold start. <strong>App Service</strong> — Platform-managed PaaS. Ideal for
-                      web
-                      apps and APIs where you want deployment slots, autoscale, and built-in CI/CD without managing
-                      infrastructure. <strong>VMs</strong> — Full OS control required, legacy software, non-HTTP
-                      workloads,
-                      or when you need to configure the network stack directly.</p>
-                  </div>
-
-                  <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                  <div class="tech-list">
-                    <span class="tech-pill">App Service</span>
-                    <span class="tech-pill">Deployment Slots</span>
-                    <span class="tech-pill">Blue/Green Deploy</span>
-                    <span class="tech-pill">Slot-Sticky Settings</span>
-                    <span class="tech-pill">Container Instances</span>
-                    <span class="tech-pill">Managed Identity</span>
-                    <span class="tech-pill">Key Vault References</span>
-                  </div>
-                  <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
-                  <div class="screenshot-grid">
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slots.png','Deployment slots — production and staging')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slots.png"
-                        alt="App Service slots" loading="lazy" />
-                      <div class="screenshot-caption">Production + staging slots</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slot-sticky-env-variable.png','Slot-sticky environment variable configuration')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-slot-sticky-env-variable.png"
-                        alt="Slot sticky setting" loading="lazy" />
-                      <div class="screenshot-caption">Slot-sticky env variable</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-deployed-swapped.png','App after slot swap — version promoted to production')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/app-deployed-swapped.png"
-                        alt="App after slot swap" loading="lazy" />
-                      <div class="screenshot-caption">Post-swap — production promoted</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/aci-nginx-access-logs.png','ACI nginx container access logs')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/aci-nginx-access-logs.png"
-                        alt="ACI nginx logs" loading="lazy" />
-                      <div class="screenshot-caption">ACI nginx access logs</div>
-                    </div>
-                  </div>
-                </div>
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — subnet delegation is a prerequisite</div>
+                <p>The target subnet must be delegated to <code>Microsoft.App/environments</code> before the
+                  Container
+                  Apps Environment can be created. Minimum subnet size is /23 (512 addresses). Delegation
+                  belongs in
+                  the
+                  subnet creation command and bootstrap script — not discovered at deploy time from a failed
+                  provisioning attempt.</p>
               </div>
 
-              <!-- P12 — Container Registry & Container Apps -->
-              <div class="project-card reveal" id="p12">
-                <div class="project-header" onclick="toggleCard('p12')">
-                  <div class="project-num">12</div>
-                  <div class="project-meta">
-                    <span class="project-tag tag-container">ACR · Container Apps · Traffic Splitting ·
-                      Scale-to-Zero</span>
-                    <div class="project-title">Container Registry &amp; Container Apps</div>
-                    <div class="project-subtitle">ACR · CAE VNet-injected · managed identity · 80/20 traffic split · min
-                      0
-                      replicas · Bicep throughout</div>
-                  </div>
-                  <span class="project-toggle">▾</span>
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Azure Container Registry</span>
+                <span class="tech-pill">ACR Tasks</span>
+                <span class="tech-pill">Container Apps</span>
+                <span class="tech-pill">Container Apps Environment</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Traffic Splitting</span>
+                <span class="tech-pill">Scale-to-Zero</span>
+                <span class="tech-pill">VNet Injection</span>
+                <span class="tech-pill">Bicep</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-overview.png','Azure Container Registry overview')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-overview.png"
+                    alt="ACR overview" loading="lazy" />
+                  <div class="screenshot-caption">ACR overview</div>
                 </div>
-                <div class="project-body">
-                  <div class="project-body-inner">
-                    <div>
-                      <div class="body-section-label">Overview</div>
-                      <p class="body-text">
-                        Deployed a complete container workload using infrastructure-as-code
-                        throughout — no portal clicks for resource creation. The stack:
-                        Azure Container Registry (<code>acrdevwus301</code>) storing two image
-                        versions built via different methods, a VNet-injected Container Apps
-                        Environment on a dedicated <code>/23</code> subnet delegated to
-                        <code>Microsoft.App/environments</code>, and a Container App running
-                        nginx with a system-assigned managed identity, scale-to-zero
-                        configuration, and an 80/20 canary traffic split between revisions.
-                        No credentials stored anywhere in the deployment chain.
-                      </p>
-
-                      <div class="body-section-label">Two Build Methods — Same Result, Different Context</div>
-                      <ul class="decision-list">
-                        <li><strong>Local Docker build + push (v1)</strong> — Build happens on the local machine. Docker
-                          Engine
-                          stamps the image, tags it with the full registry path, pushes each layer to ACR. Layers from
-                          prior
-                          pushes are reused. Requires Docker Desktop running locally.</li>
-                        <li><strong>ACR Tasks cloud build (v2)</strong> — <code>az acr build</code> uploads the
-                          Dockerfile
-                          and
-                          context to Azure. ACR spins up a build agent, executes the Dockerfile, pushes the result — all
-                          in
-                          the
-                          cloud. No local Docker daemon required. This is how CI/CD pipelines build images.</li>
-                      </ul>
-
-                      <a class="diagram-link" href="../infrastructure-as-code/diagrams/project12-architecture.svg"
-                        target="_blank">
-                        <span class="diagram-link-icon">⬡</span>
-                        View architecture diagram — project12-architecture.svg
-                      </a>
-                    </div>
-
-                    <div>
-                      <div class="body-section-label">Key Design Decisions</div>
-                      <ul class="decision-list">
-                        <li><strong>Scale to zero — minReplicas: 0</strong> — The Container App runs zero instances when
-                          idle.
-                          Cost drops to zero. First request cold-starts a new instance in seconds. For workloads with
-                          uneven
-                          demand — internal tools, APIs called during business hours — this is a significant cost
-                          advantage
-                          over
-                          App Service, which idles at a fixed price regardless of traffic.</li>
-                        <li><strong>Canary deployment via traffic splitting</strong> — 80% of requests route to the
-                          stable
-                          v1
-                          revision, 20% to the new v2 revision. If v2 shows problems, shift 100% back to v1 without
-                          redeployment. Traffic weights are managed via CLI post-deploy
-                          (<code>az containerapp ingress traffic set</code>) — not in Bicep, because revision names are
-                          auto-generated at deploy time and unknown at template authoring time.</li>
-                        <li><strong>Two-pass deployment for role assignment</strong> — System-assigned managed identity
-                          only
-                          exists after the Container App is created, so the AcrPull role assignment cannot happen in the
-                          same
-                          deployment pass. Production-grade solution: user-assigned managed identity created as
-                          infrastructure
-                          before the app, with the role pre-assigned. The identity exists independently of any app.</li>
-                        <li><strong>Internal CAE is immutable</strong> — The Container Apps Environment was declared
-                          internal at
-                          creation time and cannot be changed afterward. Redeploy required to change to external. This
-                          was a
-                          deliberate design choice following the no-public-IP posture established across all lab
-                          resources.
-                        </li>
-                      </ul>
-
-                      <div class="gotcha">
-                        <div class="gotcha-label">⚠ Gotcha — subnet delegation is a prerequisite</div>
-                        <p>The target subnet must be delegated to <code>Microsoft.App/environments</code> before the
-                          Container
-                          Apps Environment can be created. Minimum subnet size is /23 (512 addresses). Delegation
-                          belongs in
-                          the
-                          subnet creation command and bootstrap script — not discovered at deploy time from a failed
-                          provisioning attempt.</p>
-                      </div>
-
-                      <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                      <div class="tech-list">
-                        <span class="tech-pill">Azure Container Registry</span>
-                        <span class="tech-pill">ACR Tasks</span>
-                        <span class="tech-pill">Container Apps</span>
-                        <span class="tech-pill">Container Apps Environment</span>
-                        <span class="tech-pill">Managed Identity</span>
-                        <span class="tech-pill">Traffic Splitting</span>
-                        <span class="tech-pill">Scale-to-Zero</span>
-                        <span class="tech-pill">VNet Injection</span>
-                        <span class="tech-pill">Bicep</span>
-                      </div>
-                      <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
-                      <div class="screenshot-grid">
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-overview.png','Azure Container Registry overview')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-overview.png"
-                            alt="ACR overview" loading="lazy" />
-                          <div class="screenshot-caption">ACR overview</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-repositories-v1-v2.png','ACR repositories showing v1 and v2 images')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-repositories-v1-v2.png"
-                            alt="ACR v1 and v2 images" loading="lazy" />
-                          <div class="screenshot-caption">ACR — v1 + v2 images</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-revisions-split-80-20.png','Container App 80/20 traffic split between revisions')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-revisions-split-80-20.png"
-                            alt="Traffic split 80/20" loading="lazy" />
-                          <div class="screenshot-caption">80/20 traffic split</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-scale-min0-max3.png','Container App scale to zero configuration')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-scale-min0-max3.png"
-                            alt="Scale to zero" loading="lazy" />
-                          <div class="screenshot-caption">Scale — min 0, max 3</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/cae-overview.png','Container Apps Environment overview')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/cae-overview.png"
-                            alt="CAE overview" loading="lazy" />
-                          <div class="screenshot-caption">Container Apps Environment</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-overview.png','Container App overview')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-overview.png"
-                            alt="Container App overview" loading="lazy" />
-                          <div class="screenshot-caption">Container App overview</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-repositories-v1-v2.png','ACR repositories showing v1 and v2 images')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/acr-repositories-v1-v2.png"
+                    alt="ACR v1 and v2 images" loading="lazy" />
+                  <div class="screenshot-caption">ACR — v1 + v2 images</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-revisions-split-80-20.png','Container App 80/20 traffic split between revisions')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-revisions-split-80-20.png"
+                    alt="Traffic split 80/20" loading="lazy" />
+                  <div class="screenshot-caption">80/20 traffic split</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-scale-min0-max3.png','Container App scale to zero configuration')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-scale-min0-max3.png"
+                    alt="Scale to zero" loading="lazy" />
+                  <div class="screenshot-caption">Scale — min 0, max 3</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/cae-overview.png','Container Apps Environment overview')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/cae-overview.png"
+                    alt="CAE overview" loading="lazy" />
+                  <div class="screenshot-caption">Container Apps Environment</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-overview.png','Container App overview')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/compute-storage/screenshots/ca-overview.png"
+                    alt="Container App overview" loading="lazy" />
+                  <div class="screenshot-caption">Container App overview</div>
                 </div>
               </div>
-            </div><!-- /project-grid -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /project-grid -->
   </section>
 
   <!-- LESSONS LEARNED -->
