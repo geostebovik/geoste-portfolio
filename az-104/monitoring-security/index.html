@@ -829,17 +829,44 @@
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Log Analytics</span><span class="tech-pill">Azure Monitor Agent</span><span
-                  class="tech-pill">Data Collection Rules</span><span class="tech-pill">Metric Alerts</span><span
-                  class="tech-pill">Log Alerts</span><span class="tech-pill">Action Groups</span><span
-                  class="tech-pill">KQL</span>
+                <span class="tech-pill">Log Analytics</span>
+                <span class="tech-pill">Azure Monitor Agent</span>
+                <span class="tech-pill">Data Collection Rules</span>
+                <span class="tech-pill">Metric Alerts</span>
+                <span class="tech-pill">Log Alerts</span>
+                <span class="tech-pill">Action Groups</span>
+                <span class="tech-pill">KQL</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/alert-fired-linux-vm.png','CPU alert fired on Linux VM')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/alert-fired-linux-vm.png"
+                    alt="Alert fired" loading="lazy" />
+                  <div class="screenshot-caption">CPU alert fired</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/alert-fired-linux-vm-additional-detail.png','Alert detail view')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/alert-fired-linux-vm-additional-detail.png"
+                    alt="Alert detail" loading="lazy" />
+                  <div class="screenshot-caption">Alert — additional detail</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/law-kql-vm-heartbeat.png','KQL heartbeat query results in Log Analytics')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/law-kql-vm-heartbeat.png"
+                    alt="KQL heartbeat query" loading="lazy" />
+                  <div class="screenshot-caption">KQL — VM heartbeat query</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- P10 -->
+      <!-- P10
       <div class="project-card reveal" id="p10">
         <div class="project-header" onclick="toggleCard('p10')">
           <div class="project-num">10</div>
@@ -910,10 +937,38 @@
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Recovery Services Vault</span><span class="tech-pill">Backup Policy</span><span
-                  class="tech-pill">VM Backup</span><span class="tech-pill">File-Level Recovery</span><span
-                  class="tech-pill">Azure Site Recovery</span><span class="tech-pill">Soft Delete</span><span
-                  class="tech-pill">LRS / GRS</span>
+                <span class="tech-pill">Recovery Services Vault</span><span class="tech-pill">Backup Policy</span><span class="tech-pill">VM Backup</span>
+                <span class="tech-pill">File-Level Recovery</span>
+                <span class="tech-pill">Azure Site Recovery</span>
+                <span class="tech-pill">Soft Delete</span>
+                <span class="tech-pill">LRS / GRS</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-backups.png','Recovery Services vault showing backup jobs')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-backups.png" alt="Vault backup jobs" loading="lazy" />
+                  <div class="screenshot-caption">RSV — backup jobs</div>
+                </div>
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-backup-linux.png','Linux VM backup completed')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-backup-linux.png" alt="Linux VM backup" loading="lazy" />
+                  <div class="screenshot-caption">Linux VM backup — completed</div>
+                </div>
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-restore-linux-create-new.png','Restore — create new VM option')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-restore-linux-create-new.png" alt="Restore create new VM" loading="lazy" />
+                  <div class="screenshot-caption">Restore — create new VM</div>
+                </div>
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-restore-linux-replace.png','Restore — replace existing VM option')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-restore-linux-replace.png" alt="Restore replace existing" loading="lazy" />
+                  <div class="screenshot-caption">Restore — replace existing</div>
+                </div>
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-file-recovery-linux-disk.png','File-level recovery — disk mount')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-file-recovery-linux-disk.png" alt="File recovery disk" loading="lazy" />
+                  <div class="screenshot-caption">File recovery — disk mount</div>
+                </div>
+                <div class="screenshot-item" onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-linux-file-recovery.png','File-level recovery in progress')">
+                  <img src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/vault-vm-linux-file-recovery.png" alt="File recovery" loading="lazy" />
+                  <div class="screenshot-caption">File-level recovery</div>
+                </div>
               </div>
             </div>
           </div>
@@ -999,10 +1054,31 @@
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Key Vault</span><span class="tech-pill">Managed Identity</span><span
-                  class="tech-pill">RBAC</span><span class="tech-pill">KV References</span><span
-                  class="tech-pill">Diagnostic Settings</span><span class="tech-pill">Log Analytics</span><span
-                  class="tech-pill">KQL</span><span class="tech-pill">Entra ID</span>
+                <span class="tech-pill">Key Vault</span>
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">RBAC</span>
+                <span class="tech-pill">KV References</span>
+                <span class="tech-pill">Diagnostic Settings</span>
+                <span class="tech-pill">Log Analytics</span>
+                <span class="tech-pill">KQL</span>
+                <span class="tech-pill">Entra ID</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/kv-setting-webapp-values.png','Key Vault references resolved in App Service settings')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/kv-setting-webapp-values.png"
+                    alt="KV references in App Service" loading="lazy" />
+                  <div class="screenshot-caption">KV references — App Service</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/law-kql-kv-logs.png','KQL query showing Key Vault audit logs in Log Analytics')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/monitoring-security/screenshots/law-kql-kv-logs.png"
+                    alt="KV audit logs KQL" loading="lazy" />
+                  <div class="screenshot-caption">KQL — KV audit logs</div>
+                </div>
               </div>
             </div>
           </div>
