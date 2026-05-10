@@ -1,103 +1,721 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monitoring &amp; Security — ostebovik.net</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap"
+    rel="stylesheet" />
   <style>
     :root {
-      --black:#0a0a0a;--orange:#FD5A1E;--orange-dim:#c44415;--cream:#EFE4B0;--cream-dim:#b8ad84;
-      --surface-1:#111213;--surface-2:#16181c;--surface-3:#1e2128;--surface-4:#252830;
-      --border:#2a2d35;--border-lit:#3a3d47;--text-primary:#e8e4d8;--text-secondary:#a8a49c;
-      --text-dim:#706c66;--blue:#4a9eff;--teal:#2dd4bf;--amber:#f59e0b;--purple:#a78bfa;
-      --green:#34d399;--red:#f87171;
+      --black: #0a0a0a;
+      --orange: #FD5A1E;
+      --orange-dim: #c44415;
+      --cream: #EFE4B0;
+      --cream-dim: #b8ad84;
+      --surface-1: #111213;
+      --surface-2: #16181c;
+      --surface-3: #1e2128;
+      --surface-4: #252830;
+      --border: #2a2d35;
+      --border-lit: #3a3d47;
+      --text-primary: #e8e4d8;
+      --text-secondary: #a8a49c;
+      --text-dim: #706c66;
+      --blue: #4a9eff;
+      --teal: #2dd4bf;
+      --amber: #f59e0b;
+      --purple: #a78bfa;
+      --green: #34d399;
+      --red: #f87171;
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{background:var(--black);color:var(--text-primary);font-family:'Barlow',sans-serif;font-weight:400;line-height:1.6;min-height:100vh;overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
-    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-    .nav-brand{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:0.05em;text-decoration:none;color:var(--cream)}
-    .nav-brand span{color:var(--orange)}
-    .nav-links{display:flex;gap:2rem;list-style:none}
-    .nav-links a{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:400;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;color:var(--text-secondary);transition:color 0.2s}
-    .nav-links a:hover,.nav-links a.active{color:var(--orange)}
-    .hero{position:relative;padding:140px 2rem 80px;max-width:1100px;margin:0 auto}
-    .hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--orange);margin-bottom:1.2rem;display:flex;align-items:center;gap:0.75rem}
-    .hero-eyebrow::before{content:'';display:inline-block;width:32px;height:1px;background:var(--orange)}
-    .hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(3.5rem,8vw,6.5rem);font-weight:800;line-height:0.92;letter-spacing:-0.01em;text-transform:uppercase;color:var(--cream);margin-bottom:1.5rem}
-    .hero h1 em{font-style:normal;color:var(--orange);display:block}
-    .hero-description{max-width:580px;font-size:1rem;font-weight:400;color:var(--text-secondary);line-height:1.75;margin-bottom:2.5rem}
-    .hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap}
-    .stat{display:flex;flex-direction:column;gap:0.2rem}
-    .stat-value{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:700;color:var(--cream);line-height:1}
-    .stat-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim)}
-    .section{max-width:1100px;margin:0 auto;padding:0 2rem 80px}
-    .section-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:2.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
-    .section-number{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:0.1em}
-    .section-title{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--cream)}
-    .project-grid{display:grid;gap:1.5px}
-    .project-card{background:var(--surface-2);border:1px solid var(--border);overflow:hidden;transition:border-color 0.2s}
-    .project-card:hover{border-color:var(--border-lit)}
-    .project-header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1.25rem;padding:1.5rem 1.75rem;cursor:pointer;user-select:none}
-    .project-num{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:800;line-height:1;color:var(--orange);opacity:0.25;min-width:3.5rem;transition:opacity 0.2s}
-    .project-card:hover .project-num,.project-card.open .project-num{opacity:1}
-    .project-tag{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:2px;margin-bottom:0.5rem;display:inline-block}
-    .tag-monitor{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
-    .tag-backup{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
-    .tag-keyvault{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-    .project-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;color:var(--cream);margin-bottom:0.3rem}
-    .project-subtitle{font-size:0.82rem;color:var(--text-secondary);font-weight:400}
-    .project-toggle{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--text-dim);transition:color 0.2s,transform 0.3s;display:inline-block}
-    .project-card.open .project-toggle{color:var(--orange);transform:rotate(180deg)}
-    .project-body{display:none;padding:0 1.75rem 1.75rem;border-top:1px solid var(--border)}
-    .project-card.open .project-body{display:block}
-    .project-body-inner{padding-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
-    @media(max-width:700px){.project-body-inner{grid-template-columns:1fr}}
-    .body-section-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.75rem}
-    .body-text{font-size:0.88rem;font-weight:400;color:var(--text-secondary);line-height:1.7;margin-bottom:1.25rem}
-    .decision-list{list-style:none;display:flex;flex-direction:column;gap:0.75rem}
-    .decision-list li{display:flex;gap:0.75rem;font-size:0.85rem;font-weight:400;color:var(--text-secondary);line-height:1.55}
-    .decision-list li::before{content:'→';font-family:'IBM Plex Mono',monospace;color:var(--orange);flex-shrink:0;margin-top:0.05rem}
-    .tech-list{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem}
-    .tech-pill{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;padding:0.25rem 0.65rem;background:var(--surface-3);border:1px solid var(--border);color:var(--text-secondary);border-radius:2px}
-    .code-block{background:var(--surface-1);border:1px solid var(--border);border-left:3px solid var(--orange);padding:1rem 1.25rem;margin:1rem 0;position:relative;overflow-x:auto}
-    .code-block pre{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;line-height:1.7;color:var(--cream-dim);white-space:pre}
-    .code-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem}
-    .copy-btn{position:absolute;top:0.6rem;right:0.75rem;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.2rem 0.5rem;cursor:pointer;transition:color 0.2s,border-color 0.2s}
-    .copy-btn:hover{color:var(--orange);border-color:var(--orange)}
-    .gotcha{background:rgba(253,90,30,0.06);border:1px solid rgba(253,90,30,0.2);border-left:3px solid var(--orange);padding:0.9rem 1.1rem;margin:1rem 0}
-    .gotcha-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange);margin-bottom:0.4rem}
-    .gotcha p{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
-    .info{background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-left:3px solid var(--blue);padding:0.9rem 1.1rem;margin:1rem 0}
-    .info-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin-bottom:0.4rem}
-    .info p{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
-    .diagram-link{display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:var(--surface-3);border:1px solid var(--border);text-decoration:none;color:var(--text-secondary);font-size:0.82rem;transition:border-color 0.2s,color 0.2s;margin-top:1rem}
-    .diagram-link:hover{border-color:var(--orange);color:var(--orange)}
-    .diagram-link-icon{font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--orange)}
-    .restore-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin:1rem 0}
-    @media(max-width:600px){.restore-grid{grid-template-columns:1fr}}
-    .restore-card{background:var(--surface-3);padding:1rem}
-    .restore-card-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:0.5rem}
-    .restore-card p{font-size:0.8rem;color:var(--text-secondary);line-height:1.55}
-    .lessons-strip{background:var(--surface-2);border:1px solid var(--border);padding:2rem 1.75rem;margin-top:1.5px}
-    .lessons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem}
-    .lesson-item{display:flex;flex-direction:column;gap:0.4rem}
-    .lesson-title{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--cream)}
-    .lesson-body{font-size:0.82rem;font-weight:400;color:var(--text-secondary);line-height:1.6}
-    footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-    .footer-brand{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:0.08em}
-    .footer-brand span{color:var(--orange)}
-    .footer-links{display:flex;gap:1.5rem;list-style:none}
-    .footer-links a{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;transition:color 0.2s}
-    .footer-links a:hover{color:var(--orange)}
-    .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s ease}
-    .reveal.visible{opacity:1;transform:none}
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .nav-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: var(--cream)
+    }
+
+    .nav-brand span {
+      color: var(--orange)
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: color 0.2s
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--orange)
+    }
+
+    .hero {
+      position: relative;
+      padding: 140px 2rem 80px;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 1px;
+      background: var(--orange)
+    }
+
+    .hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 1.5rem
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--orange);
+      display: block
+    }
+
+    .hero-description {
+      max-width: 580px;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 2.5rem
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem
+    }
+
+    .stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1
+    }
+
+    .stat-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim)
+    }
+
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 80px
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .section-number {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em
+    }
+
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--cream)
+    }
+
+    .project-grid {
+      display: grid;
+      gap: 1.5px
+    }
+
+    .project-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.2s
+    }
+
+    .project-card:hover {
+      border-color: var(--border-lit)
+    }
+
+    .project-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.5rem 1.75rem;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .project-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--orange);
+      opacity: 0.25;
+      min-width: 3.5rem;
+      transition: opacity 0.2s
+    }
+
+    .project-card:hover .project-num,
+    .project-card.open .project-num {
+      opacity: 1
+    }
+
+    .project-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      margin-bottom: 0.5rem;
+      display: inline-block
+    }
+
+    .tag-monitor {
+      background: rgba(167, 139, 250, 0.12);
+      color: var(--purple);
+      border: 1px solid rgba(167, 139, 250, 0.2)
+    }
+
+    .tag-backup {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, 0.2)
+    }
+
+    .tag-keyvault {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.2)
+    }
+
+    .project-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 0.3rem
+    }
+
+    .project-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 400
+    }
+
+    .project-toggle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      transition: color 0.2s, transform 0.3s;
+      display: inline-block
+    }
+
+    .project-card.open .project-toggle {
+      color: var(--orange);
+      transform: rotate(180deg)
+    }
+
+    .project-body {
+      display: none;
+      padding: 0 1.75rem 1.75rem;
+      border-top: 1px solid var(--border)
+    }
+
+    .project-card.open .project-body {
+      display: block
+    }
+
+    .project-body-inner {
+      padding-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem
+    }
+
+    @media(max-width:700px) {
+      .project-body-inner {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .body-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem
+    }
+
+    .body-text {
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.25rem
+    }
+
+    .decision-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem
+    }
+
+    .decision-list li {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.55
+    }
+
+    .decision-list li::before {
+      content: '→';
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--orange);
+      flex-shrink: 0;
+      margin-top: 0.05rem
+    }
+
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem
+    }
+
+    .tech-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 2px
+    }
+
+    .code-block {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      position: relative;
+      overflow-x: auto
+    }
+
+    .code-block pre {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      color: var(--cream-dim);
+      white-space: pre
+    }
+
+    .code-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.75rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s
+    }
+
+    .copy-btn:hover {
+      color: var(--orange);
+      border-color: var(--orange)
+    }
+
+    .gotcha {
+      background: rgba(253, 90, 30, 0.06);
+      border: 1px solid rgba(253, 90, 30, 0.2);
+      border-left: 3px solid var(--orange);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0
+    }
+
+    .gotcha-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.4rem
+    }
+
+    .gotcha p {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6
+    }
+
+    .info {
+      background: rgba(74, 158, 255, 0.06);
+      border: 1px solid rgba(74, 158, 255, 0.2);
+      border-left: 3px solid var(--blue);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0
+    }
+
+    .info-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.4rem
+    }
+
+    .info p {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6
+    }
+
+    .diagram-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 1rem
+    }
+
+    .diagram-link:hover {
+      border-color: var(--orange);
+      color: var(--orange)
+    }
+
+    .diagram-link-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      color: var(--orange)
+    }
+
+    /* ── Screenshots ───────────────────────────────────────────── */
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin-top: 1rem;
+    }
+
+    .screenshot-item {
+      background: var(--surface-3);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .screenshot-item:hover img {
+      opacity: 0.85;
+    }
+
+    .screenshot-caption {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      padding: 0.5rem 0.75rem;
+      border-top: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    /* Lightbox */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lb-overlay.active {
+      display: flex;
+    }
+
+    .lb-overlay img {
+      max-width: 92vw;
+      max-height: 88vh;
+      object-fit: contain;
+      border: 1px solid var(--border);
+    }
+
+    .restore-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      margin: 1rem 0
+    }
+
+    @media(max-width:600px) {
+      .restore-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .restore-card {
+      background: var(--surface-3);
+      padding: 1rem
+    }
+
+    .restore-card-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem
+    }
+
+    .restore-card p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.55
+    }
+
+    .lessons-strip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2rem 1.75rem;
+      margin-top: 1.5px
+    }
+
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem
+    }
+
+    .lesson-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem
+    }
+
+    .lesson-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream)
+    }
+
+    .lesson-body {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem
+    }
+
+    .footer-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em
+    }
+
+    .footer-brand span {
+      color: var(--orange)
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none
+    }
+
+    .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s
+    }
+
+    .footer-links a:hover {
+      color: var(--orange)
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s ease, transform 0.5s ease
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none
+    }
   </style>
 </head>
+
 <body>
 
   <nav>
@@ -143,7 +761,8 @@
           <div class="project-meta">
             <span class="project-tag tag-monitor">Log Analytics · KQL · Alerts · AMA + DCR</span>
             <div class="project-title">Azure Monitor &amp; Log Analytics</div>
-            <div class="project-subtitle">LAW · Azure Monitor Agent · Data Collection Rules · metric alerts · log-based alerts · KQL queries</div>
+            <div class="project-subtitle">LAW · Azure Monitor Agent · Data Collection Rules · metric alerts · log-based
+              alerts · KQL queries</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -151,9 +770,16 @@
           <div class="project-body-inner">
             <div>
               <div class="body-section-label">Overview</div>
-              <p class="body-text">Built the observability layer for the lab environment: a Log Analytics workspace receiving performance and event data from both VMs via Azure Monitor Agent and Data Collection Rules, metric alert rules firing on CPU threshold breaches, a log-based heartbeat alert detecting VM availability, and an Action Group delivering email notifications. Verified end-to-end by stress-testing CPU on the Linux VM and confirming the alert fired and the email arrived.</p>
+              <p class="body-text">Built the observability layer for the lab environment: a Log Analytics workspace
+                receiving performance and event data from both VMs via Azure Monitor Agent and Data Collection Rules,
+                metric alert rules firing on CPU threshold breaches, a log-based heartbeat alert detecting VM
+                availability, and an Action Group delivering email notifications. Verified end-to-end by stress-testing
+                CPU on the Linux VM and confirming the alert fired and the email arrived.</p>
               <div class="body-section-label">AMA + DCR — Current Correct Pattern</div>
-              <p class="body-text">The legacy Log Analytics agent (MMA) and Azure Diagnostics extension (LAD) were deprecated in March 2026. The current pattern is Azure Monitor Agent with Data Collection Rules. DCRs decouple the definition of what data to collect from the agent — the same DCR can be associated with multiple VMs, and data collection can be changed without touching the agent.</p>
+              <p class="body-text">The legacy Log Analytics agent (MMA) and Azure Diagnostics extension (LAD) were
+                deprecated in March 2026. The current pattern is Azure Monitor Agent with Data Collection Rules. DCRs
+                decouple the definition of what data to collect from the agent — the same DCR can be associated with
+                multiple VMs, and data collection can be changed without touching the agent.</p>
               <div class="code-block">
                 <div class="code-label">KQL — VM heartbeat availability</div>
                 <button class="copy-btn" onclick="copyCode(this)">copy</button>
@@ -181,18 +807,32 @@
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>AMA over legacy agents</strong> — MMA and LAD are deprecated. Azure Monitor Agent is the current correct deployment pattern. Remove legacy extensions before installing AMA to avoid conflicts — both agents writing to the same workspace produce duplicate records.</li>
-                <li><strong>DCR association has no -g flag</strong> — <code>az monitor data-collection rule association create</code> does not accept <code>-g</code>. The resource group is implicit in the <code>--resource</code> ARM ID. Use the full resource ID.</li>
-                <li><strong>Metric alert vs log alert</strong> — Metric alerts evaluate a numeric measurement against a threshold in near-real-time. Log alerts run a KQL query on a schedule. Use metric alerts for threshold breaches on known counters; use log alerts for absence detection (heartbeat missing) or complex multi-resource patterns.</li>
-                <li><strong>Action Group is reusable</strong> — Defined once, referenced by multiple alert rules. Adding a new notification target means updating the Action Group, not each individual alert rule.</li>
+                <li><strong>AMA over legacy agents</strong> — MMA and LAD are deprecated. Azure Monitor Agent is the
+                  current correct deployment pattern. Remove legacy extensions before installing AMA to avoid conflicts
+                  — both agents writing to the same workspace produce duplicate records.</li>
+                <li><strong>DCR association has no -g flag</strong> —
+                  <code>az monitor data-collection rule association create</code> does not accept <code>-g</code>. The
+                  resource group is implicit in the <code>--resource</code> ARM ID. Use the full resource ID.
+                </li>
+                <li><strong>Metric alert vs log alert</strong> — Metric alerts evaluate a numeric measurement against a
+                  threshold in near-real-time. Log alerts run a KQL query on a schedule. Use metric alerts for threshold
+                  breaches on known counters; use log alerts for absence detection (heartbeat missing) or complex
+                  multi-resource patterns.</li>
+                <li><strong>Action Group is reusable</strong> — Defined once, referenced by multiple alert rules. Adding
+                  a new notification target means updating the Action Group, not each individual alert rule.</li>
               </ul>
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — diagnostic logs have 5–15 min lag</div>
-                <p>After creating a diagnostic setting, logs take 5–15 minutes to appear in Log Analytics. Trigger a read operation first, wait, then query. Running the KQL query immediately returns zero results and looks like a misconfiguration — it isn't.</p>
+                <p>After creating a diagnostic setting, logs take 5–15 minutes to appear in Log Analytics. Trigger a
+                  read operation first, wait, then query. Running the KQL query immediately returns zero results and
+                  looks like a misconfiguration — it isn't.</p>
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Log Analytics</span><span class="tech-pill">Azure Monitor Agent</span><span class="tech-pill">Data Collection Rules</span><span class="tech-pill">Metric Alerts</span><span class="tech-pill">Log Alerts</span><span class="tech-pill">Action Groups</span><span class="tech-pill">KQL</span>
+                <span class="tech-pill">Log Analytics</span><span class="tech-pill">Azure Monitor Agent</span><span
+                  class="tech-pill">Data Collection Rules</span><span class="tech-pill">Metric Alerts</span><span
+                  class="tech-pill">Log Alerts</span><span class="tech-pill">Action Groups</span><span
+                  class="tech-pill">KQL</span>
               </div>
             </div>
           </div>
@@ -206,7 +846,8 @@
           <div class="project-meta">
             <span class="project-tag tag-backup">Backup · Site Recovery · RPO · RTO</span>
             <div class="project-title">Azure Backup &amp; Site Recovery</div>
-            <div class="project-subtitle">Recovery Services vault · custom backup policy · VM backup · file-level recovery · ASR concepts</div>
+            <div class="project-subtitle">Recovery Services vault · custom backup policy · VM backup · file-level
+              recovery · ASR concepts</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -214,20 +855,27 @@
           <div class="project-body-inner">
             <div>
               <div class="body-section-label">Overview</div>
-              <p class="body-text">Deployed a Recovery Services vault with a custom backup policy (daily at 11PM UTC, 7-day daily retention, 4-week weekly, 3-month monthly), enabled VM backup for the Linux VM, triggered an immediate backup, and verified the job completed successfully. Explored all three restore paths and file-level recovery. ASR replication was not run in the lab due to cost (~$25+/month per VM) but the RPO/RTO concepts and configuration wizard were fully documented.</p>
+              <p class="body-text">Deployed a Recovery Services vault with a custom backup policy (daily at 11PM UTC,
+                7-day daily retention, 4-week weekly, 3-month monthly), enabled VM backup for the Linux VM, triggered an
+                immediate backup, and verified the job completed successfully. Explored all three restore paths and
+                file-level recovery. ASR replication was not run in the lab due to cost (~$25+/month per VM) but the
+                RPO/RTO concepts and configuration wizard were fully documented.</p>
               <div class="body-section-label">Three Restore Paths</div>
               <div class="restore-grid">
                 <div class="restore-card">
                   <div class="restore-card-title">Create new VM</div>
-                  <p>Deploys a new VM from the recovery point. Original VM untouched. Use when validating the backup or running parallel before cutover.</p>
+                  <p>Deploys a new VM from the recovery point. Original VM untouched. Use when validating the backup or
+                    running parallel before cutover.</p>
                 </div>
                 <div class="restore-card">
                   <div class="restore-card-title">Replace existing</div>
-                  <p>Overwrites the source VM's disks with the recovery point. Fastest path to a known-good state. Use for ransomware recovery or failed-change rollback.</p>
+                  <p>Overwrites the source VM's disks with the recovery point. Fastest path to a known-good state. Use
+                    for ransomware recovery or failed-change rollback.</p>
                 </div>
                 <div class="restore-card">
                   <div class="restore-card-title">Restore disks</div>
-                  <p>Returns managed disks you can attach anywhere. Most flexible — inspect contents or use as source for a new deployment without touching the original VM.</p>
+                  <p>Returns managed disks you can attach anywhere. Most flexible — inspect contents or use as source
+                    for a new deployment without touching the original VM.</p>
                 </div>
               </div>
               <a class="diagram-link" href="diagrams/project10-architecture.svg" target="_blank">
@@ -238,18 +886,34 @@
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>RPO vs RTO — negotiated, not discovered</strong> — RPO determines backup frequency; RTO determines standby architecture. Daily backup gives 24-hour RPO. Hot standby with ASR gives near-zero RTO. Every backup architecture is a deliberate tradeoff between data loss tolerance, recovery time tolerance, and budget.</li>
-                <li><strong>LRS vs GRS vault redundancy</strong> — LRS keeps backup data in one region. GRS replicates to a paired region and supports Cross-Region Restore. LRS is appropriate for lab; production vaults protecting business-critical workloads should use GRS.</li>
-                <li><strong>Soft delete protects against ransomware</strong> — Soft delete retains deleted backup data for 14 days regardless of who deleted it. Ransomware attacks frequently destroy backups before encrypting primary workloads — soft delete ensures the backup survives.</li>
-                <li><strong>Teardown sequence is order-dependent</strong> — <code>az group delete</code> fails if the RSV contains protected items. Required: disable backup protection with <code>--delete-backup-data true</code> → verify no protected items → wait 10–30 minutes for restore point collections to clear → delete RG.</li>
+                <li><strong>RPO vs RTO — negotiated, not discovered</strong> — RPO determines backup frequency; RTO
+                  determines standby architecture. Daily backup gives 24-hour RPO. Hot standby with ASR gives near-zero
+                  RTO. Every backup architecture is a deliberate tradeoff between data loss tolerance, recovery time
+                  tolerance, and budget.</li>
+                <li><strong>LRS vs GRS vault redundancy</strong> — LRS keeps backup data in one region. GRS replicates
+                  to a paired region and supports Cross-Region Restore. LRS is appropriate for lab; production vaults
+                  protecting business-critical workloads should use GRS.</li>
+                <li><strong>Soft delete protects against ransomware</strong> — Soft delete retains deleted backup data
+                  for 14 days regardless of who deleted it. Ransomware attacks frequently destroy backups before
+                  encrypting primary workloads — soft delete ensures the backup survives.</li>
+                <li><strong>Teardown sequence is order-dependent</strong> — <code>az group delete</code> fails if the
+                  RSV contains protected items. Required: disable backup protection with
+                  <code>--delete-backup-data true</code> → verify no protected items → wait 10–30 minutes for restore
+                  point collections to clear → delete RG.
+                </li>
               </ul>
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — backup container name must be queried, never constructed</div>
-                <p>The container name format <code>IaasVMContainer;iaasvmcontainerv2;{rg};{vm-name}</code> is exact and case-sensitive. Always query it: <code>az backup container list ... --query "[].name" -o tsv</code>. One character difference causes every backup CLI command to fail.</p>
+                <p>The container name format <code>IaasVMContainer;iaasvmcontainerv2;{rg};{vm-name}</code> is exact and
+                  case-sensitive. Always query it: <code>az backup container list ... --query "[].name" -o tsv</code>.
+                  One character difference causes every backup CLI command to fail.</p>
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Recovery Services Vault</span><span class="tech-pill">Backup Policy</span><span class="tech-pill">VM Backup</span><span class="tech-pill">File-Level Recovery</span><span class="tech-pill">Azure Site Recovery</span><span class="tech-pill">Soft Delete</span><span class="tech-pill">LRS / GRS</span>
+                <span class="tech-pill">Recovery Services Vault</span><span class="tech-pill">Backup Policy</span><span
+                  class="tech-pill">VM Backup</span><span class="tech-pill">File-Level Recovery</span><span
+                  class="tech-pill">Azure Site Recovery</span><span class="tech-pill">Soft Delete</span><span
+                  class="tech-pill">LRS / GRS</span>
               </div>
             </div>
           </div>
@@ -263,7 +927,8 @@
           <div class="project-meta">
             <span class="project-tag tag-keyvault">Key Vault · Managed Identity · Zero-Credential · Audit Logs</span>
             <div class="project-title">Key Vault &amp; Managed Identity</div>
-            <div class="project-subtitle">Zero-credential architecture · RBAC model · KV references · diagnostic logs · KQL audit trail</div>
+            <div class="project-subtitle">Zero-credential architecture · RBAC model · KV references · diagnostic logs ·
+              KQL audit trail</div>
           </div>
           <span class="project-toggle">▾</span>
         </div>
@@ -271,9 +936,20 @@
           <div class="project-body-inner">
             <div>
               <div class="body-section-label">Overview</div>
-              <p class="body-text">Deployed a zero-credential architecture connecting App Service to Key Vault using system-assigned managed identity. No passwords, no API keys, no service principal secrets anywhere in code, configuration files, deployment scripts, or git history. The App Service proves its identity to Microsoft Entra ID, receives a scoped token, and uses that token to resolve Key Vault references at runtime — surfacing secrets as ordinary environment variables to the application without any Key Vault dependency in application code. Every secret access is logged to Log Analytics as an <code>AuditEvent</code> and queryable via KQL.</p>
+              <p class="body-text">Deployed a zero-credential architecture connecting App Service to Key Vault using
+                system-assigned managed identity. No passwords, no API keys, no service principal secrets anywhere in
+                code, configuration files, deployment scripts, or git history. The App Service proves its identity to
+                Microsoft Entra ID, receives a scoped token, and uses that token to resolve Key Vault references at
+                runtime — surfacing secrets as ordinary environment variables to the application without any Key Vault
+                dependency in application code. Every secret access is logged to Log Analytics as an
+                <code>AuditEvent</code> and queryable via KQL.
+              </p>
               <div class="body-section-label">How Managed Identity Works</div>
-              <p class="body-text">The traditional approach stores a credential somewhere the app can read it. Every step is a failure point: committed to git, stored in plaintext, forgotten after rotation. Managed identity eliminates the credential entirely. Azure manages the identity lifecycle — when the App Service is deleted, the identity is deleted with it. Nothing to rotate, nothing to leak, nothing to accidentally expose.</p>
+              <p class="body-text">The traditional approach stores a credential somewhere the app can read it. Every
+                step is a failure point: committed to git, stored in plaintext, forgotten after rotation. Managed
+                identity eliminates the credential entirely. Azure manages the identity lifecycle — when the App Service
+                is deleted, the identity is deleted with it. Nothing to rotate, nothing to leak, nothing to accidentally
+                expose.</p>
               <div class="code-block">
                 <div class="code-label">KQL — Key Vault secret access audit</div>
                 <button class="copy-btn" onclick="copyCode(this)">copy</button>
@@ -284,7 +960,8 @@
           OperationName, ResultType
 | order by TimeGenerated desc</pre>
               </div>
-              <a class="diagram-link" href="../infrastructure-as-code/diagrams/project14-architecture.svg" target="_blank">
+              <a class="diagram-link" href="../infrastructure-as-code/diagrams/project14-architecture.svg"
+                target="_blank">
                 <span class="diagram-link-icon">⬡</span>
                 View architecture diagram — project14-architecture.svg
               </a>
@@ -292,22 +969,40 @@
             <div>
               <div class="body-section-label">Key Design Decisions</div>
               <ul class="decision-list">
-                <li><strong>RBAC model, never Access Policies</strong> — Access Policies grant access at vault level — all or nothing. RBAC grants access at any scope, integrates with standard Azure IAM tooling, and produces an audit trail consistent with every other RBAC operation in the subscription. Access Policies are deprecated for new vaults.</li>
-                <li><strong>Key Vault Secrets User — least privilege</strong> — The App Service identity has read-only access to secret values only. It cannot list secrets, create, modify, or delete. The application gets exactly what it needs and no more.</li>
-                <li><strong>KV references over SDK retrieval</strong> — Configuring secrets as App Service references (<code>@Microsoft.KeyVault(SecretUri=...)</code>) means the application has no Key Vault dependency in its code. The runtime resolves the reference before surfacing it as an environment variable. Infrastructure manages secrets; application consumes environment variables.</li>
-                <li><strong>RBAC scope — Key Vault resource, not resource group</strong> — Scoping to the resource group grants the same role against every resource in the group. Scope every RBAC assignment as narrowly as possible.</li>
+                <li><strong>RBAC model, never Access Policies</strong> — Access Policies grant access at vault level —
+                  all or nothing. RBAC grants access at any scope, integrates with standard Azure IAM tooling, and
+                  produces an audit trail consistent with every other RBAC operation in the subscription. Access
+                  Policies are deprecated for new vaults.</li>
+                <li><strong>Key Vault Secrets User — least privilege</strong> — The App Service identity has read-only
+                  access to secret values only. It cannot list secrets, create, modify, or delete. The application gets
+                  exactly what it needs and no more.</li>
+                <li><strong>KV references over SDK retrieval</strong> — Configuring secrets as App Service references
+                  (<code>@Microsoft.KeyVault(SecretUri=...)</code>) means the application has no Key Vault dependency in
+                  its code. The runtime resolves the reference before surfacing it as an environment variable.
+                  Infrastructure manages secrets; application consumes environment variables.</li>
+                <li><strong>RBAC scope — Key Vault resource, not resource group</strong> — Scoping to the resource group
+                  grants the same role against every resource in the group. Scope every RBAC assignment as narrowly as
+                  possible.</li>
               </ul>
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — KV reference strings corrupt in local Bash</div>
-                <p>The <code>@</code> symbol and parentheses in <code>@Microsoft.KeyVault(...)</code> are mishandled by Git Bash and WSL even inside quotes. All <code>az webapp config appsettings set</code> commands containing KV references must run from Azure Cloud Shell.</p>
+                <p>The <code>@</code> symbol and parentheses in <code>@Microsoft.KeyVault(...)</code> are mishandled by
+                  Git Bash and WSL even inside quotes. All <code>az webapp config appsettings set</code> commands
+                  containing KV references must run from Azure Cloud Shell.</p>
               </div>
               <div class="info">
                 <div class="info-label">App Service masks KV reference values by design</div>
-                <p>After setting KV references via CLI, output shows <code>"value": null</code>. This is expected — App Service hides the reference string for security. Verify in the portal under Settings → Environment variables: correctly resolved references show a green checkmark and "Key vault" in the Source column.</p>
+                <p>After setting KV references via CLI, output shows <code>"value": null</code>. This is expected — App
+                  Service hides the reference string for security. Verify in the portal under Settings → Environment
+                  variables: correctly resolved references show a green checkmark and "Key vault" in the Source column.
+                </p>
               </div>
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
               <div class="tech-list">
-                <span class="tech-pill">Key Vault</span><span class="tech-pill">Managed Identity</span><span class="tech-pill">RBAC</span><span class="tech-pill">KV References</span><span class="tech-pill">Diagnostic Settings</span><span class="tech-pill">Log Analytics</span><span class="tech-pill">KQL</span><span class="tech-pill">Entra ID</span>
+                <span class="tech-pill">Key Vault</span><span class="tech-pill">Managed Identity</span><span
+                  class="tech-pill">RBAC</span><span class="tech-pill">KV References</span><span
+                  class="tech-pill">Diagnostic Settings</span><span class="tech-pill">Log Analytics</span><span
+                  class="tech-pill">KQL</span><span class="tech-pill">Entra ID</span>
               </div>
             </div>
           </div>
@@ -327,31 +1022,54 @@
       <div class="lessons-grid">
         <div class="lesson-item">
           <div class="lesson-title">Managed identity eliminates the rotation problem</div>
-          <div class="lesson-body">Every stored credential has a rotation schedule, and every rotation is a change event that can break dependent applications. Managed identity has no credential to rotate. The identity lifecycle is tied to the resource — deleted with it, never orphaned in Entra ID. This removes an entire class of security risk, not just a maintenance burden.</div>
+          <div class="lesson-body">Every stored credential has a rotation schedule, and every rotation is a change event
+            that can break dependent applications. Managed identity has no credential to rotate. The identity lifecycle
+            is tied to the resource — deleted with it, never orphaned in Entra ID. This removes an entire class of
+            security risk, not just a maintenance burden.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Legacy agents are gone — AMA + DCR is the pattern</div>
-          <div class="lesson-body">The Log Analytics agent (MMA) and Azure Diagnostics extension (LAD) were deprecated in March 2026. Any guide referencing these agents describes a deprecated workflow. Azure Monitor Agent with Data Collection Rules is the current correct approach. DCRs decouple data collection definition from the agent, making it possible to change what's collected without touching the VM.</div>
+          <div class="lesson-body">The Log Analytics agent (MMA) and Azure Diagnostics extension (LAD) were deprecated
+            in March 2026. Any guide referencing these agents describes a deprecated workflow. Azure Monitor Agent with
+            Data Collection Rules is the current correct approach. DCRs decouple data collection definition from the
+            agent, making it possible to change what's collected without touching the VM.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">RPO and RTO are negotiated, not discovered</div>
-          <div class="lesson-body">RPO and RTO are business requirements that determine infrastructure choices. Daily backup gives 24-hour RPO. Hot standby with ASR gives near-zero RTO. The cost difference is significant. Every backup architecture is a deliberate tradeoff between data loss tolerance, recovery time tolerance, and budget — not a default setting to accept.</div>
+          <div class="lesson-body">RPO and RTO are business requirements that determine infrastructure choices. Daily
+            backup gives 24-hour RPO. Hot standby with ASR gives near-zero RTO. The cost difference is significant.
+            Every backup architecture is a deliberate tradeoff between data loss tolerance, recovery time tolerance, and
+            budget — not a default setting to accept.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Diagnostic log categories are resource-type specific</div>
-          <div class="lesson-body"><code>AuditEvent</code> is the Key Vault diagnostic category. App Service exposes <code>AppServiceHTTPLogs</code>, <code>AppServiceConsoleLogs</code>, and others. Never guess category names — query them: <code>az monitor diagnostic-settings categories list --resource $RESOURCE_ID</code> returns exactly what is valid for that specific resource type.</div>
+          <div class="lesson-body"><code>AuditEvent</code> is the Key Vault diagnostic category. App Service exposes
+            <code>AppServiceHTTPLogs</code>, <code>AppServiceConsoleLogs</code>, and others. Never guess category names
+            — query them: <code>az monitor diagnostic-settings categories list --resource $RESOURCE_ID</code> returns
+            exactly what is valid for that specific resource type.
+          </div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Soft delete is the last line of defense</div>
-          <div class="lesson-body">Ransomware attacks frequently target backups before encrypting the primary workload. Soft delete on Recovery Services vault retains deleted backup data for 14 days regardless of who deleted it. Purge protection on Key Vault prevents vault deletion during the retention period. Both should be enabled on any production resource from day one.</div>
+          <div class="lesson-body">Ransomware attacks frequently target backups before encrypting the primary workload.
+            Soft delete on Recovery Services vault retains deleted backup data for 14 days regardless of who deleted it.
+            Purge protection on Key Vault prevents vault deletion during the retention period. Both should be enabled on
+            any production resource from day one.</div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">KQL is the common language across Azure monitoring</div>
-          <div class="lesson-body">The same KQL syntax queries VM performance data, Key Vault audit logs, App Service HTTP logs, and diagnostic data from every Azure service that integrates with Log Analytics. The heartbeat query, the CPU timechart, and the Key Vault SecretGet audit query all follow identical patterns. Proficiency in KQL compounds across every new service you monitor.</div>
+          <div class="lesson-body">The same KQL syntax queries VM performance data, Key Vault audit logs, App Service
+            HTTP logs, and diagnostic data from every Azure service that integrates with Log Analytics. The heartbeat
+            query, the CPU timechart, and the Key Vault SecretGet audit query all follow identical patterns. Proficiency
+            in KQL compounds across every new service you monitor.</div>
         </div>
       </div>
     </div>
   </section>
+
+  <div class="lb-overlay" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lb-img" src="" alt="" />
+  </div>
 
   <footer>
     <div class="footer-brand">oste<span>bovik</span>.net · AZ-104 Phase 3 + 4 · Projects 9, 10, 14</div>
@@ -363,20 +1081,28 @@
   </footer>
 
   <script>
-    function toggleCard(id){document.getElementById(id).classList.toggle('open')}
-    function copyCode(btn){
-      const pre=btn.nextElementSibling;
-      navigator.clipboard.writeText(pre.textContent).then(()=>{
-        const orig=btn.textContent;btn.textContent='copied';
-        btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
-        setTimeout(()=>{btn.textContent=orig;btn.style.color='';btn.style.borderColor=''},1800);
+    function toggleCard(id) { document.getElementById(id).classList.toggle('open') }
+
+    function copyCode(btn) {
+      const pre = btn.nextElementSibling;
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        const orig = btn.textContent; btn.textContent = 'copied';
+        btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green)';
+        setTimeout(() => { btn.textContent = orig; btn.style.color = ''; btn.style.borderColor = '' }, 1800);
       });
     }
-    const observer=new IntersectionObserver(
-      entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),
-      {threshold:0.08}
+    function openLightbox(src, alt) {
+      document.getElementById('lb-img').src = src;
+      document.getElementById('lb-img').alt = alt;
+      document.getElementById('lightbox').classList.add('active');
+    }
+
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
+      { threshold: 0.08 }
     );
-    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   </script>
 </body>
+
 </html>

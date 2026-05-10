@@ -531,6 +531,67 @@
       color: var(--orange);
     }
 
+    /* ── Screenshots ───────────────────────────────────────────── */
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin-top: 1rem;
+    }
+
+    .screenshot-item {
+      background: var(--surface-3);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .screenshot-item:hover img {
+      opacity: 0.85;
+    }
+
+    .screenshot-caption {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      padding: 0.5rem 0.75rem;
+      border-top: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    /* Lightbox */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lb-overlay.active {
+      display: flex;
+    }
+
+    .lb-overlay img {
+      max-width: 92vw;
+      max-height: 88vh;
+      object-fit: contain;
+      border: 1px solid var(--border);
+    }
+
     /* ── Module map ────────────────────────────────────────────── */
     .module-map {
       display: grid;
@@ -795,7 +856,8 @@ param tags = {
                   CLI args.</li>
                 <li><strong>Policy-enforced tag inheritance</strong> — <code>require-tag-env</code> and
                   <code>require-tag-owner</code> deny assignments on the RG. <code>inherit-tag-*</code> policies push
-                  tags from RG to all child resources automatically. Manual tagging is inconsistent and breaks.</li>
+                  tags from RG to all child resources automatically. Manual tagging is inconsistent and breaks.
+                </li>
                 <li><strong>Bastion condition flag</strong> — <code>deployBastionHost bool</code> parameter controls
                   whether the host deploys. Standard SKU costs ~$140/mo; delete between lab phases.</li>
                 <li><strong>guid() with stable inputs</strong> — Role assignment names use <code>guid()</code> seeded
@@ -807,13 +869,15 @@ param tags = {
                 <p>Azure resource names can be any valid length but Windows OS hostnames are hard-limited to 15
                   characters. <code>vm-win-dev-wus3-01</code> is 18 chars and fails at provisioning. Pass
                   <code>computerName</code> as a separate explicit parameter — never rely on
-                  <code>take(vmName, 15)</code> for multi-VM deployments as it produces duplicate hostnames.</p>
+                  <code>take(vmName, 15)</code> for multi-VM deployments as it produces duplicate hostnames.
+                </p>
               </div>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — .bicepparam no interpolation</div>
                 <p>Cannot reference other parameters within the same <code>.bicepparam</code> file.
-                  <code>param tags = &#123; env: env &#125;</code> fails — use literals only.</p>
+                  <code>param tags = &#123; env: env &#125;</code> fails — use literals only.
+                </p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -974,24 +1038,28 @@ param tags = {
               <ul class="decision-list">
                 <li><strong>RBAC model, never Access Policies</strong> — KV created with
                   <code>--enable-rbac-authorization true</code>. Access Policies are deprecated for new vaults. RBAC
-                  provides per-secret granularity with full audit trail in Entra ID.</li>
+                  provides per-secret granularity with full audit trail in Entra ID.
+                </li>
                 <li><strong>Two separate access grants required</strong> — (1) creator needs
                   <code>Key Vault Secrets Officer</code> to write secrets; (2) ARM needs
                   <code>--enabled-for-template-deployment true</code> to resolve <code>getSecret()</code> in Bicep.
-                  Neither is implied by the other.</li>
+                  Neither is implied by the other.
+                </li>
                 <li><strong>System-assigned MI at creation time</strong> — <code>--assign-identity "[system]"</code>
                   passed during resource creation. Post-creation assignment introduces a timing window where RBAC
                   assignment may fail before the identity GUID propagates in Entra ID.</li>
                 <li><strong>KV reference strings — use Cloud Shell</strong> — The <code>@</code> and parentheses in KV
                   reference values cause PowerShell parsing failures even inside quotes. Always use Cloud Shell Bash for
-                  <code>az webapp config appsettings set</code> with KV references.</li>
+                  <code>az webapp config appsettings set</code> with KV references.
+                </li>
               </ul>
 
               <div class="gotcha">
                 <div class="gotcha-label">⚠ Gotcha — Soft delete blocks name reuse</div>
                 <p>Deleted secrets are retained for 7 days by default. Attempting to reuse a secret name during the
                   retention window fails. Purge explicitly:
-                  <code>az keyvault secret purge --vault-name kv-az104-dev-wus3-01 --name secret-name</code></p>
+                  <code>az keyvault secret purge --vault-name kv-az104-dev-wus3-01 --name secret-name</code>
+                </p>
               </div>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -1081,7 +1149,8 @@ param tags = {
                 <li><strong>GitHub Actions workflow created manually</strong> —
                   <code>skipGithubActionWorkflowGeneration: false</code> requires Azure write access to the repo at
                   deploy time. If not granted, the workflow file is never auto-generated. Added manually to
-                  <code>.github/workflows/</code> with deployment token in repo secrets.</li>
+                  <code>.github/workflows/</code> with deployment token in repo secrets.
+                </li>
                 <li><strong>Managed TLS certificate</strong> — <code>certificateType: 'ManagedCertificate'</code> on the
                   Front Door custom domain. Free, auto-renewed — no certificate management overhead.</li>
               </ul>
@@ -1169,6 +1238,10 @@ param tags = {
     </div>
   </section>
 
+  <div class="lb-overlay" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lb-img" src="" alt="" />
+  </div>
+
   <!-- FOOTER -->
   <footer>
     <div class="footer-brand">
@@ -1202,6 +1275,12 @@ param tags = {
           btn.style.borderColor = '';
         }, 1800);
       });
+    }
+
+    function openLightbox(src, alt) {
+      document.getElementById('lb-img').src = src;
+      document.getElementById('lb-img').alt = alt;
+      document.getElementById('lightbox').classList.add('active');
     }
 
     // ── Scroll reveal ─────────────────────────────────────────────
