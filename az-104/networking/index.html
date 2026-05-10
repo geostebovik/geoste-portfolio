@@ -554,6 +554,67 @@
       color: var(--orange);
     }
 
+    /* ── Screenshots ───────────────────────────────────────────── */
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin-top: 1rem;
+    }
+
+    .screenshot-item {
+      background: var(--surface-3);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .screenshot-item:hover img {
+      opacity: 0.85;
+    }
+
+    .screenshot-caption {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      padding: 0.5rem 0.75rem;
+      border-top: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    /* Lightbox */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lb-overlay.active {
+      display: flex;
+    }
+
+    .lb-overlay img {
+      max-width: 92vw;
+      max-height: 88vh;
+      object-fit: contain;
+      border: 1px solid var(--border);
+    }
+
     /* ── DNS comparison grid ───────────────────────────────────── */
     .dns-compare {
       display: grid;
@@ -867,13 +928,16 @@
                   (automation).</li>
                 <li><strong>NSG at subnet level, not NIC level</strong> —
                   <code>az network vnet subnet create --nsg</code> attaches the NSG to the subnet. Protects all
-                  resources in the subnet including future additions. Single management point vs. per-VM NIC rules.</li>
+                  resources in the subnet including future additions. Single management point vs. per-VM NIC rules.
+                </li>
                 <li><strong>Service tags over IP ranges</strong> — <code>AzureLoadBalancer</code>,
                   <code>VirtualNetwork</code>, <code>Internet</code> rather than hardcoded IP ranges. Microsoft
-                  maintains service tags automatically — hardcoded IPs break when Azure infrastructure changes.</li>
+                  maintains service tags automatically — hardcoded IPs break when Azure infrastructure changes.
+                </li>
                 <li><strong>Internet vs * in NSG deny rules</strong> — <code>Internet</code> blocks public traffic only.
                   <code>*</code> blocks everything including Bastion connections through the VNet. Using <code>*</code>
-                  to deny RDP/SSH would silently block Bastion.</li>
+                  to deny RDP/SSH would silently block Bastion.
+                </li>
               </ul>
 
               <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
@@ -922,11 +986,13 @@
                   misconfiguration. Always type <code>http://</code> explicitly when testing HTTP-only backends.</li>
                 <li><strong>Health probes blocked by NSG</strong> — Without a rule allowing the
                   <code>AzureLoadBalancer</code> service tag on port 80, probes are silently dropped. Both VMs show as
-                  Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.</li>
+                  Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.
+                </li>
                 <li><strong>No implicit outbound SNAT</strong> — VMs in the backend pool with no public IP had zero
                   internet access. <code>apt install nginx</code> appeared to succeed but silently failed.
                   <code>systemctl status nginx</code> revealed the service didn't exist. Fix: second public IP, frontend
-                  IP config, outbound rule.</li>
+                  IP config, outbound rule.
+                </li>
                 <li><strong>Frontend IP config is an intermediate layer</strong> — Outbound rules reference frontend IP
                   configurations, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config →
                   Rule. Portal abstracts this; CLI does not.</li>
@@ -1076,7 +1142,8 @@ done | sort | uniq -c</pre>
                   DNS response is returned. Both must be configured.</li>
                 <li><strong>Private DNS zone names are fixed</strong> — The zone name for each Private Link service is
                   mandated by Azure. Any other name prevents automatic A record creation. Blob Storage must be
-                  <code>privatelink.blob.core.windows.net</code>.</li>
+                  <code>privatelink.blob.core.windows.net</code>.
+                </li>
                 <li><strong>Disable public access only after private connectivity confirmed</strong> —
                   Confirm-then-lockdown: deploy endpoint → verify private IP resolution via nslookup → disable public
                   access → verify public is blocked. Re-enable before teardown — CLI delete commands from Cloud Shell
@@ -1149,7 +1216,8 @@ done | sort | uniq -c</pre>
                 <p>NSG rules for <code>AzureBastionSubnet</code> must be defined inside
                   <code>properties.securityRules: [...]</code> on the NSG resource, not as separate child resources.
                   Separate child resources deploy in parallel and may not be complete when the compliance check runs at
-                  subnet attachment time.</p>
+                  subnet attachment time.
+                </p>
               </div>
 
               <div class="gotcha">
@@ -1231,14 +1299,16 @@ done | sort | uniq -c</pre>
           <div class="lesson-body">Defining Bastion NSG rules as separate child resources triggers a race condition —
             the compliance check at subnet attachment time may run before all rules are deployed. Rules inside
             <code>securityRules: [...]</code> on the NSG resource deploy atomically and pass the compliance check
-            reliably every time.</div>
+            reliably every time.
+          </div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">Verify installation, don't trust exit codes</div>
           <div class="lesson-body"><code>apt install</code> can exit 0 while silently failing to download packages when
             there's no outbound internet access. The Standard LB SNAT issue was only discovered via
             <code>systemctl status nginx</code> — the install appeared successful. Always verify service state after
-            package installation on a newly provisioned VM.</div>
+            package installation on a newly provisioned VM.
+          </div>
         </div>
         <div class="lesson-item">
           <div class="lesson-title">404 is stronger than 403 for locked storage</div>
@@ -1250,6 +1320,10 @@ done | sort | uniq -c</pre>
       </div>
     </div>
   </section>
+
+  <div class="lb-overlay" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lb-img" src="" alt="" />
+  </div>
 
   <!-- FOOTER -->
   <footer>
@@ -1279,6 +1353,12 @@ done | sort | uniq -c</pre>
           btn.style.borderColor = '';
         }, 1800);
       });
+    }
+
+    function openLightbox(src, alt) {
+      document.getElementById('lb-img').src = src;
+      document.getElementById('lb-img').alt = alt;
+      document.getElementById('lightbox').classList.add('active');
     }
 
     const observer = new IntersectionObserver(
