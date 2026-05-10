@@ -982,426 +982,430 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- P5 — Load Balancer -->
-          <div class="project-card reveal" id="p5">
-            <div class="project-header" onclick="toggleCard('p5')">
-              <div class="project-num">05</div>
-              <div class="project-meta">
-                <span class="project-tag tag-lb">Load Balancer · SNAT · Availability</span>
-                <div class="project-title">Standard Load Balancer</div>
-                <div class="project-subtitle">Standard SKU · health probes · explicit outbound SNAT · availability set ·
-                  round-robin distribution</div>
+      <!-- P5 — Load Balancer -->
+      <div class="project-card reveal" id="p5">
+        <div class="project-header" onclick="toggleCard('p5')">
+          <div class="project-num">05</div>
+          <div class="project-meta">
+            <span class="project-tag tag-lb">Load Balancer · SNAT · Availability</span>
+            <div class="project-title">Standard Load Balancer</div>
+            <div class="project-subtitle">Standard SKU · health probes · explicit outbound SNAT · availability set ·
+              round-robin distribution</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed a Standard SKU Load Balancer distributing HTTP traffic across
+                two Ubuntu VMs running nginx, each in separate fault domains via an
+                availability set. The Standard SKU required explicit configuration of
+                things Basic SKU provided implicitly — health probe NSG rules and
+                outbound SNAT. Four separate issues were encountered and resolved during
+                this project, each genuinely educational.
+              </p>
+
+              <div class="body-section-label">The Four Issues</div>
+              <ul class="decision-list">
+                <li><strong>Browsers silently upgrade bare IPs to HTTPS</strong> — Chrome and Edge default to HTTPS
+                  for
+                  all addresses. The LB only had port 80 configured, so the attempt timed out and looked like an LB
+                  misconfiguration. Always type <code>http://</code> explicitly when testing HTTP-only backends.
+                </li>
+                <li><strong>Health probes blocked by NSG</strong> — Without a rule allowing the
+                  <code>AzureLoadBalancer</code> service tag on port 80, probes are silently dropped. Both VMs show
+                  as
+                  Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.
+                </li>
+                <li><strong>No implicit outbound SNAT</strong> — VMs in the backend pool with no public IP had zero
+                  internet access. <code>apt install nginx</code> appeared to succeed but silently failed.
+                  <code>systemctl status nginx</code> revealed the service didn't exist. Fix: second public IP,
+                  frontend
+                  IP config, outbound rule.
+                </li>
+                <li><strong>Frontend IP config is an intermediate layer</strong> — Outbound rules reference frontend
+                  IP
+                  configurations, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config →
+                  Rule. Portal abstracts this; CLI does not.</li>
+              </ul>
+
+              <div class="code-block">
+                <div class="code-label">Verify round-robin distribution</div>
+                <button class="copy-btn" onclick="copyCode(this)">copy</button>
+                <pre>for i in {1..20}; do curl -s http://&lt;LB-IP&gt; | grep "Served by"; done | sort | uniq -c</pre>
               </div>
-              <span class="project-toggle">▾</span>
+
+              <a class="diagram-link" href="diagrams/project5-lb-architecture.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project5-lb-architecture.svg
+              </a>
             </div>
-            <div class="project-body">
-              <div class="project-body-inner">
-                <div>
-                  <div class="body-section-label">Overview</div>
-                  <p class="body-text">
-                    Deployed a Standard SKU Load Balancer distributing HTTP traffic across
-                    two Ubuntu VMs running nginx, each in separate fault domains via an
-                    availability set. The Standard SKU required explicit configuration of
-                    things Basic SKU provided implicitly — health probe NSG rules and
-                    outbound SNAT. Four separate issues were encountered and resolved during
-                    this project, each genuinely educational.
-                  </p>
 
-                  <div class="body-section-label">The Four Issues</div>
-                  <ul class="decision-list">
-                    <li><strong>Browsers silently upgrade bare IPs to HTTPS</strong> — Chrome and Edge default to HTTPS
-                      for
-                      all addresses. The LB only had port 80 configured, so the attempt timed out and looked like an LB
-                      misconfiguration. Always type <code>http://</code> explicitly when testing HTTP-only backends.
-                    </li>
-                    <li><strong>Health probes blocked by NSG</strong> — Without a rule allowing the
-                      <code>AzureLoadBalancer</code> service tag on port 80, probes are silently dropped. Both VMs show
-                      as
-                      Unhealthy and the LB drops all traffic. Basic SKU allowed this implicitly; Standard does not.
-                    </li>
-                    <li><strong>No implicit outbound SNAT</strong> — VMs in the backend pool with no public IP had zero
-                      internet access. <code>apt install nginx</code> appeared to succeed but silently failed.
-                      <code>systemctl status nginx</code> revealed the service didn't exist. Fix: second public IP,
-                      frontend
-                      IP config, outbound rule.
-                    </li>
-                    <li><strong>Frontend IP config is an intermediate layer</strong> — Outbound rules reference frontend
-                      IP
-                      configurations, not public IPs directly. The dependency chain is: Public IP → Frontend IP Config →
-                      Rule. Portal abstracts this; CLI does not.</li>
-                  </ul>
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Standard SKU — no exceptions</strong> — Basic SKU Load Balancer is being retired.
+                  Standard
+                  is zone-redundant, supports outbound rules and multiple frontend IPs. Every new deployment uses
+                  Standard.</li>
+                <li><strong>Availability set for fault domain separation</strong> — Two VMs in separate fault
+                  domains
+                  means a single rack failure doesn't take both offline. Minimum viable HA for a two-VM pool.</li>
+                <li><strong>Dedicated outbound public IP</strong> — Separate from the inbound frontend IP. Keeps
+                  outbound SNAT traffic on a distinct IP, simplifying firewall rules and preserving the inbound IP
+                  for
+                  load-balanced traffic only.</li>
+                <li><strong>Round-robin is not strictly alternating</strong> — Standard LB uses a 5-tuple hash.
+                  Browser
+                  HTTP keep-alive reuses TCP connections, so the same VM serves multiple requests in a row. Expect
+                  uneven distribution (e.g., 13/7), not exactly 10/10.</li>
+              </ul>
 
-                  <div class="code-block">
-                    <div class="code-label">Verify round-robin distribution</div>
-                    <button class="copy-btn" onclick="copyCode(this)">copy</button>
-                    <pre>for i in {1..20}; do
-  curl -s http://&lt;LB-IP&gt; | grep "Served by"
-done | sort | uniq -c</pre>
-                  </div>
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — apt install can silently fail</div>
+                <p>Without outbound SNAT, <code>apt install nginx</code> printed connection warnings but reported
+                  success — exit code 0. Never trust package manager exit status alone on a newly provisioned VM.
+                  Always
+                  verify with <code>systemctl status nginx</code>.</p>
+              </div>
 
-                  <a class="diagram-link" href="diagrams/project5-lb-architecture.svg" target="_blank">
-                    <span class="diagram-link-icon">⬡</span>
-                    View architecture diagram — project5-lb-architecture.svg
-                  </a>
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Standard Load Balancer</span>
+                <span class="tech-pill">Health Probes</span>
+                <span class="tech-pill">Backend Pools</span>
+                <span class="tech-pill">Outbound SNAT</span>
+                <span class="tech-pill">Frontend IP Config</span>
+                <span class="tech-pill">Availability Sets</span>
+                <span class="tech-pill">NSG Service Tags</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-rule-health.png','Load balancer rule and health probe configuration')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-rule-health.png"
+                    alt="LB rule and health probe" loading="lazy" />
+                  <div class="screenshot-caption">LB rule + health probe</div>
                 </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-availset-rr.png','Load balancer availability set round robin')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-availset-rr.png"
+                    alt="LB availability set" loading="lazy" />
+                  <div class="screenshot-caption">Availability set + round-robin</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-blocking-lb.png','NSG blocking LB health probes')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-blocking-lb.png"
+                    alt="NSG blocking LB probes" loading="lazy" />
+                  <div class="screenshot-caption">NSG blocking LB probes</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-vmdown-portal.png','VM marked unhealthy in LB backend pool')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-vmdown-portal.png"
+                    alt="VM unhealthy in LB" loading="lazy" />
+                  <div class="screenshot-caption">VM unhealthy — backend pool</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                <div>
-                  <div class="body-section-label">Key Design Decisions</div>
-                  <ul class="decision-list">
-                    <li><strong>Standard SKU — no exceptions</strong> — Basic SKU Load Balancer is being retired.
-                      Standard
-                      is zone-redundant, supports outbound rules and multiple frontend IPs. Every new deployment uses
-                      Standard.</li>
-                    <li><strong>Availability set for fault domain separation</strong> — Two VMs in separate fault
-                      domains
-                      means a single rack failure doesn't take both offline. Minimum viable HA for a two-VM pool.</li>
-                    <li><strong>Dedicated outbound public IP</strong> — Separate from the inbound frontend IP. Keeps
-                      outbound SNAT traffic on a distinct IP, simplifying firewall rules and preserving the inbound IP
-                      for
-                      load-balanced traffic only.</li>
-                    <li><strong>Round-robin is not strictly alternating</strong> — Standard LB uses a 5-tuple hash.
-                      Browser
-                      HTTP keep-alive reuses TCP connections, so the same VM serves multiple requests in a row. Expect
-                      uneven distribution (e.g., 13/7), not exactly 10/10.</li>
-                  </ul>
+      <!-- P6 — DNS / Private Endpoints -->
+      <div class="project-card reveal" id="p6">
+        <div class="project-header" onclick="toggleCard('p6')">
+          <div class="project-num">06</div>
+          <div class="project-meta">
+            <span class="project-tag tag-dns">DNS · Private Endpoints · Zero Trust</span>
+            <div class="project-title">Private Endpoints &amp; Split-Horizon DNS</div>
+            <div class="project-subtitle">Private Link · Private DNS zone · VNet DNS links · public access
+              disabled
+              ·
+              same hostname, different resolution</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Removed Azure Blob Storage from the public internet without changing
+                application hostname — using a private endpoint and split-horizon DNS.
+                VMs inside the VNet resolve the storage hostname to a private IP
+                (<code>10.0.1.6</code>) via the private DNS zone. Public internet
+                clients receive a <code>404 WebContentNotFound</code> response — not
+                a 403, by design. Azure Storage does not acknowledge the endpoint
+                exists when public access is disabled. A 403 would reveal the resource
+                is there. A 404 reveals nothing.
+              </p>
 
-                  <div class="gotcha">
-                    <div class="gotcha-label">⚠ Gotcha — apt install can silently fail</div>
-                    <p>Without outbound SNAT, <code>apt install nginx</code> printed connection warnings but reported
-                      success — exit code 0. Never trust package manager exit status alone on a newly provisioned VM.
-                      Always
-                      verify with <code>systemctl status nginx</code>.</p>
+              <div class="body-section-label">DNS Resolution — Before vs After</div>
+              <div class="dns-compare">
+                <div class="dns-card">
+                  <div class="dns-card-header bad">Before — Public Resolution</div>
+                  <div class="dns-card-body">
+                    <span class="dns-hop">stlabeastus001.blob.core.windows.net</span>
+                    <span class="dns-hop bad">→ resolves to public IP</span>
+                    <span class="dns-hop bad">→ traverses public internet</span>
+                    <span class="dns-hop bad">→ hits storage firewall</span>
                   </div>
-
-                  <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                  <div class="tech-list">
-                    <span class="tech-pill">Standard Load Balancer</span>
-                    <span class="tech-pill">Health Probes</span>
-                    <span class="tech-pill">Backend Pools</span>
-                    <span class="tech-pill">Outbound SNAT</span>
-                    <span class="tech-pill">Frontend IP Config</span>
-                    <span class="tech-pill">Availability Sets</span>
-                    <span class="tech-pill">NSG Service Tags</span>
-                  </div>
-                  <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
-                  <div class="screenshot-grid">
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-rule-health.png','Load balancer rule and health probe configuration')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-rule-health.png"
-                        alt="LB rule and health probe" loading="lazy" />
-                      <div class="screenshot-caption">LB rule + health probe</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-availset-rr.png','Load balancer availability set round robin')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-availset-rr.png"
-                        alt="LB availability set" loading="lazy" />
-                      <div class="screenshot-caption">Availability set + round-robin</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-blocking-lb.png','NSG blocking LB health probes')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-blocking-lb.png"
-                        alt="NSG blocking LB probes" loading="lazy" />
-                      <div class="screenshot-caption">NSG blocking LB probes</div>
-                    </div>
-                    <div class="screenshot-item"
-                      onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-vmdown-portal.png','VM marked unhealthy in LB backend pool')">
-                      <img
-                        src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/lb-vmdown-portal.png"
-                        alt="VM unhealthy in LB" loading="lazy" />
-                      <div class="screenshot-caption">VM unhealthy — backend pool</div>
-                    </div>
+                </div>
+                <div class="dns-card">
+                  <div class="dns-card-header good">After — Private Resolution</div>
+                  <div class="dns-card-body">
+                    <span class="dns-hop">stlabeastus001.blob.core.windows.net</span>
+                    <span class="dns-hop key">→ private DNS zone override</span>
+                    <span class="dns-hop good">→ resolves to 10.0.1.6</span>
+                    <span class="dns-hop good">→ stays inside VNet ✓</span>
                   </div>
                 </div>
               </div>
 
-              <!-- P6 — DNS / Private Endpoints -->
-              <div class="project-card reveal" id="p6">
-                <div class="project-header" onclick="toggleCard('p6')">
-                  <div class="project-num">06</div>
-                  <div class="project-meta">
-                    <span class="project-tag tag-dns">DNS · Private Endpoints · Zero Trust</span>
-                    <div class="project-title">Private Endpoints &amp; Split-Horizon DNS</div>
-                    <div class="project-subtitle">Private Link · Private DNS zone · VNet DNS links · public access
-                      disabled
-                      ·
-                      same hostname, different resolution</div>
-                  </div>
-                  <span class="project-toggle">▾</span>
+              <div class="body-section-label" style="margin-top:1.25rem;">Access Outcome</div>
+              <table class="outcome-table">
+                <thead>
+                  <tr>
+                    <th>Source</th>
+                    <th>Resolves to</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>vm-web-01 (vnet-spoke)</td>
+                    <td><code style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">10.0.1.6</code>
+                    </td>
+                    <td><span class="badge badge-green">✓ Private access</span></td>
+                  </tr>
+                  <tr>
+                    <td>vm-hub-test (vnet-hub)</td>
+                    <td><code style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">10.0.1.6</code>
+                    </td>
+                    <td><span class="badge badge-green">✓ Private access</span></td>
+                  </tr>
+                  <tr>
+                    <td>Public internet</td>
+                    <td>Public IP (overridden)</td>
+                    <td><span class="badge badge-red">✗ 404 — resource not acknowledged</span></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <a class="diagram-link" href="diagrams/project6-dns-private-endpoint.svg" target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                View architecture diagram — project6-dns-private-endpoint.svg
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>Private DNS zone linked to ALL VNets</strong> — Linking only to vnet-hub means
+                  vnet-spoke
+                  VMs query Azure DNS without the private zone override and receive the public IP. DNS
+                  resolution
+                  and
+                  network routing are independent — peering establishes the route; VNet DNS zone links determine
+                  which
+                  DNS response is returned. Both must be configured.</li>
+                <li><strong>Private DNS zone names are fixed</strong> — The zone name for each Private Link
+                  service
+                  is
+                  mandated by Azure. Any other name prevents automatic A record creation. Blob Storage must be
+                  <code>privatelink.blob.core.windows.net</code>.
+                </li>
+                <li><strong>Disable public access only after private connectivity confirmed</strong> —
+                  Confirm-then-lockdown: deploy endpoint → verify private IP resolution via nslookup → disable
+                  public
+                  access → verify public is blocked. Re-enable before teardown — CLI delete commands from Cloud
+                  Shell
+                  cannot reach storage with public access disabled.</li>
+                <li><strong>404 is the stronger security posture</strong> — When public network access is
+                  disabled,
+                  Azure Storage returns 404, not 403. A 403 would reveal the resource exists. A 404 reveals
+                  nothing.
+                  This is intentional Azure behavior, not a misconfiguration.</li>
+              </ul>
+
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — Private DNS zone name is not configurable</div>
+                <p>Common mistake: creating the private DNS zone with a custom name. Azure requires the exact
+                  mandated
+                  name per service type or the private endpoint NIC's A record will not be auto-registered.
+                  Always
+                  verify the zone name matches the Private Link DNS zone table before deployment.</p>
+              </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Private Endpoints</span>
+                <span class="tech-pill">Private Link</span>
+                <span class="tech-pill">Private DNS Zones</span>
+                <span class="tech-pill">DNS Split-Horizon</span>
+                <span class="tech-pill">VNet DNS Links</span>
+                <span class="tech-pill">Storage Firewall</span>
+                <span class="tech-pill">Zero-Trust Networking</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-nslookup.png','nslookup confirming private IP resolution')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-nslookup.png"
+                    alt="DNS nslookup private resolution" loading="lazy" />
+                  <div class="screenshot-caption">nslookup — private IP resolution</div>
                 </div>
-                <div class="project-body">
-                  <div class="project-body-inner">
-                    <div>
-                      <div class="body-section-label">Overview</div>
-                      <p class="body-text">
-                        Removed Azure Blob Storage from the public internet without changing
-                        application hostname — using a private endpoint and split-horizon DNS.
-                        VMs inside the VNet resolve the storage hostname to a private IP
-                        (<code>10.0.1.6</code>) via the private DNS zone. Public internet
-                        clients receive a <code>404 WebContentNotFound</code> response — not
-                        a 403, by design. Azure Storage does not acknowledge the endpoint
-                        exists when public access is disabled. A 403 would reveal the resource
-                        is there. A 404 reveals nothing.
-                      </p>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-recordsets.png','Private DNS zone A record auto-registered')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-recordsets.png"
+                    alt="Private DNS zone recordsets" loading="lazy" />
+                  <div class="screenshot-caption">Private DNS zone — A record</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                      <div class="body-section-label">DNS Resolution — Before vs After</div>
-                      <div class="dns-compare">
-                        <div class="dns-card">
-                          <div class="dns-card-header bad">Before — Public Resolution</div>
-                          <div class="dns-card-body">
-                            <span class="dns-hop">stlabeastus001.blob.core.windows.net</span>
-                            <span class="dns-hop bad">→ resolves to public IP</span>
-                            <span class="dns-hop bad">→ traverses public internet</span>
-                            <span class="dns-hop bad">→ hits storage firewall</span>
-                          </div>
-                        </div>
-                        <div class="dns-card">
-                          <div class="dns-card-header good">After — Private Resolution</div>
-                          <div class="dns-card-body">
-                            <span class="dns-hop">stlabeastus001.blob.core.windows.net</span>
-                            <span class="dns-hop key">→ private DNS zone override</span>
-                            <span class="dns-hop good">→ resolves to 10.0.1.6</span>
-                            <span class="dns-hop good">→ stays inside VNet ✓</span>
-                          </div>
-                        </div>
-                      </div>
+      <!-- P13 — App Gateway / Bastion -->
+      <div class="project-card reveal" id="p13">
+        <div class="project-header" onclick="toggleCard('p13')">
+          <div class="project-num">13</div>
+          <div class="project-meta">
+            <span class="project-tag tag-appgw">App Gateway · WAF · Bastion</span>
+            <div class="project-title">Application Gateway &amp; Bastion</div>
+            <div class="project-subtitle">Standard_v2 · WAF policy · dedicated subnet · AzureBastionSubnet ·
+              inline
+              NSG
+              rules</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Deployed Azure Application Gateway (Standard_v2) as an L7 load balancer
+                with WAF policy in front of the web subnet, and Azure Bastion for
+                secure browser-based VM access with no public IPs required.
+                Both services have strict subnet requirements — Application Gateway
+                requires a dedicated subnet with three specific NSG rules or provisioning
+                fails; Bastion requires a subnet named exactly <code>AzureBastionSubnet</code>
+                with inline NSG rules.
+              </p>
 
-                      <div class="body-section-label" style="margin-top:1.25rem;">Access Outcome</div>
-                      <table class="outcome-table">
-                        <thead>
-                          <tr>
-                            <th>Source</th>
-                            <th>Resolves to</th>
-                            <th>Result</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>vm-web-01 (vnet-spoke)</td>
-                            <td><code style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">10.0.1.6</code>
-                            </td>
-                            <td><span class="badge badge-green">✓ Private access</span></td>
-                          </tr>
-                          <tr>
-                            <td>vm-hub-test (vnet-hub)</td>
-                            <td><code style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">10.0.1.6</code>
-                            </td>
-                            <td><span class="badge badge-green">✓ Private access</span></td>
-                          </tr>
-                          <tr>
-                            <td>Public internet</td>
-                            <td>Public IP (overridden)</td>
-                            <td><span class="badge badge-red">✗ 404 — resource not acknowledged</span></td>
-                          </tr>
-                        </tbody>
-                      </table>
+              <div class="body-section-label">App Gateway NSG — Three Non-Negotiable Rules</div>
+              <ul class="decision-list">
+                <li><strong>GatewayManager → ports 65200–65535 (priority 100)</strong> — Control plane
+                  traffic from
+                  Azure infrastructure. Without this, the gateway fails health checks and will not
+                  provision.</li>
+                <li><strong>AzureLoadBalancer → any (priority 200)</strong> — Azure internal health probing.
+                  Required
+                  for Standard_v2.</li>
+                <li><strong>Internet → ports 80, 443 (priority 300)</strong> — Inbound client traffic.
+                  Restrict
+                  source
+                  to known ranges in production.</li>
+              </ul>
 
-                      <a class="diagram-link" href="diagrams/project6-dns-private-endpoint.svg" target="_blank">
-                        <span class="diagram-link-icon">⬡</span>
-                        View architecture diagram — project6-dns-private-endpoint.svg
-                      </a>
-                    </div>
+              <div class="info">
+                <div class="info-label">Bastion — inline NSG rules are required</div>
+                <p>NSG rules for <code>AzureBastionSubnet</code> must be defined inside
+                  <code>properties.securityRules: [...]</code> on the NSG resource, not as separate child
+                  resources.
+                  Separate child resources deploy in parallel and may not be complete when the compliance
+                  check runs
+                  at
+                  subnet attachment time.
+                </p>
+              </div>
 
-                    <div>
-                      <div class="body-section-label">Key Design Decisions</div>
-                      <ul class="decision-list">
-                        <li><strong>Private DNS zone linked to ALL VNets</strong> — Linking only to vnet-hub means
-                          vnet-spoke
-                          VMs query Azure DNS without the private zone override and receive the public IP. DNS
-                          resolution
-                          and
-                          network routing are independent — peering establishes the route; VNet DNS zone links determine
-                          which
-                          DNS response is returned. Both must be configured.</li>
-                        <li><strong>Private DNS zone names are fixed</strong> — The zone name for each Private Link
-                          service
-                          is
-                          mandated by Azure. Any other name prevents automatic A record creation. Blob Storage must be
-                          <code>privatelink.blob.core.windows.net</code>.
-                        </li>
-                        <li><strong>Disable public access only after private connectivity confirmed</strong> —
-                          Confirm-then-lockdown: deploy endpoint → verify private IP resolution via nslookup → disable
-                          public
-                          access → verify public is blocked. Re-enable before teardown — CLI delete commands from Cloud
-                          Shell
-                          cannot reach storage with public access disabled.</li>
-                        <li><strong>404 is the stronger security posture</strong> — When public network access is
-                          disabled,
-                          Azure Storage returns 404, not 403. A 403 would reveal the resource exists. A 404 reveals
-                          nothing.
-                          This is intentional Azure behavior, not a misconfiguration.</li>
-                      </ul>
+              <div class="gotcha">
+                <div class="gotcha-label">⚠ Gotcha — AzureBastionSubnet exact name required</div>
+                <p>The subnet must be named exactly <code>AzureBastionSubnet</code> — no CAF naming, no
+                  variations.
+                  Minimum size /26. Any deviation and Bastion will not provision regardless of all other
+                  configuration
+                  being correct.</p>
+              </div>
+            </div>
 
-                      <div class="gotcha">
-                        <div class="gotcha-label">⚠ Gotcha — Private DNS zone name is not configurable</div>
-                        <p>Common mistake: creating the private DNS zone with a custom name. Azure requires the exact
-                          mandated
-                          name per service type or the private endpoint NIC's A record will not be auto-registered.
-                          Always
-                          verify the zone name matches the Private Link DNS zone table before deployment.</p>
-                      </div>
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>App Gateway requires a dedicated subnet</strong> — Cannot share a subnet with
+                  any other
+                  resource type. Minimum /27 for lab, /24 for production. This is a hard platform
+                  requirement, not a
+                  recommendation.</li>
+                <li><strong>deployBastionHost condition flag</strong> — Bastion Standard SKU costs ~$0.19/hr
+                  (~$140/mo).
+                  A <code>deployBastionHost bool</code> parameter in Bicep allows the NSG, subnet, and all
+                  rules to
+                  deploy in place while the host itself is only created when needed. Cost control pattern
+                  for lab
+                  environments.</li>
+                <li><strong>Bastion target VM NSG rule required</strong> — Bastion can connect to the VM but
+                  the
+                  VM's
+                  NSG must allow inbound SSH (22) or RDP (3389) from the <code>AzureBastionSubnet</code>
+                  range
+                  (<code>10.0.7.0/26</code>). No clear error is surfaced — the connection simply fails
+                  silently.
+                </li>
+                <li><strong>WAF over NSG for L7 protection</strong> — NSGs operate at L3/L4 — they can block
+                  IPs and
+                  ports but cannot inspect HTTP payloads. WAF policy on Application Gateway provides OWASP
+                  ruleset
+                  enforcement, SQL injection protection, and custom rules at the application layer.</li>
+              </ul>
 
-                      <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                      <div class="tech-list">
-                        <span class="tech-pill">Private Endpoints</span>
-                        <span class="tech-pill">Private Link</span>
-                        <span class="tech-pill">Private DNS Zones</span>
-                        <span class="tech-pill">DNS Split-Horizon</span>
-                        <span class="tech-pill">VNet DNS Links</span>
-                        <span class="tech-pill">Storage Firewall</span>
-                        <span class="tech-pill">Zero-Trust Networking</span>
-                      </div>
-                      <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
-                      <div class="screenshot-grid">
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-nslookup.png','nslookup confirming private IP resolution')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-nslookup.png"
-                            alt="DNS nslookup private resolution" loading="lazy" />
-                          <div class="screenshot-caption">nslookup — private IP resolution</div>
-                        </div>
-                        <div class="screenshot-item"
-                          onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-recordsets.png','Private DNS zone A record auto-registered')">
-                          <img
-                            src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/dns-recordsets.png"
-                            alt="Private DNS zone recordsets" loading="lazy" />
-                          <div class="screenshot-caption">Private DNS zone — A record</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Application Gateway</span>
+                <span class="tech-pill">WAF Policy</span>
+                <span class="tech-pill">Azure Bastion</span>
+                <span class="tech-pill">Standard_v2</span>
+                <span class="tech-pill">NSG</span>
+                <span class="tech-pill">Service Tags</span>
+                <span class="tech-pill">Bicep</span>
+              </div>
+              <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
+              <div class="screenshot-grid">
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-rules-issue.png','NSG inbound rules causing App Gateway provisioning failure')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-rules-issue.png"
+                    alt="NSG rules issue" loading="lazy" />
+                  <div class="screenshot-caption">NSG rules — AppGW failure</div>
+                </div>
+                <div class="screenshot-item"
+                  onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-rule-blocking-rdp.png','NSG rule blocking RDP — Bastion path required')">
+                  <img
+                    src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-rule-blocking-rdp.png"
+                    alt="NSG blocking RDP" loading="lazy" />
+                  <div class="screenshot-caption">NSG blocking RDP — Bastion path</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <!-- P13 — App Gateway / Bastion -->
-                  <div class="project-card reveal" id="p13">
-                    <div class="project-header" onclick="toggleCard('p13')">
-                      <div class="project-num">13</div>
-                      <div class="project-meta">
-                        <span class="project-tag tag-appgw">App Gateway · WAF · Bastion</span>
-                        <div class="project-title">Application Gateway &amp; Bastion</div>
-                        <div class="project-subtitle">Standard_v2 · WAF policy · dedicated subnet · AzureBastionSubnet ·
-                          inline
-                          NSG
-                          rules</div>
-                      </div>
-                      <span class="project-toggle">▾</span>
-                    </div>
-                    <div class="project-body">
-                      <div class="project-body-inner">
-                        <div>
-                          <div class="body-section-label">Overview</div>
-                          <p class="body-text">
-                            Deployed Azure Application Gateway (Standard_v2) as an L7 load balancer
-                            with WAF policy in front of the web subnet, and Azure Bastion for
-                            secure browser-based VM access with no public IPs required.
-                            Both services have strict subnet requirements — Application Gateway
-                            requires a dedicated subnet with three specific NSG rules or provisioning
-                            fails; Bastion requires a subnet named exactly <code>AzureBastionSubnet</code>
-                            with inline NSG rules.
-                          </p>
-
-                          <div class="body-section-label">App Gateway NSG — Three Non-Negotiable Rules</div>
-                          <ul class="decision-list">
-                            <li><strong>GatewayManager → ports 65200–65535 (priority 100)</strong> — Control plane
-                              traffic from
-                              Azure infrastructure. Without this, the gateway fails health checks and will not
-                              provision.</li>
-                            <li><strong>AzureLoadBalancer → any (priority 200)</strong> — Azure internal health probing.
-                              Required
-                              for Standard_v2.</li>
-                            <li><strong>Internet → ports 80, 443 (priority 300)</strong> — Inbound client traffic.
-                              Restrict
-                              source
-                              to known ranges in production.</li>
-                          </ul>
-
-                          <div class="info">
-                            <div class="info-label">Bastion — inline NSG rules are required</div>
-                            <p>NSG rules for <code>AzureBastionSubnet</code> must be defined inside
-                              <code>properties.securityRules: [...]</code> on the NSG resource, not as separate child
-                              resources.
-                              Separate child resources deploy in parallel and may not be complete when the compliance
-                              check runs
-                              at
-                              subnet attachment time.
-                            </p>
-                          </div>
-
-                          <div class="gotcha">
-                            <div class="gotcha-label">⚠ Gotcha — AzureBastionSubnet exact name required</div>
-                            <p>The subnet must be named exactly <code>AzureBastionSubnet</code> — no CAF naming, no
-                              variations.
-                              Minimum size /26. Any deviation and Bastion will not provision regardless of all other
-                              configuration
-                              being correct.</p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div class="body-section-label">Key Design Decisions</div>
-                          <ul class="decision-list">
-                            <li><strong>App Gateway requires a dedicated subnet</strong> — Cannot share a subnet with
-                              any other
-                              resource type. Minimum /27 for lab, /24 for production. This is a hard platform
-                              requirement, not a
-                              recommendation.</li>
-                            <li><strong>deployBastionHost condition flag</strong> — Bastion Standard SKU costs ~$0.19/hr
-                              (~$140/mo).
-                              A <code>deployBastionHost bool</code> parameter in Bicep allows the NSG, subnet, and all
-                              rules to
-                              deploy in place while the host itself is only created when needed. Cost control pattern
-                              for lab
-                              environments.</li>
-                            <li><strong>Bastion target VM NSG rule required</strong> — Bastion can connect to the VM but
-                              the
-                              VM's
-                              NSG must allow inbound SSH (22) or RDP (3389) from the <code>AzureBastionSubnet</code>
-                              range
-                              (<code>10.0.7.0/26</code>). No clear error is surfaced — the connection simply fails
-                              silently.
-                            </li>
-                            <li><strong>WAF over NSG for L7 protection</strong> — NSGs operate at L3/L4 — they can block
-                              IPs and
-                              ports but cannot inspect HTTP payloads. WAF policy on Application Gateway provides OWASP
-                              ruleset
-                              enforcement, SQL injection protection, and custom rules at the application layer.</li>
-                          </ul>
-
-                          <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
-                          <div class="tech-list">
-                            <span class="tech-pill">Application Gateway</span>
-                            <span class="tech-pill">WAF Policy</span>
-                            <span class="tech-pill">Azure Bastion</span>
-                            <span class="tech-pill">Standard_v2</span>
-                            <span class="tech-pill">NSG</span>
-                            <span class="tech-pill">Service Tags</span>
-                            <span class="tech-pill">Bicep</span>
-                          </div>
-                          <div class="body-section-label" style="margin-top:1.25rem;">Evidence</div>
-                          <div class="screenshot-grid">
-                            <div class="screenshot-item"
-                              onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-rules-issue.png','NSG inbound rules causing App Gateway provisioning failure')">
-                              <img
-                                src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-inbound-rules-issue.png"
-                                alt="NSG rules issue" loading="lazy" />
-                              <div class="screenshot-caption">NSG rules — AppGW failure</div>
-                            </div>
-                            <div class="screenshot-item"
-                              onclick="openLightbox('https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-rule-blocking-rdp.png','NSG rule blocking RDP — Bastion path required')">
-                              <img
-                                src="https://stgeostewus301.blob.core.windows.net/content/az-104/networking/screenshots/nsg-rule-blocking-rdp.png"
-                                alt="NSG blocking RDP" loading="lazy" />
-                              <div class="screenshot-caption">NSG blocking RDP — Bastion path</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div><!-- /project-grid -->
+    </div><!-- /project-grid -->
   </section>
 
   <!-- LESSONS LEARNED -->
