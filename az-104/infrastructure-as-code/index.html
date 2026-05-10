@@ -825,6 +825,20 @@
                 </div>
               </div>
 
+              <div class="body-section-label" style="margin-top:1.25rem;">Source Files</div>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/main.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                main.bicep — orchestration entry point
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/az104-bootstrap.sh"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                az104-bootstrap.sh — pre-flight script
+              </a>
+
               <div class="code-block">
                 <div class="code-label">dev.bicepparam — secret injection</div>
                 <button class="copy-btn" onclick="copyCode(this)">copy</button>
@@ -1125,6 +1139,44 @@ param tags = {
                   <div class="module-box-desc">CDN · WAF · custom domain · TLS</div>
                 </div>
               </div>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Source Files</div>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/main.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                main.bicep — orchestration entry point
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/modules/frontdoor.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                frontdoor.bicep — CDN, WAF, custom domain, TLS
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/modules/keyvault.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                keyvault.bicep — RBAC model, soft-delete, purge protection
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/modules/monitoring.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                monitoring.bicep — Log Analytics + App Insights
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/modules/staticwebapp.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                staticwebapp.bicep — SWA + GitHub Actions CI/CD
+              </a>
+              <a class="diagram-link"
+                href="https://github.com/geostebovik/geoste-portfolio/blob/main/infrastructure/modules/storage.bicep"
+                target="_blank">
+                <span class="diagram-link-icon">⬡</span>
+                storage.bicep — static asset storage
+              </a>
 
               <div class="code-block">
                 <div class="code-label">Deploy from bootstrap.sh</div>
