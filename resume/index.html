@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume — Gerard Ostebovik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --black: #0a0a0a;
+      --orange: #FD5A1E;
+      --cream: #EFE4B0;
+      --cream-dim: #b8ad84;
+      --surface-1: #111213;
+      --surface-2: #16181c;
+      --surface-3: #1e2128;
+      --border: #2a2d35;
+      --border-lit: #3a3d47;
+      --text-primary: #e8e4d8;
+      --text-secondary: #a8a49c;
+      --text-dim: #706c66;
+      --teal: #2dd4bf;
+      --green: #34d399;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: var(--cream);
+    }
+
+    .nav-brand span {
+      color: var(--orange);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--orange);
+    }
+
+    /* ── Page wrapper ──────────────────────────────────────────── */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 88px 2rem 80px;
+    }
+
+    /* ── Download bar ──────────────────────────────────────────── */
+    .download-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .download-bar-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .download-bar-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      background: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      color: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: var(--black);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #e04e18;
+      border-color: #e04e18;
+      color: var(--black);
+    }
+
+    /* ── Resume card ───────────────────────────────────────────── */
+    .resume-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 3rem 3.5rem;
+    }
+
+    /* ── Resume header ─────────────────────────────────────────── */
+    .resume-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: start;
+      padding-bottom: 1.75rem;
+      border-bottom: 2px solid var(--orange);
+      margin-bottom: 2rem;
+    }
+
+    .resume-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--cream);
+      line-height: 0.95;
+      margin-bottom: 0.5rem;
+    }
+
+    .resume-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+    }
+
+    .resume-contact {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .contact-line {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+
+    a.contact-line:hover {
+      color: var(--orange);
+    }
+
+    .contact-line.highlight {
+      color: var(--teal);
+    }
+
+    /* ── Section ───────────────────────────────────────────────── */
+    .resume-section {
+      margin-bottom: 2rem;
+    }
+
+    .resume-section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Summary ───────────────────────────────────────────────── */
+    .summary-text {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    .summary-text strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ── Skills grid ───────────────────────────────────────────── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .skill-group-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .skill-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .skill-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.55rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 2px;
+    }
+
+    .skill-pill.hot {
+      background: rgba(253, 90, 30, 0.08);
+      border-color: rgba(253, 90, 30, 0.25);
+      color: var(--orange);
+    }
+
+    /* ── Experience ────────────────────────────────────────────── */
+    .job {
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .job:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .job-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: baseline;
+      margin-bottom: 0.2rem;
+    }
+
+    .job-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .job-dates {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .job-company {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--teal);
+      margin-bottom: 0.75rem;
+    }
+
+    .job-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .job-bullets li {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .job-bullets li::before {
+      content: '→';
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--orange);
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+    }
+
+    .job-bullets li strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ── Certifications ────────────────────────────────────────── */
+    .cert-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .cert-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+      align-items: baseline;
+    }
+
+    .cert-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .cert-name {
+      font-size: 0.84rem;
+      color: var(--text-primary);
+    }
+
+    .cert-name.in-progress {
+      color: var(--orange);
+    }
+
+    .cert-issuer {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Print styles ──────────────────────────────────────────── */
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #1a1a1a !important;
+      }
+
+      body::before {
+        display: none;
+      }
+
+      nav,
+      .download-bar {
+        display: none !important;
+      }
+
+      .page {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .resume-card {
+        background: #ffffff !important;
+        border: none !important;
+        padding: 0.5in 0.65in !important;
+        box-shadow: none !important;
+      }
+
+      .resume-name {
+        color: #111111 !important;
+      }
+
+      .resume-title {
+        color: #c44415 !important;
+      }
+
+      .resume-section-title {
+        color: #c44415 !important;
+        border-bottom-color: #dddddd !important;
+      }
+
+      .resume-header {
+        border-bottom-color: #c44415 !important;
+      }
+
+      .contact-line {
+        color: #444444 !important;
+      }
+
+      .contact-line.highlight {
+        color: #1a7a6e !important;
+      }
+
+      .summary-text {
+        color: #333333 !important;
+      }
+
+      .summary-text strong {
+        color: #111111 !important;
+      }
+
+      .job-title {
+        color: #111111 !important;
+      }
+
+      .job-company {
+        color: #1a7a6e !important;
+      }
+
+      .job-dates {
+        color: #666666 !important;
+      }
+
+      .job-bullets li {
+        color: #333333 !important;
+      }
+
+      .job-bullets li::before {
+        color: #c44415 !important;
+      }
+
+      .job-bullets li strong {
+        color: #111111 !important;
+      }
+
+      .skill-pill {
+        background: #f4f4f4 !important;
+        border-color: #dddddd !important;
+        color: #333333 !important;
+      }
+
+      .skill-pill.hot {
+        background: #fff3ef !important;
+        border-color: #f0a080 !important;
+        color: #c44415 !important;
+      }
+
+      .skill-group-label {
+        color: #888888 !important;
+      }
+
+      .cert-date {
+        color: #888888 !important;
+      }
+
+      .cert-name {
+        color: #111111 !important;
+      }
+
+      .cert-name.in-progress {
+        color: #c44415 !important;
+      }
+
+      .cert-issuer {
+        color: #888888 !important;
+      }
+
+      .job {
+        border-bottom-color: #dddddd !important;
+      }
+
+      .resume-section {
+        page-break-inside: avoid;
+      }
+
+      .job {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/az-104/identity-governance/">Identity</a></li>
+      <li><a href="/az-104/networking/">Networking</a></li>
+      <li><a href="/az-104/compute-storage/">Compute</a></li>
+      <li><a href="/az-104/infrastructure-as-code/">IaC</a></li>
+      <li><a href="/az-104/monitoring-security/">Monitoring</a></li>
+      <li><a href="/resources/">Resources</a></li>
+      <li><a href="/resume/" class="active">Resume</a></li>
+    </ul>
+  </nav>
+
+  <div class="page">
+
+    <!-- DOWNLOAD BAR -->
+    <div class="download-bar">
+      <span class="download-bar-label">Gerard Ostebovik · Resume · Updated May 2026</span>
+      <div class="download-bar-actions">
+        <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+        <a class="btn btn-primary"
+          href="https://stgeostewus301.blob.core.windows.net/content/resume/Gerard_Ostebovik_Resume.pdf"
+          download>Download PDF</a>
+      </div>
+    </div>
+
+    <!-- RESUME CARD -->
+    <div class="resume-card">
+
+      <!-- HEADER -->
+      <div class="resume-header">
+        <div>
+          <div class="resume-name">Gerard Ostebovik</div>
+          <div class="resume-title">Azure Cloud Infrastructure · DevOps · IaC</div>
+        </div>
+        <div class="resume-contact">
+          <span class="contact-line">Phoenix, AZ · Open to Remote &amp; Relocation</span>
+          <span class="contact-line">425.765.6301</span>
+          <a class="contact-line" href="mailto:gerardostebovik@gmail.com">gerardostebovik@gmail.com</a>
+          <a class="contact-line highlight" href="https://ostebovik.net" target="_blank">ostebovik.net</a>
+          <a class="contact-line" href="https://linkedin.com/in/gerard-ostebovik-b5924b15b"
+            target="_blank">linkedin.com/in/gerard-ostebovik</a>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="resume-section">
+        <div class="resume-section-title">Profile</div>
+        <p class="summary-text">
+          Cloud infrastructure professional with <strong>11 years at Microsoft</strong> supporting
+          enterprise Azure environments for S500 customers — and a deliberate pivot into designing,
+          deploying, and maintaining that infrastructure directly. Completed <strong>15 hands-on Azure
+            projects</strong> across networking, compute, IaC, and security, documented at
+          <strong>ostebovik.net</strong> — production-pattern deployments built from scratch using
+          Azure CLI, Bicep, and GitHub Actions. Deep understanding of how enterprise Azure breaks,
+          how it should be built, and the gap between the two. Pursuing
+          <strong>AZ-104 Microsoft Certified: Azure Administrator Associate</strong>, with AI-901
+          and AZ-305 planned.
+        </p>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="resume-section">
+        <div class="resume-section-title">Technical Skills</div>
+        <div class="skills-grid">
+          <div>
+            <div class="skill-group-label">Azure Services</div>
+            <div class="skill-pills">
+              <span class="skill-pill hot">Virtual Networks</span>
+              <span class="skill-pill hot">NSG</span>
+              <span class="skill-pill hot">Azure Front Door</span>
+              <span class="skill-pill hot">App Gateway</span>
+              <span class="skill-pill hot">Load Balancer</span>
+              <span class="skill-pill hot">Key Vault</span>
+              <span class="skill-pill hot">App Service</span>
+              <span class="skill-pill hot">Container Apps</span>
+              <span class="skill-pill hot">Azure Bastion</span>
+              <span class="skill-pill">Log Analytics</span>
+              <span class="skill-pill">App Insights</span>
+              <span class="skill-pill">Entra ID</span>
+              <span class="skill-pill">Azure Policy</span>
+              <span class="skill-pill">Azure Backup</span>
+              <span class="skill-pill">Site Recovery</span>
+            </div>
+          </div>
+          <div>
+            <div class="skill-group-label">IaC · Automation · CI/CD</div>
+            <div class="skill-pills">
+              <span class="skill-pill hot">Bicep</span>
+              <span class="skill-pill hot">Azure CLI</span>
+              <span class="skill-pill hot">GitHub Actions</span>
+              <span class="skill-pill hot">PowerShell</span>
+              <span class="skill-pill hot">Bash</span>
+              <span class="skill-pill">ARM Templates</span>
+              <span class="skill-pill">Static Web Apps</span>
+            </div>
+            <div class="skill-group-label" style="margin-top:0.75rem;">Languages · Query</div>
+            <div class="skill-pills">
+              <span class="skill-pill">Python</span>
+              <span class="skill-pill">KQL</span>
+              <span class="skill-pill">SQL</span>
+              <span class="skill-pill">HTML/CSS</span>
+              <span class="skill-pill">JavaScript</span>
+            </div>
+          </div>
+          <div>
+            <div class="skill-group-label">Practices</div>
+            <div class="skill-pills">
+              <span class="skill-pill hot">Zero-credential architecture</span>
+              <span class="skill-pill hot">Managed Identity</span>
+              <span class="skill-pill hot">RBAC</span>
+              <span class="skill-pill">Hub-spoke topology</span>
+              <span class="skill-pill">Private endpoints</span>
+              <span class="skill-pill">WAF policy</span>
+              <span class="skill-pill">CAF naming</span>
+              <span class="skill-pill">Cost governance</span>
+              <span class="skill-pill">Enterprise support</span>
+              <span class="skill-pill">Technical writing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPERIENCE -->
+      <div class="resume-section">
+        <div class="resume-section-title">Experience</div>
+
+        <div class="job">
+          <div class="job-header">
+            <div class="job-title">Tier 2 Product Support Engineer</div>
+            <div class="job-dates">2020 – 2025</div>
+          </div>
+          <div class="job-company">Microsoft Corporation · Redmond, WA</div>
+          <ul class="job-bullets">
+            <li>Established and maintained internal Azure test beds running IaaS, PaaS, and SaaS workloads for the
+              support team — hands-on Azure infrastructure work running continuously alongside the support role.</li>
+            <li>Piloted a Tier 2 escalation role handling the most complex customer-reported issues; achieved 7-day
+              resolution for over 65% of managed cases and contributed to a 94% customer satisfaction rating — 10 basis
+              points above Tier 1.</li>
+            <li>Collaborated directly with Engineering and Customer Success on issues requiring non-standard solutions,
+              serving as the technical bridge between customer impact and product teams.</li>
+            <li>Delivered quarterly onboarding training to 10 new support engineers; concurrently mentored 3–5 engineers
+              on an ongoing basis.</li>
+            <li>Created and refined 10–15 technical documents monthly to improve support accuracy and delivery
+              efficiency across the team.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <div class="job-title">Senior Customer Support Engineer</div>
+            <div class="job-dates">2014 – 2020</div>
+          </div>
+          <div class="job-company">Microsoft Corporation · Redmond, WA</div>
+          <ul class="job-bullets">
+            <li>Managed Azure subscription, account, and billing issues for Microsoft's S500 enterprise customer base —
+              including Verizon, NTT Technologies, CenturyLink, and Sony — minimizing production downtime and fiscal
+              impact.</li>
+            <li>Troubleshot Azure environment outage events, providing professional paths to resolution under time
+              pressure for enterprise SLAs.</li>
+            <li>Collaborated with SaaS, IaaS, and PaaS partner teams to uncover root causes for complex customer issues
+              requiring cross-team coordination.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <div class="job-title">Senior Technical Support / Onboarding Engineer</div>
+            <div class="job-dates">2011 – 2014</div>
+          </div>
+          <div class="job-company">Mercent Corporation · Seattle, WA</div>
+          <ul class="job-bullets">
+            <li>Used XML, XSLT, XPath, and XQuery to build and maintain customized e-commerce integrations, accelerating
+              customer production timelines and revenue.</li>
+            <li>Resolved complex escalated issues requiring development-level changes to customer integrations; served
+              as bridge between technical support and development teams.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <div class="job-title">Developer Support Engineer</div>
+            <div class="job-dates">1999 – 2002</div>
+          </div>
+          <div class="job-company">Onyx Software (Acquired by Consona Corp) · Bellevue, WA</div>
+          <ul class="job-bullets">
+            <li>Served as liaison between technical support and development for high-priority, medium-to-high-impact
+              software issues requiring immediate resolution.</li>
+            <li>Created and managed a self-service portal and knowledge base that reduced support contact volume and
+              accelerated customer issue resolution.</li>
+            <li>Performed QA testing on patches prior to release; trained and coached support engineers and customer
+              service representatives.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <div class="job-title">Founder &amp; General Manager</div>
+            <div class="job-dates">2003 – 2010</div>
+          </div>
+          <div class="job-company">Hot Yoga of Issaquah · Issaquah, WA</div>
+          <ul class="job-bullets">
+            <li>Acquired and turned around a failing small business; grew revenue 150% through pricing restructure,
+              marketing, and customer retention focus.</li>
+            <li>Managed all operations including finance, facility, and a staff of 10 instructors.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- CERTIFICATIONS -->
+      <div class="resume-section">
+        <div class="resume-section-title">Certifications</div>
+        <div class="cert-grid">
+          <div class="cert-item">
+            <span class="cert-date">In Progress</span>
+            <span class="cert-name in-progress">AZ-104: Microsoft Certified Azure Administrator Associate</span>
+            <span class="cert-issuer">Microsoft</span>
+          </div>
+          <div class="cert-item">
+            <span class="cert-date">02 / 2026</span>
+            <span class="cert-name">AZ-900: Microsoft Certified Azure Fundamentals</span>
+            <span class="cert-issuer">Microsoft · 3547EB-50BR0E</span>
+          </div>
+          <div class="cert-item">
+            <span class="cert-date">10 / 2025</span>
+            <span class="cert-name">Certified in Cybersecurity (CC)</span>
+            <span class="cert-issuer">ISC2 · 3093573</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /resume-card -->
+  </div><!-- /page -->
+
+  <!-- FOOTER -->
+  <footer
+    style="border-top:1px solid var(--border);padding:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:0.08em;">
+      oste<span style="color:var(--orange)">bovik</span>.net · Resume
+    </div>
+    <ul style="display:flex;gap:1.5rem;list-style:none;">
+      <li><a href="/"
+          style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;">Home</a>
+      </li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank"
+          style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;">GitHub</a>
+      </li>
+      <li><a href="https://www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank"
+          style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;">LinkedIn</a>
+      </li>
+    </ul>
+  </footer>
+
+</body>
+
+</html>
