@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPO vs RTO — AZ-104 Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #0e0f11;
+    --surface:     #16181c;
+    --surface2:    #1e2128;
+    --surface3:    #252830;
+    --border:      rgba(255,255,255,0.07);
+    --border-lit:  rgba(255,255,255,0.13);
+    --text:        #e8e4d8;
+    --muted:       #767b87;
+    --dim:         #4a4e57;
+    --orange:      #FD5A1E;
+    --orange-dim:  rgba(253,90,30,0.12);
+    --orange-glow: rgba(253,90,30,0.06);
+    --cream:       #EFE4B0;
+    --blue:        #4a9eff;
+    --blue-dim:    rgba(74,158,255,0.1);
+    --teal:        #2dd4bf;
+    --teal-dim:    rgba(45,212,191,0.1);
+    --amber:       #f59e0b;
+    --amber-dim:   rgba(245,158,11,0.1);
+    --green:       #34d399;
+    --green-dim:   rgba(52,211,153,0.1);
+    --red:         #f87171;
+    --red-dim:     rgba(248,113,113,0.1);
+    --mono:        'IBM Plex Mono', monospace;
+    --display:     'Syne', sans-serif;
+    --radius:      6px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+    line-height: 1.7;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .doc-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    margin-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .doc-brand {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    text-decoration: none;
+  }
+
+  .doc-brand:hover { color: var(--cream); }
+
+  .doc-meta {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    margin-bottom: 56px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-size: 0.8rem;
+    color: var(--text);
+    margin-top: 14px;
+    max-width: 540px;
+    line-height: 1.7;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Definition cards ── */
+  .def-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 600px) { .def-grid { grid-template-columns: 1fr; } }
+
+  .def-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .def-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .def-card.rpo::before { background: var(--blue); }
+  .def-card.rto::before { background: var(--orange); }
+
+  .def-abbr {
+    font-family: var(--display);
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .def-card.rpo .def-abbr { color: var(--blue); }
+  .def-card.rto .def-abbr { color: var(--orange); }
+
+  .def-full {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .def-question {
+    font-size: 0.85rem;
+    color: var(--cream);
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .def-body {
+    font-size: 0.78rem;
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  /* ── Timeline diagram ── */
+  .timeline-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+  }
+
+  .timeline-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .timeline {
+    position: relative;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .tl-track {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--border-lit);
+  }
+
+  .tl-span {
+    position: absolute;
+    height: 4px;
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .tl-span.rpo-span { background: var(--blue); left: 0; width: 38%; }
+  .tl-span.rto-span { background: var(--orange); left: 48%; width: 38%; }
+
+  .tl-dot {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--bg);
+  }
+
+  .tl-dot.backup  { background: var(--blue);   left: 0%; }
+  .tl-dot.disaster { background: var(--red);   left: 38%; }
+  .tl-dot.restored { background: var(--green); left: 86%; }
+
+  .tl-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--dim);
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .tl-labels span { position: absolute; transform: translateX(-50%); }
+  .tl-labels span:nth-child(1) { left: 0%;  color: var(--blue);   transform: none; }
+  .tl-labels span:nth-child(2) { left: 38%; color: var(--red); }
+  .tl-labels span:nth-child(3) { left: 86%; color: var(--green); }
+
+  .tl-annotation {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .tl-ann-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  .tl-ann-bar {
+    width: 24px; height: 3px;
+    border-radius: 2px;
+  }
+
+  /* ── Prose sections ── */
+  .prose-section {
+    margin-bottom: 48px;
+  }
+
+  .prose-section h2 {
+    font-family: var(--display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 16px;
+  }
+
+  .prose-section p {
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .prose-section p:last-child { margin-bottom: 0; }
+
+  /* ── Mechanism table ── */
+  .mech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 700px) { .mech-grid { grid-template-columns: 1fr; } }
+
+  .mech-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .mech-card h3 {
+    font-family: var(--display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+
+  .mech-card .mech-sub {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .mech-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.7rem;
+  }
+
+  .mech-row:last-child { border-bottom: none; }
+
+  .mech-key { color: var(--dim); font-size: 0.65rem; }
+
+  .mech-val { color: var(--text); text-align: right; }
+  .val-mid  { color: var(--amber); }
+  .val-high { color: var(--red); }
+
+  /* ── Reference table ── */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    margin-bottom: 48px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .ref-table thead th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ref-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: rgba(255,255,255,0.01); }
+
+  .ref-table td:first-child { color: var(--text); font-weight: 500; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--cream);
+  }
+
+  /* ── Callout ── */
+  .callout {
+    background: var(--orange-dim);
+    border: 1px solid rgba(253,90,30,0.25);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 48px;
+    font-size: 0.78rem;
+    line-height: 1.75;
+    color: var(--text);
+  }
+
+  .callout strong { color: var(--orange); }
+
+  /* ── Quick ref card ── */
+  .quick-ref {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 48px;
+  }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 600px) { .qr-grid { grid-template-columns: 1fr; } }
+
+  .qr-item {
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .qr-key {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .qr-val {
+    font-size: 0.8rem;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+
+  .qr-val strong { color: var(--orange); }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  footer a:hover { color: var(--orange); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <a class="doc-brand" href="https://ostebovik.net/resources/">ostebovik.net / resources</a>
+    <span class="doc-meta">AZ-104 · Interview Reference</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <p class="hero-eyebrow">Backup & Recovery — Core Concepts</p>
+    <h1>RPO <em>vs</em> RTO</h1>
+    <p class="hero-sub">Two numbers every infrastructure conversation eventually reaches. RPO tells you how much data you can afford to lose. RTO tells you how long you can afford to be down. The business defines them — you design and price the solution that meets them.</p>
+  </div>
+
+  <!-- Definitions -->
+  <div class="section-label">The definitions</div>
+  <div class="def-grid">
+
+    <div class="def-card rpo">
+      <div class="def-abbr">RPO</div>
+      <div class="def-full">Recovery Point Objective</div>
+      <div class="def-question">"How much data can we afford to lose?"</div>
+      <div class="def-body">Expressed as a time window — the maximum age of data you would restore from. An RPO of 24 hours means you accept losing up to 24 hours of changes in a disaster. Controlled by backup <strong style="color:var(--text)">frequency</strong>.</div>
+    </div>
+
+    <div class="def-card rto">
+      <div class="def-abbr">RTO</div>
+      <div class="def-full">Recovery Time Objective</div>
+      <div class="def-question">"How long can the system be down?"</div>
+      <div class="def-body">Expressed as a duration — the maximum acceptable outage from failure to restoration. An RTO of 4 hours means the business can survive a 4-hour outage before impact becomes unacceptable. Controlled by recovery <strong style="color:var(--text)">infrastructure</strong>.</div>
+    </div>
+
+  </div>
+
+  <!-- Timeline diagram -->
+  <div class="section-label">Visualized on a timeline</div>
+  <div class="timeline-block" style="margin-bottom:48px;">
+    <div class="timeline-label">RPO = data loss window &nbsp;·&nbsp; RTO = recovery duration</div>
+    <div class="timeline">
+      <div class="tl-track"></div>
+      <div class="tl-span rpo-span"></div>
+      <div class="tl-span rto-span"></div>
+      <div class="tl-dot backup"></div>
+      <div class="tl-dot disaster"></div>
+      <div class="tl-dot restored"></div>
+    </div>
+    <div class="tl-labels" style="height:18px;">
+      <span>Last backup</span>
+      <span>Disaster</span>
+      <span>Restored</span>
+    </div>
+    <div class="tl-annotation">
+      <div class="tl-ann-item">
+        <div class="tl-ann-bar" style="background:var(--blue)"></div>
+        <span>RPO — data in this gap is lost</span>
+      </div>
+      <div class="tl-ann-item">
+        <div class="tl-ann-bar" style="background:var(--orange)"></div>
+        <span>RTO — system is down for this duration</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why it matters -->
+  <div class="prose-section">
+    <div class="section-label">Why this matters</div>
+    <h2>Making risk tolerance measurable</h2>
+    <p>Anyone can say "we need good backups." RPO and RTO make that statement measurable — and measurable means you can design for it, price it, and hold someone accountable to it.</p>
+    <p>RPO and RTO are independent dimensions. A financial trading system might need an RPO of seconds and an RTO of minutes — every transaction matters and downtime costs millions per hour. A dev environment might accept an RPO of 24 hours and an RTO of 4 hours — losing a day of work is annoying, not catastrophic.</p>
+    <p>The business defines acceptable values based on the cost of downtime versus the cost of protection. The infrastructure team designs the solution that meets those targets within budget.</p>
+  </div>
+
+  <!-- Azure mechanisms -->
+  <div class="section-label">Azure recovery mechanisms</div>
+  <div class="mech-grid">
+
+    <div class="mech-card">
+      <h3>Azure Backup</h3>
+      <div class="mech-sub">VM restore from vault</div>
+      <div class="mech-row"><span class="mech-key">RPO</span><span class="mech-val val-mid">Hours</span></div>
+      <div class="mech-row"><span class="mech-key">RTO</span><span class="mech-val val-mid">30 min – hours</span></div>
+      <div class="mech-row"><span class="mech-key">Cost</span><span class="mech-val val-low">Low</span></div>
+      <div class="mech-row"><span class="mech-key">Use case</span><span class="mech-val">Deletion, corruption, ransomware</span></div>
+    </div>
+
+    <div class="mech-card">
+      <h3>Azure Site Recovery</h3>
+      <div class="mech-sub">Continuous replication</div>
+      <div class="mech-row"><span class="mech-key">RPO</span><span class="mech-val val-low">~30 seconds</span></div>
+      <div class="mech-row"><span class="mech-key">RTO</span><span class="mech-val val-low">Minutes</span></div>
+      <div class="mech-row"><span class="mech-key">Cost</span><span class="mech-val val-high">~$25+/VM/mo</span></div>
+      <div class="mech-row"><span class="mech-key">Use case</span><span class="mech-val">Regional outage, DR compliance</span></div>
+    </div>
+
+    <div class="mech-card">
+      <h3>Availability Zones</h3>
+      <div class="mech-sub">Multi-zone redundancy</div>
+      <div class="mech-row"><span class="mech-key">RPO</span><span class="mech-val val-low">~Zero</span></div>
+      <div class="mech-row"><span class="mech-key">RTO</span><span class="mech-val val-low">Seconds</span></div>
+      <div class="mech-row"><span class="mech-key">Cost</span><span class="mech-val val-high">2–3× VM count</span></div>
+      <div class="mech-row"><span class="mech-key">Use case</span><span class="mech-val">Hardware failure, zone outage</span></div>
+    </div>
+
+  </div>
+
+  <!-- Backup policy → RPO -->
+  <div class="prose-section">
+    <div class="section-label">How backup policy sets RPO</div>
+    <h2>Frequency is the lever</h2>
+    <p>The backup schedule directly determines your RPO ceiling. A daily backup at 11pm UTC means an RPO of up to 23 hours 59 minutes — a failure at 10:59pm means restoring from yesterday.</p>
+    <p>Retention tiers (7-day daily, 4-week weekly, 3-month monthly) do not affect RPO. They control how far back you can go when choosing a restore point. RPO is set by frequency. Retention is set by compliance and business requirements.</p>
+  </div>
+
+  <!-- Policy reference table -->
+  <div class="section-label">Project 10 policy — pol-daily-7day</div>
+  <table class="ref-table">
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Value</th>
+        <th>What it means</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Schedule</td>
+        <td>Daily · 11:00 PM UTC</td>
+        <td>RPO ceiling of ~24 hours</td>
+      </tr>
+      <tr>
+        <td>Daily retention</td>
+        <td>7 days</td>
+        <td>Restore to any point in the last week</td>
+      </tr>
+      <tr>
+        <td>Weekly retention</td>
+        <td>4 weeks</td>
+        <td>Restore to start of any week in last month</td>
+      </tr>
+      <tr>
+        <td>Monthly retention</td>
+        <td>3 months</td>
+        <td>Restore to start of any month in last quarter</td>
+      </tr>
+      <tr>
+        <td>Vault redundancy</td>
+        <td>LRS</td>
+        <td>Survives rack/building failure. Does <strong>not</strong> survive regional outage — use GRS for production</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Interview callout -->
+  <div class="callout">
+    <strong>Interview answer — three parts:</strong><br><br>
+    <strong>1. Definitions:</strong> RPO is how much data you can lose — set by backup frequency. RTO is how long recovery takes — set by recovery infrastructure.<br><br>
+    <strong>2. The trade-off:</strong> Lower RPO and RTO both cost more. The business defines acceptable values based on the cost of downtime vs the cost of protection.<br><br>
+    <strong>3. Azure mapping:</strong> Azure Backup daily schedule sets RPO. Vault restore time sets RTO baseline. Azure Site Recovery pushes RPO to seconds and RTO to minutes — at significantly higher cost. Right answer depends on workload criticality.
+  </div>
+
+  <!-- Quick ref -->
+  <div class="section-label">Quick reference</div>
+  <div class="quick-ref">
+    <div class="qr-grid">
+      <div class="qr-item">
+        <div class="qr-key">RPO</div>
+        <div class="qr-val">Data loss window<br><strong>Set by backup frequency</strong></div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-key">RTO</div>
+        <div class="qr-val">Recovery duration<br><strong>Set by recovery infrastructure</strong></div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-key">Lower RPO</div>
+        <div class="qr-val">More frequent backups → more storage cost</div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-key">Lower RTO</div>
+        <div class="qr-val">Faster recovery tooling → more infrastructure cost</div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-key">Production minimum</div>
+        <div class="qr-val">GRS vault + daily backup + <strong>tested restore</strong></div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-key">Production DR</div>
+        <div class="qr-val">ASR for critical workloads only — cost justifies selectively</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <span>ostebovik.net · AZ-104 · Backup &amp; Recovery Reference</span>
+    <a href="https://ostebovik.net/resources/">← back to resources</a>
+  </footer>
+
+</div>
+</body>
+</html>

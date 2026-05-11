@@ -573,11 +573,13 @@
         <div class="resource-body">
           <div class="resource-body-inner">
             <a class="open-link"
-              href="https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-rpo-rto.md"
-              target="_blank">↗ open raw file</a>
-            <div class="md-content" id="content-rpo-rto">
-              <p class="loading-msg">loading…</p>
-            </div>
+              href="https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-rpo-rto.html"
+              target="_blank">↗ open full reference</a>
+            <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.7;">
+              Full interactive HTML reference — open in a new tab. Covers RPO vs RTO
+              definitions, Azure backup mechanisms, how backup policy controls RPO,
+              and an interview answer with Azure-specific mapping.
+            </p>
           </div>
         </div>
       </div>
@@ -597,11 +599,13 @@
         <div class="resource-body">
           <div class="resource-body-inner">
             <a class="open-link"
-              href="https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-compute-comparison.md"
-              target="_blank">↗ open raw file</a>
-            <div class="md-content" id="content-compute-compare">
-              <p class="loading-msg">loading…</p>
-            </div>
+              href="https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-compute-comparison.html"
+              target="_blank">↗ open full reference</a>
+            <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.7;">
+              Full interactive HTML reference — open in a new tab. Covers VM vs App
+              Service vs Container Instances with a visual decision tree, side-by-side
+              comparison table, and the exam trap question explained.
+            </p>
           </div>
         </div>
       </div>
@@ -705,127 +709,7 @@
     // ── Card toggle ────────────────────────────────────────────────
     function toggleCard(id) {
       const card = document.getElementById(id);
-      const wasOpen = card.classList.contains('open');
       card.classList.toggle('open');
-      // Lazy-load markdown content on first open
-      if (!wasOpen) loadMarkdown(id);
-    }
-
-    // ── Markdown loader ────────────────────────────────────────────
-    const markdownSources = {
-      'rpo-rto': 'https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-rpo-rto.md',
-      'compute-compare': 'https://stgeostewus301.blob.core.windows.net/content/az-104/resources/reference-compute-comparison.md'
-    };
-
-    const loaded = {};
-
-    async function loadMarkdown(id) {
-      if (loaded[id] || !markdownSources[id]) return;
-      loaded[id] = true;
-      const el = document.getElementById('content-' + id);
-      if (!el) return;
-      try {
-        const res = await fetch(markdownSources[id]);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        el.innerHTML = parseMarkdown(text);
-      } catch (e) {
-        el.innerHTML = '<p class="load-error">Could not load content — <a href="' +
-          markdownSources[id] + '" target="_blank" style="color:var(--orange)">open directly</a></p>';
-      }
-    }
-
-    // ── Minimal markdown parser ────────────────────────────────────
-    function parseMarkdown(md) {
-      // Remove YAML-style frontmatter if present
-      md = md.replace(/^---[\s\S]*?---\n/, '');
-
-      const lines = md.split('\n');
-      let html = '';
-      let inPre = false;
-      let preBuffer = '';
-      let inUl = false;
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-
-        // Fenced code blocks
-        if (line.startsWith('```')) {
-          if (!inPre) {
-            if (inUl) { html += '</ul>'; inUl = false; }
-            inPre = true;
-            preBuffer = '';
-          } else {
-            html += '<pre><code>' + escHtml(preBuffer) + '</code></pre>';
-            inPre = false;
-          }
-          continue;
-        }
-        if (inPre) { preBuffer += line + '\n'; continue; }
-
-        // Headings
-        if (line.startsWith('### ')) {
-          if (inUl) { html += '</ul>'; inUl = false; }
-          html += '<h3>' + inline(line.slice(4)) + '</h3>';
-          continue;
-        }
-        if (line.startsWith('## ')) {
-          if (inUl) { html += '</ul>'; inUl = false; }
-          html += '<h2>' + inline(line.slice(3)) + '</h2>';
-          continue;
-        }
-        if (line.startsWith('# ')) {
-          if (inUl) { html += '</ul>'; inUl = false; }
-          // Skip the top-level title — already in the hero
-          continue;
-        }
-
-        // HR
-        if (line.match(/^---+$/)) {
-          if (inUl) { html += '</ul>'; inUl = false; }
-          html += '<hr>';
-          continue;
-        }
-
-        // List items
-        if (line.startsWith('- ') || line.startsWith('* ')) {
-          if (!inUl) { html += '<ul>'; inUl = true; }
-          html += '<li>' + inline(line.slice(2)) + '</li>';
-          continue;
-        }
-
-        // Close open list
-        if (inUl && line.trim() === '') {
-          html += '</ul>'; inUl = false;
-        }
-
-        // Blank line
-        if (line.trim() === '') continue;
-
-        // Paragraph
-        html += '<p>' + inline(line) + '</p>';
-      }
-
-      if (inUl) html += '</ul>';
-      return html;
-    }
-
-    function inline(text) {
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--orange)">$1</a>');
-    }
-
-    function escHtml(text) {
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
     }
 
     // ── Scroll reveal ──────────────────────────────────────────────
