@@ -7,3 +7,12 @@
 
 # VS Code
 .vscode/
+
+# Working notes and session files
+docs/
+
+# Infrastructure secrets
+infrastructure/prod.bicepparam
+
+# Root-level screenshots folder
+screenshots/
