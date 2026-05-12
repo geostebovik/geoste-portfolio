@@ -1,122 +1,171 @@
-<svg width="100%" viewBox="0 0 680 760" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
-  <title>AZ-104 Phase 3 Project 7 — Architecture Diagram</title>
-  <desc>Architecture showing vnet-spoke with snet-web subnet containing vm-win-dev-01 in Zone 1 and vm-linux-dev-01 in Zone 2, with managed disks, snapshot, CSE, BGInfo, storage account, and NSGs.</desc>
-
+<svg viewBox="0 0 680 760" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>P7 VM Compute and Extensions — westus3</title>
+  <desc>Architecture showing vnet-az104-dev-wus3-01 with snet-web-dev-wus3-01 containing vm-win-dev-wus3-01 in Zone 1 with CSE and BGInfo extensions, and vm-linux-dev-wus3-01 in Zone 2 with data disk and snapshot. Both VMs connect to shared storage account for CSE scripts.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
     <style>
-      text { font-family: Segoe UI, system-ui, sans-serif; fill: #2a2820; }
-      .label-sub { font-size: 11px; fill: #6b6860; }
-      .label-main { font-size: 13px; font-weight: 500; fill: #1a1814; }
-      .caption { font-size: 11px; fill: #9a9890; }
-      .box-rg    { fill: #f1efe8; stroke: #888780; }
-      .box-vnet  { fill: #e6f1fb; stroke: #185fa5; }
-      .box-snet  { fill: #e1f5ee; stroke: #0f6e56; }
-      .box-zone  { fill: #eeedfe; stroke: #534ab7; }
-      .box-vm    { fill: #d3d1c7; stroke: #5f5e5a; }
-      .box-ext   { fill: #faeeda; stroke: #854f0b; }
-      .box-disk  { fill: #d3d1c7; stroke: #5f5e5a; }
-      .box-data  { fill: #eaf3de; stroke: #3b6d11; }
-      .box-snap  { fill: #faece7; stroke: #993c1d; }
-      .box-stor  { fill: #e1f5ee; stroke: #0f6e56; }
-      .box-nsg   { fill: #f1efe8; stroke: #5f5e5a; }
-      .conn      { stroke: #b4b2a9; stroke-width: 0.5px; fill: none; }
-      .label-rg    { fill: #2c2c2a; }
-      .label-vnet  { fill: #0c447c; }
-      .label-snet  { fill: #085041; }
-      .label-zone  { fill: #3c3489; }
-      .label-vm    { fill: #2c2c2a; }
-      .label-ext   { fill: #633806; }
-      .label-data  { fill: #27500a; }
-      .label-snap  { fill: #712b13; }
-      .label-stor  { fill: #085041; }
-      .sub-rg   { fill: #5f5e5a; }
-      .sub-vnet { fill: #185fa5; }
-      .sub-snet { fill: #0f6e56; }
-      .sub-zone { fill: #534ab7; }
-      .sub-vm   { fill: #5f5e5a; }
-      .sub-ext  { fill: #854f0b; }
-      .sub-data { fill: #3b6d11; }
-      .sub-snap { fill: #993c1d; }
-      .sub-stor { fill: #0f6e56; }
+      text { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+      .sans { font-family: 'Syne', 'Segoe UI', system-ui, sans-serif; }
+      .cap  { font-size: 10px; fill: #475569; letter-spacing: 0.08em; }
+      .nm   { font-size: 12px; font-weight: 600; }
+      .sub  { font-size: 10px; }
+      .row  { font-size: 9px; }
     </style>
   </defs>
 
-  <text x="340" y="20" text-anchor="middle" class="caption">AZ-104 · Phase 3 · Project 7 · West US 3</text>
+  <!-- page bg -->
+  <rect width="680" height="760" fill="#0f1117"/>
 
-  <rect x="30" y="30" width="620" height="698" rx="16" class="box-rg" stroke-width="0.5"/>
-  <text x="52" y="55" class="label-main label-rg">rg-az104-dev-wus3-01</text>
-  <text x="52" y="70" class="label-sub sub-rg">resource group</text>
+  <!-- header stripe -->
+  <rect x="0" y="0" width="680" height="3" fill="#2dd4bf"/>
 
-  <rect x="50" y="84" width="580" height="556" rx="12" class="box-vnet" stroke-width="0.5"/>
-  <text x="70" y="107" class="label-main label-vnet">vnet-az104-dev-wus3-01</text>
-  <text x="70" y="122" class="label-sub sub-vnet">10.0.0.0/16</text>
+  <!-- header -->
+  <rect x="0" y="3" width="680" height="44" fill="#161b27"/>
+  <rect x="0" y="47" width="680" height="1" fill="#2a3347"/>
+  <text x="16" y="26" class="sans nm" fill="#e2e8f0" font-size="13" font-weight="600">AZ-104 · Project 7</text>
+  <text x="16" y="41" class="sub" fill="#64748b">VM compute · extensions · managed disks · snapshot · westus3</text>
+  <rect x="524" y="12" width="140" height="22" rx="11" fill="#134e4a" stroke="#2dd4bf" stroke-width="0.5"/>
+  <text x="594" y="27" text-anchor="middle" class="sub" fill="#5eead4">project-7 · compute</text>
 
-  <rect x="70" y="134" width="540" height="486" rx="8" class="box-snet" stroke-width="0.5"/>
-  <text x="90" y="156" class="label-main label-snet">snet-web-dev-wus3-01</text>
-  <text x="90" y="171" class="label-sub sub-snet">10.0.1.0/24</text>
+  <!-- RG outer -->
+  <rect x="16" y="56" width="648" height="672" rx="12" fill="#161b27" stroke="#2a3347" stroke-width="1"/>
+  <text x="30" y="74" class="sans nm" fill="#94a3b8" font-size="11">rg-az104-dev-wus3-01</text>
+  <text x="30" y="87" class="row" fill="#475569">resource group · westus3</text>
 
-  <rect x="88" y="182" width="238" height="408" rx="8" class="box-zone" stroke-width="0.5"/>
-  <text x="207" y="204" text-anchor="middle" class="label-main label-zone">Availability Zone 1</text>
+  <!-- VNet -->
+  <rect x="30" y="96" width="620" height="548" rx="10" fill="#161b27" stroke="#4a9eff" stroke-width="1.5"/>
+  <rect x="30" y="96" width="620" height="28" rx="10" fill="#1e3a5f"/>
+  <rect x="30" y="112" width="620" height="12" fill="#1e3a5f"/>
+  <text x="44" y="114" class="sans nm" fill="#93c5fd" font-size="12">vnet-az104-dev-wus3-01</text>
+  <text x="44" y="127" class="row" fill="#64748b">10.0.0.0/16 · westus3</text>
 
-  <rect x="354" y="182" width="238" height="408" rx="8" class="box-zone" stroke-width="0.5"/>
-  <text x="473" y="204" text-anchor="middle" class="label-main label-zone">Availability Zone 2</text>
+  <!-- Subnet -->
+  <rect x="44" y="136" width="592" height="494" rx="8" fill="rgba(45,212,191,0.03)" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="58" y="154" class="sub" fill="#2dd4bf" font-weight="600">snet-web-dev-wus3-01</text>
+  <text x="58" y="167" class="row" fill="#64748b">10.0.3.0/24</text>
 
-  <rect x="106" y="216" width="202" height="52" rx="8" class="box-vm" stroke-width="0.5"/>
-  <text x="207" y="237" text-anchor="middle" class="label-main label-vm">vm-win-dev-01</text>
-  <text x="207" y="253" text-anchor="middle" class="label-sub sub-vm">Windows Server 2025 · B2s</text>
+  <!-- Zone 1 -->
+  <rect x="58" y="176" width="278" height="428" rx="8" fill="rgba(167,139,250,0.04)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="197" y="196" text-anchor="middle" class="sub" fill="#a78bfa" font-weight="600">Availability Zone 1</text>
 
-  <rect x="372" y="216" width="202" height="52" rx="8" class="box-vm" stroke-width="0.5"/>
-  <text x="473" y="237" text-anchor="middle" class="label-main label-vm">vm-linux-dev-01</text>
-  <text x="473" y="253" text-anchor="middle" class="label-sub sub-vm">Ubuntu 24.04 LTS · B2s</text>
+  <!-- Zone 2 -->
+  <rect x="344" y="176" width="278" height="428" rx="8" fill="rgba(167,139,250,0.04)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="483" y="196" text-anchor="middle" class="sub" fill="#a78bfa" font-weight="600">Availability Zone 2</text>
 
-  <line x1="207" y1="268" x2="207" y2="296" class="conn" marker-end="url(#arrow)"/>
-  <rect x="106" y="296" width="202" height="44" rx="8" class="box-ext" stroke-width="0.5"/>
-  <text x="207" y="313" text-anchor="middle" class="label-main label-ext">CustomScriptExtension</text>
-  <text x="207" y="329" text-anchor="middle" class="label-sub sub-ext">IIS + test page</text>
+  <!-- vm-win card -->
+  <rect x="72" y="206" width="250" height="56" rx="7" fill="#1d2435" stroke="#94a3b8" stroke-width="0.75"/>
+  <rect x="72" y="206" width="250" height="3" rx="2" fill="#94a3b8"/>
+  <text x="197" y="225" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11">vm-win-dev-wus3-01</text>
+  <text x="197" y="240" text-anchor="middle" class="row" fill="#64748b">Windows Server 2025 Azure Edition · B2s</text>
+  <text x="197" y="253" text-anchor="middle" class="row" fill="#64748b">10.0.3.4 · no public IP · hotpatch enabled</text>
 
-  <line x1="207" y1="340" x2="207" y2="368" class="conn" marker-end="url(#arrow)"/>
-  <rect x="106" y="368" width="202" height="44" rx="8" class="box-ext" stroke-width="0.5"/>
-  <text x="207" y="385" text-anchor="middle" class="label-main label-ext">BGInfo extension</text>
-  <text x="207" y="401" text-anchor="middle" class="label-sub sub-ext">VM info on wallpaper</text>
+  <!-- vm-win → CSE arrow -->
+  <line x1="197" y1="262" x2="197" y2="280" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
 
-  <line x1="207" y1="412" x2="207" y2="440" class="conn" marker-end="url(#arrow)"/>
-  <rect x="106" y="440" width="202" height="44" rx="8" class="box-disk" stroke-width="0.5"/>
-  <text x="207" y="457" text-anchor="middle" class="label-main label-vm">disk-os-win-dev-01</text>
-  <text x="207" y="473" text-anchor="middle" class="label-sub sub-vm">OS disk · Premium SSD</text>
+  <!-- CSE card -->
+  <rect x="72" y="280" width="250" height="48" rx="7" fill="#1c1209" stroke="#f59e0b" stroke-width="0.75"/>
+  <rect x="72" y="280" width="250" height="3" rx="2" fill="#f59e0b"/>
+  <text x="197" y="299" text-anchor="middle" class="sans nm" fill="#fcd34d" font-size="11">CustomScriptExtension</text>
+  <text x="197" y="313" text-anchor="middle" class="row" fill="#92400e">Installs IIS · deploys test page</text>
+  <text x="197" y="323" text-anchor="middle" class="row" fill="#64748b">script fetched from stscriptswus301</text>
 
-  <line x1="473" y1="268" x2="473" y2="296" class="conn" marker-end="url(#arrow)"/>
-  <rect x="372" y="296" width="202" height="44" rx="8" class="box-disk" stroke-width="0.5"/>
-  <text x="473" y="313" text-anchor="middle" class="label-main label-vm">disk-os-linux-dev-01</text>
-  <text x="473" y="329" text-anchor="middle" class="label-sub sub-vm">OS disk · Premium SSD</text>
+  <!-- CSE → BGInfo arrow -->
+  <line x1="197" y1="328" x2="197" y2="346" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
 
-  <line x1="473" y1="340" x2="473" y2="368" class="conn" marker-end="url(#arrow)"/>
-  <rect x="372" y="368" width="202" height="44" rx="8" class="box-data" stroke-width="0.5"/>
-  <text x="473" y="385" text-anchor="middle" class="label-main label-data">disk-data-az104-dev-01</text>
-  <text x="473" y="401" text-anchor="middle" class="label-sub sub-data">64 GB · managed · /data</text>
+  <!-- BGInfo card -->
+  <rect x="72" y="346" width="250" height="48" rx="7" fill="#1c1209" stroke="#f59e0b" stroke-width="0.75"/>
+  <rect x="72" y="346" width="250" height="3" rx="2" fill="#f59e0b"/>
+  <text x="197" y="365" text-anchor="middle" class="sans nm" fill="#fcd34d" font-size="11">BGInfo extension</text>
+  <text x="197" y="379" text-anchor="middle" class="row" fill="#92400e">VM info rendered on desktop wallpaper</text>
+  <text x="197" y="389" text-anchor="middle" class="row" fill="#64748b">CLI deploy only — not in portal marketplace</text>
 
-  <line x1="473" y1="412" x2="473" y2="440" class="conn" marker-end="url(#arrow)"/>
-  <rect x="372" y="440" width="202" height="44" rx="8" class="box-snap" stroke-width="0.5"/>
-  <text x="473" y="457" text-anchor="middle" class="label-main label-snap">snap-linux-dev-wus3-01</text>
-  <text x="473" y="473" text-anchor="middle" class="label-sub sub-snap">OS disk snapshot · LRS</text>
+  <!-- BGInfo → OS disk arrow -->
+  <line x1="197" y1="394" x2="197" y2="412" stroke="#64748b" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
 
-  <line x1="207" y1="484" x2="207" y2="512" class="conn" marker-end="url(#arrow)"/>
-  <line x1="473" y1="484" x2="473" y2="512" class="conn" marker-end="url(#arrow)"/>
-  <rect x="106" y="512" width="468" height="44" rx="8" class="box-stor" stroke-width="0.5"/>
-  <text x="340" y="529" text-anchor="middle" class="label-main label-stor">stscriptswus301</text>
-  <text x="340" y="545" text-anchor="middle" class="label-sub sub-stor">blob · scripts container · private · CSE source</text>
+  <!-- OS disk win -->
+  <rect x="72" y="412" width="250" height="44" rx="7" fill="#1d2435" stroke="#64748b" stroke-width="0.75"/>
+  <text x="197" y="431" text-anchor="middle" class="sans nm" fill="#94a3b8" font-size="11">disk-os-win-dev-wus3-01</text>
+  <text x="197" y="446" text-anchor="middle" class="row" fill="#64748b">OS disk · Premium SSD LRS · deleteOption=Delete</text>
 
-  <line x1="207" y1="556" x2="207" y2="584" class="conn" marker-end="url(#arrow)"/>
-  <rect x="106" y="584" width="202" height="44" rx="8" class="box-nsg" stroke-width="0.5"/>
-  <text x="207" y="601" text-anchor="middle" class="label-main label-rg">nsg-win-dev-wus3-01</text>
-  <text x="207" y="617" text-anchor="middle" class="label-sub sub-rg">allow RDP 3389 · HTTP 80</text>
+  <!-- NSG win -->
+  <rect x="72" y="468" width="250" height="44" rx="7" fill="#161b27" stroke="#2a3347" stroke-width="0.75"/>
+  <text x="197" y="487" text-anchor="middle" class="sans nm" fill="#94a3b8" font-size="11">nsg-win-dev-wus3-01</text>
+  <text x="197" y="502" text-anchor="middle" class="row" fill="#64748b">allow RDP 3389 · HTTP 80 · AzureLoadBalancer</text>
 
-  <line x1="473" y1="556" x2="473" y2="584" class="conn" marker-end="url(#arrow)"/>
-  <rect x="372" y="584" width="202" height="44" rx="8" class="box-nsg" stroke-width="0.5"/>
-  <text x="473" y="601" text-anchor="middle" class="label-main label-rg">nsg-linux-dev-wus3-01</text>
-  <text x="473" y="617" text-anchor="middle" class="label-sub sub-rg">allow SSH 22</text>
+  <!-- vm-linux card -->
+  <rect x="358" y="206" width="250" height="56" rx="7" fill="#1d2435" stroke="#94a3b8" stroke-width="0.75"/>
+  <rect x="358" y="206" width="250" height="3" rx="2" fill="#94a3b8"/>
+  <text x="483" y="225" text-anchor="middle" class="sans nm" fill="#e2e8f0" font-size="11">vm-linux-dev-wus3-01</text>
+  <text x="483" y="240" text-anchor="middle" class="row" fill="#64748b">Ubuntu 24.04 LTS · B2s · SSH key auth</text>
+  <text x="483" y="253" text-anchor="middle" class="row" fill="#64748b">10.0.2.4 · no public IP</text>
 
-  <text x="340" y="740" text-anchor="middle" class="caption">ostebovik.net · AZ-104 Phase 3 · Project 7</text>
+  <!-- vm-linux → OS disk arrow -->
+  <line x1="483" y1="262" x2="483" y2="280" stroke="#64748b" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
+
+  <!-- OS disk linux -->
+  <rect x="358" y="280" width="250" height="44" rx="7" fill="#1d2435" stroke="#64748b" stroke-width="0.75"/>
+  <text x="483" y="299" text-anchor="middle" class="sans nm" fill="#94a3b8" font-size="11">disk-os-linux-dev-wus3-01</text>
+  <text x="483" y="314" text-anchor="middle" class="row" fill="#64748b">OS disk · Premium SSD LRS · deleteOption=Delete</text>
+
+  <!-- OS disk → data disk arrow -->
+  <line x1="483" y1="324" x2="483" y2="342" stroke="#34d399" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
+
+  <!-- Data disk -->
+  <rect x="358" y="342" width="250" height="48" rx="7" fill="#0d2e1a" stroke="#34d399" stroke-width="0.75"/>
+  <rect x="358" y="342" width="250" height="3" rx="2" fill="#34d399"/>
+  <text x="483" y="361" text-anchor="middle" class="sans nm" fill="#34d399" font-size="11">disk-data-az104-dev-wus3-01</text>
+  <text x="483" y="375" text-anchor="middle" class="row" fill="#64748b">64 GB · managed · mounted at /data</text>
+  <text x="483" y="387" text-anchor="middle" class="row" fill="#64748b">UUID mount · nofail · ext4</text>
+
+  <!-- data disk → snapshot arrow -->
+  <line x1="483" y1="390" x2="483" y2="408" stroke="#f87171" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.7"/>
+
+  <!-- Snapshot -->
+  <rect x="358" y="408" width="250" height="48" rx="7" fill="#1c0909" stroke="#f87171" stroke-width="0.75"/>
+  <rect x="358" y="408" width="250" height="3" rx="2" fill="#f87171"/>
+  <text x="483" y="427" text-anchor="middle" class="sans nm" fill="#fca5a5" font-size="11">snap-linux-dev-wus3-01</text>
+  <text x="483" y="441" text-anchor="middle" class="row" fill="#64748b">OS disk snapshot · Standard LRS</text>
+  <text x="483" y="453" text-anchor="middle" class="row" fill="#64748b">point-in-time recovery · incremental</text>
+
+  <!-- NSG linux -->
+  <rect x="358" y="468" width="250" height="44" rx="7" fill="#161b27" stroke="#2a3347" stroke-width="0.75"/>
+  <text x="483" y="487" text-anchor="middle" class="sans nm" fill="#94a3b8" font-size="11">nsg-linux-dev-wus3-01</text>
+  <text x="483" y="502" text-anchor="middle" class="row" fill="#64748b">allow SSH 22 from AzureBastionSubnet</text>
+
+  <!-- Shared storage account -->
+  <rect x="58" y="522" width="564" height="48" rx="7" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="1"/>
+  <rect x="58" y="522" width="564" height="3" rx="2" fill="#2dd4bf"/>
+  <text x="340" y="541" text-anchor="middle" class="sans nm" fill="#2dd4bf" font-size="11">stscriptswus301 — scripts container · private · CSE source</text>
+  <text x="340" y="555" text-anchor="middle" class="row" fill="#64748b">Standard LRS · blob · service SAS for CSE download · production: managed identity + Storage Blob Data Reader</text>
+
+  <!-- zone arrows to storage -->
+  <line x1="197" y1="512" x2="197" y2="522" stroke="#2dd4bf" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.5"/>
+  <line x1="483" y1="512" x2="483" y2="522" stroke="#2dd4bf" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.5"/>
+
+  <!-- legend -->
+  <rect x="16" y="656" width="648" height="46" rx="6" fill="#161b27" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="28" y="664" width="7" height="7" rx="2" fill="#1e3a5f" stroke="#4a9eff" stroke-width="1"/>
+  <text x="40" y="673" class="row" fill="#64748b">VNet</text>
+  <rect x="80" y="664" width="7" height="7" rx="2" fill="rgba(167,139,250,0.04)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="92" y="673" class="row" fill="#64748b">Availability zone</text>
+  <rect x="188" y="664" width="7" height="7" rx="2" fill="#1c1209" stroke="#f59e0b" stroke-width="1"/>
+  <text x="200" y="673" class="row" fill="#64748b">VM extension</text>
+  <rect x="278" y="664" width="7" height="7" rx="2" fill="#0d2e1a" stroke="#34d399" stroke-width="1"/>
+  <text x="290" y="673" class="row" fill="#64748b">Data disk</text>
+  <rect x="350" y="664" width="7" height="7" rx="2" fill="#1c0909" stroke="#f87171" stroke-width="1"/>
+  <text x="362" y="673" class="row" fill="#64748b">Snapshot</text>
+  <rect x="420" y="664" width="7" height="7" rx="2" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="432" y="673" class="row" fill="#64748b">Storage account</text>
+  <rect x="524" y="664" width="7" height="7" rx="2" fill="#161b27" stroke="#2a3347" stroke-width="1"/>
+  <text x="536" y="673" class="row" fill="#64748b">NSG</text>
+
+  <text x="28" y="692" class="row" fill="#475569">Disk resize is two steps: az disk update --size-gb (Azure) then resize2fs (OS) · online resize supported for ext4</text>
+  <text x="28" y="704" class="row" fill="#475569">Always use UUID in fstab with nofail · device names (/dev/sd*) shift on reboot · never mount data disk at /mnt</text>
+
+  <!-- footer -->
+  <rect x="0" y="742" width="680" height="18" fill="#161b27"/>
+  <rect x="0" y="742" width="680" height="1" fill="#2a3347"/>
+  <text x="340" y="756" text-anchor="middle" class="cap sans" font-size="9">ostebovik.net · AZ-104 · Project 7 · VM Compute &amp; Extensions · westus3</text>
 </svg>

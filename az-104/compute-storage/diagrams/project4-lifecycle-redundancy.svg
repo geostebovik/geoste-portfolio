@@ -1,0 +1,184 @@
+<svg viewBox="0 0 680 660" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>P4 Lifecycle Policy and Redundancy — westus3</title>
+  <desc>Lifecycle management policy showing Hot to Cool to Archive to Delete tier transitions with day thresholds. LRS redundancy showing 3 synchronous copies across racks. GRS extension showing async replication to secondary region. Redundancy comparison table for LRS, ZRS, and GRS.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+      .sans { font-family: 'Syne', 'Segoe UI', system-ui, sans-serif; }
+      .cap  { font-size: 10px; fill: #475569; letter-spacing: 0.08em; }
+      .nm   { font-size: 12px; font-weight: 600; }
+      .sub  { font-size: 10px; }
+      .row  { font-size: 9px; }
+    </style>
+  </defs>
+
+  <!-- page bg -->
+  <rect width="680" height="660" fill="#0f1117"/>
+
+  <!-- header stripe -->
+  <rect x="0" y="0" width="680" height="3" fill="#a78bfa"/>
+
+  <!-- header -->
+  <rect x="0" y="3" width="680" height="44" fill="#161b27"/>
+  <rect x="0" y="47" width="680" height="1" fill="#2a3347"/>
+  <text x="16" y="26" class="sans nm" fill="#e2e8f0" font-size="13" font-weight="600">AZ-104 · Project 4</text>
+  <text x="16" y="41" class="sub" fill="#64748b">Lifecycle management policy · LRS redundancy · GRS replication · westus3</text>
+  <rect x="504" y="12" width="160" height="22" rx="11" fill="#1a0e35" stroke="#a78bfa" stroke-width="0.5"/>
+  <text x="584" y="27" text-anchor="middle" class="sub" fill="#c4b5fd">project-4 · diagram 2 of 2</text>
+
+  <!-- ══ LIFECYCLE MANAGEMENT POLICY ══ -->
+  <rect x="16" y="56" width="648" height="220" rx="10" fill="#161b27" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="16" y="56" width="648" height="3" rx="2" fill="#a78bfa"/>
+  <rect x="16" y="56" width="648" height="28" rx="10" fill="#1a0e35"/>
+  <rect x="16" y="72" width="648" height="12" fill="#1a0e35"/>
+  <text x="30" y="74" class="sans nm" fill="#c4b5fd" font-size="12">Lifecycle management policy — stdevwus301</text>
+  <text x="30" y="87" class="row" fill="#64748b">uploads/ and archive/ prefixes · policy runs daily · cost optimization demo</text>
+
+  <!-- tier flow label -->
+  <text x="30" y="108" class="row" fill="#a78bfa" font-weight="600">Tier transitions</text>
+
+  <!-- Hot box -->
+  <rect x="30" y="116" width="108" height="56" rx="7" fill="#1e3a5f" stroke="#4a9eff" stroke-width="1"/>
+  <text x="84" y="139" text-anchor="middle" class="sans" fill="#93c5fd" font-size="13" font-weight="600">Hot</text>
+  <text x="84" y="154" text-anchor="middle" class="row" fill="#4a9eff">Day 0+ · full access</text>
+  <text x="84" y="166" text-anchor="middle" class="row" fill="#64748b">highest cost</text>
+
+  <line x1="138" y1="144" x2="158" y2="144" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="148" y="138" text-anchor="middle" class="row" fill="#64748b">30d</text>
+
+  <!-- Cool box -->
+  <rect x="160" y="116" width="108" height="56" rx="7" fill="#1e2e4a" stroke="#60a5fa" stroke-width="1"/>
+  <text x="214" y="139" text-anchor="middle" class="sans" fill="#60a5fa" font-size="13" font-weight="600">Cool</text>
+  <text x="214" y="154" text-anchor="middle" class="row" fill="#60a5fa">Day 30+ · lower cost</text>
+  <text x="214" y="166" text-anchor="middle" class="row" fill="#64748b">ms access latency</text>
+
+  <line x1="268" y1="144" x2="288" y2="144" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="278" y="138" text-anchor="middle" class="row" fill="#64748b">90d</text>
+
+  <!-- Archive box -->
+  <rect x="290" y="116" width="108" height="56" rx="7" fill="#1a0e35" stroke="#a78bfa" stroke-width="1"/>
+  <text x="344" y="139" text-anchor="middle" class="sans" fill="#c4b5fd" font-size="13" font-weight="600">Archive</text>
+  <text x="344" y="154" text-anchor="middle" class="row" fill="#a78bfa">Day 90+ · offline</text>
+  <text x="344" y="166" text-anchor="middle" class="row" fill="#64748b">rehydrate hrs to read</text>
+
+  <line x1="398" y1="144" x2="418" y2="144" stroke="#f87171" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="408" y="138" text-anchor="middle" class="row" fill="#64748b">365d</text>
+
+  <!-- Delete box -->
+  <rect x="420" y="116" width="108" height="56" rx="7" fill="#450a0a" stroke="#f87171" stroke-width="1"/>
+  <text x="474" y="139" text-anchor="middle" class="sans" fill="#fca5a5" font-size="13" font-weight="600">Delete</text>
+  <text x="474" y="154" text-anchor="middle" class="row" fill="#f87171">Day 365+ · permanent</text>
+  <text x="474" y="166" text-anchor="middle" class="row" fill="#64748b">no recovery</text>
+
+  <!-- prefix rules panel -->
+  <rect x="542" y="116" width="110" height="56" rx="7" fill="#0f1117" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="552" y="131" class="row" fill="#64748b">uploads/ prefix:</text>
+  <text x="552" y="144" class="row" fill="#a78bfa">7d→Cool · 30d→Arch</text>
+  <text x="552" y="157" class="row" fill="#f87171">180d→Delete</text>
+  <text x="552" y="170" class="row" fill="#64748b">archive/ same</text>
+
+  <!-- Archive insight -->
+  <rect x="30" y="184" width="622" height="36" rx="6" fill="#1a0e35" stroke="#a78bfa" stroke-width="0.4"/>
+  <text x="341" y="199" text-anchor="middle" class="row" fill="#c4b5fd" font-weight="600">Archive tier key constraint</text>
+  <text x="341" y="213" text-anchor="middle" class="row" fill="#64748b">Rehydration to Hot/Cool takes hours before data is readable — not suitable for frequently accessed data</text>
+
+  <!-- ══ LRS REDUNDANCY ══ -->
+  <rect x="16" y="288" width="390" height="196" rx="10" fill="#161b27" stroke="#4a9eff" stroke-width="1.5"/>
+  <rect x="16" y="288" width="390" height="3" rx="2" fill="#4a9eff"/>
+  <rect x="16" y="288" width="390" height="28" rx="10" fill="#1e3a5f"/>
+  <rect x="16" y="304" width="390" height="12" fill="#1e3a5f"/>
+  <text x="30" y="306" class="sans nm" fill="#93c5fd" font-size="12">LRS redundancy — stdevwus301</text>
+  <text x="30" y="319" class="row" fill="#64748b">3 synchronous copies · one datacenter · westus3</text>
+
+  <!-- rack boxes -->
+  <rect x="36" y="332" width="90" height="54" rx="7" fill="#1d2435" stroke="#4a9eff" stroke-width="0.75"/>
+  <text x="81" y="353" text-anchor="middle" class="sub" fill="#93c5fd" font-weight="600">Rack 1</text>
+  <text x="81" y="368" text-anchor="middle" class="row" fill="#4a9eff">Copy 1</text>
+  <text x="81" y="380" text-anchor="middle" class="row" fill="#64748b">sync write</text>
+
+  <line x1="126" y1="359" x2="146" y2="359" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="148" y="332" width="90" height="54" rx="7" fill="#1d2435" stroke="#4a9eff" stroke-width="0.75"/>
+  <text x="193" y="353" text-anchor="middle" class="sub" fill="#93c5fd" font-weight="600">Rack 2</text>
+  <text x="193" y="368" text-anchor="middle" class="row" fill="#4a9eff">Copy 2</text>
+  <text x="193" y="380" text-anchor="middle" class="row" fill="#64748b">sync write</text>
+
+  <line x1="238" y1="359" x2="258" y2="359" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="260" y="332" width="90" height="54" rx="7" fill="#1d2435" stroke="#4a9eff" stroke-width="0.75"/>
+  <text x="305" y="353" text-anchor="middle" class="sub" fill="#93c5fd" font-weight="600">Rack 3</text>
+  <text x="305" y="368" text-anchor="middle" class="row" fill="#4a9eff">Copy 3</text>
+  <text x="305" y="380" text-anchor="middle" class="row" fill="#64748b">sync write</text>
+
+  <text x="211" y="404" text-anchor="middle" class="row" fill="#64748b">11 nines durability (99.999999999%)</text>
+  <text x="211" y="418" text-anchor="middle" class="row" fill="#64748b">Survives: drive failure · rack failure</text>
+  <text x="211" y="432" text-anchor="middle" class="row" fill="#64748b">Write confirmed only after all 3 copies written</text>
+  <text x="211" y="448" text-anchor="middle" class="row" fill="#f59e0b">⚠ Single datacenter — region outage = unavailable</text>
+  <text x="211" y="462" text-anchor="middle" class="row" fill="#475569">Not: datacenter loss · regional disaster</text>
+
+  <!-- ══ GRS EXTENSION ══ -->
+  <rect x="420" y="288" width="244" height="196" rx="10" fill="#161b27" stroke="#f87171" stroke-width="1.5"/>
+  <rect x="420" y="288" width="244" height="3" rx="2" fill="#f87171"/>
+  <rect x="420" y="288" width="244" height="28" rx="10" fill="#450a0a"/>
+  <rect x="420" y="304" width="244" height="12" fill="#450a0a"/>
+  <text x="434" y="306" class="sans nm" fill="#fca5a5" font-size="12">GRS extension</text>
+  <text x="434" y="319" class="row" fill="#64748b">stdevgrswus301 · 6 copies across 2 regions</text>
+
+  <rect x="432" y="332" width="96" height="40" rx="6" fill="#1d2435" stroke="#4a9eff" stroke-width="0.75"/>
+  <text x="480" y="348" text-anchor="middle" class="row" fill="#93c5fd" font-weight="600">LRS copies</text>
+  <text x="480" y="362" text-anchor="middle" class="row" fill="#4a9eff">3 × westus3</text>
+
+  <line x1="528" y1="352" x2="544" y2="352" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <text x="536" y="346" text-anchor="middle" class="row" fill="#f87171">async</text>
+
+  <rect x="546" y="332" width="96" height="40" rx="6" fill="#1d2435" stroke="#f87171" stroke-width="0.75" stroke-dasharray="4 2"/>
+  <text x="594" y="348" text-anchor="middle" class="row" fill="#fca5a5" font-weight="600">GRS copies</text>
+  <text x="594" y="362" text-anchor="middle" class="row" fill="#993C1D">3 × East US 2</text>
+
+  <text x="542" y="392" text-anchor="middle" class="row" fill="#64748b">16 nines (99.9999999999999%)</text>
+  <text x="542" y="406" text-anchor="middle" class="row" fill="#64748b">Survives datacenter + regional loss</text>
+  <text x="542" y="420" text-anchor="middle" class="row" fill="#64748b">RPO: up to 15 min · RA-GRS = read-only</text>
+  <text x="542" y="434" text-anchor="middle" class="row" fill="#64748b">secondary available during outage</text>
+  <rect x="432" y="448" width="216" height="16" rx="4" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="540" y="460" text-anchor="middle" class="row" fill="#fca5a5">Delete after screenshots — costs ~2x LRS</text>
+  <text x="542" y="476" text-anchor="middle" class="row" fill="#475569">stdevgrswus301 was a lab demo resource</text>
+
+  <!-- ══ REDUNDANCY COMPARISON TABLE ══ -->
+  <rect x="16" y="496" width="648" height="136" rx="8" fill="#161b27" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="30" y="514" class="sans" fill="#94a3b8" font-size="11" font-weight="600">Redundancy comparison</text>
+
+  <!-- LRS card -->
+  <rect x="30" y="522" width="194" height="96" rx="6" fill="#1e3a5f" stroke="#4a9eff" stroke-width="0.75"/>
+  <text x="127" y="540" text-anchor="middle" class="sub" fill="#93c5fd" font-weight="600">LRS — 11 nines</text>
+  <text x="127" y="554" text-anchor="middle" class="row" fill="#64748b">3 copies · 1 datacenter</text>
+  <text x="127" y="568" text-anchor="middle" class="row" fill="#64748b">Lowest cost option</text>
+  <text x="127" y="582" text-anchor="middle" class="row" fill="#64748b">Survives: drive, rack failure</text>
+  <text x="127" y="596" text-anchor="middle" class="row" fill="#f59e0b">Not: datacenter / region loss</text>
+  <text x="127" y="610" text-anchor="middle" class="row" fill="#64748b">Good for: dev, non-critical data</text>
+
+  <!-- ZRS card -->
+  <rect x="234" y="522" width="194" height="96" rx="6" fill="#1a1235" stroke="#a78bfa" stroke-width="0.75"/>
+  <text x="331" y="540" text-anchor="middle" class="sub" fill="#c4b5fd" font-weight="600">ZRS — 12 nines</text>
+  <text x="331" y="554" text-anchor="middle" class="row" fill="#64748b">3 copies · 3 availability zones</text>
+  <text x="331" y="568" text-anchor="middle" class="row" fill="#64748b">Mid-tier cost</text>
+  <text x="331" y="582" text-anchor="middle" class="row" fill="#64748b">Survives: datacenter failure</text>
+  <text x="331" y="596" text-anchor="middle" class="row" fill="#f59e0b">Not: regional disaster</text>
+  <text x="331" y="610" text-anchor="middle" class="row" fill="#64748b">Good for: HA within region</text>
+
+  <!-- GRS card -->
+  <rect x="438" y="522" width="210" height="96" rx="6" fill="#450a0a" stroke="#f87171" stroke-width="0.75"/>
+  <text x="543" y="540" text-anchor="middle" class="sub" fill="#fca5a5" font-weight="600">GRS — 16 nines</text>
+  <text x="543" y="554" text-anchor="middle" class="row" fill="#64748b">6 copies · 2 regions · ~2x LRS cost</text>
+  <text x="543" y="568" text-anchor="middle" class="row" fill="#64748b">Async replication · RPO ~15 min</text>
+  <text x="543" y="582" text-anchor="middle" class="row" fill="#64748b">Survives: regional outage</text>
+  <text x="543" y="596" text-anchor="middle" class="row" fill="#34d399">RA-GRS: secondary is readable</text>
+  <text x="543" y="610" text-anchor="middle" class="row" fill="#64748b">Good for: DR, compliance, critical data</text>
+
+  <!-- footer -->
+  <rect x="0" y="642" width="680" height="18" fill="#161b27"/>
+  <rect x="0" y="642" width="680" height="1" fill="#2a3347"/>
+  <text x="340" y="656" text-anchor="middle" class="cap sans" font-size="9">ostebovik.net · AZ-104 · Project 4 · Lifecycle Policy &amp; Redundancy · westus3</text>
+</svg>

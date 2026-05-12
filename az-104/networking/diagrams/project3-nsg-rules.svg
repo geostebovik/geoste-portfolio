@@ -1,0 +1,141 @@
+<svg viewBox="0 0 680 540" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>P3 NSG Rules and Traffic Flows — westus3</title>
+  <desc>NSG rule detail for nsg-web and nsg-db showing allowed and denied traffic flows. Internet denied to snet-db. SQL 1433 allowed only from snet-web. RDP/SSH blocked from internet to all VMs.</desc>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+      .sans { font-family: 'Syne', 'Segoe UI', system-ui, sans-serif; }
+      .cap  { font-size: 10px; fill: #475569; letter-spacing: 0.08em; }
+      .nm   { font-size: 12px; font-weight: 600; }
+      .sub  { font-size: 10px; }
+      .row  { font-size: 9px; }
+    </style>
+  </defs>
+
+  <!-- page bg -->
+  <rect width="680" height="540" fill="#0f1117"/>
+
+  <!-- header stripe -->
+  <rect x="0" y="0" width="680" height="3" fill="#f59e0b"/>
+
+  <!-- header -->
+  <rect x="0" y="3" width="680" height="44" fill="#161b27"/>
+  <rect x="0" y="47" width="680" height="1" fill="#2a3347"/>
+  <text x="16" y="26" class="sans nm" fill="#e2e8f0" font-size="13" font-weight="600">AZ-104 · Project 3</text>
+  <text x="16" y="41" class="sub" fill="#64748b">NSG rules · traffic flows · allow / deny decisions · westus3</text>
+  <rect x="504" y="12" width="160" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="584" y="27" text-anchor="middle" class="sub" fill="#fcd34d">NSG detail · diagram 2 of 2</text>
+
+  <!-- Internet cloud -->
+  <g transform="translate(278,58)">
+    <ellipse cx="62" cy="22" rx="56" ry="18" fill="#1d2435" stroke="#2a3347" stroke-width="1"/>
+    <ellipse cx="34" cy="26" rx="28" ry="13" fill="#1d2435" stroke="#2a3347" stroke-width="1"/>
+    <ellipse cx="88" cy="26" rx="24" ry="12" fill="#1d2435" stroke="#2a3347" stroke-width="1"/>
+    <rect x="10" y="24" width="104" height="12" fill="#1d2435"/>
+    <text x="62" y="32" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600" font-family="'Syne',sans-serif">Internet</text>
+  </g>
+
+  <!-- arrow Internet → nsg-web (allowed) -->
+  <line x1="316" y1="98" x2="218" y2="150" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+  <rect x="228" y="108" width="82" height="16" rx="8" fill="#14532d" stroke="#34d399" stroke-width="0.5"/>
+  <text x="269" y="120" text-anchor="middle" class="row" fill="#86efac">✓ 80 / 443</text>
+
+  <!-- arrow Internet → nsg-db (denied) -->
+  <line x1="358" y1="98" x2="462" y2="150" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0.8"/>
+  <rect x="370" y="108" width="82" height="16" rx="8" fill="#450a0a" stroke="#f87171" stroke-width="0.5"/>
+  <text x="411" y="120" text-anchor="middle" class="row" fill="#fca5a5">✗ all denied</text>
+
+  <!-- ── NSG-WEB panel ── -->
+  <rect x="16" y="150" width="304" height="282" rx="10" fill="#1d2435" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="16" y="150" width="304" height="3" rx="2" fill="#f59e0b"/>
+  <rect x="16" y="150" width="304" height="28" rx="10" fill="#1c1209"/>
+  <rect x="16" y="166" width="304" height="12" fill="#1c1209"/>
+  <text x="30" y="168" class="sans nm" fill="#fcd34d" font-size="11" font-weight="600">nsg-web</text>
+  <text x="30" y="181" class="row" fill="#92400e">attached to snet-web · 10.1.1.0/24</text>
+
+  <!-- nsg-web rule rows -->
+  <rect x="28" y="192" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="36" y="206" class="row" fill="#86efac">p.100 · Allow · TCP 80 inbound · Any → Any</text>
+
+  <rect x="28" y="216" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="36" y="230" class="row" fill="#86efac">p.110 · Allow · TCP 443 inbound · Any → Any</text>
+
+  <rect x="28" y="240" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="36" y="254" class="row" fill="#86efac">p.120 · Allow · AzureLoadBalancer inbound</text>
+
+  <rect x="28" y="264" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="36" y="278" class="row" fill="#86efac">p.150 · Allow · VirtualNetwork inbound</text>
+
+  <rect x="28" y="288" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="36" y="302" class="row" fill="#fca5a5">p.200 · Deny · TCP 3389 · Internet → snet-web</text>
+
+  <rect x="28" y="312" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="36" y="326" class="row" fill="#fca5a5">p.210 · Deny · TCP 22 · Internet → snet-web</text>
+
+  <rect x="28" y="336" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="36" y="350" class="row" fill="#fca5a5">p.4096 · Deny · All · Internet (default rule)</text>
+
+  <!-- nsg-web design note -->
+  <rect x="28" y="362" width="280" height="28" rx="5" fill="#0f1117" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="36" y="374" class="row" fill="#64748b">RDP/SSH blocked from Internet.</text>
+  <text x="36" y="386" class="row" fill="#64748b">Bastion (AzureBastionSubnet) is the only path in.</text>
+
+  <!-- ── NSG-DB panel ── -->
+  <rect x="360" y="150" width="304" height="282" rx="10" fill="#1d2435" stroke="#f87171" stroke-width="1.5"/>
+  <rect x="360" y="150" width="304" height="3" rx="2" fill="#f87171"/>
+  <rect x="360" y="150" width="304" height="28" rx="10" fill="#1c0909"/>
+  <rect x="360" y="166" width="304" height="12" fill="#1c0909"/>
+  <text x="374" y="168" class="sans nm" fill="#fca5a5" font-size="11" font-weight="600">nsg-db</text>
+  <text x="374" y="181" class="row" fill="#7f1d1d">attached to snet-db · 10.1.2.0/24</text>
+
+  <!-- nsg-db rule rows -->
+  <rect x="372" y="192" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="380" y="206" class="row" fill="#86efac">p.100 · Allow · TCP 1433 · 10.1.1.0/24 → Any</text>
+
+  <rect x="372" y="216" width="280" height="20" rx="3" fill="#14532d" stroke="#34d399" stroke-width="0.4"/>
+  <text x="380" y="230" class="row" fill="#86efac">p.150 · Allow · VirtualNetwork inbound</text>
+
+  <rect x="372" y="240" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="380" y="254" class="row" fill="#fca5a5">p.200 · Deny · TCP 3389 · Internet → snet-db</text>
+
+  <rect x="372" y="264" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="380" y="278" class="row" fill="#fca5a5">p.210 · Deny · TCP 22 · Internet → snet-db</text>
+
+  <rect x="372" y="288" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="380" y="302" class="row" fill="#fca5a5">p.4000 · Deny · All · Internet inbound</text>
+
+  <rect x="372" y="312" width="280" height="20" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="380" y="326" class="row" fill="#fca5a5">p.4096 · Deny · All · Any (default rule)</text>
+
+  <!-- nsg-db design note -->
+  <rect x="372" y="336" width="280" height="54" rx="5" fill="#0f1117" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="380" y="350" class="row" fill="#64748b">DB is not internet-reachable by design.</text>
+  <text x="380" y="362" class="row" fill="#64748b">Only snet-web (10.1.1.0/24) can reach TCP 1433.</text>
+  <text x="380" y="374" class="row" fill="#64748b">All other inbound is denied.</text>
+  <text x="380" y="386" class="row" fill="#5eead4">Key lesson: source-specific allow rules.</text>
+
+  <!-- ── TRAFFIC FLOW SUMMARY (bottom) ── -->
+  <rect x="16" y="448" width="648" height="54" rx="8" fill="#161b27" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="30" y="464" class="sans" fill="#94a3b8" font-size="10" font-weight="600">Traffic flow decisions</text>
+
+  <rect x="30" y="470" width="148" height="22" rx="5" fill="#14532d" stroke="#34d399" stroke-width="0.5"/>
+  <text x="104" y="485" text-anchor="middle" class="row" fill="#86efac">✓ Internet → 80/443 → snet-web</text>
+
+  <rect x="186" y="470" width="148" height="22" rx="5" fill="#14532d" stroke="#34d399" stroke-width="0.5"/>
+  <text x="260" y="485" text-anchor="middle" class="row" fill="#86efac">✓ snet-web → TCP 1433 → snet-db</text>
+
+  <rect x="342" y="470" width="148" height="22" rx="5" fill="#450a0a" stroke="#f87171" stroke-width="0.5"/>
+  <text x="416" y="485" text-anchor="middle" class="row" fill="#fca5a5">✗ Internet → RDP/SSH → any VM</text>
+
+  <rect x="498" y="470" width="148" height="22" rx="5" fill="#450a0a" stroke="#f87171" stroke-width="0.5"/>
+  <text x="572" y="485" text-anchor="middle" class="row" fill="#fca5a5">✗ Internet → any port → snet-db</text>
+
+  <!-- ── FOOTER ── -->
+  <rect x="0" y="510" width="680" height="30" fill="#161b27"/>
+  <rect x="0" y="510" width="680" height="1" fill="#2a3347"/>
+  <text x="340" y="530" text-anchor="middle" class="cap sans" font-size="10">ostebovik.net · AZ-104 · Project 3 · NSG Rules &amp; Traffic Flows · westus3</text>
+</svg>
