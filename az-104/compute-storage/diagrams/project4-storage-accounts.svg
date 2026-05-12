@@ -1,0 +1,196 @@
+<svg viewBox="0 0 680 660" xmlns="http://www.w3.org/2000/svg" role="img" width="100%">
+  <title>P4 Storage Accounts and Access Control — westus3</title>
+  <desc>Two storage accounts: stdevwus301 (LRS) with uploads, archive, and $web containers plus access methods panel. stdevgrswus301 (GRS) showing primary/secondary async replication with delete note.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+      .sans { font-family: 'Syne', 'Segoe UI', system-ui, sans-serif; }
+      .cap  { font-size: 10px; fill: #475569; letter-spacing: 0.08em; }
+      .nm   { font-size: 12px; font-weight: 600; }
+      .sub  { font-size: 10px; }
+      .row  { font-size: 9px; }
+    </style>
+  </defs>
+
+  <!-- page bg -->
+  <rect width="680" height="660" fill="#0f1117"/>
+
+  <!-- header stripe -->
+  <rect x="0" y="0" width="680" height="3" fill="#f59e0b"/>
+
+  <!-- header -->
+  <rect x="0" y="3" width="680" height="44" fill="#161b27"/>
+  <rect x="0" y="47" width="680" height="1" fill="#2a3347"/>
+  <text x="16" y="26" class="sans nm" fill="#e2e8f0" font-size="13" font-weight="600">AZ-104 · Project 4</text>
+  <text x="16" y="41" class="sub" fill="#64748b">Storage accounts · containers · access control · static website · westus3</text>
+  <rect x="504" y="12" width="160" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="584" y="27" text-anchor="middle" class="sub" fill="#fcd34d">project-4 · diagram 1 of 2</text>
+
+  <!-- ══ stdevwus301 (LRS) ══ -->
+  <rect x="16" y="56" width="390" height="568" rx="12" fill="#161b27" stroke="#4a9eff" stroke-width="1.5"/>
+  <rect x="16" y="56" width="390" height="28" rx="12" fill="#1e3a5f"/>
+  <rect x="16" y="72" width="390" height="12" fill="#1e3a5f"/>
+  <text x="30" y="74" class="sans nm" fill="#93c5fd" font-size="12">stdevwus301</text>
+  <text x="30" y="87" class="row" fill="#64748b">Standard_LRS · Hot tier · westus3 · TLS 1.2</text>
+  <text x="392" y="74" text-anchor="end" fill="#4a9eff" font-size="9" font-weight="600" letter-spacing=".06em">PRIMARY</text>
+
+  <!-- container: uploads -->
+  <rect x="30" y="96" width="168" height="196" rx="8" fill="rgba(45,212,191,0.04)" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="44" y="114" class="sub" fill="#2dd4bf" font-weight="600">uploads</text>
+  <text x="44" y="127" class="row" fill="#64748b">Private · 5 blobs</text>
+
+  <rect x="44" y="134" width="140" height="18" rx="3" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="0.4"/>
+  <text x="52" y="147" class="row" fill="#5eead4">testfile1.txt</text>
+  <text x="178" y="147" text-anchor="end" class="row" fill="#2dd4bf">Hot</text>
+
+  <rect x="44" y="156" width="140" height="18" rx="3" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="0.4"/>
+  <text x="52" y="169" class="row" fill="#5eead4">testfile2.txt</text>
+  <text x="178" y="169" text-anchor="end" class="row" fill="#2dd4bf">Hot</text>
+
+  <rect x="44" y="178" width="140" height="18" rx="3" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="0.4"/>
+  <text x="52" y="191" class="row" fill="#5eead4">testfile3.txt</text>
+  <text x="178" y="191" text-anchor="end" class="row" fill="#2dd4bf">Hot</text>
+
+  <rect x="44" y="200" width="140" height="18" rx="3" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="0.4"/>
+  <text x="52" y="213" class="row" fill="#5eead4">testfile4.json</text>
+  <text x="178" y="213" text-anchor="end" class="row" fill="#2dd4bf">Hot</text>
+
+  <rect x="44" y="222" width="140" height="18" rx="3" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="0.4"/>
+  <text x="52" y="235" class="row" fill="#5eead4">testfile5.json</text>
+  <text x="178" y="235" text-anchor="end" class="row" fill="#2dd4bf">Hot</text>
+
+  <rect x="44" y="246" width="140" height="16" rx="3" fill="#1e3a5f" stroke="#4a9eff" stroke-width="0.4"/>
+  <text x="114" y="258" text-anchor="middle" class="row" fill="#93c5fd">Soft delete: 7 day retention</text>
+
+  <!-- container: archive -->
+  <rect x="30" y="302" width="168" height="76" rx="8" fill="rgba(167,139,250,0.04)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="44" y="320" class="sub" fill="#a78bfa" font-weight="600">archive</text>
+  <text x="44" y="333" class="row" fill="#64748b">Private · lifecycle demo</text>
+  <rect x="44" y="340" width="140" height="18" rx="3" fill="#1a0e35" stroke="#a78bfa" stroke-width="0.4"/>
+  <text x="52" y="353" class="row" fill="#c4b5fd">archive-testfile1.txt</text>
+  <text x="178" y="353" text-anchor="end" class="row" fill="#a78bfa">Hot</text>
+
+  <!-- container: $web -->
+  <rect x="30" y="390" width="168" height="94" rx="8" fill="rgba(248,113,113,0.04)" stroke="#f87171" stroke-width="1"/>
+  <text x="44" y="408" class="sub" fill="#f87171" font-weight="600">$web</text>
+  <text x="44" y="421" class="row" fill="#64748b">Static website container</text>
+  <rect x="44" y="428" width="140" height="18" rx="3" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="52" y="441" class="row" fill="#fca5a5">index.html</text>
+  <rect x="44" y="450" width="140" height="18" rx="3" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="52" y="463" class="row" fill="#fca5a5">404.html</text>
+
+  <!-- static website endpoint -->
+  <rect x="30" y="496" width="362" height="72" rx="8" fill="#1d2435" stroke="#f87171" stroke-width="1"/>
+  <rect x="30" y="496" width="362" height="3" rx="2" fill="#f87171"/>
+  <text x="44" y="514" class="sans nm" fill="#fca5a5" font-size="11">Static website endpoint</text>
+  <text x="44" y="529" class="row" fill="#64748b">https://stdevwus301.z13.web.core.windows.net/</text>
+  <rect x="44" y="534" width="334" height="18" rx="4" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="211" y="547" text-anchor="middle" class="row" fill="#fca5a5">Public · No compute · ~$0.002/GB/month</text>
+  <text x="44" y="562" class="row" fill="#475569">Served from $web container · index.html + 404.html</text>
+
+  <!-- $web → endpoint arrow -->
+  <line x1="114" y1="484" x2="114" y2="496" stroke="#f87171" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arr)" opacity="0.6"/>
+
+  <!-- access methods panel -->
+  <rect x="208" y="96" width="184" height="284" rx="8" fill="#1d2435" stroke="#4a9eff" stroke-width="1"/>
+  <rect x="208" y="96" width="184" height="3" rx="2" fill="#4a9eff"/>
+  <text x="222" y="114" class="sub" fill="#93c5fd" font-weight="600">Access methods</text>
+
+  <!-- account keys -->
+  <rect x="220" y="122" width="160" height="54" rx="6" fill="#1e3a5f" stroke="#4a9eff" stroke-width="0.5"/>
+  <text x="230" y="138" class="row" fill="#93c5fd" font-weight="600">Account keys (Key 1 + Key 2)</text>
+  <text x="230" y="152" class="row" fill="#64748b">Full admin · rotate independently</text>
+  <text x="230" y="164" class="row" fill="#64748b">Zero-downtime rotation pattern</text>
+
+  <!-- ad-hoc SAS -->
+  <rect x="220" y="184" width="160" height="54" rx="6" fill="#1c1209" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="230" y="200" class="row" fill="#fcd34d" font-weight="600">Ad-hoc SAS token</text>
+  <text x="230" y="214" class="row" fill="#92400e">Read-only · 2hr expiry · HTTPS</text>
+  <text x="230" y="226" class="row" fill="#f87171">Cannot be revoked before expiry</text>
+
+  <!-- policy SAS -->
+  <rect x="220" y="246" width="160" height="54" rx="6" fill="#0d2e1a" stroke="#34d399" stroke-width="0.5"/>
+  <text x="230" y="262" class="row" fill="#34d399" font-weight="600">Stored access policy SAS</text>
+  <text x="230" y="276" class="row" fill="#64748b">read-policy-30d · Read+List</text>
+  <text x="230" y="288" class="row" fill="#34d399">Revoke policy → all tokens invalid</text>
+
+  <!-- managed identity note -->
+  <rect x="220" y="308" width="160" height="42" rx="6" fill="#0f1117" stroke="#2a3347" stroke-width="0.5"/>
+  <text x="230" y="323" class="row" fill="#475569">Production: use Managed</text>
+  <text x="230" y="335" class="row" fill="#475569">Identity — no keys in code</text>
+  <text x="230" y="347" class="row" fill="#34d399">→ see Project 14</text>
+
+  <!-- ══ stdevgrswus301 (GRS) ══ -->
+  <rect x="420" y="56" width="244" height="220" rx="12" fill="#161b27" stroke="#f87171" stroke-width="1.5"/>
+  <rect x="420" y="56" width="244" height="28" rx="12" fill="#450a0a"/>
+  <rect x="420" y="72" width="244" height="12" fill="#450a0a"/>
+  <text x="434" y="74" class="sans nm" fill="#fca5a5" font-size="12">stdevgrswus301</text>
+  <text x="434" y="87" class="row" fill="#64748b">Standard_GRS · Cool tier · westus3</text>
+  <text x="650" y="74" text-anchor="end" fill="#f87171" font-size="9" font-weight="600" letter-spacing=".06em">GRS DEMO</text>
+
+  <!-- primary region -->
+  <rect x="432" y="98" width="96" height="110" rx="7" fill="#1d2435" stroke="#f87171" stroke-width="0.75"/>
+  <text x="480" y="115" text-anchor="middle" class="sub" fill="#fca5a5" font-weight="600">Primary</text>
+  <text x="480" y="128" text-anchor="middle" class="row" fill="#64748b">westus3</text>
+  <rect x="442" y="134" width="76" height="16" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="480" y="146" text-anchor="middle" class="row" fill="#fca5a5">Copy 1 (local)</text>
+  <rect x="442" y="154" width="76" height="16" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="480" y="166" text-anchor="middle" class="row" fill="#fca5a5">Copy 2 (local)</text>
+  <rect x="442" y="174" width="76" height="16" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.4"/>
+  <text x="480" y="186" text-anchor="middle" class="row" fill="#fca5a5">Copy 3 (local)</text>
+
+  <!-- async arrow -->
+  <line x1="528" y1="153" x2="544" y2="153" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <text x="536" y="147" text-anchor="middle" class="row" fill="#f87171">async</text>
+
+  <!-- secondary region -->
+  <rect x="546" y="98" width="100" height="110" rx="7" fill="#1d2435" stroke="#f87171" stroke-width="0.75" stroke-dasharray="4 2"/>
+  <text x="596" y="115" text-anchor="middle" class="sub" fill="#993C1D" font-weight="600">Secondary</text>
+  <text x="596" y="128" text-anchor="middle" class="row" fill="#64748b">East US 2</text>
+  <rect x="556" y="134" width="80" height="16" rx="3" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="596" y="146" text-anchor="middle" class="row" fill="#993C1D">Copy 4 (remote)</text>
+  <rect x="556" y="154" width="80" height="16" rx="3" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="596" y="166" text-anchor="middle" class="row" fill="#993C1D">Copy 5 (remote)</text>
+  <rect x="556" y="174" width="80" height="16" rx="3" fill="#1c0909" stroke="#f87171" stroke-width="0.4"/>
+  <text x="596" y="186" text-anchor="middle" class="row" fill="#993C1D">Copy 6 (remote)</text>
+
+  <!-- delete note -->
+  <rect x="432" y="218" width="220" height="22" rx="6" fill="#450a0a" stroke="#f87171" stroke-width="0.5"/>
+  <text x="542" y="233" text-anchor="middle" class="row" fill="#fca5a5" font-weight="600">Delete after screenshots — costs ~2x LRS</text>
+
+  <!-- ── LEGEND ── -->
+  <rect x="16" y="586" width="648" height="46" rx="6" fill="#161b27" stroke="#2a3347" stroke-width="0.5"/>
+  <rect x="28" y="594" width="7" height="7" rx="2" fill="#1e3a5f" stroke="#4a9eff" stroke-width="1"/>
+  <text x="40" y="603" class="row" fill="#64748b">LRS account</text>
+  <rect x="110" y="594" width="7" height="7" rx="2" fill="#450a0a" stroke="#f87171" stroke-width="1"/>
+  <text x="122" y="603" class="row" fill="#64748b">GRS account</text>
+  <rect x="192" y="594" width="7" height="7" rx="2" fill="#0d2e2a" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="204" y="603" class="row" fill="#64748b">Blob container</text>
+  <rect x="284" y="594" width="7" height="7" rx="2" fill="#1c1209" stroke="#f59e0b" stroke-width="1"/>
+  <text x="296" y="603" class="row" fill="#64748b">Ad-hoc SAS</text>
+  <rect x="366" y="594" width="7" height="7" rx="2" fill="#0d2e1a" stroke="#34d399" stroke-width="1"/>
+  <text x="378" y="603" class="row" fill="#64748b">Policy SAS</text>
+  <rect x="440" y="594" width="7" height="7" rx="2" fill="#1a0e35" stroke="#a78bfa" stroke-width="1"/>
+  <text x="452" y="603" class="row" fill="#64748b">Lifecycle / archive</text>
+
+  <text x="28" y="622" class="row" fill="#475569">Lifecycle tiers:</text>
+  <rect x="98" y="613" width="30" height="14" rx="3" fill="#1e3a5f" stroke="#4a9eff" stroke-width="0.5"/>
+  <text x="113" y="624" text-anchor="middle" class="row" fill="#93c5fd">Hot 0d</text>
+  <line x1="128" y1="620" x2="138" y2="620" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="140" y="613" width="36" height="14" rx="3" fill="#1e2e4a" stroke="#60a5fa" stroke-width="0.5"/>
+  <text x="158" y="624" text-anchor="middle" class="row" fill="#60a5fa">Cool 30d</text>
+  <line x1="176" y1="620" x2="186" y2="620" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="188" y="613" width="48" height="14" rx="3" fill="#1a0e35" stroke="#a78bfa" stroke-width="0.5"/>
+  <text x="212" y="624" text-anchor="middle" class="row" fill="#a78bfa">Archive 90d</text>
+  <line x1="236" y1="620" x2="246" y2="620" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="248" y="613" width="46" height="14" rx="3" fill="#450a0a" stroke="#f87171" stroke-width="0.5"/>
+  <text x="271" y="624" text-anchor="middle" class="row" fill="#fca5a5">Delete 365d</text>
+
+  <!-- footer -->
+  <rect x="0" y="642" width="680" height="18" fill="#161b27"/>
+  <rect x="0" y="642" width="680" height="1" fill="#2a3347"/>
+  <text x="340" y="656" text-anchor="middle" class="cap sans" font-size="9">ostebovik.net · AZ-104 · Project 4 · Storage Accounts &amp; Access Control · westus3</text>
+</svg>
