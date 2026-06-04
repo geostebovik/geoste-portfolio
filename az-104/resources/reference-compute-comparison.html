@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VM vs App Service vs Container Instances — AZ-104 Reference</title>
+<title>VM vs App Service vs ACI vs ACA — AZ-104 Compute Reference</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
 
@@ -32,6 +32,7 @@
     --green-dim:  rgba(52,211,153,0.12);
     --red:        #f87171;
     --purple:     #a78bfa;
+    --purple-dim: rgba(167,139,250,0.12);
     --mono:       'IBM Plex Mono', monospace;
     --display:    'Syne', sans-serif;
     --radius:     6px;
@@ -46,7 +47,7 @@
     line-height: 1.7;
   }
 
-  .page { max-width: 900px; margin: 0 auto; }
+  .page { max-width: 960px; margin: 0 auto; }
 
   /* ── Header ── */
   .doc-header {
@@ -89,7 +90,7 @@
 
   .hero h1 {
     font-family: var(--display);
-    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
     font-weight: 700;
     line-height: 1.1;
     color: var(--cream);
@@ -99,7 +100,7 @@
   .hero-sub {
     font-size: 0.8rem;
     color: var(--text);
-    max-width: 600px;
+    max-width: 660px;
     line-height: 1.75;
   }
 
@@ -122,21 +123,22 @@
     background: var(--border);
   }
 
-  /* ── Service cards ── */
+  /* ── Service cards — primary row ── */
   .service-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 48px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
   }
 
-  @media (max-width: 680px) { .service-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .service-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .service-grid { grid-template-columns: 1fr; } }
 
   .service-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 22px;
+    padding: 20px;
     position: relative;
     overflow: hidden;
   }
@@ -148,13 +150,14 @@
     height: 2px;
   }
 
-  .service-card.vm::before   { background: var(--blue); }
-  .service-card.app::before  { background: var(--teal); }
-  .service-card.aci::before  { background: var(--amber); }
+  .service-card.vm::before     { background: var(--blue); }
+  .service-card.app::before    { background: var(--teal); }
+  .service-card.aci::before    { background: var(--amber); }
+  .service-card.aca::before    { background: var(--purple); }
 
   .service-abbr {
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 6px;
@@ -162,7 +165,7 @@
 
   .service-name {
     font-family: var(--display);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 4px;
   }
@@ -170,11 +173,12 @@
   .service-card.vm  .service-name { color: var(--blue); }
   .service-card.app .service-name { color: var(--teal); }
   .service-card.aci .service-name { color: var(--amber); }
+  .service-card.aca .service-name { color: var(--purple); }
 
   .service-tagline {
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     color: var(--muted);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     line-height: 1.5;
   }
 
@@ -184,15 +188,15 @@
     align-items: baseline;
     padding: 5px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 0.7rem;
-    gap: 8px;
+    font-size: 0.67rem;
+    gap: 6px;
   }
 
   .service-row:last-child { border-bottom: none; }
 
   .svc-key {
     color: var(--muted);
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -206,6 +210,66 @@
   .good  { color: var(--green); }
   .mid   { color: var(--amber); }
   .bad   { color: var(--red); }
+
+  /* ── Container concepts sub-row ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 760px) { .concept-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .concept-grid { grid-template-columns: 1fr; } }
+
+  .concept-card {
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 0.67rem;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  /* VM and App Service columns — blank spacer */
+  .concept-card.spacer {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .concept-card.group {
+    background: rgba(245,158,11,0.06);
+    border-color: rgba(245,158,11,0.2);
+  }
+
+  .concept-card.cae {
+    background: rgba(167,139,250,0.06);
+    border-color: rgba(167,139,250,0.2);
+  }
+
+  .concept-title {
+    font-family: var(--display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .concept-card.group .concept-title { color: var(--amber); }
+  .concept-card.cae   .concept-title { color: var(--purple); }
+
+  .concept-parent {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .concept-body {
+    color: var(--text);
+    font-size: 0.65rem;
+    line-height: 1.65;
+  }
 
   /* ── Decision tree ── */
   .tree-wrap {
@@ -221,7 +285,7 @@
   .comp-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.73rem;
+    font-size: 0.7rem;
     margin-bottom: 48px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -230,21 +294,22 @@
 
   .comp-table thead th {
     background: var(--surface2);
-    padding: 12px 16px;
+    padding: 12px 14px;
     text-align: left;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     border-bottom: 1px solid var(--border);
   }
 
-  .comp-table thead th.vm-h  { color: var(--blue); }
-  .comp-table thead th.app-h { color: var(--teal); }
-  .comp-table thead th.aci-h { color: var(--amber); }
+  .comp-table thead th.vm-h   { color: var(--blue); }
+  .comp-table thead th.app-h  { color: var(--teal); }
+  .comp-table thead th.aci-h  { color: var(--amber); }
+  .comp-table thead th.aca-h  { color: var(--purple); }
 
   .comp-table td {
-    padding: 10px 16px;
+    padding: 9px 14px;
     border-bottom: 1px solid var(--border);
     vertical-align: top;
     color: var(--text);
@@ -253,7 +318,7 @@
 
   .comp-table tr:last-child td { border-bottom: none; }
   .comp-table tr:hover td { background: rgba(255,255,255,0.01); }
-  .comp-table td:first-child { color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .comp-table td:first-child { color: var(--muted); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; }
 
   /* ── Exam trap ── */
   .exam-trap {
@@ -276,38 +341,41 @@
     font-size: 0.8rem;
     color: var(--text);
     line-height: 1.8;
+    margin-bottom: 16px;
   }
 
   .trap-body strong { color: var(--orange); }
 
   .trap-verdict {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
-    margin-top: 16px;
   }
 
-  @media (max-width: 500px) { .trap-verdict { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .trap-verdict { grid-template-columns: 1fr; } }
 
   .verdict-item {
     background: var(--surface2);
     border-radius: var(--radius);
     padding: 12px 14px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     line-height: 1.6;
     color: var(--text);
     border: 1px solid var(--border);
   }
 
   .verdict-item .v-label {
-    font-size: 0.58rem;
+    font-size: 0.56rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 4px;
   }
 
-  .verdict-item .v-answer { color: var(--teal); font-weight: 600; }
+  .verdict-item .v-answer { font-weight: 600; }
+  .verdict-item .v-answer.teal   { color: var(--teal); }
+  .verdict-item .v-answer.amber  { color: var(--amber); }
+  .verdict-item .v-answer.purple { color: var(--purple); }
 
   /* ── Prose ── */
   .prose { margin-bottom: 40px; }
@@ -350,8 +418,8 @@
   <!-- Hero -->
   <div class="hero">
     <p class="hero-eyebrow">Azure Compute — When to choose each</p>
-    <h1>VM vs App Service<br>vs Container Instances</h1>
-    <p class="hero-sub">Every Azure compute decision starts with the same question: how much of the stack do you want to manage? The three options represent a trade-off between control and operational overhead. Think of it as owning a house, renting an apartment, or booking a hotel — most control in the house, least hassle in the hotel, but you can't repaint the hotel walls.</p>
+    <h1>VM vs App Service vs<br>Container Instances vs Container Apps</h1>
+    <p class="hero-sub">Every Azure compute decision starts with the same question: how much of the stack do you want to manage? The four options represent a spectrum from full control to full abstraction. Think of it as owning a house, renting an apartment, booking a hotel room, or joining a co-living space with on-demand staff — most control in the house, least hassle in the co-living space, but you can't repaint the hotel walls.</p>
   </div>
 
   <!-- Service cards -->
@@ -373,7 +441,7 @@
     <div class="service-card app">
       <div class="service-abbr">Microsoft.Web/sites</div>
       <div class="service-name">App Service</div>
-      <div class="service-tagline">Managed platform. Deploy code or a container — Azure handles the rest.</div>
+      <div class="service-tagline">Managed platform. Deploy code or container — Azure handles the rest.</div>
       <div class="service-row"><span class="svc-key">Control</span><span class="svc-val mid">App layer only</span></div>
       <div class="service-row"><span class="svc-key">Startup</span><span class="svc-val good">Seconds</span></div>
       <div class="service-row"><span class="svc-key">Scaling</span><span class="svc-val good">Built-in autoscale</span></div>
@@ -391,15 +459,61 @@
       <div class="service-row"><span class="svc-key">Scaling</span><span class="svc-val bad">Manual only</span></div>
       <div class="service-row"><span class="svc-key">Billing</span><span class="svc-val good">Per second, stops when idle</span></div>
       <div class="service-row"><span class="svc-key">Patching</span><span class="svc-val good">Image-based</span></div>
-      <div class="service-row"><span class="svc-key">Best for</span><span class="svc-val">Batch jobs, CI runners, event-driven, testing</span></div>
+      <div class="service-row"><span class="svc-key">Best for</span><span class="svc-val">Batch jobs, CI runners, event-driven tasks, testing</span></div>
     </div>
 
+    <div class="service-card aca">
+      <div class="service-abbr">Microsoft.App/containerApps</div>
+      <div class="service-name">Container Apps</div>
+      <div class="service-tagline">Managed container platform. Scaling, routing, and revisions handled for you.</div>
+      <div class="service-row"><span class="svc-key">Control</span><span class="svc-val mid">App + traffic rules</span></div>
+      <div class="service-row"><span class="svc-key">Startup</span><span class="svc-val good">Seconds (cold: ~5s)</span></div>
+      <div class="service-row"><span class="svc-key">Scaling</span><span class="svc-val good">Auto + scale to zero</span></div>
+      <div class="service-row"><span class="svc-key">Billing</span><span class="svc-val good">Consumption or dedicated</span></div>
+      <div class="service-row"><span class="svc-key">Patching</span><span class="svc-val good">Image-based + revisions</span></div>
+      <div class="service-row"><span class="svc-key">Best for</span><span class="svc-val">Microservices, APIs, event-driven, traffic splitting</span></div>
+    </div>
+
+  </div>
+
+  <!-- Container concepts sub-row -->
+  <div class="concept-grid">
+    <div class="concept-card spacer"></div>
+    <div class="concept-card spacer"></div>
+
+    <div class="concept-card group">
+      <div class="concept-parent">ACI concept</div>
+      <div class="concept-title">Container Group</div>
+      <div class="concept-body">Two or more containers sharing the same host, IP address, and localhost. Analogous to a Kubernetes Pod. Use when a sidecar (e.g. a log shipper) must run alongside the main container on the same machine. Scheduled and billed as a single unit.</div>
+    </div>
+
+    <div class="concept-card cae">
+      <div class="concept-parent">ACA concept</div>
+      <div class="concept-title">Container App Environment</div>
+      <div class="concept-body">The shared infrastructure boundary for one or more Container Apps — the apartment building to each app's tenant unit. Owns the VNet subnet (delegated, min /23), shared ingress controller, Log Analytics workspace, and internal DNS. One CAE is required per group of Container Apps.</div>
+    </div>
   </div>
 
   <!-- Decision tree -->
   <div class="section-label">Decision flow</div>
   <div class="tree-wrap">
-    <svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto;" font-family="'IBM Plex Mono', monospace">
+    <!--
+      Layout:
+        Left answer column: center x=130, box x=20 w=220
+        Right Q column: x=350 w=320, center x=510
+        5 answer rows at y: 107, 211, 315, 419, 523
+        Box height=44, so bottoms: 151, 255, 359, 463, 567
+        Midpoints: 129, 233, 337, 441, 545
+        Q boxes centered in gaps:
+          Q2 y_top = (129+233)/2 - 28 = 153
+          Q3 y_top = (233+337)/2 - 28 = 257
+          Q4 y_top = (337+441)/2 - 28 = 361
+          Q5 y_top = (441+545)/2 - 28 = 465
+        Branch lines at answer midpoints: 129,233,337,441,545
+        Q1 at y=20
+        Total height: 567 + 20 = 587
+    -->
+    <svg viewBox="0 0 700 595" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto;" font-family="'IBM Plex Mono', monospace">
 
       <defs>
         <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
@@ -407,69 +521,54 @@
         </marker>
       </defs>
 
-      <!--
-        Layout:
-          Left answer column center x=130, box x=20 w=220
-          Right Q column: x=360 w=310, center x=515
-          Answer rows (top of box): VM=107, App=211, ACI=315, AKS=419
-          Answer box h=44 → bottoms at 151, 255, 359, 463
-          Answer midpoints: 129, 233, 337, 441
-          Q boxes sit centered in gaps between answer midpoints:
-            Q2 midpoint y = (129+233)/2 = 181 → top = 181-28 = 153
-            Q3 midpoint y = (233+337)/2 = 285 → top = 285-28 = 257
-            Q4 midpoint y = (337+441)/2 = 389 → top = 389-28 = 361
-          Branch lines at answer midpoints: y=129, 233, 337, 441
-          Q1 centered at top y=20
-      -->
-
       <!-- ── Q1 centered ── -->
       <rect x="195" y="20" width="310" height="56" rx="6" fill="#1e2128" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="350" y="43" text-anchor="middle" font-size="11" fill="#e8e4d8">Need full OS control, custom drivers,</text>
       <text x="350" y="59" text-anchor="middle" font-size="11" fill="#e8e4d8">domain join, or kernel requirements?</text>
       <line x1="350" y1="76" x2="350" y2="90" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
-      <!-- Branch line 1 y=90 — above VM box -->
+      <!-- Branch line 1 y=90 -->
       <line x1="130" y1="90" x2="660" y2="90" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
       <rect x="152" y="81" width="36" height="18" rx="9" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.35)" stroke-width="1"/>
       <text x="170" y="94" text-anchor="middle" font-size="9" fill="#34d399" font-weight="500">YES</text>
       <rect x="635" y="81" width="30" height="18" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="650" y="94" text-anchor="middle" font-size="9" fill="#767b87">NO</text>
 
-      <!-- YES drop → VM (y=107) -->
+      <!-- YES → VM -->
       <line x1="130" y1="90" x2="130" y2="107" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
       <rect x="20" y="107" width="220" height="44" rx="6" fill="rgba(74,158,255,0.12)" stroke="rgba(74,158,255,0.3)" stroke-width="1"/>
       <text x="130" y="127" text-anchor="middle" font-size="12" fill="#4a9eff" font-weight="600" font-family="'Syne', sans-serif">Virtual Machine</text>
       <text x="130" y="141" text-anchor="middle" font-size="9" fill="rgba(74,158,255,0.6)">IaaS — full OS control</text>
 
-      <!-- NO → right column drops to Q2 top (y=153) -->
-      <line x1="515" y1="90" x2="515" y2="153" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
+      <!-- NO → Q2 -->
+      <line x1="515" y1="90" x2="515" y2="153" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
-      <!-- ── Q2 y=153 (sits in gap between VM and App Service) ── -->
+      <!-- ── Q2 ── -->
       <rect x="360" y="153" width="310" height="56" rx="6" fill="#1e2128" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="515" y="176" text-anchor="middle" font-size="11" fill="#e8e4d8">Is it a web app, API, or</text>
-      <text x="515" y="192" text-anchor="middle" font-size="11" fill="#e8e4d8">continuously running service?</text>
+      <text x="515" y="192" text-anchor="middle" font-size="11" fill="#e8e4d8">continuously running service needing PaaS features?</text>
       <line x1="515" y1="209" x2="515" y2="220" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
-      <!-- Branch line 2 y=220 — crosses at App Service midpoint -->
+      <!-- Branch line 2 y=220 -->
       <line x1="130" y1="220" x2="660" y2="220" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
       <rect x="152" y="211" width="36" height="18" rx="9" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.35)" stroke-width="1"/>
       <text x="170" y="224" text-anchor="middle" font-size="9" fill="#34d399" font-weight="500">YES</text>
       <rect x="635" y="211" width="30" height="18" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="650" y="224" text-anchor="middle" font-size="9" fill="#767b87">NO</text>
 
-      <!-- YES → App Service (y=228) -->
+      <!-- YES → App Service -->
       <line x1="130" y1="220" x2="130" y2="228" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
       <rect x="20" y="228" width="220" height="44" rx="6" fill="rgba(45,212,191,0.12)" stroke="rgba(45,212,191,0.3)" stroke-width="1"/>
       <text x="130" y="248" text-anchor="middle" font-size="12" fill="#2dd4bf" font-weight="600" font-family="'Syne', sans-serif">App Service</text>
-      <text x="130" y="262" text-anchor="middle" font-size="9" fill="rgba(45,212,191,0.6)">PaaS — managed platform</text>
+      <text x="130" y="262" text-anchor="middle" font-size="9" fill="rgba(45,212,191,0.6)">PaaS — slots, TLS, autoscale</text>
 
-      <!-- NO → Q3 top (y=257) -->
+      <!-- NO → Q3 -->
       <line x1="515" y1="220" x2="515" y2="257" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
 
-      <!-- ── Q3 y=257 (sits in gap between App Service and Container Instances) ── -->
+      <!-- ── Q3 ── -->
       <rect x="360" y="257" width="310" height="56" rx="6" fill="#1e2128" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="515" y="280" text-anchor="middle" font-size="11" fill="#e8e4d8">Short-lived task, batch job,</text>
-      <text x="515" y="296" text-anchor="middle" font-size="11" fill="#e8e4d8">or intermittent workload?</text>
+      <text x="515" y="296" text-anchor="middle" font-size="11" fill="#e8e4d8">or intermittent workload (no scaling needed)?</text>
       <line x1="515" y1="313" x2="515" y2="324" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
       <!-- Branch line 3 y=324 -->
@@ -479,19 +578,19 @@
       <rect x="635" y="315" width="30" height="18" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="650" y="328" text-anchor="middle" font-size="9" fill="#767b87">NO</text>
 
-      <!-- YES → Container Instances (y=332) -->
+      <!-- YES → ACI -->
       <line x1="130" y1="324" x2="130" y2="332" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
       <rect x="20" y="332" width="220" height="44" rx="6" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
       <text x="130" y="352" text-anchor="middle" font-size="12" fill="#f59e0b" font-weight="600" font-family="'Syne', sans-serif">Container Instances</text>
-      <text x="130" y="366" text-anchor="middle" font-size="9" fill="rgba(245,158,11,0.6)">CaaS — per second billing</text>
+      <text x="130" y="366" text-anchor="middle" font-size="9" fill="rgba(245,158,11,0.6)">CaaS — per second, no cluster</text>
 
-      <!-- NO → Q4 top (y=361) -->
+      <!-- NO → Q4 -->
       <line x1="515" y1="324" x2="515" y2="361" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
 
-      <!-- ── Q4 y=361 (sits in gap between Container Instances and AKS) ── -->
+      <!-- ── Q4 ── -->
       <rect x="360" y="361" width="310" height="56" rx="6" fill="#1e2128" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
-      <text x="515" y="384" text-anchor="middle" font-size="11" fill="#e8e4d8">Multiple containers needing</text>
-      <text x="515" y="400" text-anchor="middle" font-size="11" fill="#e8e4d8">orchestration or scaling?</text>
+      <text x="515" y="384" text-anchor="middle" font-size="11" fill="#e8e4d8">Long-running container app needing</text>
+      <text x="515" y="400" text-anchor="middle" font-size="11" fill="#e8e4d8">auto-scale, revisions, or traffic splitting?</text>
       <line x1="515" y1="417" x2="515" y2="428" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
       <!-- Branch line 4 y=428 -->
@@ -501,17 +600,39 @@
       <rect x="635" y="419" width="30" height="18" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
       <text x="650" y="432" text-anchor="middle" font-size="9" fill="#767b87">NO</text>
 
-      <!-- YES → AKS (y=436) -->
+      <!-- YES → ACA -->
       <line x1="130" y1="428" x2="130" y2="436" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
-      <rect x="20" y="436" width="220" height="36" rx="6" fill="rgba(248,113,113,0.08)" stroke="rgba(248,113,113,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="130" y="452" text-anchor="middle" font-size="12" fill="#f87171" font-weight="600" font-family="'Syne', sans-serif">AKS</text>
-      <text x="130" y="465" text-anchor="middle" font-size="9" fill="rgba(248,113,113,0.6)">outside project scope</text>
+      <rect x="20" y="436" width="220" height="44" rx="6" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+      <text x="130" y="456" text-anchor="middle" font-size="12" fill="#a78bfa" font-weight="600" font-family="'Syne', sans-serif">Container Apps</text>
+      <text x="130" y="470" text-anchor="middle" font-size="9" fill="rgba(167,139,250,0.6)">Managed containers — CAE required</text>
+
+      <!-- NO → Q5 -->
+      <line x1="515" y1="428" x2="515" y2="465" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- ── Q5 ── -->
+      <rect x="360" y="465" width="310" height="56" rx="6" fill="#1e2128" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
+      <text x="515" y="488" text-anchor="middle" font-size="11" fill="#e8e4d8">Need full Kubernetes control,</text>
+      <text x="515" y="504" text-anchor="middle" font-size="11" fill="#e8e4d8">custom node pools, or cluster config?</text>
+      <line x1="515" y1="521" x2="515" y2="532" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+      <!-- Branch line 5 y=532 -->
+      <line x1="130" y1="532" x2="660" y2="532" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <rect x="152" y="523" width="36" height="18" rx="9" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.35)" stroke-width="1"/>
+      <text x="170" y="536" text-anchor="middle" font-size="9" fill="#34d399" font-weight="500">YES</text>
+      <rect x="635" y="523" width="30" height="18" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
+      <text x="650" y="536" text-anchor="middle" font-size="9" fill="#767b87">NO</text>
+
+      <!-- YES → AKS (dashed, out of scope) -->
+      <line x1="130" y1="532" x2="130" y2="540" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="20" y="540" width="220" height="44" rx="6" fill="rgba(248,113,113,0.06)" stroke="rgba(248,113,113,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="130" y="560" text-anchor="middle" font-size="12" fill="#f87171" font-weight="600" font-family="'Syne', sans-serif">AKS</text>
+      <text x="130" y="574" text-anchor="middle" font-size="9" fill="rgba(248,113,113,0.5)">outside AZ-104 scope</text>
 
       <!-- NO → dim note -->
-      <line x1="515" y1="428" x2="515" y2="436" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
-      <rect x="370" y="436" width="290" height="36" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="515" y="452" text-anchor="middle" font-size="10" fill="#4a4e57">Consider AKS, Service Fabric,</text>
-      <text x="515" y="465" text-anchor="middle" font-size="10" fill="#4a4e57">or other orchestrators</text>
+      <line x1="515" y1="532" x2="515" y2="540" stroke="rgba(255,255,255,0.2)" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="370" y="540" width="290" height="44" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="515" y="558" text-anchor="middle" font-size="10" fill="#4a4e57">Consider Service Fabric or</text>
+      <text x="515" y="572" text-anchor="middle" font-size="10" fill="#4a4e57">other orchestrators</text>
 
     </svg>
   </div>
@@ -525,6 +646,7 @@
         <th class="vm-h">Virtual Machine</th>
         <th class="app-h">App Service</th>
         <th class="aci-h">Container Instances</th>
+        <th class="aca-h">Container Apps</th>
       </tr>
     </thead>
     <tbody>
@@ -533,11 +655,13 @@
         <td>IaaS</td>
         <td>PaaS</td>
         <td>CaaS</td>
+        <td>Managed CaaS</td>
       </tr>
       <tr>
         <td>OS management</td>
         <td><span class="bad">You</span></td>
         <td><span class="good">Azure</span></td>
+        <td><span class="good">N/A — image-based</span></td>
         <td><span class="good">N/A — image-based</span></td>
       </tr>
       <tr>
@@ -545,35 +669,55 @@
         <td><span class="bad">1–5 minutes</span></td>
         <td><span class="good">Seconds</span></td>
         <td><span class="good">Seconds</span></td>
+        <td><span class="good">Seconds (cold ~5s)</span></td>
       </tr>
       <tr>
         <td>Scaling</td>
         <td>Manual or VMSS</td>
         <td><span class="good">Built-in autoscale</span></td>
         <td><span class="bad">Manual only</span></td>
+        <td><span class="good">Auto + scale to zero</span></td>
       </tr>
       <tr>
         <td>Cost model</td>
         <td>Per hour — always on</td>
         <td>Per plan — always on</td>
-        <td><span class="good">Per second — stops billing when stopped</span></td>
+        <td><span class="good">Per second — stops when stopped</span></td>
+        <td><span class="good">Consumption or dedicated plan</span></td>
       </tr>
       <tr>
         <td>Deployment slots</td>
         <td><span class="bad">No</span></td>
         <td><span class="good">Yes (Standard+)</span></td>
         <td><span class="bad">No</span></td>
+        <td><span class="good">Revisions (similar concept)</span></td>
+      </tr>
+      <tr>
+        <td>Traffic splitting</td>
+        <td><span class="bad">No</span></td>
+        <td><span class="mid">Slot swap only</span></td>
+        <td><span class="bad">No</span></td>
+        <td><span class="good">Yes — % by revision</span></td>
       </tr>
       <tr>
         <td>Managed TLS</td>
         <td><span class="bad">No</span></td>
         <td><span class="good">Yes</span></td>
         <td><span class="bad">No</span></td>
+        <td><span class="good">Yes</span></td>
+      </tr>
+      <tr>
+        <td>VNet integration</td>
+        <td><span class="good">Native (NIC in subnet)</span></td>
+        <td><span class="mid">VNet Integration add-on</span></td>
+        <td><span class="mid">Optional VNet injection</span></td>
+        <td><span class="good">Required — CAE owns subnet</span></td>
       </tr>
       <tr>
         <td>Persistent storage</td>
         <td><span class="good">Managed disks</span></td>
         <td>Limited</td>
+        <td>Azure Files mount</td>
         <td>Azure Files mount</td>
       </tr>
       <tr>
@@ -581,39 +725,44 @@
         <td><span class="good">Yes</span></td>
         <td><span class="bad">No</span></td>
         <td><span class="bad">No</span></td>
+        <td><span class="bad">No</span></td>
       </tr>
       <tr>
-        <td>Custom OS</td>
-        <td><span class="good">Yes</span></td>
-        <td><span class="bad">No</span></td>
-        <td>Via image</td>
+        <td>Infrastructure concept</td>
+        <td>—</td>
+        <td>App Service Plan</td>
+        <td>Container Group</td>
+        <td>Container App Environment</td>
       </tr>
     </tbody>
   </table>
 
   <!-- Exam trap -->
   <div class="exam-trap">
-    <div class="trap-label">⚠ The exam trap</div>
-    <div class="trap-body">
-      The most common AZ-104 trick question pairs App Service with Container Instances. A containerized web application — which service? The answer depends on one thing: <strong>does it run continuously?</strong> The word "container" is a distraction. The decision driver is the workload pattern, not the packaging format.
-    </div>
+    <div class="trap-label">⚠ The exam trap — three container scenarios</div>
+    <div class="trap-body">The word "container" appears in all three container services. The exam exploits this. <strong>The decision driver is always the workload pattern, not the packaging format.</strong> Ask: does it run continuously? Does it need to scale? Is it a one-shot job?</div>
     <div class="trap-verdict">
       <div class="verdict-item">
-        <div class="v-label">Containerized web app serving users continuously</div>
-        <div class="v-answer">→ App Service (container deployment mode)</div>
+        <div class="v-label">Containerized web app serving users continuously — needs slots and TLS</div>
+        <div class="v-answer teal">→ App Service (container mode)</div>
       </div>
       <div class="verdict-item">
-        <div class="v-label">Containerized job that processes a queue and exits</div>
-        <div class="v-answer">→ Container Instances</div>
+        <div class="v-label">Containerized job that processes a queue and exits — no scaling needed</div>
+        <div class="v-answer amber">→ Container Instances</div>
+      </div>
+      <div class="verdict-item">
+        <div class="v-label">Containerized microservice or API — needs auto-scale and traffic splitting</div>
+        <div class="v-answer purple">→ Container Apps</div>
       </div>
     </div>
   </div>
 
-  <!-- App Service container note -->
-  <div class="section-label">App Service + containers</div>
+  <!-- Container distinctions prose -->
+  <div class="section-label">Container service distinctions</div>
   <div class="prose">
-    <p>App Service can run container images instead of code — this is not the same as Container Instances. The platform remains App Service (slots, autoscale, auth, TLS all still work) but the delivery mechanism is a container image rather than a zip deploy. Use this when your team already has a container build pipeline and wants App Service's operational features without rewriting deployment tooling.</p>
-    <p>ACI lacks deployment slots, autoscaling, built-in TLS termination, and built-in auth. If you need any of those, App Service is the right answer regardless of whether the app is containerized.</p>
+    <p><strong style="color:var(--teal)">App Service + containers</strong> — App Service can run container images instead of code. The platform remains App Service: slots, autoscale, auth, and TLS all still work. The container is just the delivery mechanism, not a different service. Use this when your team already has a container build pipeline and wants App Service's operational features without rewriting deployment tooling.</p>
+    <p><strong style="color:var(--amber)">Container Instances + Container Groups</strong> — A container group is an ACI-only concept: two or more containers sharing the same host, IP, and localhost. Think of it as a Kubernetes Pod equivalent in Azure. Use it when a sidecar container must run alongside the main container — for example, a log-forwarding agent that reads from the same filesystem. ACI has no built-in scaling; it is the right choice when you want to start a container, run a task, and stop paying.</p>
+    <p><strong style="color:var(--purple)">Container Apps + Container App Environment</strong> — Every Container App must live inside a Container App Environment (CAE). The CAE owns the VNet subnet (delegated to <code>Microsoft.App/environments</code>, minimum /23), shared ingress, Log Analytics, and internal DNS. Think of the CAE as the apartment building and each Container App as a tenant unit. ACA adds revision management (blue/green deployments), percentage-based traffic splitting between revisions, and KEDA-based event-driven autoscaling — capabilities that ACI simply does not have.</p>
   </div>
 
   <!-- Exam signals -->
@@ -627,16 +776,24 @@
     </thead>
     <tbody>
       <tr>
-        <td>"Domain join", "custom OS", "lift and shift", "specific software version", "IaaS"</td>
+        <td>"Domain join", "custom OS", "lift and shift", "specific software version", "kernel", "IaaS"</td>
         <td><span style="color:var(--blue); font-weight:600;">Virtual Machine</span></td>
       </tr>
       <tr>
-        <td>"Web app", "API", "PaaS", "deployment slots", "autoscale", "managed TLS", "GitHub integration"</td>
+        <td>"Web app", "API", "PaaS", "deployment slots", "autoscale", "managed TLS", "GitHub integration", "staging environment"</td>
         <td><span style="color:var(--teal); font-weight:600;">App Service</span></td>
       </tr>
       <tr>
-        <td>"Serverless containers", "batch job", "short-lived", "event-driven", "no cluster", "per-second billing"</td>
+        <td>"Serverless containers", "batch job", "short-lived", "no cluster", "per-second billing", "sidecar", "container group"</td>
         <td><span style="color:var(--amber); font-weight:600;">Container Instances</span></td>
+      </tr>
+      <tr>
+        <td>"Microservices", "traffic splitting", "revisions", "KEDA", "scale to zero", "event-driven", "long-running container", "CAE"</td>
+        <td><span style="color:var(--purple); font-weight:600;">Container Apps</span></td>
+      </tr>
+      <tr>
+        <td>"Kubernetes", "node pools", "cluster admin", "helm", "kubectl", "full orchestration control"</td>
+        <td><span style="color:var(--red); font-weight:600;">AKS</span> <span style="color:var(--dim); font-size:0.65rem;">(outside AZ-104 scope)</span></td>
       </tr>
     </tbody>
   </table>
