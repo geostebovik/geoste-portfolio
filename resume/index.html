@@ -112,6 +112,15 @@
       color: var(--orange);
     }
 
+    .inline-link {
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    .inline-link:hover {
+      text-decoration: underline;
+    }
+
     /* ── Page wrapper ──────────────────────────────────────────── */
     .page {
       max-width: 900px;
@@ -702,6 +711,15 @@
           <ul class="job-bullets">
             <li>Established and maintained internal Azure test beds running IaaS, PaaS, and SaaS workloads for the
               support team — hands-on Azure infrastructure work running continuously alongside the support role.</li>
+            <li>Built Azure Monitor pipelines using Data Collection Rules and the Azure Monitor Agent, authoring KQL
+              queries and configuring alert rules and action groups — documented lab work at
+              <a href="https://ostebovik.net/monitoring-security/" class="inline-link">ostebovik.net</a>.</li>
+            <li>Implemented Azure Backup and Site Recovery configurations including Recovery Services Vault policies,
+              MARS agent deployment, and ASR replication — translating direct customer exposure to backup failures into
+              structured, documented lab coverage.</li>
+            <li>Deployed a full production Azure environment using Bicep IaC and GitHub Actions CI/CD — Front Door,
+              Static Web App, Key Vault with Managed Identity and RBAC-scoped secret references — live at
+              <a href="https://ostebovik.net" class="inline-link">ostebovik.net</a>.</li>
             <li>Piloted a Tier 2 escalation role handling the most complex customer-reported issues; achieved 7-day
               resolution for over 65% of managed cases and contributed to a 94% customer satisfaction rating — 10 basis
               points above Tier 1.</li>
