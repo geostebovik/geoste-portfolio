@@ -370,8 +370,9 @@
     }
 
     .job-bullets li {
-      display: flex;
-      gap: 0.75rem;
+      display: block;
+      padding-left: 1.5rem;
+      position: relative;
       font-size: 0.84rem;
       color: var(--text-secondary);
       line-height: 1.55;
@@ -381,8 +382,9 @@
       content: '→';
       font-family: 'IBM Plex Mono', monospace;
       color: var(--orange);
-      flex-shrink: 0;
-      margin-top: 0.05rem;
+      position: absolute;
+      left: 0;
+      top: 0.05rem;
     }
 
     .job-bullets li strong {
@@ -618,13 +620,15 @@
       <div class="resume-section">
         <div class="resume-section-title">Profile</div>
         <p class="summary-text">
-          Cloud infrastructure professional with <strong>10 years at Microsoft</strong> supporting
-          enterprise Azure environments for S500 customers — and a deliberate pivot into designing,
-          deploying, and maintaining that infrastructure directly. Completed <strong>15 hands-on Azure
-            projects</strong> across networking, compute, IaC, and security, documented at
-          <strong>ostebovik.net</strong> — production-pattern deployments built from scratch using
-          Azure CLI, Bicep, and GitHub Actions. Deep understanding of how enterprise Azure breaks,
-          how it should be built, and the gap between the two.
+          Cloud infrastructure professional with <strong>10 years at Microsoft</strong>, repeatedly
+          selected into progressively more exclusive support teams — a founding member of Microsoft's
+          Azure Government support team (requiring a full federal background check), the S500 Enterprise
+          support team, and an Escalation Engineer pilot program reserved for top-performing engineers —
+          and a deliberate pivot into designing, deploying, and maintaining that infrastructure directly.
+          Completed <strong>15 hands-on Azure projects</strong> across networking, compute, IaC, and
+          security, documented at <strong>ostebovik.net</strong> — production-pattern deployments built
+          from scratch using Azure CLI, Bicep, and GitHub Actions. Deep understanding of how enterprise
+          Azure breaks, how it should be built, and the gap between the two.
           <strong>AZ-104 Microsoft Certified: Azure Administrator Associate</strong> earned June 2026, with AI-901
           and AZ-305 planned.
         </p>
@@ -709,20 +713,23 @@
           </div>
           <div class="job-company">Microsoft Corporation · Redmond, WA</div>
           <ul class="job-bullets">
-            <li>Established and maintained internal Azure test beds running IaaS, PaaS, and SaaS workloads for the
-              support team — hands-on Azure infrastructure work running continuously alongside the support role.</li>
-            <li>Built Azure Monitor pipelines using Data Collection Rules and the Azure Monitor Agent, authoring KQL
-              queries and configuring alert rules and action groups — documented lab work at
+            <li>Built Azure Monitor pipelines using Data Collection Rules and the Azure Monitor
+              Agent, authoring KQL queries and configuring alert rules and action groups —
+              documented lab work at
               <a href="https://ostebovik.net/monitoring-security/" class="inline-link">ostebovik.net</a>.
             </li>
-            <li>Implemented Azure Backup and Site Recovery configurations including Recovery Services Vault policies,
-              MARS agent deployment, and ASR replication — translating direct customer exposure to backup failures into
-              structured, documented lab coverage.</li>
+            <li>Implemented Azure Backup and Site Recovery configurations including Recovery Services Vault
+              policies, MARS agent deployment, and ASR replication — translating direct customer exposure to
+              backup failures into structured, documented lab coverage.</li>
             <li>Deployed a full production Azure environment using Bicep IaC and GitHub Actions CI/CD — Front Door,
               Static Web App, Key Vault with Managed Identity and RBAC-scoped secret references — live at
               <a href="https://ostebovik.net" class="inline-link">ostebovik.net</a>.
             </li>
-            <li>Piloted a Tier 2 escalation role handling the most complex customer-reported issues; achieved 7-day
+            <li>Established and maintained internal Azure test beds running IaaS and PaaS workloads for the
+              support team — hands-on Azure infrastructure work running alongside the support role.</li>
+            <li>Selected for Microsoft's Escalation Engineer pilot program — a small team reserved for
+              top-performing engineers, formed once the S500 Enterprise team was fully staffed and
+              operating as intended — handling the most complex customer-reported issues; achieved 7-day
               resolution for over 65% of managed cases and contributed to a 94% customer satisfaction rating — 10 basis
               points above Tier 1.</li>
             <li>Collaborated directly with Engineering and Customer Success on issues requiring non-standard solutions,
@@ -741,6 +748,10 @@
           </div>
           <div class="job-company">Microsoft Corporation · Redmond, WA</div>
           <ul class="job-bullets">
+            <li>Founding member of Microsoft's Azure Government support team from its inception through
+              its transition into an independent reporting structure — a select team requiring a full
+              federal background check to support customers on a completely siloed, access-controlled
+              government cloud environment.</li>
             <li>Managed Azure subscription, account, and billing issues for Microsoft's S500 enterprise customer base —
               including Verizon, NTT Technologies, CenturyLink, and Sony — minimizing production downtime and fiscal
               impact.</li>
