@@ -1,0 +1,176 @@
+{
+    "analyzerId": "iip_loan_agreement_analyzer",
+    "name": "IIP Loan Agreement Analyzer",
+    "description": "Extracts loan agreement quantities, entities, sentiment, and key phrases for the IIP Document Intelligence sample set.",
+    "baseAnalyzerId": "prebuilt-document",
+    "config": {
+        "enableOcr": true,
+        "enableLayout": true,
+        "estimateFieldSourceAndConfidence": true
+    },
+    "fieldSchema": {
+        "name": "LoanAgreementFields",
+        "fields": {
+            "PrincipalAmount": {
+                "type": "number",
+                "description": "The principal loan amount stated in the agreement, typically found near the top of the document",
+                "method": "extract"
+            },
+            "AnnualInterestRatePercent": {
+                "type": "number",
+                "description": "The annual interest rate of the loan expressed as a percentage.",
+                "method": "extract"
+            },
+            "AgreementDate": {
+                "type": "date",
+                "description": "The date on which the loan agreement was executed.",
+                "method": "extract"
+            },
+            "Borrower": {
+                "type": "object",
+                "description": "The borrower party to the loan agreement.",
+                "properties": {
+                    "FullName": {
+                        "type": "string",
+                        "description": "The name of the borrower as stated in the loan agreement.",
+                        "method": "extract"
+                    },
+                    "MailingAddress": {
+                        "type": "string",
+                        "description": "The mailing address of the borrower.",
+                        "method": "extract"
+                    }
+                }
+            },
+            "Lender": {
+                "type": "object",
+                "description": "The lender party to the loan agreement.",
+                "properties": {
+                    "FullName": {
+                        "type": "string",
+                        "description": "The name of the lender as stated in the loan agreement.",
+                        "method": "extract"
+                    },
+                    "MailingAddress": {
+                        "type": "string",
+                        "description": "The mailing address of the lender.",
+                        "method": "extract"
+                    }
+                }
+            },
+            "DueDate": {
+                "type": "date",
+                "description": "The due date for full repayment of the loan as specified in the agreement.",
+                "method": "extract"
+            },
+            "PaymentSchedule": {
+                "type": "object",
+                "description": "The recurring payment terms for the loan.",
+                "properties": {
+                    "PaymentFrequency": {
+                        "type": "string",
+                        "description": "How often recurring payments are due (e.g., monthly, weekly).",
+                        "method": "extract"
+                    },
+                    "PaymentDayOfMonth": {
+                        "type": "integer",
+                        "description": "The day of the month on which recurring payments are due.",
+                        "method": "extract"
+                    },
+                    "FirstPaymentDate": {
+                        "type": "date",
+                        "description": "The date of the first scheduled recurring payment.",
+                        "method": "extract"
+                    },
+                    "MonthlyPaymentAmount": {
+                        "type": "number",
+                        "description": "The dollar amount due for each scheduled payment.",
+                        "method": "extract"
+                    },
+                    "NumberOfPayments": {
+                        "type": "integer",
+                        "description": "The total number of scheduled payments over the life of the loan.",
+                        "method": "extract"
+                    }
+                }
+            },
+            "LatePaymentFeeAmount": {
+                "type": "number",
+                "description": "The amount charged for late payment as specified in the loan agreement.",
+                "method": "extract"
+            },
+            "GoverningLawState": {
+                "type": "string",
+                "description": "The state whose laws govern the loan agreement.",
+                "method": "extract"
+            },
+            "PaymentAllocationOrder": {
+                "type": "string",
+                "description": "The order in which payments are applied to fees, interest, and principal, quoted directly from the agreement's allocation-of-payments clause.",
+                "method": "extract"
+            },
+            "DefaultInterestRateDescription": {
+                "type": "string",
+                "description": "The clause describing how interest accrues on the unpaid balance if the borrower defaults, quoted directly from the agreement.",
+                "method": "extract"
+            },
+            "BorrowerPrintedName": {
+                "type": "string",
+                "description": "The borrower's printed name from the signature block, if present.",
+                "method": "extract"
+            },
+            "BorrowerSignatureDate": {
+                "type": "date",
+                "description": "The date beside the borrower's signature, if present.",
+                "method": "extract"
+            },
+            "LenderPrintedName": {
+                "type": "string",
+                "description": "The lender's printed name from the signature block, if present.",
+                "method": "extract"
+            },
+            "LenderSignatureDate": {
+                "type": "date",
+                "description": "The date beside the lender's signature, if present.",
+                "method": "extract"
+            },
+            "IsSecuredLoan": {
+                "type": "string",
+                "description": "Answer Unsecured or Secured based on the document",
+                "method": "generate"
+            },
+            "HasAccelerationClause": {
+                "type": "string",
+                "description": "Indicates whether the loan agreement contains an acceleration clause. Answer Yes or No: does the agreement contain an acceleration clause?",
+                "method": "generate"
+            },
+            "HasAttorneyFeesProvision": {
+                "type": "string",
+                "description": "Indicates whether the loan agreement contains an attorney's fees provision. Answer Yes or No: does the agreement contain an attorney's fees provision?",
+                "method": "generate"
+            },
+            "KeyPhrases": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "A list of key words or phrases summarizing the document's main terms.",
+                "method": "generate"
+            },
+            "Sentiment": {
+                "type": "string",
+                "description": "The overall sentiment of the loan agreement document. Possible values are Positive, Negative, or Neutral.",
+                "method": "classify",
+                "enum": [
+                    "Positive",
+                    "Negative",
+                    "Neutral"
+                ]
+            }
+        }
+    },
+    "models": {
+        "completion": "gpt-5.2",
+        "embedding": "text-embedding-3-small"
+    }
+}
