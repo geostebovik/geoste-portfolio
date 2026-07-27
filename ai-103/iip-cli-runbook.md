@@ -74,6 +74,9 @@ az storage blob generate-sas \
 no manual concatenation needed. Blob names are case-sensitive; a SAS
 signs whatever name it's given whether the blob exists or not.
 
+Current sample doc: `--container-name docs --name loan-agreement-promissory-note.pdf`
+(confirmed via `az storage blob list`, July 27, 2026).
+
 ## Submit an analyze call
 
 ```bash
@@ -139,3 +142,11 @@ Services/Foundry account.
 *Log new entries here as they come up. First real entries above date to
 July 24, 2026, drawn from that session's key-rotation and analyze
 verification work.*
+
+## July 27, 2026 (midday)
+
+First real end-to-end run of `m3_analyze.py` (the Python wrapper around
+the submit/poll commands above) succeeded against the sample doc, using
+the SAS/blob values now recorded above. Python-specific debugging notes
+for that script live in MASTER-REFERENCE Section 4.12, not here — this
+file stays commands-only.
