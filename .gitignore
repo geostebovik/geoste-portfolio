@@ -8,6 +8,10 @@
 # VS Code
 .vscode/
 
+# Python virtual environments and bytecode cache
+venv/
+__pycache__/
+
 # Working notes and session files
 docs/
 
