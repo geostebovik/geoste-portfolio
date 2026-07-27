@@ -12,6 +12,9 @@
 venv/
 __pycache__/
 
+# Generated script outputs (regenerable, not source)
+scripts/results/
+
 # Working notes and session files
 docs/
 
