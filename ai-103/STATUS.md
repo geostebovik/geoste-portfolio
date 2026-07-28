@@ -15,7 +15,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** July 27, 2026 (end of day)
+**Status as of:** July 28, 2026 (end of day)
 
 ---
 
@@ -34,14 +34,67 @@ accumulates for them — no point building empty structure now.
   **Blocked on M6** — deliberately sequenced after the evaluator so the Q&A model
   choice is evidence-based, not guessed.
 - [ ] **M6:** Evaluator harness built, used to pick GPT-5.4 vs. GPT-5.4-mini for M5.
-  **In progress** — both candidate models now deployed (see below); evaluator
-  script itself not yet written.
+  **In progress** — design decisions locked (judge model, context strategy, SDK
+  choice, see below); `.env`/`requirements.txt` config in place. Step 1 script
+  (candidate generation) not yet started.
 - [ ] **M7:** Light multi-agent pattern (extraction/verification agent → Q&A agent) →
   Phase 1 complete.
 
 ---
 
-## Latest session (July 27, 2026)
+## Latest session (July 28, 2026)
+
+- Confirmed `azure-ai-evaluation` SDK is still current under that exact package
+  name (v1.18.2 per Microsoft Learn, page last updated July 22, 2026). Evaluator
+  classes needed: `GroundednessEvaluator`, `RelevanceEvaluator`, `SimilarityEvaluator`
+  (AI-assisted, need a judge model deployment), `F1ScoreEvaluator` (pure token-overlap,
+  no judge needed). The Foundry/Foundry-classic doc split doesn't affect the SDK
+  itself, only which portal-side reference page matches this project's resources.
+- M6 design decisions locked in:
+  - **Judge model:** `gpt-5.2` (already deployed). Chosen because it isn't one of
+    the two candidates being compared — avoids a model (or its sibling) grading
+    itself, a documented self-preference/same-family bias risk in LLM-as-judge
+    setups. Known tradeoff: two generations behind the candidates, so judge skill
+    may lag. Cheaply reversible if scores look off on manual spot-check — swapping
+    the judge deployment is a one-line `model_config` change, not a rebuild.
+  - **Context strategy:** full loan agreement text, same for every question, fed
+    to both candidates — not hand-picked excerpts. Text is already available as
+    plain markdown in `iip-docs/Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json`
+    (`result.contents[0].markdown`, from the M2 Content Understanding run) — no
+    fresh extraction needed. Reasoning: isolates model quality as the only variable
+    under test; hand-picked excerpts would risk a second confound (bad excerpt vs.
+    weak model) and could reproduce M4's legitimate "page 2 not visible" finding
+    as an evaluation artifact instead of a real result.
+  - **Chat call method:** `openai` package's `AzureOpenAI` client, not raw
+    `requests` (unlike M3). `azure-ai-evaluation` already pulls in `openai`
+    transitively for the evaluation step, so there's no dependency-avoidance
+    argument left, and the SDK doesn't change the security posture — key is
+    still fetched live via `az` each run, never persisted, same as M3.
+- Real gotcha: Content Understanding and Chat Completions are different Azure
+  OpenAI API surfaces with different `api-version` strings (`2025-11-01` vs.
+  `2024-06-01`, confirmed against Microsoft Learn). Kept as two separate `.env`
+  variables — `API_VERSION` (Content Understanding, unchanged from M3) and new
+  `CHAT_API_VERSION` — rather than renaming, since a rename would have silently
+  broken `m3_analyze.py`'s `os.environ.get("API_VERSION", "2025-11-01")` fallback.
+- `.env` and `.env.example` both updated with `CHAT_API_VERSION`,
+  `CHAT_DEPLOYMENT_GPT_5_4`, `CHAT_DEPLOYMENT_GPT_5_4_MINI`. `openai` added to
+  `requirements.txt` — not yet installed in `venv1`, run
+  `pip install -r requirements.txt` before the next script attempts to import it.
+- Noted limitation, not yet addressed: the existing Sample Q&A Pairs table
+  (`iip-docs/loan-agreement-expected-output.md`) is 10 simple factual-lookup
+  questions only — none test cross-clause reasoning or page-2-dependent answers.
+  M6 as scoped measures "which model is better at easy factual QA," not general
+  robustness. Worth flagging if M6's results ever get used beyond picking M5's model.
+- Session ended with config groundwork done but the step 1 script (client
+  construction, prompt/message building, candidate-generation loop) not yet
+  written. Also ended with the overall architecture — how `.env` config, the
+  chat client, the analyzer, and the eventual evaluator actually connect
+  end-to-end — not clicking yet. Worth addressing directly at the start of next
+  session rather than assuming more code will resolve it on its own.
+
+---
+
+## Session — July 27, 2026
 
 - GitKraken GitHub connector confirmed working after a clean PC restart (prior
   session's "sign into GitKraken" loop resolved itself) — verified against a real
@@ -120,11 +173,17 @@ accumulates for them — no point building empty structure now.
 
 ## Next action
 
-Build the M6 evaluator scaffold: Python script using the `azure-ai-evaluation`
-SDK (confirm current package/API shape against Microsoft Learn first — the docs
-are mid-transition between "Microsoft Foundry" and "Microsoft Foundry (classic)"
-naming, though this project's resources are confirmed on the current/non-classic
-generation). Score `gpt-5-4` vs. `gpt-5-4-mini` using Groundedness, Relevance, and
-Similarity/F1 evaluators against the existing Sample Q&A Pairs table in
-`ai-103/iip-docs/loan-agreement-expected-output.md`. Winner (with actual evidence,
-not just reasoning) becomes the model for M5's RAG-grounded Q&A.
+Before more code: re-establish the end-to-end shape of M6 — how `.env` config,
+the `AzureOpenAI` client, the two candidate deployments, and the eventual
+evaluator step connect — by tracing one real question through the system
+concretely (real values, one actual API call, one real response), not another
+prose explanation.
+
+Then continue M6 step 1 (candidate generation): construct the `AzureOpenAI`
+client from the now-configured env vars, build the system/user message pair
+(system: answer only from the provided document; user: full document text +
+question), loop over the 10 Sample Q&A questions against both `gpt-5-4` and
+`gpt-5-4-mini`, save real responses. Step 2 (assemble `data.jsonl`) and step 3
+(run `evaluate()` with Groundedness/Relevance/Similarity/F1, judge = `gpt-5.2`)
+follow after. Winner (actual evidence, not reasoning) becomes the model for
+M5's RAG-grounded Q&A.
