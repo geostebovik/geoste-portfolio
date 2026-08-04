@@ -1,0 +1,539 @@
+{
+	"id": "ced6d35e-5a8c-4792-9ab0-453ffcee13b2",
+	"status": "Succeeded",
+	"result": {
+		"analyzerId": "projectAnalyzer_1784316189374_940",
+		"apiVersion": "2025-11-01",
+		"createdAt": "2026-07-17T19:23:13Z",
+		"stringEncoding": "codePoint",
+		"warnings": [],
+		"contents": [
+			{
+				"path": "input1",
+				"markdown": "# LOAN AGREEMENT\n\nI. THE PARTIES. This Loan Agreement (\"Agreement\") made this July 1 2026 is between:\n\n1 individual known as Harry Sample of 321 Central Ave, Phoenix, Arizona, 85012 (\"Borrower\")\nand\n\n1 individual known as Scrooge McDuck of 982 W Treasure Trl, Apache Junction, Arizona, 85120\n(\"Lender\").\n\nLender agrees to loan to the Borrower the sum of $50,000.00 (referred to as the \"Borrowed Money\"),\nwith interest accruing on the unpaid balance at a rate of 11.25 percent (%) per annum. Borrower agrees\nto pay the Borrowed Money in accordance with the terms set forth herein.\n\nII. PAYMENTS. The full balance of this Agreement, including any accrued interest and late fees, is\ndue and payable on June 30 2031, referred to as the \"Due Date.\" The Lender shall be repaid in monthly\ninstallments on the 1st of every month beginning on July 1 2026. The monthly payments shall be\n$958.12 for a period of 72 months.\n\nIf the Lender does not receive payment on time for any installment there shall be a late payment fee of\n$50 (U.S. Dollars).\n\nIII. SECURITY. The loan is unsecured.\n\nIV. INTEREST DUE IN THE EVENT OF DEFAULT. In the event the Borrower fails to pay the\nnote in full on the Due Date, the unpaid principal shall accrue interest at the maximum rate allowed by\nlaw until the Borrower is no longer in default.\n\nV. ALLOCATION OF PAYMENTS. Payments shall be first credited to any late fees due, then to\ninterest due, and any remainder will be credited to principal.\n\nVI. ACCELERATION. If the Borrower is in default under this Agreement or is in default under\nanother provision of this Agreement, and such default is not cured within the minimum allotted time by\nlaw after written notice of such default, then Lender may, at its option, declare all outstanding sums\nowed on this Agreement to be immediately due and payable.\n\nVII. ATTORNEYS' FEES AND COSTS. Borrower shall pay all costs incurred by Lender in\ncollecting sums due under this Agreement after a default, including reasonable attorneys' fees. If\nLender or Borrower sues to enforce this Agreement or obtain a declaration of its rights hereunder, the\nprevailing party in any such proceeding shall be entitled to recover its reasonable attorneys' fees and\ncosts incurred in the proceeding (including those incurred in any bankruptcy proceeding or appeal)\nfrom the non-prevailing party.\n\n<!-- PageNumber: Page 1 -->\n<!-- PageBreak -->\n\nVIII. WAIVER OF PRESENTMENTS. Borrower waives presentment for payment, a notice of\ndishonor, protest, and notice of protest.\n\nIX. NON-WAIVER. No failure or delay by Lender in exercising Lender's rights under this Agreement\nshall be considered a waiver of such rights.\n\nX. SEVERABILITY. In the event that any provision herein is determined to be void or unenforceable\nfor any reason, such determination shall not affect the validity or enforceability of any other provision,\nall of which shall remain in full force and effect.\n\nXI. INTEGRATION. There are no verbal or other agreements that modify or affect the terms of this\nAgreement. This Agreement may not be modified or amended except by a written agreement signed by\nBorrower and Lender.\n\nXII. CONFLICTING TERMS. The terms of this Agreement shall have authority and precedence over\nany conflicting terms in any referenced agreement or document.\n\nXIII. NOTICE. Any notices required or permitted to be given hereunder shall be given in writing and\nshall be delivered (a) in person, (b) by certified mail, postage prepaid, return receipt requested, (c) by\nfacsimile, or (d) by a commercial overnight courier that guarantees next day delivery and provides a\nreceipt, and such notices shall be made to the parties at the addresses listed in this Agreement.\n\nXIV. EXECUTION. The Borrower executes this Agreement as a principal and not as a surety. If there\nis a Co-Signer, the Borrower and Co-Signer shall be jointly and severally liable under this Agreement.\n\nXV. GOVERNING LAW. This note shall be governed under the laws in the State of Arizona.\n\nWith my signature below, I affirm that I have read and understood this Agreement.\n\nBorrower Signature and Date\n\nPrinted Name\n\nLender Signature and Date\n\nPrinted Name\n\n<!-- PageNumber: Page 2 -->\n",
+				"fields": {
+					"AgreementDate": {
+						"type": "date",
+						"valueDate": "2026-07-01",
+						"spans": [
+							{
+								"offset": 78,
+								"length": 11
+							}
+						],
+						"confidence": 0.774,
+						"source": "D(1,5.3004,1.8156,6.0935,1.8147,6.0937,2.0058,5.3006,2.0067)"
+					},
+					"Borrower": {
+						"type": "object",
+						"valueObject": {
+							"FullName": {
+								"type": "string",
+								"valueString": "Harry Sample",
+								"spans": [
+									{
+										"offset": 125,
+										"length": 12
+									}
+								],
+								"confidence": 0.903,
+								"source": "D(1,2.2969,2.1900,3.2270,2.1906,3.2269,2.3903,2.2968,2.3897)"
+							},
+							"MailingAddress": {
+								"type": "string",
+								"valueString": "321 Central Ave, Phoenix, Arizona, 85012",
+								"spans": [
+									{
+										"offset": 141,
+										"length": 40
+									}
+								],
+								"confidence": 0.897,
+								"source": "D(1,3.4553,2.1905,6.2702,2.1922,6.2701,2.3923,3.4552,2.3906)"
+							}
+						}
+					},
+					"Lender": {
+						"type": "object",
+						"valueObject": {
+							"FullName": {
+								"type": "string",
+								"valueString": "Scrooge McDuck",
+								"spans": [
+									{
+										"offset": 222,
+										"length": 14
+									}
+								],
+								"confidence": 0.96,
+								"source": "D(1,2.2991,2.9602,3.4803,2.9628,3.4799,3.1574,2.2987,3.1548)"
+							},
+							"MailingAddress": {
+								"type": "string",
+								"valueString": "982 W Treasure Trl, Apache Junction, Arizona, 85120",
+								"spans": [
+									{
+										"offset": 240,
+										"length": 51
+									}
+								],
+								"confidence": 0.903,
+								"source": "D(1,3.6860,2.9628,7.2964,2.9579,7.2967,3.1542,3.6863,3.1591)"
+							}
+						}
+					},
+					"PrincipalAmount": {
+						"type": "number",
+						"valueNumber": 50000,
+						"spans": [
+							{
+								"offset": 354,
+								"length": 10
+							}
+						],
+						"confidence": 0.938,
+						"source": "D(1,4.0988,3.5332,4.8483,3.5337,4.8482,3.7273,4.0987,3.7267)"
+					},
+					"AnnualInterestRatePercent": {
+						"type": "number",
+						"valueNumber": 11.25,
+						"spans": [
+							{
+								"offset": 462,
+								"length": 17
+							}
+						],
+						"confidence": 0.695,
+						"source": "D(1,4.5217,3.7293,5.6946,3.7314,5.6943,3.9249,4.5214,3.9229)"
+					},
+					"DueDate": {
+						"type": "date",
+						"valueDate": "2031-06-30",
+						"spans": [
+							{
+								"offset": 699,
+								"length": 12
+							}
+						],
+						"confidence": 0.738,
+						"source": "D(1,2.1010,4.4957,2.9933,4.4951,2.9934,4.6833,2.1011,4.6838)"
+					},
+					"PaymentSchedule": {
+						"type": "object",
+						"valueObject": {
+							"PaymentFrequency": {
+								"type": "string",
+								"valueString": "monthly",
+								"spans": [
+									{
+										"offset": 774,
+										"length": 7
+									}
+								],
+								"confidence": 0.982,
+								"source": "D(1,7.1381,4.4992,7.7073,4.5001,7.7073,4.6917,7.1382,4.6902)"
+							},
+							"PaymentDayOfMonth": {
+								"type": "integer",
+								"valueInteger": 1,
+								"spans": [
+									{
+										"offset": 802,
+										"length": 3
+									}
+								],
+								"confidence": 0.901,
+								"source": "D(1,2.0845,4.6923,2.2758,4.6920,2.2766,4.8819,2.0853,4.8812)"
+							},
+							"FirstPaymentDate": {
+								"type": "date",
+								"valueDate": "2026-07-01",
+								"spans": [
+									{
+										"offset": 834,
+										"length": 11
+									}
+								],
+								"confidence": 0.877,
+								"source": "D(1,4.2885,4.6894,5.0704,4.6898,5.0703,4.8866,4.2884,4.8862)"
+							},
+							"MonthlyPaymentAmount": {
+								"type": "number",
+								"valueNumber": 958.12,
+								"spans": [
+									{
+										"offset": 877,
+										"length": 7
+									}
+								],
+								"confidence": 0.831,
+								"source": "D(1,0.7751,4.8763,1.3209,4.8795,1.3198,5.0675,0.7740,5.0643)"
+							},
+							"NumberOfPayments": {
+								"type": "integer",
+								"valueInteger": 72,
+								"spans": [
+									{
+										"offset": 901,
+										"length": 2
+									}
+								],
+								"confidence": 0.978,
+								"source": "D(1,2.3653,4.8819,2.5299,4.8823,2.5303,5.0694,2.3658,5.0704)"
+							}
+						}
+					},
+					"LatePaymentFeeAmount": {
+						"type": "number",
+						"valueNumber": 50,
+						"spans": [
+							{
+								"offset": 1017,
+								"length": 18
+							}
+						],
+						"confidence": 0.716,
+						"source": "D(1,0.7777,5.4584,2.0128,5.4584,2.0128,5.6511,0.7777,5.6511)"
+					},
+					"IsSecuredLoan": {
+						"type": "boolean",
+						"confidence": 0.309
+					},
+					"GoverningLawState": {
+						"type": "string",
+						"valueString": "Arizona",
+						"spans": [
+							{
+								"offset": 3981,
+								"length": 7
+							}
+						],
+						"confidence": 0.733,
+						"source": "D(2,6.4884,5.5916,7.0285,5.5922,7.0285,5.7743,6.4885,5.7741)"
+					},
+					"PaymentAllocationOrder": {
+						"type": "string",
+						"valueString": "Payments shall be first credited to any late fees due, then to interest due, and any remainder will be credited to principal.",
+						"spans": [
+							{
+								"offset": 1342,
+								"length": 62
+							},
+							{
+								"offset": 1405,
+								"length": 62
+							}
+						],
+						"confidence": 0.45,
+						"source": "D(1,3.4175,6.9871,7.3464,6.9912,7.3462,7.1858,3.4173,7.1817);D(1,0.7735,7.1825,4.8062,7.1833,4.8062,7.3742,0.7735,7.3734)"
+					},
+					"DefaultInterestRateDescription": {
+						"type": "string",
+						"valueString": "the unpaid principal shall accrue interest at the maximum rate allowed by law until the Borrower is no longer in default.",
+						"spans": [
+							{
+								"offset": 1192,
+								"length": 73
+							},
+							{
+								"offset": 1266,
+								"length": 47
+							}
+						],
+						"confidence": 0.406,
+						"source": "D(1,2.7186,6.4211,7.6202,6.4231,7.6201,6.6087,2.7185,6.6067);D(1,0.7694,6.6040,3.8454,6.6055,3.8453,6.7952,0.7693,6.7938)"
+					},
+					"BorrowerSignatureDate": {
+						"type": "date",
+						"confidence": 0.904
+					},
+					"BorrowerPrintedName": {
+						"type": "string",
+						"confidence": 0.782
+					},
+					"LenderSignatureDate": {
+						"type": "date",
+						"confidence": 0.904
+					},
+					"LenderPrintedName": {
+						"type": "string",
+						"confidence": 0.782
+					},
+					"Sentiment": {
+						"type": "string",
+						"valueString": "Neutral",
+						"spans": [
+							{
+								"offset": 2,
+								"length": 14
+							},
+							{
+								"offset": 18,
+								"length": 83
+							},
+							{
+								"offset": 305,
+								"length": 98
+							},
+							{
+								"offset": 404,
+								"length": 102
+							},
+							{
+								"offset": 507,
+								"length": 72
+							},
+							{
+								"offset": 581,
+								"length": 98
+							},
+							{
+								"offset": 680,
+								"length": 101
+							},
+							{
+								"offset": 782,
+								"length": 94
+							},
+							{
+								"offset": 877,
+								"length": 34
+							},
+							{
+								"offset": 913,
+								"length": 103
+							},
+							{
+								"offset": 1017,
+								"length": 19
+							},
+							{
+								"offset": 1038,
+								"length": 37
+							},
+							{
+								"offset": 3903,
+								"length": 86
+							},
+							{
+								"offset": 3991,
+								"length": 81
+							}
+						],
+						"confidence": 0.873,
+						"source": "D(1,2.8928,0.9297,5.5950,0.9326,5.5947,1.1833,2.8925,1.1804);D(1,0.7709,1.8134,6.8897,1.8163,6.8896,2.0089,0.7708,2.0060);D(1,0.7735,3.5336,7.5330,3.5336,7.5330,3.7312,0.7735,3.7312);D(1,0.7720,3.7247,7.6536,3.7339,7.6533,3.9289,0.7717,3.9197);D(1,0.7735,3.9327,5.7151,3.9207,5.7155,4.1098,0.7740,4.1218);D(1,0.7751,4.3031,7.4626,4.3100,7.4624,4.5008,0.7749,4.4939);D(1,0.7761,4.4926,7.7075,4.4981,7.7073,4.6917,0.7760,4.6862);D(1,0.7735,4.6883,7.2550,4.6905,7.2549,4.8874,0.7734,4.8851);D(1,0.7751,4.8781,3.1110,4.8820,3.1107,5.0721,0.7748,5.0682);D(1,0.7761,5.2638,7.6201,5.2652,7.6201,5.4609,0.7761,5.4595);D(1,0.7777,5.4584,2.0576,5.4584,2.0576,5.6513,0.7777,5.6513);D(1,0.7709,5.8374,3.5052,5.8405,3.5050,6.0200,0.7707,6.0169);D(2,0.7709,5.5847,7.0683,5.5919,7.0681,5.7759,0.7707,5.7687);D(2,0.7720,5.9706,6.2837,5.9680,6.2838,6.1613,0.7721,6.1639)"
+					},
+					"KeyPhrases": {
+						"type": "array",
+						"valueArray": [
+							{
+								"type": "string",
+								"valueString": "Loan Agreement",
+								"spans": [
+									{
+										"offset": 2,
+										"length": 14
+									}
+								],
+								"confidence": 0.586,
+								"source": "D(1,2.8928,0.9297,5.5950,0.9326,5.5947,1.1833,2.8925,1.1804)"
+							},
+							{
+								"type": "string",
+								"valueString": "Borrowed Money",
+								"spans": [
+									{
+										"offset": 305,
+										"length": 98
+									},
+									{
+										"offset": 404,
+										"length": 102
+									},
+									{
+										"offset": 507,
+										"length": 72
+									}
+								],
+								"confidence": 0.421,
+								"source": "D(1,0.7735,3.5336,7.5330,3.5336,7.5330,3.7312,0.7735,3.7312);D(1,0.7720,3.7247,7.6536,3.7339,7.6533,3.9289,0.7717,3.9197);D(1,0.7735,3.9327,5.7151,3.9207,5.7155,4.1098,0.7740,4.1218)"
+							},
+							{
+								"type": "string",
+								"valueString": "11.25 percent (%) per annum",
+								"spans": [
+									{
+										"offset": 305,
+										"length": 98
+									},
+									{
+										"offset": 404,
+										"length": 102
+									},
+									{
+										"offset": 507,
+										"length": 72
+									}
+								],
+								"confidence": 0.421,
+								"source": "D(1,0.7735,3.5336,7.5330,3.5336,7.5330,3.7312,0.7735,3.7312);D(1,0.7720,3.7247,7.6536,3.7339,7.6533,3.9289,0.7717,3.9197);D(1,0.7735,3.9327,5.7151,3.9207,5.7155,4.1098,0.7740,4.1218)"
+							},
+							{
+								"type": "string",
+								"valueString": "monthly installments on the 1st of every month",
+								"spans": [
+									{
+										"offset": 581,
+										"length": 98
+									},
+									{
+										"offset": 680,
+										"length": 101
+									},
+									{
+										"offset": 782,
+										"length": 94
+									},
+									{
+										"offset": 877,
+										"length": 34
+									}
+								],
+								"confidence": 0.347,
+								"source": "D(1,0.7751,4.3031,7.4626,4.3100,7.4624,4.5008,0.7749,4.4939);D(1,0.7761,4.4926,7.7075,4.4981,7.7073,4.6917,0.7760,4.6862);D(1,0.7735,4.6883,7.2550,4.6905,7.2549,4.8874,0.7734,4.8851);D(1,0.7751,4.8781,3.1110,4.8820,3.1107,5.0721,0.7748,5.0682)"
+							},
+							{
+								"type": "string",
+								"valueString": "$958.12 for a period of 72 months",
+								"spans": [
+									{
+										"offset": 581,
+										"length": 98
+									},
+									{
+										"offset": 680,
+										"length": 101
+									},
+									{
+										"offset": 782,
+										"length": 94
+									},
+									{
+										"offset": 877,
+										"length": 34
+									}
+								],
+								"confidence": 0.347,
+								"source": "D(1,0.7751,4.3031,7.4626,4.3100,7.4624,4.5008,0.7749,4.4939);D(1,0.7761,4.4926,7.7075,4.4981,7.7073,4.6917,0.7760,4.6862);D(1,0.7735,4.6883,7.2550,4.6905,7.2549,4.8874,0.7734,4.8851);D(1,0.7751,4.8781,3.1110,4.8820,3.1107,5.0721,0.7748,5.0682)"
+							},
+							{
+								"type": "string",
+								"valueString": "late payment fee of $50 (U.S. Dollars)",
+								"spans": [
+									{
+										"offset": 913,
+										"length": 103
+									},
+									{
+										"offset": 1017,
+										"length": 19
+									}
+								],
+								"confidence": 0.455,
+								"source": "D(1,0.7761,5.2638,7.6201,5.2652,7.6201,5.4609,0.7761,5.4595);D(1,0.7777,5.4584,2.0576,5.4584,2.0576,5.6513,0.7777,5.6513)"
+							},
+							{
+								"type": "string",
+								"valueString": "The loan is unsecured",
+								"spans": [
+									{
+										"offset": 1038,
+										"length": 37
+									}
+								],
+								"confidence": 0.463,
+								"source": "D(1,0.7709,5.8374,3.5052,5.8405,3.5050,6.0200,0.7707,6.0169)"
+							},
+							{
+								"type": "string",
+								"valueString": "maximum rate allowed by law",
+								"spans": [
+									{
+										"offset": 1077,
+										"length": 84
+									},
+									{
+										"offset": 1162,
+										"length": 103
+									},
+									{
+										"offset": 1266,
+										"length": 47
+									}
+								],
+								"confidence": 0.439,
+								"source": "D(1,0.7720,6.2147,7.4046,6.2258,7.4043,6.4161,0.7717,6.4050);D(1,0.7751,6.4214,7.6201,6.4225,7.6201,6.6085,0.7751,6.6074);D(1,0.7694,6.6040,3.8454,6.6055,3.8453,6.7952,0.7693,6.7938)"
+							},
+							{
+								"type": "string",
+								"valueString": "Allocation of Payments",
+								"spans": [
+									{
+										"offset": 1315,
+										"length": 89
+									},
+									{
+										"offset": 1405,
+										"length": 62
+									}
+								],
+								"confidence": 0.455,
+								"source": "D(1,0.7751,6.9837,7.3464,6.9919,7.3462,7.1862,0.7749,7.1780);D(1,0.7735,7.1825,4.8062,7.1833,4.8062,7.3742,0.7735,7.3734)"
+							},
+							{
+								"type": "string",
+								"valueString": "laws in the State of Arizona",
+								"spans": [
+									{
+										"offset": 3903,
+										"length": 86
+									}
+								],
+								"confidence": 0.383,
+								"source": "D(2,0.7709,5.5847,7.0683,5.5919,7.0681,5.7759,0.7707,5.7687)"
+							}
+						]
+					}
+				},
+				"kind": "document",
+				"startPageNumber": 1,
+				"endPageNumber": 2,
+				"unit": "inch",
+				"pages": [
+					{
+						"pageNumber": 1,
+						"angle": 0.0238631,
+						"width": 8.5,
+						"height": 11
+					},
+					{
+						"pageNumber": 2,
+						"angle": 0.02558691,
+						"width": 8.5,
+						"height": 11
+					}
+				],
+				"analyzerId": "projectAnalyzer_1784316189374_940",
+				"mimeType": "application/pdf"
+			}
+		]
+	},
+	"usage": {
+		"documentPagesStandard": 2,
+		"contextualizationTokens": 2000,
+		"tokens": {
+			"gpt-5.2-input": 6421,
+			"gpt-5.2-output": 667
+		}
+	}
+}

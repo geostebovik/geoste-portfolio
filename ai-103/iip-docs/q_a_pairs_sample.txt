@@ -1,0 +1,11 @@
+query | response
+Who is the borrower? | Harry Sample
+Who is the lender? | Scrooge McDuck
+What is the loan amount? | $50,000.00
+What is the interest rate? | 11.25% per annum
+What is the monthly payment amount? | $958.12
+Is the loan secured or unsecured? | Unsecured
+What is the late fee for a missed payment? | $50.00
+What state's law governs this agreement? | Arizona
+When is the full balance due? | June 30, 2031
+How many monthly payments are there? | 72

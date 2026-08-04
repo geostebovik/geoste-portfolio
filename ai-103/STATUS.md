@@ -15,7 +15,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** July 28, 2026 (end of day)
+**Status as of:** August 5, 2026
 
 ---
 
@@ -36,13 +36,364 @@ accumulates for them — no point building empty structure now.
 - [ ] **M6:** Evaluator harness built, used to pick GPT-5.4 vs. GPT-5.4-mini for M5.
   **In progress** — design decisions locked (judge model, context strategy, SDK
   choice, see below); `.env`/`requirements.txt` config in place. Step 1 script
-  (candidate generation) not yet started.
-- [ ] **M7:** Light multi-agent pattern (extraction/verification agent → Q&A agent) →
-  Phase 1 complete.
+  (`m6_generate.py`) complete and validated: merged from `m6_probe.py` +
+  `scratch.py`, single-item proof passed, and the full 10×2 loop ran clean —
+  20/20 factually correct answers across both candidate models (see July 30
+  session for real findings on answer verbosity, model inconsistency, and
+  raw Markdown-syntax emission — all left as-is pending evaluator evidence).
+  Step 1 complete end-to-end: results saved to
+  `ai-103/scripts/results/{timestamp}_results.json` (gitignored), matching
+  `m3_analyze.py`'s save convention. **Step 2 complete (Aug 5):**
+  `m6_assemble.py` reads `results/20260730-131154_results.json` and the
+  loan-agreement markdown, renames fields to the SDK's native names, attaches
+  context, and writes `data.jsonl` (gitignored) — verified programmatically,
+  20 valid JSON objects, correct 5-key schema, no blank lines. Evaluator run
+  (`evaluate()`, Step 3) not yet started — planned for the next session.
+- [ ] **M7:** Build a single orchestrator agent (Generative AI/agentic exam
+  domain) over a neutral, synthetic small-business content-review scenario —
+  decoupled from the YouTube-cleanup business thesis as of August 4, see
+  `agent-system-project-plan.md`'s "Decoupling note." Same technical shape
+  as originally planned: drafts content against a template, reuses M6's
+  evaluation-harness pattern (Groundedness/Relevance/F1) to QA drafted
+  output against grounding data, and adds a computer-vision module
+  (thumbnail-style brand/legibility/info-accuracy audit) — the one AI-103
+  exam domain not otherwise touched through M6. No longer tied to Anne's
+  engagement or any specific unvalidated business premise; "is this a real
+  business" is now a separate, evidence-gated question, not assumed live.
+  Not started. → Phase 1 (of IIP labs) complete.
 
 ---
 
-## Latest session (July 28, 2026)
+## Latest session (August 5, 2026)
+
+- Picked up Step 2 (`data.jsonl` assembly) where July 31 left off. Before
+  writing code, re-verified the Aug 4 correction's central claim — that
+  `evaluate()`'s `_rename_columns_conditionally()` unconditionally prefixes
+  unmapped columns with `inputs.`, so a passthrough `model` column survives
+  as `inputs.model` — against real installed source rather than trusting the
+  prior note secondhand.
+- That re-verification surfaced a real gap: `azure-ai-evaluation` was not
+  installed in `venv1` and not in `requirements.txt` at all — the prior
+  session's claim of having checked "the pinned version" described a pin
+  that didn't exist anywhere in the repo. Installed it fresh (resolved to
+  `1.18.3`, not the `1.18.1`/`1.18.2` cited in earlier sessions — unpinned
+  installs just grab current latest, so the discrepancy was expected once
+  the missing pin was found). Pinned `azure-ai-evaluation==1.18.3` in
+  `requirements.txt` with a dated comment explaining why, so future
+  source-level claims stay reproducible instead of silently drifting.
+- Read the actual installed source
+  (`venv1/Lib/site-packages/azure/ai/evaluation/_evaluate/_evaluate.py:797`)
+  directly. Confirmed real, not assumed: every input column without a
+  target-generated-output prefix gets renamed to `inputs.{col}` — `model`
+  will reliably show up as `inputs.model` in `evaluate()`'s row-level output,
+  which is what lets Step 3 split results by candidate model after the fact.
+- Separate real gap found while fixing the above: `.gitignore`'s `venv/`
+  pattern never matched the actual folder name, `venv1/` — same species of
+  mid-string-slash miss as July 27's `results/` bug, different mechanism.
+  Confirmed via `git check-ignore` (no match) and `git ls-files` (zero
+  tracked, so nothing committed yet, but it was one `git add .` away from
+  pulling in the full installed package tree). Changed to `venv*/` to also
+  cover future numbered venvs. Also added `ai-103/scripts/data.jsonl` to the
+  same "generated, not source" section as `results/`.
+- `m6_assemble.py` built from scratch, working style unchanged from prior
+  sessions — first pass written independently, checked and corrected in
+  rounds rather than written wholesale. Real mistakes caught and fixed along
+  the way, not glossed over: a relative path missing `../` (same
+  `scripts/`-vs-sibling-directory gotcha `m6_generate.py` had already
+  solved, just not checked against before running); four dead
+  self-assignment lines (`result["x"] = result["x"]`) left over after
+  removing an earlier, unnecessary newline-stripping step; unused
+  `pathlib`/`os`/`datetime`/`Path` imports copied from `m6_generate.py`'s
+  timestamp-naming logic that this script doesn't need, since `data.jsonl`
+  is a disposable, overwritten-every-run file rather than a preserved
+  history like `results/`.
+- Final script: reads `results/20260730-131154_results.json` and the loan
+  agreement markdown once, builds one dict per result with
+  `question`→`query`, `answer`→`response`, `expected_answer`→`ground_truth`,
+  a constant `context` field, and `model` passed through unchanged, then
+  writes one `json.dumps()` object per line (no array brackets, no indent —
+  real JSONL, not pretty-printed JSON) to `data.jsonl`.
+- Verified programmatically after running it, not just by eye: `wc -l`
+  confirms 20 lines; a small validation pass confirmed all 20 parse as valid
+  JSON with exactly the five expected keys (`model`, `query`, `response`,
+  `ground_truth`, `context`) and no blank lines.
+- Step 3 (`evaluate()` run) talked through conceptually before writing
+  anything — judge model `gpt-5.2`, four evaluators
+  (`Groundedness`/`Relevance`/`Similarity`/`F1Score`), no `column_mapping`
+  needed since `data.jsonl`'s fields already match the SDK's native names.
+  Real point worth remembering going in: `evaluate()`'s aggregate metrics
+  blend both candidate models together — picking an actual winner requires
+  a second pass grouping the row-level output by `inputs.model` afterward,
+  not just reading the top-line summary. Not started — deliberately deferred
+  to the next session, fresher rather than at the end of a long one.
+
+---
+
+## Session — August 4, 2026
+
+- Anne Collins engagement ended: client balked at cost — price too high for
+  perceived value, not a misunderstanding or timing issue. She understood
+  the offer and still declined at the already-discounted, friend-rate price.
+  Taken seriously as a real signal, not explained away: no referrals
+  expected from this engagement.
+- Real question raised and answered today, not deferred: was M7 (re-scoped
+  Aug 3 around this specific business thesis) becoming busywork — automating
+  delivery of a service that just failed its first real pricing test, rather
+  than solving a validated problem. Concern judged legitimate, not
+  overthinking.
+- Two things cleanly separated that got bundled together on Aug 3:
+  1. The cert-track argument for M7 (Generative AI/agentic exam domain,
+     largest weight; computer-vision gap-filling) never actually depended
+     on Anne's engagement surviving — still holds.
+  2. The "this is also a real business tool" argument took a genuine hit
+     and doesn't get to ride along on the cert argument's coattails anymore.
+- Decision: M7 decoupled from the YouTube-cleanup business thesis entirely.
+  Goes back to a neutral, synthetic small-business content-review scenario
+  — same technical shape (orchestrator agent, M6 eval-harness reuse, vision
+  module), no longer justified by or tied to a specific unvalidated premise.
+  "Is this a real business" is now an open question requiring real evidence
+  (a paying, non-discounted client) before more build effort goes toward it
+  specifically — not something to keep building toward on assumption.
+- `rg-ycc-dev-wus-01` / `kv-ycc-dev-wus-01` left in place, not torn down —
+  the governance principle behind them (real client data/credentials never
+  touch the IIP lab RG/Key Vault) is reusable regardless of which business
+  thesis, if any, eventually gets validated. Currently unused, not wasted.
+- Anne Collins' Notion profile updated to reflect the engagement's actual
+  outcome, so it doesn't sit stale.
+
+---
+
+## Session — August 3, 2026
+
+- No M6/M7 code this session — this was a scope/planning session, prompted
+  by a separate, real engagement (YouTube channel cleanup consulting for a
+  Scottsdale realtor) starting to converge with IIP's own trajectory.
+- Reviewed `agent-system-project-plan.md` (committed into this repo this
+  session, previously an upload only) against this file's M0–M7 arc.
+  Confirmed real convergence, not just cert-checkbox overlap: M7 was already
+  a generic "light multi-agent pattern" placeholder before this business
+  need existed; M6's evaluation-harness concepts (Groundedness/Relevance/F1)
+  transfer directly to "is this drafted output grounded in real data,"
+  regardless of domain; computer vision was a real, unfilled exam-domain gap
+  in IIP through M6, and the business's thumbnail-audit need closes it.
+- Three real decisions made, not assumed:
+  1. Only two efforts exist (IIP + the Anne engagement) — no third,
+     separate "agent-development" project to reconcile.
+  2. Real client data/credentials get their own resource boundary
+     (`rg-ycc-dev-wus-01` / `kv-ycc-dev-wus-01`, placeholder naming, not yet
+     created) — never the IIP lab RG/Key Vault, decided ahead of need rather
+     than after a boundary violation.
+  3. M7 proceeds on synthetic/simulated data rather than gating on a second
+     real client engagement (which the business plan's own Phase 1 requires
+     before Phase 2 touches a live second client, but isn't fully
+     controllable on a cert timeline). Real Phase 1 evidence still governs
+     when this touches an actual second client — only the cert milestone's
+     dependency on that timing was relaxed.
+- M7 milestone description rewritten below to reflect this. Full reasoning
+  kept in `agent-system-project-plan.md`'s own "Merge note," not duplicated
+  here — this file stays the tracker, that file stays the reference.
+- Nothing else in M0–M6 touched or renegotiated this session.
+- `rg-ycc-dev-wus-01` / `kv-ycc-dev-wus-01` created and confirmed (`az resource
+  list -g rg-ycc-dev-wus-01` returned the vault) — purge protection enabled
+  at creation, not added after the fact. No longer "not yet created" as
+  written earlier in this entry's M7 description.
+- Anne Collins' client profile (YouTube `@LifeInArizonaRE`, website,
+  Instagram, Facebook, Calendly, email, phone) logged in Notion
+  ("YCC — Client Profiles" > "Anne Collins") — informal placeholder ahead of
+  the real intake questionnaire (Phase 0), not in the ai-103 repo or the
+  Key Vault, per this session's own reasoning above.
+
+---
+
+## Session — July 31, 2026
+
+- Step 2 groundwork only — no code written this session (time went to another
+  project). Research sub-step (confirm `evaluate()`'s real row schema before
+  writing anything, per the same discipline as July 28's SDK-name/evaluator-class
+  verification) is done and settled, not open for re-litigation.
+- Verified directly against Microsoft Learn — the `evaluate-sdk` how-to page's
+  data-format section, plus the individual class pages for
+  `GroundednessEvaluator`, `RelevanceEvaluator`, `SimilarityEvaluator`, and
+  `F1ScoreEvaluator` (full constructor + call-signature detail, not just the
+  evaluator-support table). Confirmed real, not guessed:
+  - `GroundednessEvaluator` (AI-assisted, needs `model_config`): `response`,
+    `context` required; `query` optional.
+  - `RelevanceEvaluator` (AI-assisted, needs `model_config`): `query`,
+    `response` only — no `context`, no `ground_truth`.
+  - `SimilarityEvaluator` (AI-assisted, needs `model_config`): `query`,
+    `response`, `ground_truth`.
+  - `F1ScoreEvaluator` (pure token-overlap, no `model_config`): `response`,
+    `ground_truth` only — no `query`.
+  - Union across all four → one `data.jsonl` row needs four flat, top-level
+    fields: `query`, `context`, `response`, `ground_truth`. Confirmed against
+    the how-to page's own sample row, not inferred.
+- Caveat worth keeping, not glossing over: these are Learn's general API
+  reference pages (most recently updated June 2026), not something pinned to
+  the exact SDK version (v1.18.2) confirmed July 28. No evidence of drift
+  found, but this wasn't cross-checked against a changelog — "current and
+  consistent," not "pinned-version-exact."
+- Real gap surfaced against the already-saved `results/{timestamp}_results.json`:
+  its fields are `question` / `answer` / `expected_answer`, not
+  `query` / `response` / `ground_truth`, and it has no `context` field at all
+  (the loan-agreement markdown, same value every row per the July 28 context-
+  strategy decision, was never saved alongside the Q&A pairs — it lives in
+  `iip-docs/Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json`).
+- Decision locked: rename the saved fields to the SDK's native names
+  (`question`→`query`, `answer`→`response`, `expected_answer`→`ground_truth`)
+  when assembling `data.jsonl`, rather than keeping the original names and
+  using `evaluator_config`'s `column_mapping` to remap them. Reasoning: one
+  less moving part, and the `column_mapping` string-template syntax
+  (`"${data.column}"`) is exactly the kind of unnecessary cleverness that
+  caused this session's earlier f-string bug — plain field renames are
+  simpler and were the intended naming all along (questioned at the time,
+  not pushed back on, since these fields were still assumed possibly
+  temporary/for something else — now confirmed they're the real schema).
+- Session ended here. `data.jsonl` assembly logic (read
+  `results/{timestamp}_results.json`, rename the three fields, add `context`
+  from the analyzer JSON) not yet started — next real step, not done today.
+
+---
+
+## Session — July 30, 2026
+
+- `m6_generate.py` created, merging the three previously-separate working
+  pieces: `load_qa_pairs()` (from `scratch.py`, now wrapped as a function
+  rather than left as loose top-level code — deliberate, so a future importer
+  of this file, e.g. an M7 multi-agent script pulling in `build_client()`,
+  doesn't trigger a file read as a side effect of import, and so the parse
+  can be re-called or re-pointed at a different file later without editing
+  the module), plus `build_client()` and the `temperature=0` chat-completions
+  call (from `m6_probe.py`, unchanged).
+- One real bug caught before the merge was proven: the first draft of the
+  chat call referenced `qa_pairs[0]["question"]` directly inside an f-string
+  already delimited by double quotes. This only parses on Python 3.12+
+  (PEP 701's relaxed f-string grammar) — tested and confirmed `SyntaxError`
+  on 3.10. Works today because `venv1` runs 3.14, but was fragile and
+  non-portable. Fixed by using the already-assigned `question` variable
+  instead, which also removed a redundancy (that variable had been assigned
+  one line earlier and gone unused).
+- Single-item proof (this doc's own Next Action step 2) passed: ran
+  `m6_generate.py` against `qa_pairs[0]` ("Who is the borrower?"), got "The
+  borrower is Harry Sample of 321 Central Ave, Phoenix, Arizona, 85012." back
+  — contains the rubric's exact expected string ("Harry Sample"), and
+  reproducible: two consecutive runs, identical output.
+- Real finding, not yet resolved: the model's answer is a full sentence with
+  the borrower's address appended, not the rubric's terse "Harry Sample."
+  Traced to a verified cause, not model quirkiness — checked the actual
+  markdown fed to the model
+  (`iip-docs/Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json`,
+  `result.contents[0].markdown`) and the source document itself presents
+  borrower name and address as one grammatical unit: "Harry Sample of 321
+  Central Ave, Phoenix, Arizona, 85012 (\"Borrower\")." The model is quoting
+  the full identifying phrase it found, not embellishing. Two contributing
+  factors, both by design, not accident: (1) M6's July 28 context-strategy
+  decision deliberately feeds the model raw prose markdown, not Content
+  Understanding's already-separated `Borrower.FullName` /
+  `Borrower.MailingAddress` fields from the same JSON, so the model never
+  sees name and address as distinct; (2) the system prompt ("Answer the
+  question using only information from the provided document...") gives no
+  length/format constraint, so the model defaults to a complete,
+  natural-language answer rather than an isolated entity. `temperature=0`
+  explains the *reproducibility* of this behavior, not the *verbosity* —
+  those are separate properties, worth not conflating going forward.
+  Open question, not decided: whether to add a format constraint to the
+  system prompt (e.g. "answer as concisely as possible, with no extra
+  detail") before generalizing to the full loop, or leave it as-is and let
+  step 3's evaluator (`F1ScoreEvaluator` is pure token-overlap — a correct
+  but verbose answer likely scores worse on precision than a terse one)
+  surface the effect as real evidence rather than pre-guessing it. Applies
+  equally to both candidate models if left alone, so it may be a fair fixed
+  condition rather than a confound — worth deciding deliberately, not by
+  default.
+- Full 10×2 loop run (`m6_generate.py`) produced 20/20 factually correct
+  answers — validates the merge end-to-end, not just the single-item proof.
+  Real finding: the verbosity finding above generalizes, but narrowly, not
+  broadly. GPT-5.4 only appends unrequested detail (address) on the borrower
+  and lender questions — the two spots where the source markdown fuses name
+  and address into one clause — and stays terse everywhere else ("Arizona."
+  for governing law). Consistent with "the model quotes the fused phrase it
+  found," not general chattiness; true chattiness would over-add everywhere,
+  not selectively. Same mechanism shows up a third time: GPT-5.4-mini's
+  late-fee answer includes "(U.S. Dollars)," quoting the source's "$50 (U.S.
+  Dollars)" clause verbatim, where GPT-5.4 trimmed to "$50" — inclusion of
+  fused detail is inconsistent per model and per question, not a fixed rule.
+- Real finding: GPT-5.4-mini is not consistently terser than GPT-5.4 — it's
+  inconsistent with itself. It answers the borrower question tersely ("Harry
+  Sample") but the lender question verbosely, address included, even though
+  the source document phrases both parties identically ("known as [Name] of
+  [Address]"). Same model, same document structure, two different behaviors
+  on structurally parallel questions.
+- Related but distinct finding, logged separately per its own mechanism:
+  GPT-5.4-mini emits literal Markdown bold syntax (`**Scrooge McDuck**`)
+  inside several answers; GPT-5.4 never does, in this sample. Verified this
+  is real returned text, not a display artifact — `json.dumps()` doesn't
+  escape `*` characters, so what prints is exactly what the model returned.
+  Nothing in the system prompt requests formatting; likely an inherited
+  default from chat-UI-style training, surfacing here even though this
+  pipeline (script → plain-text field → JSON → terminal) never renders it.
+  Matters for evaluation: this fuses literal punctuation onto real words
+  (e.g. `**Scrooge`), a harsher mismatch against a plain-text rubric than
+  ordinary verbose phrasing — compounds, rather than just adds to, the
+  verbosity finding's expected effect on `F1ScoreEvaluator`.
+- Minor, likely-benign finding: both models answer the late-fee question
+  with "$50," not the rubric's "$50.00" — same value, different string
+  formatting. Appears to affect both candidates equally, so probably not a
+  model-quality signal, but worth knowing before an exact-match-style score
+  reads as worse than the answer actually is.
+
+---
+
+## Session — July 29, 2026
+
+- Started by tracing one real question ("Who is the lender?") end-to-end
+  through the system before writing more code, per last session's own note
+  that the architecture wasn't clicking. Confirmed real, not theoretical:
+  `.env` → `get_endpoint()` / `get_subscription_key()` (reused directly from
+  `m3_analyze.py`, not rewritten) → `AzureOpenAI` client → document text
+  pulled straight from `iip-docs/Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json`'s
+  `result.contents[0].markdown` (no fresh extraction, per July 28's context
+  strategy decision) → one real chat completions call → real answer, matched
+  the rubric ("Scrooge McDuck").
+- Real gotcha, not part of the July 28 locked decisions: `chat.completions.create()`
+  defaults to non-zero temperature — same question, same model, same document
+  produced two different (both individually correct) answers across
+  back-to-back runs. Fixed by setting `temperature=0` on the candidate-generation
+  call, with an inline comment explaining why. Verified fixed, not assumed —
+  two consecutive runs now produce byte-identical output. Matters because M6's
+  premise is evidence over guessing; a model's own results need to be
+  reproducible run-to-run before comparing it fairly against the other
+  candidate.
+- `pip install -r requirements.txt` had actually installed `openai` into a
+  different Python (`AppData\Local\Python\pythoncore-3.14-64`) than `venv1`,
+  because plain `pip`/`python` resolved differently across shell sessions.
+  Fixed with `python -m pip install -r requirements.txt` while `venv1` was
+  active, confirmed via `python -m pip show openai` pointing at
+  `venv1\Lib\site-packages`. Lesson: prefer `python -m pip` over bare `pip`
+  whenever more than one Python install is on the machine.
+- `build_client()` extracted as a reusable function in `m6_probe.py`, wrapping
+  the endpoint-fetch/key-fetch/client-construction sequence — needed since the
+  eventual loop builds the client once, not per question/model. Caught and
+  removed a stray `from xmlrpc import client` import (VS Code IntelliSense
+  auto-add; harmless since it was immediately overwritten by the real `client`
+  variable, but dead and misleading — unrelated stdlib XML-RPC module).
+- The 10 Sample Q&A pairs copied out of `loan-agreement-expected-output.md`'s
+  table into a new file, `iip-docs/q_a_pairs_sample.txt` (pipe-delimited:
+  `query | response`), and parsed in `scratch.py` into a list of
+  `{"question": ..., "answer": ...}` dicts — verified all 10 match the rubric
+  exactly. Not yet merged into the client-construction script.
+- Naming convention question raised and resolved: the `m{phase}_` filename
+  prefix (`m3_analyze.py`, etc.) is internal milestone-tracking shorthand, not
+  portfolio-clear naming for an outside reader — a real tradeoff, not
+  "amateur." Decision: don't rename mid-M6; defer a full rename (every script
+  + every reference in `STATUS.md`/`iip-cli-runbook.md`/imports) to one
+  deliberate commit at a phase boundary, not a piecemeal change now.
+- Tentative name picked for the M6 step 1 script: `m6_generate.py` — not yet
+  created. Working pieces currently split across `m6_probe.py` (client +
+  single-question proof) and `scratch.py` (Q&A parsing), still need merging.
+
+---
+
+## Session — July 28, 2026
 
 - Confirmed `azure-ai-evaluation` SDK is still current under that exact package
   name (v1.18.2 per Microsoft Learn, page last updated July 22, 2026). Evaluator
@@ -173,17 +524,32 @@ accumulates for them — no point building empty structure now.
 
 ## Next action
 
-Before more code: re-establish the end-to-end shape of M6 — how `.env` config,
-the `AzureOpenAI` client, the two candidate deployments, and the eventual
-evaluator step connect — by tracing one real question through the system
-concretely (real values, one actual API call, one real response), not another
-prose explanation.
+Steps 1 and 2 are both done and verified end-to-end. `m6_generate.py`
+produced `results/20260730-131154_results.json` (20/20 factually correct
+answers across both candidates). `m6_assemble.py` consumes that file plus
+the loan-agreement markdown and produces `scripts/data.jsonl` — 20 rows,
+fields renamed to the SDK's native names (`query`/`response`/`ground_truth`),
+constant `context` attached, `model` preserved unmapped so it survives as
+`inputs.model` in `evaluate()`'s output (confirmed against real installed
+SDK source, Aug 5 — see session notes above). `azure-ai-evaluation==1.18.3`
+is now actually installed and pinned in `requirements.txt`, which wasn't
+true before this session despite an earlier note claiming otherwise.
 
-Then continue M6 step 1 (candidate generation): construct the `AzureOpenAI`
-client from the now-configured env vars, build the system/user message pair
-(system: answer only from the provided document; user: full document text +
-question), loop over the 10 Sample Q&A questions against both `gpt-5-4` and
-`gpt-5-4-mini`, save real responses. Step 2 (assemble `data.jsonl`) and step 3
-(run `evaluate()` with Groundedness/Relevance/Similarity/F1, judge = `gpt-5.2`)
-follow after. Winner (actual evidence, not reasoning) becomes the model for
-M5's RAG-grounded Q&A.
+Two things deliberately left unresolved, both revisit-after-evaluator-
+evidence calls from July 30 (see session notes above for full reasoning): no
+format/length constraint added to the system prompt despite the verbosity
+finding, and no "plain text, no Markdown" constraint added despite
+GPT-5.4-mini's raw Markdown-syntax finding. Both apply equally to both
+candidates, so real evaluator scores — not a pre-emptive guess — should
+settle whether either needs fixing.
+
+Next real sub-step is Step 3, deliberately deferred to the next session
+rather than started at the end of a long one: build the `evaluate()` call
+against `data.jsonl` with judge model `gpt-5.2` and the four evaluators
+(`Groundedness`/`Relevance`/`Similarity`/`F1Score`) — no `column_mapping`
+needed, `data.jsonl`'s fields already match the SDK's expected names. Then
+group the row-level output by `inputs.model` and compare the two candidates'
+averages directly — `evaluate()`'s own aggregate metrics blend both models
+together, so the actual "pick a winner" comparison is a second, deliberate
+step, not something the SDK hands over on its own. Winner (actual evidence,
+not reasoning) becomes the model for M5's RAG-grounded Q&A. Not started.
