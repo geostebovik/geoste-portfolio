@@ -9,11 +9,12 @@
 .vscode/
 
 # Python virtual environments and bytecode cache
-venv/
+venv*/
 __pycache__/
 
 # Generated script outputs (regenerable, not source)
 ai-103/scripts/results/
+ai-103/scripts/data.jsonl
 
 # Working notes and session files
 docs/
