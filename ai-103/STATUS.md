@@ -124,8 +124,141 @@ accumulates for them — no point building empty structure now.
   Real point worth remembering going in: `evaluate()`'s aggregate metrics
   blend both candidate models together — picking an actual winner requires
   a second pass grouping the row-level output by `inputs.model` afterward,
-  not just reading the top-line summary. Not started — deliberately deferred
-  to the next session, fresher rather than at the end of a long one.
+  not just reading the top-line summary.
+- Before writing `m6_evaluate.py`, re-verified three specific things against
+  real source rather than assumption: `azure-ai-evaluation==1.18.3` actually
+  importable in `venv1` (confirmed via installed dist-info); the judge
+  deployment name, since `gpt-5.2` only appeared anywhere in the repo inside
+  the Content Understanding analyzer JSON (`"completion": "gpt-5.2"`, a
+  different API surface, not a chat-completions deployment reference) —
+  resolved by running `az cognitiveservices account deployment list` against
+  `aif-dev-wus-01`, confirming a real deployment named `gpt-5-2` (hyphenated,
+  matching the existing convention) exists in the same account as the two
+  candidates; and the `../iip-docs` relative-path gotcha, which turned out
+  not to apply to this script at all, since `context` is already baked into
+  `data.jsonl` — Step 3 never touches `iip-docs/` directly.
+- `m6_evaluate.py` written (first pass independently, corrected in rounds —
+  same working style as `m6_assemble.py`), and debugged through a real chain
+  of distinct failures, each traced to a root cause rather than patched
+  blind:
+  - Six names (`evaluate`, `AzureOpenAIModelConfiguration`, and the four
+    evaluator classes) were never imported from `azure.ai.evaluation` —
+    caught immediately as `NameError`/`ModuleNotFoundError`-adjacent
+    failures.
+  - `AzureOpenAIModelConfiguration(...)` was missing `azure_deployment`
+    entirely — had `azure_endpoint`/`api_key`/`api_version` but not the
+    judge's actual deployment name.
+  - First draft called `evaluate()` once per candidate model in a loop; real
+    misunderstanding, not a typo — `evaluate()` runs once over the whole
+    `data.jsonl` (both models' rows together), and the model-vs-model split
+    happens after, on the output, not via repeated calls.
+  - `model_config()` was being invoked three separate times (once per
+    AI-assisted evaluator), each call re-fetching a live Azure key
+    unnecessarily — fixed to call once and reuse the result.
+  - `ModuleNotFoundError: No module named 'azure'` despite confirmed
+    installation — root cause was the active terminal not actually running
+    `venv1`'s Python (same species of bug as July 29's `pip`-vs-`venv1`
+    mismatch); confirmed via `sys.executable`, fixed by properly activating
+    `venv1` in that shell.
+  - `nltk` (pulled in transitively by `azure-ai-evaluation`) blocked its own
+    `regex` import with `ImportError: Blocked import ... from current
+    working directory for security reasons`. Real, structural cause, not a
+    stray file: `venv1` lives nested inside `scripts/`, so when a script
+    runs with cwd = `scripts/`, `regex`'s real, legitimately-installed
+    location resolves to a path *underneath* cwd, and nltk's new CWE-427
+    defense (`venv1/Lib/site-packages/nltk/inisec.py`, added this nltk
+    version) can't tell that apart from an attacker's planted file. The
+    error's own suggested fix (`-P`/`PYTHONSAFEPATH`) does **not** work here
+    — confirmed by reading `inisec.py`'s own docstring, which states that
+    flag only isolates spawned worker processes, not the main synchronous
+    process this script runs in. Real fix: the module's own documented
+    escape hatch, `NLTK_DISABLE_IMPORT_SECURITY=1`, set as a real shell
+    environment variable *before* Python starts — `.env` is too late, since
+    `load_dotenv()` doesn't run until after the blocked import already
+    fired. **Unresolved, worth a deliberate decision, not re-discovering
+    each session:** this will recur on every future script that imports
+    `azure.ai.evaluation` from inside `scripts/`, since it's the venv's
+    location causing it, not this one script. Either keep setting the env
+    var per terminal session, or relocate `venv1` outside the `ai-103` tree
+    entirely. Not decided.
+  - `evaluate()` was called with `input_file=`/`output_file=` — wrong
+    keyword names. Real trap: `evaluate()` accepts `**kwargs`, so wrong
+    keyword names don't error, they're silently absorbed and ignored.
+    Python only complained about the one genuinely required argument
+    (`data`) that was missing entirely; `output_file` failed silently and
+    would have produced no output file at all if not caught. Fixed to
+    `data=`/`output_path=`, confirmed against real installed source
+    (`evaluate()`'s actual signature), not assumed.
+  - `openai.BadRequestError`: `max_tokens` unsupported, "Use
+    'max_completion_tokens' instead." Root cause, confirmed by reading
+    `azure/ai/evaluation/_legacy/prompty/_prompty.py`: `gpt-5.2` is a
+    reasoning-family model (same class as o1/o3), which rejects `max_tokens`
+    and also `temperature`/`top_p`/etc. The SDK already supports this via an
+    `is_reasoning_model` flag (documented on `GroundednessEvaluator`,
+    `RelevanceEvaluator`, `SimilarityEvaluator`; defaults to `False`) — fixed
+    by passing `is_reasoning_model=True` to all three (not `F1ScoreEvaluator`,
+    which never calls a model). Real side-finding, not incidental: this also
+    confirms `gpt-5-4`/`gpt-5-4-mini` are **not** reasoning-family models,
+    since `m6_generate.py`'s `temperature=0` call worked fine on both — a
+    reasoning model would have rejected that the same way it rejected
+    `max_tokens`. Strengthens the July 28 same-family-bias reasoning for the
+    judge choice: `gpt-5.2` isn't just an older generation, it's a
+    structurally different model class from both candidates.
+  - `openai.RateLimitError` (429), sustained and heavy, once the reasoning-
+    model fix let real traffic through. Root cause, confirmed via
+    `azure/ai/evaluation/_legacy/_batch_engine/_config.py` and
+    `_run_submitter_client.py`: `evaluate()` runs each of the three
+    AI-assisted evaluators as separate, concurrent batch jobs, each
+    defaulting to up to 10 concurrent requests (`max_concurrency`,
+    overridable via the `PF_WORKER_COUNT` env var) — meaning up to 30
+    concurrent requests could hit the single `gpt-5-2` deployment at once,
+    despite it nominally having more capacity (10) than either candidate (3
+    each) per the July 27 resource table. It's not under-provisioned in
+    isolation, it's getting hit by three evaluators simultaneously. Fixed
+    for this run via `$env:PF_WORKER_COUNT = "2"` set in the terminal before
+    running. Worth noting as a contrast to the nltk fix above: this variable
+    *would* work from `.env`, since it's read at runtime inside `evaluate()`
+    — well after the script's own `load_dotenv()` call — unlike
+    `NLTK_DISABLE_IMPORT_SECURITY`, which has to be set before Python starts.
+    Not yet moved into `.env` permanently.
+- Run completed end-to-end despite the heavy 429 retries during the run.
+  Verified, not assumed, that nothing silently degraded: all 60 AI-judged
+  calls (3 evaluators × 20 rows) show `status: completed` in the row-level
+  output; `F1ScoreEvaluator`'s `status: None` on every row is expected, not
+  an error — it never calls a model, so it never has a "completed" API
+  lifecycle to report in the first place.
+- Real, not-yet-fixed bug in the output path: `output_path=` was written as
+  a plain string, `"results/{timestamp}_eval_results.json"`, not an
+  f-string — so `{timestamp}` was never substituted, and the actual file on
+  disk is literally named `{timestamp}_eval_results.json`. Fix is the same
+  `datetime.now().strftime(...)` + f-string pattern `m6_generate.py` already
+  uses — not yet applied.
+- Results reviewed programmatically (structure confirmed as
+  `{rows, metrics, studio_url}`, matching `evaluate()`'s real return type —
+  not assumed from the docstring alone). 20 rows confirmed, split 10/10
+  between `gpt-5-4` and `gpt-5-4-mini`. Per-model grouped averages (the
+  actual comparison, since `evaluate()`'s own aggregate blends both models):
+
+  | metric | gpt-5-4 | gpt-5-4-mini |
+  |---|---|---|
+  | groundedness | 4.00 | 4.10 |
+  | relevance | 4.00 | 4.00 |
+  | similarity | 5.00 | 5.00 |
+  | f1_score | 0.475 | 0.429 |
+
+  Honest read, not a declared winner: three of four metrics are effectively
+  tied (identical or within 0.1 on a 5-point scale) at only 10 questions per
+  model — too small a sample to treat a 0.1 gap as a real signal. The one
+  real gap is `f1_score`, favoring `gpt-5-4`. Plausibly connected to the
+  July 30 finding that `gpt-5-4-mini` sometimes emits raw Markdown syntax in
+  its answers (literal punctuation fused onto real words would hurt a pure
+  token-overlap metric specifically, without necessarily moving an LLM
+  judge's opinion) — but this is a lead, not a confirmed explanation. Real
+  spot-check to run next session, not yet done: filter `gpt-5-4-mini`'s rows
+  to the lowest `f1_score` values, read `inputs.response` for stray
+  Markdown, and cross-check against `gpt-5-4`'s answers to the *same*
+  questions (matched by `inputs.query`, not row position) to see if the
+  theory actually holds or if something else explains the gap.
 
 ---
 
@@ -543,13 +676,43 @@ GPT-5.4-mini's raw Markdown-syntax finding. Both apply equally to both
 candidates, so real evaluator scores — not a pre-emptive guess — should
 settle whether either needs fixing.
 
-Next real sub-step is Step 3, deliberately deferred to the next session
-rather than started at the end of a long one: build the `evaluate()` call
-against `data.jsonl` with judge model `gpt-5.2` and the four evaluators
-(`Groundedness`/`Relevance`/`Similarity`/`F1Score`) — no `column_mapping`
-needed, `data.jsonl`'s fields already match the SDK's expected names. Then
-group the row-level output by `inputs.model` and compare the two candidates'
-averages directly — `evaluate()`'s own aggregate metrics blend both models
-together, so the actual "pick a winner" comparison is a second, deliberate
-step, not something the SDK hands over on its own. Winner (actual evidence,
-not reasoning) becomes the model for M5's RAG-grounded Q&A. Not started.
+Step 3 is built, debugged, and has produced real results —
+`m6_evaluate.py` runs `evaluate()` against `data.jsonl` with judge model
+`gpt-5-2` (`is_reasoning_model=True` on the three AI-assisted evaluators,
+`PF_WORKER_COUNT=2` to stay under the judge's rate limit) and all 20 rows
+completed successfully. Per-model averages: three of four metrics
+(groundedness, relevance, similarity) are effectively tied between
+`gpt-5-4` and `gpt-5-4-mini`; `f1_score` favors `gpt-5-4` (0.475 vs. 0.429),
+plausibly tied to `gpt-5-4-mini`'s raw-Markdown-emission finding from
+July 30 but not yet confirmed (see session notes above).
+
+Output filename bug is fixed — `output_path=` now builds a real timestamp
+via `datetime.now().strftime(...)` + an f-string, same pattern
+`m6_generate.py` already used. `PF_WORKER_COUNT=2` has also been moved into
+both `.env` and `.env.example` (Aug 5), so it no longer needs to be set
+per-terminal-session before each run.
+
+Two concrete things left for next session, in order:
+
+1. **Spot-check the F1 gap** — filter `gpt-5-4-mini`'s rows to lowest
+   `f1_score`, inspect `inputs.response` for stray Markdown, cross-check
+   against `gpt-5-4`'s answers to the same questions (by `inputs.query`).
+   Confirms or kills the Markdown theory before it's used as a deciding
+   factor.
+2. **Decide the winner** — informed by the spot-check, not just the raw
+   F1 number, given how thin the sample is (n=10/model). Winner becomes the
+   model for M5's RAG-grounded Q&A.
+
+One unresolved structural item, not urgent but real, worth a deliberate
+call rather than re-discovering it each session (full detail in this
+session's notes above): the `nltk`/`venv1`-nested-in-`scripts/` CWD-import
+block will recur on every future script that imports `azure.ai.evaluation`
+from `scripts/` — either keep setting `NLTK_DISABLE_IMPORT_SECURITY=1` per
+terminal session or relocate `venv1` outside the `ai-103` tree. Not decided.
+
+Also noticed but not fixed (small, deferred — real coding, not today's
+cleanup): `m6_evaluate.py` hardcodes `azure_deployment="gpt-5-2"` directly
+in code rather than reading it from a `CHAT_DEPLOYMENT_GPT_5_2`-style `.env`
+variable, unlike the two candidate deployments. Inconsistent with the
+established convention, worth fixing alongside other Step 3 polish, not
+urgent.
