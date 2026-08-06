@@ -1,3 +1,4 @@
 *.sh text eol=lf
+*.py text eol=lf
 *.bicep text eol=lf
 *.bicepparam text eol=lf
