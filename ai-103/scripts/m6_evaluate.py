@@ -34,8 +34,8 @@ evaluators = {
 # evaluate now
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 evaluate(
-    data="data.jsonl",
+    data="m6_eval_input.jsonl",
     evaluators=evaluators,
     output_path=f"results/{timestamp}_eval_results.json",
-    fail_on_evaluator_errors=True # is this where this line goes?
+    fail_on_evaluator_errors=True
 )

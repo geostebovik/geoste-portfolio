@@ -9,3 +9,7 @@ What is the late fee for a missed payment? | $50.00
 What state's law governs this agreement? | Arizona
 When is the full balance due? | June 30, 2031
 How many monthly payments are there? | 72
+If a payment is received while both late fees and interest are owed, what is the order in which the payment is applied? | Late fees first, then interest, then any remainder to principal.
+What is the total amount of all scheduled monthly payments over the full term of the loan, not including any late fees or default interest? | $68,984.64
+If the Borrower defaults and the default is not cured after written notice, what can happen to the loan under this agreement? | The unpaid principal begins accruing interest at the maximum rate allowed by law, and the Lender may declare the entire outstanding balance immediately due and payable.
+How many days does the Borrower have after a payment's due date before a late fee is charged? | Not specified in the document.
