@@ -14,7 +14,7 @@ __pycache__/
 
 # Generated script outputs (regenerable, not source)
 ai-103/scripts/results/
-ai-103/scripts/data.jsonl
+ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files
 docs/

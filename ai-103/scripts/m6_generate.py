@@ -71,6 +71,6 @@ for model in chat_models:
 results_dir = Path("results")
 results_dir.mkdir(parents=True, exist_ok=True)
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-out_path = results_dir / f"{timestamp}_results.json"
+out_path = results_dir / f"{timestamp}_generate_results.json"
 out_path.write_text(json.dumps(results, indent=2))
 print(f"Saved: {out_path}")

@@ -15,7 +15,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** August 5, 2026
+**Status as of:** August 6, 2026
 
 ---
 
@@ -31,24 +31,17 @@ accumulates for them — no point building empty structure now.
 - [x] **M4:** Extraction validated across all 3 image conditions (clean PDF, flatbed
   scan, angled photo). **Complete July 27, 2026.**
 - [ ] **M5:** RAG-grounded Q&A working (real vector search/index, not context-stuffing).
-  **Blocked on M6** — deliberately sequenced after the evaluator so the Q&A model
-  choice is evidence-based, not guessed.
-- [ ] **M6:** Evaluator harness built, used to pick GPT-5.4 vs. GPT-5.4-mini for M5.
-  **In progress** — design decisions locked (judge model, context strategy, SDK
-  choice, see below); `.env`/`requirements.txt` config in place. Step 1 script
-  (`m6_generate.py`) complete and validated: merged from `m6_probe.py` +
-  `scratch.py`, single-item proof passed, and the full 10×2 loop ran clean —
-  20/20 factually correct answers across both candidate models (see July 30
-  session for real findings on answer verbosity, model inconsistency, and
-  raw Markdown-syntax emission — all left as-is pending evaluator evidence).
-  Step 1 complete end-to-end: results saved to
-  `ai-103/scripts/results/{timestamp}_results.json` (gitignored), matching
-  `m3_analyze.py`'s save convention. **Step 2 complete (Aug 5):**
-  `m6_assemble.py` reads `results/20260730-131154_results.json` and the
-  loan-agreement markdown, renames fields to the SDK's native names, attaches
-  context, and writes `data.jsonl` (gitignored) — verified programmatically,
-  20 valid JSON objects, correct 5-key schema, no blank lines. Evaluator run
-  (`evaluate()`, Step 3) not yet started — planned for the next session.
+  **Unblocked (Aug 6)** — M6 picked `gpt-5-4-mini` as the Q&A model. Not started.
+- [x] **M6:** Evaluator harness built, used to pick GPT-5.4 vs. GPT-5.4-mini for M5.
+  **Complete (Aug 6).** Full pipeline (`m6_generate.py` → `m6_assemble.py` →
+  `m6_evaluate.py`) built, debugged, and run twice — once against the original
+  10-question rubric (Aug 5), once against a 14-question set stress-tested with
+  4 harder questions probing cross-clause reasoning, arithmetic synthesis, and
+  abstention (Aug 6). Decision: **`gpt-5-4-mini`**, on confirmed quality parity
+  across both runs plus a real ~3x per-token cost advantage. Full evidence
+  trail, including a real cross-session reproducibility finding that overturned
+  the Aug 5 run's apparent `gpt-5-4` edge, in the Aug 6 session notes below.
+  Small infra items remain (see Next action) but don't block M5.
 - [ ] **M7:** Build a single orchestrator agent (Generative AI/agentic exam
   domain) over a neutral, synthetic small-business content-review scenario —
   decoupled from the YouTube-cleanup business thesis as of August 4, see
@@ -64,7 +57,162 @@ accumulates for them — no point building empty structure now.
 
 ---
 
-## Latest session (August 5, 2026)
+## Latest session (August 6, 2026)
+
+- Before adding new evaluator evidence, re-examined the Aug 5 F1 result with
+  real skepticism instead of accepting the raw number: is the near-tie an
+  artifact of comparing two close variants of the same model family, or of
+  the test document/questions being too simple to discriminate on? The
+  original 10 questions are single-fact lookups with no cross-clause
+  reasoning — a limitation already flagged July 28 but never actually tested
+  against. Decision: stress-test the *same* document and pipeline with harder
+  questions rather than swap models or documents — narrower and cheaper, and
+  it directly tests which explanation (task difficulty vs. real model-quality
+  difference) is doing the work, instead of guessing.
+- Checked whether pricing alone could resolve the tie if quality really is
+  even. Confirmed via Microsoft Learn / Microsoft Q&A (citing the official
+  GPT-5.4 launch blog): `gpt-5.4` (<272K context) runs $2.50/M input tokens,
+  $15.00/M output tokens on Standard Global. `gpt-5.4-mini`'s $0.75/M input,
+  $4.50/M output came from a secondary aggregator, not independently
+  confirmed against the primary Microsoft blog (JS-rendered, didn't return
+  usable text via fetch) — worth a portal spot-check before treating the
+  exact cents as final, but the ~30%-of-base ratio on both input and output
+  is internally consistent and plausible. No latency data exists anywhere in
+  this project to weigh alongside it; `m6_generate.py` never captured request
+  timing.
+- 4 new Q&A pairs added to `iip-docs/q_a_pairs_sample.txt` (now 14 rows
+  total), each targeting a distinct failure mode the original 10 never
+  touched: payment-allocation ordering (a 3-item sequence from Section V),
+  an arithmetic-synthesis question ($958.12 × 72, hand-checked = $68,984.64),
+  a multi-clause combination question (needs both Section IV *and* Section VI
+  for a complete answer), and an abstention question (late-fee grace period
+  in days — genuinely not stated anywhere in the document, testing whether
+  the system prompt's "say so if it's not in the document" instruction is
+  actually followed rather than assumed).
+- Naming-convention rework across the M6 pipeline, prompted by realizing
+  `m6_assemble.py`'s hardcoded results filename would need a manual edit
+  every single run. Settled on `{timestamp}_{script}_results.json` per
+  producing script, not incrementing IDs — incrementing IDs were considered
+  and rejected: they don't remove the "which file is current" lookup problem,
+  they just relabel it, and they carry less information than a timestamp does
+  for free (a timestamp says *when* for free; a counter needs its own lookup
+  logic to find the highest existing value). `m6_generate.py`'s output
+  renamed `{ts}_results.json` → `{ts}_generate_results.json`. `data.jsonl`
+  renamed to `m6_eval_input.jsonl` — a real, six-months-from-now-legible name
+  instead of a generic one — updated in all three places it's referenced
+  (`m6_assemble.py`'s write, `m6_evaluate.py`'s read, `.gitignore`).
+- `m6_assemble.py` rewritten to auto-discover the latest generate-results
+  file instead of reading a hardcoded filename, built collaboratively in
+  rounds rather than handed over finished — same working style as every
+  other script this project. Confirmed by direct test, not assumed:
+  `Path.glob()` on a nonexistent directory returns `[]` rather than raising
+  on this Python/OS combination, which meant the originally-planned separate
+  `mkdir` guard wasn't actually needed — one empty-list check covers both the
+  missing-directory and empty-directory first-run cases. Two real bugs caught
+  in review, not just style nits: `from anyio import Path` (an async I/O
+  library, not `pathlib.Path` — same species of mistake as July 29's stray
+  `xmlrpc.client` import, VS Code autocomplete offering the wrong match),
+  swapped for the real import; and the first working draft looped over
+  *every* matched file and merged their rows together rather than selecting
+  only the newest one with `[-1]` — would have silently blended every
+  historical generate-run into `m6_eval_input.jsonl` the moment a second
+  `*_generate_results.json` file existed, which is exactly what this
+  session's rerun would have triggered if it had shipped unfixed.
+- Re-hit the `nltk`/`venv1`-nested-in-`scripts/` CWD-import block from Aug 5,
+  exactly as predicted — the first real recurrence since it was flagged as
+  something that "will recur on every future script that imports
+  `azure.ai.evaluation` from `scripts/`." Unblocked for this session the same
+  way (`$env:NLTK_DISABLE_IMPORT_SECURITY = "1"` in PowerShell before
+  running), but the deferred decision is now made: relocate `venv1` outside
+  the `ai-103` tree rather than keep setting the env var per session. Not yet
+  executed — deliberately deferred to the start of the next session instead
+  of squeezed in at the tail end of this one, since it's a real structural
+  change worth doing with a clear head. Plan: recreate fresh via
+  `python -m venv` + `pip install -r requirements.txt` rather than move the
+  folder wholesale, since venvs bake absolute paths into `pyvenv.cfg` and
+  their activation scripts at creation time. Real verification step for that
+  session, not to be skipped: confirm `sys.executable` resolves correctly
+  afterward, and confirm importing `azure.ai.evaluation` no longer needs the
+  env var at all — proof the fix addressed the actual root cause, not an
+  assumption that it did.
+- `m6_generate.py` rerun against the full 14-question set (28 rows: 14
+  questions × 2 models). Both models' arithmetic answer checked and correct
+  ($68,984.64, matching the hand-computed ground truth). Both correctly
+  abstained on the grace-period question rather than inventing a day count —
+  no hallucination on either candidate. `m6_assemble.py`'s new discovery
+  logic exercised for real for the first time: correctly found and read the
+  new `20260806-132129_generate_results.json`, the only file in `results/`
+  matching the new `_generate_results.json` pattern.
+- `m6_evaluate.py` run against the 14-question set
+  (`NLTK_DISABLE_IMPORT_SECURITY=1` set per-session, `PF_WORKER_COUNT=2`
+  still in effect from `.env`; sustained 429s during the run, expected given
+  the account's per-deployment capacity limits, same in kind as Aug 5).
+  Results saved to `results/20260806-135742_eval_results.json`.
+
+  | metric | gpt-5-4 | gpt-5-4-mini |
+  |---|---|---|
+  | groundedness | 4.214 | 4.429 |
+  | relevance | 4.000 | 4.071 |
+  | similarity | 4.857 | 4.929 |
+  | f1_score | 0.320 | 0.382 |
+
+  `gpt-5-4-mini` now leads or ties on every metric, across both the original
+  10 questions (re-asked fresh today, not reused from Aug 5) and the 4 new
+  stress questions — a materially different picture than Aug 5's "three tied,
+  one thin edge to `gpt-5-4`."
+- Real, significant finding, bigger than the stress-question results
+  themselves: `gpt-5-4`'s answer to "What state's law governs this
+  agreement?" changed between the two evaluation runs. Aug 5: "Arizona."
+  (F1=1.000). Today, same model, same deployment, same `temperature=0`: "This
+  agreement is governed by the laws of the State of Arizona." (F1=0.182) —
+  identical in substance to `gpt-5-4-mini`'s answer both times. That single
+  question drove essentially the entire Aug 5 F1 gap (+0.818 of the +0.459
+  total sum of per-question differences); it evaporated on rerun, which
+  directly confirms — with a real repeated observation, not just a
+  small-sample-size argument — that Aug 5's apparent `gpt-5-4` F1 edge was
+  noise. Worth flagging plainly against the July 29 finding that
+  `temperature=0` gives "byte-identical output" on reruns: that was verified
+  back-to-back, in immediate succession, on a single question. Today is the
+  first time it's been tested across a multi-day gap on a full question set,
+  and it did not hold. Root cause not established — could be floating-point
+  non-associativity in batched inference, a silent model-version rotation
+  behind a stable deployment name, or something else — worth knowing this is
+  unconfirmed rather than assuming a mechanism.
+- Stress-question results reviewed individually, not just as an aggregate
+  average, matching the discipline of checking real per-row content rather
+  than trusting a summary number:
+  - Arithmetic and abstention questions: near-parity between the two models,
+    both correct.
+  - Multi-clause synthesis question (default consequences): both models made
+    the same partial-answer mistake — neither surfaced Section IV's
+    interest-escalation clause, both caught only Section VI's acceleration
+    clause. Doesn't discriminate between candidates; flags a shared
+    limitation (likely a prompting gap, not a model-selection lever) worth
+    remembering if M5's real Q&A needs multi-clause synthesis.
+  - Payment-ordering question: the one real per-question gap (F1 0.643 mini
+    vs. 0.333 `gpt-5-4`) — but traced to response format, not substance:
+    `gpt-5-4` answered with a numbered Markdown list plus a citation, mini
+    with one plain sentence closer to the ground truth's shape. Both
+    correctly identified the actual order.
+  - Overall conclusion on the original open question (was the Aug 5 tie a
+    ceiling effect from an easy document, or a real model-quality artifact):
+    making the test harder did not surface a latent capability gap between
+    the two models. They converged on the same successes and the same shared
+    blind spot; the one place they differed was formatting, not correctness.
+    Strengthens rather than weakens the case that this is a genuine
+    characteristic of this model pair on this task type within what's been
+    tested, not a test-design artifact.
+- M6 model decision made: **`gpt-5-4-mini`**, for M5's RAG-grounded Q&A.
+  Basis: quality parity confirmed across two independent evaluation runs (14
+  questions total, including 4 designed specifically to stress harder
+  reasoning than the original set), reinforced rather than undercut by the
+  harder questions; a real, though not fully primary-sourced, ~3x per-token
+  cost advantage; no latency data to weigh either way, since none was ever
+  captured. M6 marked complete above — M5 is unblocked.
+
+---
+
+## Session — August 5, 2026
 
 - Picked up Step 2 (`data.jsonl` assembly) where July 31 left off. Before
   writing code, re-verified the Aug 4 correction's central claim — that
@@ -657,62 +805,40 @@ accumulates for them — no point building empty structure now.
 
 ## Next action
 
-Steps 1 and 2 are both done and verified end-to-end. `m6_generate.py`
-produced `results/20260730-131154_results.json` (20/20 factually correct
-answers across both candidates). `m6_assemble.py` consumes that file plus
-the loan-agreement markdown and produces `scripts/data.jsonl` — 20 rows,
-fields renamed to the SDK's native names (`query`/`response`/`ground_truth`),
-constant `context` attached, `model` preserved unmapped so it survives as
-`inputs.model` in `evaluate()`'s output (confirmed against real installed
-SDK source, Aug 5 — see session notes above). `azure-ai-evaluation==1.18.3`
-is now actually installed and pinned in `requirements.txt`, which wasn't
-true before this session despite an earlier note claiming otherwise.
+M6 is done and M5 is unblocked. Before starting M5, four small infra items
+carried forward from Aug 6, none of which block M5 but all real and worth
+closing out rather than re-discovering:
 
-Two things deliberately left unresolved, both revisit-after-evaluator-
-evidence calls from July 30 (see session notes above for full reasoning): no
-format/length constraint added to the system prompt despite the verbosity
-finding, and no "plain text, no Markdown" constraint added despite
-GPT-5.4-mini's raw Markdown-syntax finding. Both apply equally to both
-candidates, so real evaluator scores — not a pre-emptive guess — should
-settle whether either needs fixing.
+1. **`m6_assemble.py` confirmation output.** It prints which generate-results
+   file it read but nothing confirms `m6_eval_input.jsonl` actually got
+   written — add a "Saved: ..." print matching `m6_generate.py`'s existing
+   pattern. Worth going one step further and writing the source
+   generate-results filename into `m6_eval_input.jsonl` itself (or a
+   sidecar), since there's currently no way to trace which generate-run
+   produced a given eval input after the fact without checking timestamps by
+   hand.
+2. **`m6_evaluate.py`'s hardcoded judge deployment.**
+   `azure_deployment="gpt-5-2"` is still hardcoded directly in
+   `model_config()`, unlike the two candidate deployments, which are read
+   from `.env`. Add a matching `.env` variable for consistency.
+3. **cwd-relative paths in `m6_generate.py` and `m6_assemble.py`.** Both use
+   paths relative to the terminal's current directory (`"../iip-docs/..."`),
+   which only work when launched from exactly `scripts/` — hit directly on
+   Aug 6 as a `FileNotFoundError` when run from the wrong folder. Fix: base
+   paths on `Path(__file__).parent` instead, so the scripts work regardless
+   of cwd.
+4. **Relocate `venv1` outside the `ai-103` tree.** Decision made Aug 6, not
+   yet executed — deliberately deferred to a session start rather than done
+   at the tail end of one. Recreate fresh via `python -m venv` +
+   `pip install -r requirements.txt` rather than moving the folder (avoids
+   stale absolute paths baked into `pyvenv.cfg`/activation scripts at
+   creation time). This is what actually removes the need for
+   `NLTK_DISABLE_IMPORT_SECURITY=1` per session, rather than continuing to
+   work around it — verify by confirming `sys.executable` resolves correctly
+   afterward and that importing `azure.ai.evaluation` no longer needs the env
+   var set at all, not by assuming the relocation fixed it.
 
-Step 3 is built, debugged, and has produced real results —
-`m6_evaluate.py` runs `evaluate()` against `data.jsonl` with judge model
-`gpt-5-2` (`is_reasoning_model=True` on the three AI-assisted evaluators,
-`PF_WORKER_COUNT=2` to stay under the judge's rate limit) and all 20 rows
-completed successfully. Per-model averages: three of four metrics
-(groundedness, relevance, similarity) are effectively tied between
-`gpt-5-4` and `gpt-5-4-mini`; `f1_score` favors `gpt-5-4` (0.475 vs. 0.429),
-plausibly tied to `gpt-5-4-mini`'s raw-Markdown-emission finding from
-July 30 but not yet confirmed (see session notes above).
-
-Output filename bug is fixed — `output_path=` now builds a real timestamp
-via `datetime.now().strftime(...)` + an f-string, same pattern
-`m6_generate.py` already used. `PF_WORKER_COUNT=2` has also been moved into
-both `.env` and `.env.example` (Aug 5), so it no longer needs to be set
-per-terminal-session before each run.
-
-Two concrete things left for next session, in order:
-
-1. **Spot-check the F1 gap** — filter `gpt-5-4-mini`'s rows to lowest
-   `f1_score`, inspect `inputs.response` for stray Markdown, cross-check
-   against `gpt-5-4`'s answers to the same questions (by `inputs.query`).
-   Confirms or kills the Markdown theory before it's used as a deciding
-   factor.
-2. **Decide the winner** — informed by the spot-check, not just the raw
-   F1 number, given how thin the sample is (n=10/model). Winner becomes the
-   model for M5's RAG-grounded Q&A.
-
-One unresolved structural item, not urgent but real, worth a deliberate
-call rather than re-discovering it each session (full detail in this
-session's notes above): the `nltk`/`venv1`-nested-in-`scripts/` CWD-import
-block will recur on every future script that imports `azure.ai.evaluation`
-from `scripts/` — either keep setting `NLTK_DISABLE_IMPORT_SECURITY=1` per
-terminal session or relocate `venv1` outside the `ai-103` tree. Not decided.
-
-Also noticed but not fixed (small, deferred — real coding, not today's
-cleanup): `m6_evaluate.py` hardcodes `azure_deployment="gpt-5-2"` directly
-in code rather than reading it from a `CHAT_DEPLOYMENT_GPT_5_2`-style `.env`
-variable, unlike the two candidate deployments. Inconsistent with the
-established convention, worth fixing alongside other Step 3 polish, not
-urgent.
+Once those are clear (or deliberately skipped for now), M5 starts: real
+vector search/index over the loan agreement, using `gpt-5-4-mini` as the Q&A
+model per M6's decision — not context-stuffing, which was M6's deliberate
+simplification to isolate model quality as the only variable under test.
