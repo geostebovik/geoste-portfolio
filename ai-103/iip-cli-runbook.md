@@ -10,6 +10,36 @@ Resource names assumed throughout: RG `rg-iip-dev-wus-01`, Foundry account
 
 ---
 
+## Activate the Python venv (before running any `m6_*.py` script)
+
+As of Aug 7, 2026 the venv lives outside the `ai-103` tree entirely —
+`C:\Users\gerar\venvs\ai-103` — not nested in `scripts/`. Relocated to fix a
+recurring `nltk` CWD-import security block; see STATUS.md Aug 6/7 for the
+full root-cause trail. Must be activated explicitly each session — nothing
+here does this automatically.
+
+PowerShell:
+
+```powershell
+C:\Users\gerar\venvs\ai-103\Scripts\Activate.ps1
+```
+
+Cloud Shell / Bash:
+
+```bash
+source /home/djee/venvs/ai-103/bin/activate
+```
+
+(Bash path assumes the venv was also created under Cloud Shell's own home,
+`/home/djee` — Cloud Shell has no persistent `~/clouddrive`, so a venv
+created there needs recreating per Cloud Shell session, same
+`python -m venv` + `pip install -r requirements.txt` sequence as the
+Windows-side one. Not yet done as of this writing — only the Windows-side
+venv has been relocated and verified.)
+
+Verify before trusting any run: `python -c "import sys; print(sys.executable)"`
+should point inside the venv path, not a system Python.
+
 ## Get the Foundry endpoint
 
 ```bash
