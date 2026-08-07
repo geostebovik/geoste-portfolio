@@ -1,6 +1,7 @@
 requests
 python-dotenv
 openai
+azure-search-documents
 # Pinned 2026-08-05 — verified _rename_columns_conditionally() behavior against this
 # exact version (venv1\Lib\site-packages\azure\ai\evaluation\_evaluate\_evaluate.py:797).
 # Bump deliberately, re-verify if evaluate()'s behavior around unmapped columns matters again.

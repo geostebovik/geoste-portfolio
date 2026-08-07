@@ -76,6 +76,22 @@ az cognitiveservices account keys regenerate \
 Swap `Key1`/`Key2`. **If it's unclear which key actually leaked, rotate
 both** — guessing wrong leaves the real exposure live.
 
+## Get a Search admin key
+
+```bash
+az search admin-key show \
+  --service-name srch-iip-dev-wus-01 \
+  --resource-group rg-iip-dev-wus-01 \
+  --query primaryKey -o tsv
+```
+
+Same convention as the Foundry key: fetch live each run, store in a
+variable, never persist it (not even in Key Vault, to match the pattern
+already used for the Foundry/storage keys on this project). Swap
+`primaryKey` for `secondaryKey` as needed; `az search query-key list`
+returns query-only keys instead, if a script only ever reads the index
+and shouldn't be able to write to it.
+
 ## List blob containers / blobs
 
 ```bash
