@@ -15,7 +15,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** August 6, 2026
+**Status as of:** August 7, 2026
 
 ---
 
@@ -57,7 +57,42 @@ accumulates for them — no point building empty structure now.
 
 ---
 
-## Latest session (August 6, 2026)
+## Latest session (August 7, 2026)
+
+- `venv1` relocated outside the `ai-103` tree, per the Aug 6 decision —
+  first item off the Next Action list. Recreated fresh at
+  `C:\Users\gerar\venvs\ai-103` via `python -m venv` + `python -m pip
+  install -r requirements.txt`, not moved (avoids stale absolute paths
+  baked into `pyvenv.cfg`/activation scripts at creation time, per the
+  Aug 6 plan). Chose a location outside *any* git repo, not just outside
+  `ai-103` — `geoste-portfolio` (the actual git root, one level up) also
+  holds the unrelated YCC client files, so a venv anywhere inside that
+  tree stays one `git add .` away from the same near-miss already caught
+  twice on Aug 6.
+- Verified, not assumed, that this actually fixed the root cause: `python
+  -c "import sys; print(sys.executable)"` resolved to the new venv path,
+  and `python -c "import azure.ai.evaluation; print('OK')"` succeeded
+  with **no** `NLTK_DISABLE_IMPORT_SECURITY` env var set in that shell —
+  the real proof, per Aug 6's own note, that relocating the venv (not
+  just working around the symptom per-session) was the correct fix. Old
+  `scripts/venv1` deleted and confirmed gone via directory listing.
+- `iip-cli-runbook.md` updated with an activation section (both
+  PowerShell and Bash/Cloud Shell forms, since they differ significantly)
+  so the new venv location isn't tribal knowledge next session. Real gap
+  surfaced while writing it: Cloud Shell has no persistent `~/clouddrive`
+  (existing lesson, see Key Lessons below), so a Cloud-Shell-side venv
+  would need recreating every Cloud Shell session regardless of where
+  it's relocated — not yet set up there, flagged in the runbook rather
+  than assumed solved. Not a blocker for M5, which runs from the Windows
+  PowerShell side per current working style.
+- Next Action item 4 marked complete below. Items 1, 2, 3, 5 (confirmation
+  prints/provenance, hardcoded judge deployment, cwd-relative paths,
+  line-ending renormalize) deliberately left for a later session, per
+  today's session-scope decision — none block M5.
+
+---
+
+## Session — August 6, 2026
 
 - Before adding new evaluator evidence, re-examined the Aug 5 F1 result with
   real skepticism instead of accepting the raw number: is the near-tie an
@@ -209,6 +244,38 @@ accumulates for them — no point building empty structure now.
   harder questions; a real, though not fully primary-sourced, ~3x per-token
   cost advantage; no latency data to weigh either way, since none was ever
   captured. M6 marked complete above — M5 is unblocked.
+- Committed and pushed today's work via manual `git status`/`add`/`commit`/
+  `push` (GitKraken uninstalled, per current working style). Real process
+  worth recording, not just the outcome: `git status` surfaced a much bigger
+  working tree than expected — this repo also holds unrelated, already-
+  modified YouTube Channel Consulting client files (`custom-instructions.md`,
+  `living-status-doc.md`, plus several untracked ones including apparent
+  client data) sitting alongside `ai-103`. Staged only today's six actual
+  files by explicit path rather than `git add .`, specifically to avoid
+  bundling that unrelated work into an M6 commit.
+- Separately, review of the `m6_evaluate.py` diff surfaced a stray CRLF line
+  ending (a `^M` git diff marks on the `data.jsonl`→`m6_eval_input.jsonl`
+  rename line) — same species of issue as the existing "CRLF→LF" lesson,
+  just in a `.py` file, which the existing `.gitattributes` (`*.sh eol=lf`
+  only) didn't cover. Added `*.py`, `*.bicep`, `*.bicepparam` rules (all
+  written as `<pattern> text eol=lf`, the complete form — `text` marks the
+  file as text at all, `eol=lf` forces the ending, matching but more explicit
+  than the existing `.sh` line). Real gotcha hit applying it: `.gitattributes`
+  changes don't retroactively fix already-tracked file content —
+  `git add --renormalize` is needed to re-stage existing files against the
+  new rules. First attempt used `git add --renormalize :/` (whole-repo
+  pathspec), which turned out to behave like a full `git add` across the
+  entire repo, not a scoped line-ending-only fix — it staged the two
+  unrelated YCC files' real pending edits right alongside the intended fix,
+  the same failure mode as `git add .` moments earlier in the same session.
+  Caught before committing by reviewing the staged list, not after. Fixed by
+  `git reset` (unstages only, doesn't touch working-tree content) and
+  re-running `--renormalize` against explicit file paths
+  (`.gitattributes`, `m6_evaluate.py`) instead of a repo-wide pathspec.
+  `m6_assemble.py` and `m6_generate.py` surfaced the same latent CRLF issue
+  once `.gitattributes` covered `.py` files — deliberately left unfixed
+  tonight rather than re-broadening scope again right after catching that
+  exact mistake; queued for next session (see Next action).
 
 ---
 
@@ -805,7 +872,7 @@ accumulates for them — no point building empty structure now.
 
 ## Next action
 
-M6 is done and M5 is unblocked. Before starting M5, four small infra items
+M6 is done and M5 is unblocked. Before starting M5, five small infra items
 carried forward from Aug 6, none of which block M5 but all real and worth
 closing out rather than re-discovering:
 
@@ -827,16 +894,21 @@ closing out rather than re-discovering:
    Aug 6 as a `FileNotFoundError` when run from the wrong folder. Fix: base
    paths on `Path(__file__).parent` instead, so the scripts work regardless
    of cwd.
-4. **Relocate `venv1` outside the `ai-103` tree.** Decision made Aug 6, not
-   yet executed — deliberately deferred to a session start rather than done
-   at the tail end of one. Recreate fresh via `python -m venv` +
-   `pip install -r requirements.txt` rather than moving the folder (avoids
-   stale absolute paths baked into `pyvenv.cfg`/activation scripts at
-   creation time). This is what actually removes the need for
-   `NLTK_DISABLE_IMPORT_SECURITY=1` per session, rather than continuing to
-   work around it — verify by confirming `sys.executable` resolves correctly
-   afterward and that importing `azure.ai.evaluation` no longer needs the env
-   var set at all, not by assuming the relocation fixed it.
+4. ~~**Relocate `venv1` outside the `ai-103` tree.**~~ **Done (Aug 7).**
+   Recreated fresh at `C:\Users\gerar\venvs\ai-103`, outside the actual git
+   root (`geoste-portfolio`, not just outside `ai-103`). Verified, not
+   assumed: `sys.executable` resolves into the new venv, and
+   `azure.ai.evaluation` imports clean with no `NLTK_DISABLE_IMPORT_SECURITY`
+   set. Old `scripts/venv1` deleted. Activation steps (PowerShell + Bash/
+   Cloud Shell) added to `iip-cli-runbook.md`. Cloud-Shell-side venv not yet
+   set up — separate, non-blocking gap, see Aug 7 session notes.
+5. **Renormalize line endings in `m6_assemble.py` and `m6_generate.py`.**
+   `.gitattributes` now covers `*.py` (added Aug 6 after a stray CRLF turned
+   up in `m6_evaluate.py`, already fixed and committed), and these two
+   surfaced the same latent issue once the rule existed. Fix per-file with
+   `git add --renormalize <file>` — explicit paths, not a repo-wide pathspec,
+   since that scope mistake already bundled unrelated files into a staging
+   area once this session (caught before committing, not after).
 
 Once those are clear (or deliberately skipped for now), M5 starts: real
 vector search/index over the loan agreement, using `gpt-5-4-mini` as the Q&A
