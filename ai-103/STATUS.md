@@ -89,6 +89,59 @@ accumulates for them — no point building empty structure now.
   prints/provenance, hardcoded judge deployment, cwd-relative paths,
   line-ending renormalize) deliberately left for a later session, per
   today's session-scope decision — none block M5.
+- M5 started. Vector-store decision made deliberately, not defaulted:
+  Azure AI Search, not a local library (FAISS or similar) — chosen because
+  it's the actual AI-103 exam skill and the more resume-relevant artifact,
+  even though the loan agreement is small enough that chunking isn't
+  solving a real context-window problem here. Honest tradeoff, not
+  hidden: the payoff is skill demonstration, not necessity, on a document
+  this size.
+- `srch-iip-dev-wus-01` provisioned in `rg-iip-dev-wus-01` (Free tier,
+  West US). Checked first, not assumed: only one Free-tier Search service
+  is allowed per subscription, and `az resource list --resource-type
+  Microsoft.Search/searchServices` returned empty across the whole
+  subscription before provisioning, confirming Free tier was actually
+  available. `provisioningState: Succeeded`. Endpoint
+  `https://srch-iip-dev-wus-01.search.windows.net`, added to Key resources
+  below. Admin-key retrieval documented in `iip-cli-runbook.md`, same
+  live-fetch-never-persist convention as the Foundry/storage keys —
+  deliberately not stored in `kv-iip-dev-wus-01`, for consistency with the
+  existing pattern rather than introducing a new one.
+- `azure-search-documents` added to `requirements.txt`, unpinned (matches
+  `requests`/`python-dotenv`/`openai` — only `azure-ai-evaluation` is
+  pinned, for a specific verified-behavior reason, not as a default
+  policy). Not yet installed in the relocated venv.
+- Chunking design settled by reading the actual source markdown (the same
+  file M6 used), not assumed: 15 roman-numeral sections (I–XV), each a
+  clean self-contained paragraph, plus an unnumbered signature block —
+  confirms chunk-by-section over fixed-token windows. Real design
+  implication carried forward from Aug 6: the multi-clause synthesis
+  question (needs both Section IV and Section VI) is where M6 found both
+  candidate models missed Section IV's interest-escalation clause even
+  with the *full* document as context. M5's retrieval top-k needs to be
+  set to ≥2 deliberately — top-1 would structurally guarantee the same
+  miss rather than test whether chunked retrieval does better or worse on
+  it. Proposed index: `loan-agreement-index`, fields `id`/`section`
+  (for citation)/`content`/`contentVector`, 16 documents total (15
+  sections + signature block).
+- Two ideas surfaced in discussion but deliberately not started, logged
+  here so they don't get rediscovered from scratch later: (1) M7's
+  orchestrator agent is a natural fit for Azure AI Foundry's AI Red
+  Teaming Agent, built on Microsoft's own open-source PyRIT and invoked
+  through the same `azure-ai-evaluation` SDK already pinned for M6 —
+  adversarial-robustness testing reusing the M6 evaluator-harness pattern
+  instead of just quality metrics. (2) Azure AI Content Safety's Prompt
+  Shields as an actual defensive layer in front of M5's chat-completion
+  call, not just a detector — a real, exam-relevant Azure product, not a
+  new track. Neither scoped or started; both are additions to consider
+  when M7 planning starts or if M5 needs a security pass, not commitments
+  made today.
+- Session ended before any `m5_*.py` code was written. Index schema and
+  chunking approach agreed conceptually — same pattern as Aug 5's Step 3
+  discussion before `m6_evaluate.py` existed — script itself not started.
+  `venv1`-relocation doc updates and the Search-service/`requirements.txt`
+  changes from this session not yet committed as of this writing (separate
+  from the venv1 commit, which already went out as `ca3f6f1`).
 
 ---
 
@@ -867,14 +920,22 @@ accumulates for them — no point building empty structure now.
 | Chat deployments | `gpt-5-2` (Content Understanding analyzer), `gpt-5-4`, `gpt-5-4-mini` (RAG/Q&A candidates) |
 | Embedding deployment | `text-embedding-3-small` |
 | Analyzer | `iip_loan_agreement_analyzer` (`ai-103/infrastructure/content-understanding/loan-agreement-analyzer.json`) |
+| AI Search service | `srch-iip-dev-wus-01` (Free tier, West US) — `https://srch-iip-dev-wus-01.search.windows.net`, provisioned Aug 7 for M5 |
 
 ---
 
 ## Next action
 
-M6 is done and M5 is unblocked. Before starting M5, five small infra items
-carried forward from Aug 6, none of which block M5 but all real and worth
-closing out rather than re-discovering:
+**M5 is in progress.** Design settled Aug 7 (Azure AI Search, chunk-by-section,
+`loan-agreement-index` schema, top-k ≥ 2 — see Aug 7 session notes above) and
+`srch-iip-dev-wus-01` is provisioned. Concrete next step for the next session:
+write the first pass of the indexing script (chunk the loan agreement
+markdown by section, embed via `text-embedding-3-small`, upload to
+`loan-agreement-index`) — Gerard's draft first, reviewed in rounds, same
+working style as every `m6_*.py` file. Not started yet.
+
+Separately, five small M6 infra items carried forward from Aug 6, none of
+which block M5 but all real and worth closing out rather than re-discovering:
 
 1. **`m6_assemble.py` confirmation output.** It prints which generate-results
    file it read but nothing confirms `m6_eval_input.jsonl` actually got
@@ -910,7 +971,5 @@ closing out rather than re-discovering:
    since that scope mistake already bundled unrelated files into a staging
    area once this session (caught before committing, not after).
 
-Once those are clear (or deliberately skipped for now), M5 starts: real
-vector search/index over the loan agreement, using `gpt-5-4-mini` as the Q&A
-model per M6's decision — not context-stuffing, which was M6's deliberate
-simplification to isolate model quality as the only variable under test.
+These are independent of M5's progress — clear them whenever convenient, not
+a gate on the indexing script above.
