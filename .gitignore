@@ -24,3 +24,14 @@ infrastructure/prod.bicepparam
 
 # Root-level screenshots folder
 screenshots/
+
+# Relocated Aug 20 -- unrelated client (YouTube Channel Consulting) work,
+# moved out to keep it off a public-facing portfolio repo. Real content now
+# lives at C:\Users\gerar\OneDrive\Documents\Data\IT Training\ycc-project.
+# This entry is a safety net against ever re-staging the old path by
+# accident -- see STATUS.md's Aug 20 session notes for the full context
+# (several of these files were already committed/pushed before this move;
+# a git-history purge is a separate, deliberate follow-up, not done by this
+# .gitignore change alone).
+youtube-channel-consulting/
+_to_delete/
