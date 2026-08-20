@@ -15,7 +15,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** August 7, 2026
+**Status as of:** August 20, 2026
 
 ---
 
@@ -30,8 +30,21 @@ accumulates for them — no point building empty structure now.
   end-to-end. **Complete July 27, 2026.**
 - [x] **M4:** Extraction validated across all 3 image conditions (clean PDF, flatbed
   scan, angled photo). **Complete July 27, 2026.**
-- [ ] **M5:** RAG-grounded Q&A working (real vector search/index, not context-stuffing).
-  **Unblocked (Aug 6)** — M6 picked `gpt-5-4-mini` as the Q&A model. Not started.
+- [x] **M5:** RAG-grounded Q&A working (real vector search/index, not context-stuffing).
+  **Complete (Aug 20).** `m5_index.py` (chunking, Search index creation,
+  embedding, upload) built and verified end-to-end Aug 18 — 16/16 chunks
+  embedded and indexed. `m5_retrieve.py` (embed query → vector search →
+  assemble context from *all* retrieved chunks, not just the top-ranked
+  one → grounded chat completion) built and verified end-to-end Aug
+  19-20 — real live run against `loan-agreement-index`, correct answer
+  ($50,000.00) despite the top-ranked chunk being the wrong one, proving
+  the `top_k≥2`/join-all-chunks design actually does what it was meant
+  to. Full detail, including two live-only bugs caught before the first
+  run and a real retrieval-ranking finding, in the Aug 19/Aug 20 session
+  notes above. One deliberate, non-blocking scope item left open: the
+  test question is still hardcoded, generalizing to a CLI arg deferred
+  per `main()`'s own docstring plan until a clean run happened — which
+  it now has.
 - [x] **M6:** Evaluator harness built, used to pick GPT-5.4 vs. GPT-5.4-mini for M5.
   **Complete (Aug 6).** Full pipeline (`m6_generate.py` → `m6_assemble.py` →
   `m6_evaluate.py`) built, debugged, and run twice — once against the original
@@ -142,6 +155,579 @@ accumulates for them — no point building empty structure now.
   `venv1`-relocation doc updates and the Search-service/`requirements.txt`
   changes from this session not yet committed as of this writing (separate
   from the venv1 commit, which already went out as `ca3f6f1`).
+
+---
+
+## Session — August 10, 2026
+
+- `m5_index.py` framework built collaboratively, not drafted blind — the
+  file combines two genuinely different kinds of unfamiliar territory:
+  Azure Search SDK object construction (`VectorSearch`,
+  `HnswAlgorithmConfiguration`, `VectorSearchProfile` — reference-lookup
+  work; nobody has this memorized, cert-track or veteran) and real
+  chunking logic (regex + boundary-pairing — a genuine core-Python gap,
+  not SDK-related at all). Framework: function stubs (all raising
+  `NotImplementedError`), imports, `.env` var names, and `main()`'s call
+  order decided; the chunking regex, index schema fields, and
+  embedding-call shape left as TODOs.
+- `SEARCH_SERVICE`, `SEARCH_INDEX_NAME`, `EMBEDDING_DEPLOYMENT` added to
+  `.env`/`.env.example`, matching the existing `CHAT_DEPLOYMENT_*`
+  commenting convention. `azure-search-documents` still needs
+  `pip install -r requirements.txt` in the relocated venv — not yet
+  confirmed installed.
+- `chunk_by_section()` built in real rounds, same working style as every
+  `m6_*.py` file — Gerard's first pass, reviewed with root-cause
+  pushback, not handed a finished answer. Two real bugs caught, not
+  glossed over:
+  - First draft never appended the built dict anywhere inside the loop —
+    rebuilt it fresh every iteration and discarded it, so nothing was
+    ever actually collected into the return value.
+  - Second, more fundamental bug: content was sliced as
+    `text[last_end:match.start()]` (later `match.end()`), paired with the
+    *current* match's id/title — but a section's content boundary is only
+    knowable once the *next* heading has been seen, so the current
+    match's id/title always described the wrong content block. Verified
+    directly, not just reasoned about: ran the actual draft against a toy
+    string and confirmed both the mislabeling and a fully dropped first
+    section.
+  - Real fix: two-pass approach — `list(re.finditer(...))` first, then
+    `enumerate()` with a `headings[i + 1]` lookahead for each section's
+    end boundary. Re-verified against the toy string post-fix: correct
+    pairing, nothing dropped. Logged as a new pattern in
+    `python-patterns.md` (see below) rather than left to be re-derived
+    next time this shape of problem shows up.
+  - Separately caught: two stray IntelliSense auto-imports
+    (`from pydoc import text`, `import match` — the latter a nonexistent
+    module, confirmed via a direct `ModuleNotFoundError` test) that would
+    have blocked the file from running at all. Same species as the
+    July 29 (`xmlrpc.client`) and Aug 6 (`anyio.Path`) stray-import bugs —
+    third confirmed instance, now logged as a recurring pattern rather
+    than treated as a one-off each time.
+- New file `python-patterns.md` created (`ai-103` root, same
+  living-document convention as this file) — a lookup for general Python
+  language patterns specifically, kept separate from this file's
+  Azure/git-focused Key Lessons so the two don't overlap. Seeded with
+  three entries: today's two-pass lookahead-pairing pattern, the
+  recurring stray-IntelliSense-import gotcha (3 confirmed instances now),
+  and `**kwargs` silently swallowing wrong keyword names (generalized
+  from the Aug 5 `m6_evaluate.py` bug). Meant to be added to as new
+  patterns come up, not written once and left static.
+- Real working-style finding, worth carrying forward rather than
+  re-learning next session: Gerard's honest post-session read was that
+  `m5_index.py` blended two different kinds of difficulty together in the
+  moment — genuine Azure SDK reference-lookup work (not a skill gap) and
+  a real core-Python gap (the lookahead-pairing pattern) that took two
+  guessed-and-verified rounds plus a shown solution to land. The failure
+  mode wasn't struggling — it was not recognizing quickly enough which
+  kind of difficulty was in play, which led to over an hour of unaided
+  guessing per instance before asking for help. Decision, not yet tested
+  in practice: cap unaided attempts on core-Python-shaped problems at
+  roughly 15-20 minutes before asking for a guided hint, not an hour; and
+  treat SDK-object-construction-shaped problems (unfamiliar class names
+  named directly in a docstring TODO) as reference-lookup from the
+  start — ask for a walkthrough immediately rather than attempting to
+  derive unfamiliar SDK shapes from first principles.
+- `chunk_by_section()` is done and correct. Remaining `m5_index.py`
+  stubs, still `NotImplementedError`, not yet attempted: three small ones
+  that are pattern-matched copies of functions already written elsewhere
+  in this repo (`get_search_admin_key()` — same shape as
+  `get_subscription_key()` in `m3_analyze.py`, different `az` command;
+  `load_document_markdown()` — same shape as the file-read already in
+  `m6_generate.py`; `build_embedding_client()` — same shape as
+  `build_client()` in `m6_generate.py`, open question not yet checked:
+  does embeddings need a different `api_version` than
+  `CHAT_API_VERSION`?), and three genuinely new-SDK-surface ones
+  (`ensure_index_exists()` — vector index/field construction;
+  `embed_chunks()` — `client.embeddings.create()`; `upload_chunks()` —
+  `search_client.upload_documents()` plus per-item success verification,
+  same silent-failure-checking discipline as `m6_evaluate.py`'s Aug 5
+  lesson).
+
+---
+
+## Session — August 11, 2026
+
+- `get_search_admin_key()` fixed and verified: the draft used `--name`
+  (copied from `get_subscription_key()`'s `cognitiveservices` command
+  shape), but `az search admin-key show` actually takes `--service-name` —
+  a different flag on a same-sounding but different `az` command family.
+  Same species of gotcha already logged for `get_storage_key()`'s
+  differing response shape (July 27). Working correctly against
+  `srch-iip-dev-wus-01` now.
+- `load_document_markdown()` fixed and verified: the draft dropped the
+  `["result"]` key that `m6_generate.py`'s proven read
+  (`json.load(f)["result"]["contents"][0]["markdown"]`) actually uses —
+  edited by feel against a copied line ("`[\"result\"]` looked redundant")
+  rather than checked against the real file's shape. Root cause and habit
+  logged as a new `python-patterns.md` entry, "Trusting a copied access
+  chain over checking the real data" — a genuinely new category, distinct
+  from the Aug 10 core-Python/SDK split: not a language gap, not an
+  unfamiliar API surface, but not having looked at the actual external
+  data before trusting an indexing chain into it.
+- `STATUS.md`'s `## Key Lessons` section created — referenced from the Aug
+  7 and Aug 10 session notes above as if it already existed; it didn't.
+  Seeded with one entry: `run_az()`'s mechanics (list-args-not-shell-string
+  subprocess pattern, the Windows `az.cmd`/`PATHEXT` `shutil.which()` fix
+  already hit once on July 27, the live-fetch-never-persist convention it
+  enables, and the `--query`-shape-varies-by-command-family gotcha behind
+  today's `get_search_admin_key()` bug).
+- `build_embedding_client()` real, unresolved finding — full technical
+  detail and the decision to defer the rebuild in Next Action below. Short
+  version: what looked like the third small pattern-matched stub turned
+  into a genuine SDK-surface question once `EMBEDDING_DEPLOYMENT` was
+  confirmed correct via `az cognitiveservices account deployment list`
+  (exact live match, `text-embedding-3-small` — ruling out the deployment
+  name as the cause) and the classic `AzureOpenAI` client still 404'd
+  regardless of which api-version value was tried (`CHAT_API_VERSION`'s
+  `2024-06-01`, then `v1`). Traced to Microsoft's own v1 GA migration
+  guidance: Azure's current API surface for embeddings needs a
+  structurally different client (`OpenAI` + `base_url`, not `AzureOpenAI`
+  + `api_version`) — not just a different string passed to the existing
+  one.
+- Real finding worth remembering on its own: a stub that reads as "small,
+  pattern-matched" from its docstring can still turn out to be genuinely
+  new SDK-surface territory once actually attempted — the Aug 10
+  categorization was a reasonable prediction going in, not a guarantee.
+  Worth re-checking in real time as a stub develops, not just trusting the
+  upfront label.
+- Session paused deliberately here, not from being stuck — real progress
+  made (2 of 6 stubs closed), but the `build_embedding_client()` rebuild is
+  exactly the kind of work the Aug 10 rule says deserves a guided
+  walkthrough with a clear head, not a tired push. `ensure_index_exists()`,
+  `embed_chunks()`, `upload_chunks()` still untouched, already flagged Aug
+  10 for the same guided treatment.
+
+---
+
+## Session — August 12, 2026
+
+- `build_embedding_client()` rebuilt and verified, closing the stub
+  deferred Aug 11. Guided walkthrough (SDK-object-construction category
+  per the Aug 10/11 working-style rule): swapped
+  `AzureOpenAI(azure_endpoint=..., api_version=...)` for plain
+  `OpenAI(api_key=..., base_url=f"{endpoint}/openai/v1/")` — the v1 GA
+  client shape identified Aug 11, not a parameter-value fix.
+  `EMBEDDING_API_VERSION` removed from `.env`, since nothing reads it once
+  the client stopped taking an `api_version` argument at all.
+- Verified live, not just "ran without erroring" (same discipline as the
+  `**kwargs`-silent-failure `python-patterns.md` entry):
+  `client.embeddings.create(model=EMBEDDING_DEPLOYMENT, input="test")`
+  returned a 1536-dim vector, matching `EMBEDDING_DIMENSIONS`.
+- New `## Key Lessons` entry added below: classic `AzureOpenAI` vs. v1 GA
+  `OpenAI` + `base_url` client shapes — generalizes past this one stub in
+  case another Azure OpenAI-family client on this account hits the same
+  404-regardless-of-api-version symptom.
+- Three stubs remain, same guided-walkthrough category as before:
+  `ensure_index_exists()`, `embed_chunks()`, `upload_chunks()`. Flagged so
+  it isn't missed: `embed_chunks()`'s stub still type-hints its `client`
+  param as `AzureOpenAI` — needs updating to `OpenAI` when that stub gets
+  built.
+- Boundary crossed starting next session, named explicitly rather than
+  discovered partway through: the three remaining stubs are real Azure SDK
+  for Python (`azure-search-documents`), a different, more standardized
+  ecosystem than the `openai` package `build_embedding_client()` sat in.
+- `ensure_index_exists()` built and verified — first stub in the
+  `azure-search-documents` half of M5, boundary held as expected (see
+  above). Check-first pattern: `SearchIndexClient.get_index()` on a
+  `try`, `ResourceNotFoundError` on the `except` signals "doesn't exist
+  yet, create it." Schema: `SimpleField` for the `id` key, `SearchableField`
+  for `section`/`content` (no `type=` kwarg on `SearchableField` — it
+  hardcodes `Edm.String` and silently drops anything else passed, same
+  `**kwargs`-swallow shape as the existing `python-patterns.md` entry),
+  `SearchField` for `contentVector` wired to a `VectorSearch` config
+  (`HnswAlgorithmConfiguration` + `VectorSearchProfile`, connected by
+  matching name strings, not object references).
+- Two real bugs hit and fixed during typing, both self-diagnosing (loud
+  errors, not silent-failure traps): `from azure.core.exception import
+  ResourceNotFoundError` — missing the `s` on `exceptions`, a plain typo;
+  and `type=SearchFieldDataType.Collection(SearchFieldDataType.Single(
+  SearchFieldDataType.Double))` — over-extended the `.Collection(...)`
+  wrapper pattern onto `.Single`, which is a plain enum member (`Edm.Single`,
+  32-bit float), not a callable. Correct form:
+  `SearchFieldDataType.Collection(SearchFieldDataType.SINGLE)` — one
+  wrapper, one element type, no nesting `Double` inside it.
+- Verified live: ran `ensure_index_exists()` twice back-to-back in one
+  command against `srch-iip-dev-wus-01`. First call printed "created
+  successfully" (index didn't exist yet); second call printed "already
+  exists, skipping creation" (`get_index()` succeeded this time, since
+  call #1 had just created it) — confirms the check-first logic is
+  actually idempotent, not just written to look idempotent.
+- IntelliSense comparison worth recording separately (see new
+  `python-patterns.md` entry below): a full autocomplete suggestion for
+  this same function offered `VectorField`/`VectorSearchConfiguration` —
+  real class names, but from the original Nov 2023 vector-search preview
+  (`11.4.0b6`–`11.4.0b11`), not the installed `azure-search-documents==12.0.0`.
+  Confirmed via direct import check and the SDK's own changelog, not
+  assumed.
+- Two stubs remain, same guided-walkthrough category: `embed_chunks()`,
+  `upload_chunks()`. Session paused here deliberately — deciding to sit
+  with what's landed today rather than stack a third stub on top and
+  risk losing it, same discipline as the Aug 11 pause before this
+  function.
+
+---
+
+## Session — August 14, 2026
+
+- `embed_chunks()` built and verified — closed, not a guided walkthrough
+  handed over wholesale: batch call decided deliberately over per-chunk
+  (`client.embeddings.create()` accepts a list `input=`, and the failure
+  mode is loud either way — an exception on the whole call, no silent
+  partial-success trap like `upload_documents()` has — so batching cost
+  nothing in safety and saved 15 round-trips). Vectors matched back to
+  chunks via each response item's `.index`, not list position/`zip()` —
+  Gerard's own call, reasoned as "cheap insurance" even though `zip()`
+  would also have worked here (order is contractually guaranteed by the
+  batch endpoint) — right instinct for the wrong-but-harmless reason,
+  worth remembering as a good default going forward regardless. Verified
+  live: 16 chunks in, 16 vectors of length 1536 out (at the time, before
+  the chunk-count bug below was found). Stub's stale `AzureOpenAI` type
+  hint fixed to `OpenAI`; the now-dead `AzureOpenAI` import removed from
+  the top of the file too.
+- Real, live-only bug found and fixed, not a hypothetical: `chunk_by_section()`
+  was returning **13** chunks against the real document, not the 16 always
+  assumed since Aug 10 — that assumption had only ever been checked
+  against a toy string, never the actual markdown, until today's live test
+  on `embed_chunks()` surfaced the real count by accident. Root cause:
+  the heading regex's title character class, `[A-Z\s]*`, doesn't allow
+  punctuation — silently dropped `VII. ATTORNEYS' FEES AND COSTS.`
+  (apostrophe) and `IX. NON-WAIVER.` (hyphen) entirely, not partially,
+  since the class breaking mid-match meant no full heading match was ever
+  found at those positions. Fixed to `[\-\'A-Z\s]*`, taking two real wrong
+  turns first: two guessed edits that looked syntactically right but
+  "didn't change the result," which turned out to be because a separate,
+  hand-typed duplicate regex in the tester scratch file (left over from
+  an earlier diagnostic snippet) was what kept getting tested, not the
+  real function in `m5_index.py` — the actual fix had been correct the
+  whole time. New `python-patterns.md` entries from today: list
+  comprehensions (first genuinely new Python syntax hit this project,
+  logged with the long-form/shorthand mapping that finally landed it) and
+  testing a hand-copied duplicate instead of the real function (the
+  tester-file trap above). Verified live post-fix: regex now finds all 15
+  of I–XV correctly, including both previously-dropped headings.
+- Chunk count now correctly 15, not yet 16 — the trailing signature block
+  is still folded into section XV's content rather than split out as its
+  own chunk, exactly as the code's own pre-existing comment already
+  flagged ("folds the signature block into the final section for now —
+  separate, deferred problem"). Decision made explicitly, not defaulted
+  past: close this gap now rather than ship short of the docstring's and
+  the index schema's stated 16-document design. Real, correctly-raised
+  concern surfaced during this discussion and deliberately not solved
+  today, logged so it isn't lost: today's planned fix keys off the literal
+  string `"With my signature below"` (confirmed appearing exactly once in
+  the real document) — document-specific, and would not generalize to a
+  differently-worded loan agreement. A general solution would need to
+  detect the signature block *structurally* rather than by exact wording
+  — real, harder parsing problem, consciously out of scope for this lab
+  per the same skill-demonstration-over-necessity tradeoff already named
+  July 30, not forgotten.
+- **Session paused here deliberately, not from being stuck** — real,
+  legitimate fatigue (end of day Friday, an unrelated Monday interview
+  weighing on attention), not a comprehension gap. Worth being explicit
+  about the difference for next time: everything actually blocking
+  progress today was already understood and solved (the regex bug, the
+  design for the signature-block split) — what ran out was the attention
+  needed to translate a fully-understood plan into typed code, not
+  understanding itself. Same category of pause as Aug 11/Aug 12, just a
+  different cause.
+
+**Next action, picking back up:** in `chunk_by_section()`, after the
+existing `for` loop finishes (`chunks` now holds 15 dicts) and before
+`return chunks`: find `"With my signature below"` inside
+`chunks[-1]["content"]`, split that string there, keep the part before it
+as XV's real content, and `chunks.append(...)` a new 16th dict (same
+`id`/`section`/`content` shape as the others) for the signature block
+using the part from the marker onward. Then re-verify live: expect 16
+chunks, `chunks[-1]["section"]` holding the signature-block text, XV's
+content no longer including it. After that: `upload_chunks()` (still
+untouched, same guided-walkthrough category as `embed_chunks()` was), then
+`main()` end-to-end as M5's real closing verification, per the standing
+plan from the start of today's session.
+
+---
+
+## Session — August 17, 2026
+
+- **`chunk_by_section()` closed — the last piece of the design from Aug
+  14.** Signature-block split written independently (core-Python-shaped,
+  per the standing rule), through several real iterations rather than
+  landed on the first attempt:
+  - First draft found the split point and built the new 16th chunk
+    correctly, but never wrote the "before" half back into
+    `chunks[-1]["content"]` — the old full text (signature block
+    included) was still sitting there, duplicated into two chunks
+    instead of divided between them.
+  - Second draft tried to fix that via `new_XV_content = chunks[-1]` /
+    `chunks[-1] = new_XV_content`, intending the second line to save the
+    edit back. Traced through live: both lines were no-ops with respect
+    to that goal — `new_XV_content` was never a copy, just a second name
+    for the same dict `chunks[-1]` already pointed at, so the mutation
+    in between had already taken effect and the reassignment did
+    nothing. Code was functionally correct, but for a different reason
+    than the draft assumed. Collapsed to one line once the aliasing was
+    understood: `chunks[-1]["content"] = chunks[-1]["content"][:split_point]`.
+  - New `python-patterns.md` entries from today, both hit as genuinely
+    new idioms rather than repeats of a known shape: slice bounds (an
+    omitted `start`/`stop` runs to the sequence's boundary, not to the
+    other bound — direction depends on which side of the colon the index
+    sits on) and assignment aliasing a mutable object instead of copying
+    it.
+  - Verified live against the real document (not a toy string): 16
+    chunks, section XV ending cleanly with no trace of the marker,
+    `chunks[-1]` holding the full signature block through both
+    signature lines and printed-name fields.
+- **Real, live-only false alarm, diagnosed and closed, not a code bug:**
+  after saving the working fix, `tester2.py` still printed the marker
+  text as part of XV's content — looked exactly like the fix had failed.
+  Root cause: `tester2.py` was being re-run in a persistent session that
+  had already imported `m5_index` before the fix was saved; editing and
+  saving the file doesn't make an already-running interpreter re-import
+  it. Settled by extracting the actual saved function's source and
+  running it fresh, independent of that session, against a real copy of
+  the document — correct result confirmed the code, not the environment,
+  restarting the session and re-running matched it. New
+  `python-patterns.md` entry logged so this doesn't get re-diagnosed as
+  a logic bug next time it happens.
+- Session closed here for the day (~4pm) rather than starting
+  `upload_chunks()` — a new guided-walkthrough SDK topic on the tail end
+  of a day that already included the signature-block work and the
+  stale-import chase is exactly the kind of thing that doesn't land well
+  started late. Clean stopping point: `chunk_by_section()` fully done and
+  verified, nothing left half-finished.
+
+---
+
+## Session — August 18, 2026
+
+- **`upload_chunks()` written and closed — first attempt was already
+  correct.** `search_client.upload_documents(documents=chunks)` plus a
+  filtering list comprehension (`[result for result in results if not
+  result.succeeded]`) to surface any partial failures, sourced from
+  IntelliSense but understood, not just accepted — long-form mapping
+  logged in `python-patterns.md` as a follow-on to the existing list-
+  comprehension entry (this one adds a filter clause, the earlier one
+  didn't). One naming note flagged, not required: the variable holding
+  failed results was named `failed_chunks`, but it actually holds
+  `IndexingResult` objects, not chunk dicts — a more accurate name was
+  suggested (`failed_results`), left as the author's call.
+- **Real, live bug on the first `main()` end-to-end run — a genuine
+  Azure Search characteristic, not a code defect.** `upload_chunks()`
+  reported all 16 succeeded; `main()`'s closing `get_document_count()`
+  check, run immediately after, reported 0. Researched rather than
+  guessed: Azure AI Search's push API (`upload_documents()`) is
+  documented as "closest to real-time," not instantaneous, and
+  `get_document_count()` reads a separately-consistent path that can lag
+  behind writes by a few seconds — corroborated by an open Azure SDK for
+  Python GitHub issue reporting the identical symptom (stale count
+  immediately after a push write). No official published number for the
+  lag. Confirmed empirically before changing anything (per Gerard's own
+  call — "changing prior to confirming just smells wrong"): a standalone
+  recheck of `get_document_count()` a few seconds after `main()` finished
+  returned 16, proving the writes had landed and the immediate check was
+  just too early, not wrong. New `STATUS.md` "Key Lessons" entry logged
+  below so this doesn't get re-diagnosed as a bug next time.
+- **Closing verification rebuilt as a bounded, tolerant retry loop, not
+  a single immediate check.** First draft (`while elapsed < timeout:` +
+  `break` on match) had a real edge case, caught before running it: the
+  final `time.sleep()` before the loop's natural exit was never followed
+  by a recheck, so a count that resolved right at the timeout boundary
+  would still report a false warning. A proposed alternative — resetting
+  the timeout indefinitely instead of ever giving up — was considered and
+  rejected: it would trade away the one thing a timeout provides (a
+  guaranteed stopping point that reports *something*) for no evidence-
+  based benefit, reintroducing exactly the silent-hang risk this whole
+  session's `upload_chunks()` work was designed against. Settled on a
+  "loop and a half" restructure (`while True:` with `break` on `count ==
+  len(chunks) or elapsed >= timeout`) — written independently once the
+  concept was understood, correct on the first pass. New
+  `python-patterns.md` entry for the pattern itself, plus a related note
+  on why referencing `count` after the loop is safe here specifically
+  because the loop is guaranteed to run at least once, not as a general
+  Python guarantee.
+- **M5's indexing half fully verified live, end-to-end, via `tester.py`
+  (`from m5_index import main; main()`):** `Chunked into 16 sections` →
+  index already existed, skipped recreation → `All 16 chunks uploaded
+  successfully` → `Indexed: 16 documents in 'loan-agreement-index'`, no
+  warning. First clean, non-stale run of the full pipeline.
+- Real process note, not a Python bug: my own read of `m5_index.py`
+  momentarily lagged Gerard's actual saved edit mid-session — the local
+  cache used to check the `while` loop hadn't been re-fetched after his
+  latest save. Caught because he pushed back on the read rather than
+  assuming it was right ("I think you might have cached data"),
+  confirmed by re-fetching, corrected immediately. Same species of trap
+  as Aug 17's stale-import issue, worth naming as a general lesson: a
+  claim about "what the file currently says" is only as fresh as the
+  last fetch, on either side of the conversation.
+
+---
+
+## Session — August 19, 2026
+
+- M5's retrieval half started: `m5_retrieve.py` created. `build_chat_client()`,
+  `embed_query()`, and `search_chunks()` all written and code-reviewed —
+  matched against the actually-installed `azure-search-documents==12.0.0`
+  signatures via `help()`, not memory. `inspect.signature()` turned out
+  useless against `VectorizedQuery.__init__`'s `**kwargs`-based
+  construction (returns a generic `(*args, **kwargs)` signature, no real
+  parameter names); the real params — `vector`, `k_nearest_neighbors`,
+  `fields` — were confirmed live via `help(VectorizedQuery)` instead.
+  None of the three functions has actually been executed against the
+  real Azure resources yet — code-reviewed, not verified live.
+- `build_context()`, `answer_question()`, and `main()` left as bare
+  `TODO` stubs — genuinely unstarted, not just unwritten in the
+  docstring sense.
+- Real, self-caught bug, unrelated to `m5_retrieve.py` itself:
+  `embed_chunks()` in `m5_index.py` had a correct `#` comment (explaining
+  the `.index`-not-`zip()` choice) rewritten as a `"""..."""` block,
+  under the mistaken belief that triple-quoting a string is comment
+  syntax generically. It isn't — Python only treats a triple-quoted
+  string as a real docstring (`__doc__`) when it's the *first statement*
+  inside a `def`/`class`/module body; anywhere else it's an ordinary
+  expression, evaluated and silently discarded. Caught via an ast-based
+  scan of the whole `scripts/` folder for stray string-literal statements
+  outside first-statement position; one other hit, in `tester.py`, turned
+  out to be intentional (a saved REPL demo, not a mistake). Self-corrected
+  before the session ended. New `python-patterns.md` entry drafted for
+  this, to be added at the start of the next session.
+- Real working-style finding, named directly at session's end rather than
+  left implicit: rising confidence has been correlating with skipping
+  verification, not with actually needing less of it — the docstring
+  mistake above is the concrete instance. Worth treating "I'm pretty sure
+  now" as a prompt to double-check once, not a signal to stop asking.
+- Session ended with a stated plan, not just a stopping point: test
+  `build_chat_client()`, `embed_query()`, and `search_chunks()`
+  independently — same "verify against real output, don't assume it
+  works because it reads correctly" discipline used throughout
+  `m5_index.py`'s build — before writing `build_context()`,
+  `answer_question()`, or `main()` on top of an unverified foundation.
+
+---
+
+## Session — August 20, 2026
+
+- Picked up exactly where Aug 19 left off, per that session's stated
+  plan. `python-patterns.md` updated with the triple-quoted-string
+  finding drafted Aug 19 (see that session's notes above), including the
+  confidence/verification meta-note, as a new dated entry.
+- `search_chunks()`'s inline comment on `search_text=None` fixed — it
+  previously overstated the parameter's effect ("it will search for all
+  documents in the index"). Corrected: leaving it `None` just skips the
+  separate full-text ranking component; `vector_queries`' own
+  `k_nearest_neighbors` still restricts results to the top_k
+  nearest-neighbor matches, not literally every document. Low-priority
+  doc fix, not a behavior change.
+- `scripts/tester3.py` framework built, then finished and run by Gerard
+  (imports/env/`search_client` construction were the framework; the three
+  test calls and their prints were his own work, including a
+  `"Chat client built successfully."` confirmation print on Test 1 and,
+  after a first review round, expanding the Test 3 print from just
+  `results[0]` to a loop over all returned chunks).
+- **All three functions verified live against the real Azure resources —
+  the open gap from Aug 19 is closed.**
+  - `build_chat_client()`: constructed with no exception against
+    `aif-dev-wus-01`.
+  - `embed_query()`: real question ("What is the loan amount?") embedded,
+    returned a 1536-dim vector — matches `EMBEDDING_DIMENSIONS`.
+  - `search_chunks()`: returned exactly 3 ranked chunks against
+    `loan-agreement-index`:
+    `III. SECURITY.` (0.6589), `I. THE PARTIES.` (0.6501),
+    `II. PAYMENTS.` (0.6323).
+- **Real, live finding, not a code defect — confirms a risk named before
+  any of this code existed.** The top-ranked chunk (`III. SECURITY.`,
+  score 0.6589) does *not* contain the answer to the test question — its
+  entire content is "The loan is unsecured." (confirmed by reading the
+  real source document directly, not assumed). The actual answer
+  ($50,000.00) is in `I. THE PARTIES.`, which ranked **second**, 0.009
+  behind the wrong top result — a near-tie, not a clean miss. `II.
+  PAYMENTS.` (monthly payment detail, also genuinely relevant) ranked
+  third. This is the exact scenario the Aug 7 design note predicted
+  before `search_chunks()` was written: *"top-1 would structurally
+  guarantee the same miss rather than test whether chunked retrieval does
+  better or worse."* With `top_k=3`, both truly relevant chunks made it
+  into the returned set despite neither ranking first — real evidence
+  that the `top_k≥2` (here, 3) decision was correct, not just cautious.
+  New `## Key Lessons` entry logged below (Azure-Search/RAG-specific
+  behavior, not a Python language pattern, so it lives here rather than
+  in `python-patterns.md`).
+- `build_context()` built independently (core-Python-shaped, per the
+  standing rule) — correct on first attempt, verified by extracting and
+  running the real saved function (not retyped) against a synthetic
+  3-chunk input. Docstring updated afterward with an explicit
+  REQUIREMENT to join every retrieved chunk, not just the top-ranked
+  one, citing the real Aug 20 test result as evidence. Along the way,
+  self-taught the list-comprehension conversion of the same logic
+  (`[f"[{chunk['section']}]\n{chunk['content']}" for chunk in chunks]`),
+  verified identical output against the loop version before adopting it.
+- `answer_question()` built independently, then two real bugs caught and
+  fixed on review, neither by reading the code — both by testing the
+  actual built output:
+  - A double-backslash escaping bug: `f"{context}\\n\\nQuestion:
+    {question}"` (copied from the TODO docstring's own instructional
+    text, where the extra backslash was needed for *display*) sent
+    literal `\n\n` as visible text in the prompt instead of a real blank
+    line. New `python-patterns.md` entry logged for this — escaping
+    that's correct inside a docstring meant for a human to read isn't
+    automatically correct once copied into real, executable code.
+  - The system prompt's own docstring said explicitly to swap
+    "document" for "context" (since this path gets retrieved chunks, not
+    the whole markdown) — the first implementation kept `m6_generate.py`'s
+    original wording unchanged. Fixed to say "context" in both spots.
+- `main()` built independently — three genuine bugs, all found before
+  the first live run, none glossed over:
+  - `get_search_admin_key()` called with three positional arguments
+    (`account, rg, search_service`) against a real two-parameter
+    signature (`service, resource_group`) — an IntelliSense-inserted
+    extra parameter that went uncaught on review. Confirmed via a real
+    `TypeError` reproduction against the actual function signature
+    before the fix; would have crashed instantly on any live run.
+  - `chat_deployment` read `CHAT_DEPLOYMENT_GPT_5_4` — quietly reusing
+    the model M6's Aug 6 evaluation explicitly *didn't* pick
+    (`gpt-5-4-mini` was the deliberate decision: quality parity + ~3x
+    cost advantage). Real process finding, not just a code fix: the
+    `## Key resources` table still listed both deployments as
+    "candidates" months after the decision was actually made, which
+    directly contributed to the model choice not being front-of-mind
+    while writing this function. Table corrected (see below) alongside
+    the code fix, specifically so the current, decided model is
+    fast-recallable rather than requiring a re-read of the Aug 6
+    narrative next time it matters.
+  - Minor: one blank line instead of two before `if __name__ ==
+    "__main__":`, inconsistent with the rest of the file's spacing.
+- **`main()` run live for real, for the first time — clean, correct
+  result, no code changes needed after the three bugs above were fixed:**
+
+  ```
+  Retrieved chunks:
+  Section: III. SECURITY., Score: 0.65894884
+  Section: I. THE PARTIES., Score: 0.65007085
+  Section: II. PAYMENTS., Score: 0.6322609
+
+  Answer:
+  The loan amount is **$50,000.00**.
+  ```
+
+  Ranking matches the Aug 20 `tester3.py` result almost exactly (score
+  deltas in the fifth decimal place, consistent with normal embedding-call
+  variance, not a different retrieval). Correct — and this is the real,
+  live proof of the whole day's central finding: `III. SECURITY.` still
+  ranked first and still doesn't contain the answer, but because
+  `build_context()` joins all three retrieved chunks rather than just the
+  top one, `answer_question()` had `I. THE PARTIES.`'s actual
+  `$50,000.00` figure available and used it correctly. The `top_k≥2`
+  design decision from Aug 7, the Aug 20 Key Lessons entry on vector
+  search's top-1 result not being guaranteed correct, and today's
+  REQUIREMENT note in `build_context()`'s docstring were not
+  precautionary — this is the concrete case they were written to prevent,
+  and the fix held on a real end-to-end run.
+- **M5 complete.** Both halves — indexing (`m5_index.py`, Aug 18) and
+  retrieval/Q&A (`m5_retrieve.py`, Aug 19-20) — built, code-reviewed, and
+  verified live end-to-end. One deliberate scope item left open, per
+  `main()`'s own docstring plan, not forgotten: the test question is
+  still hardcoded (`"What is the loan amount?"`); generalizing to a CLI
+  arg or interactive prompt was explicitly deferred until "this runs
+  clean once" — which it now has. Optional polish, not a blocker; M6
+  precedent (small non-blocking infra items tracked separately, not
+  gating milestone completion) applies the same way here.
 
 ---
 
@@ -907,6 +1493,153 @@ accumulates for them — no point building empty structure now.
 
 ---
 
+## Key Lessons
+
+**This is a lookup, not a manual.** Azure/infra/git-specific gotchas live
+here; general Python language patterns (control flow, data structures,
+stray imports) live in `python-patterns.md` instead, so the two don't
+overlap — same split `python-patterns.md`'s own header already describes.
+Referenced from the Aug 7 and Aug 10 session notes above as if it already
+existed; it didn't. Created Aug 11 to close that gap.
+
+### `run_az()` — the subprocess wrapper every script's Azure calls go through
+
+**What it does:** takes a list of CLI arguments (e.g. `["cognitiveservices",
+"account", "keys", "list", "--name", account, ...]`), prepends the resolved
+`az` executable path, appends `-o tsv`, and runs the result via
+`subprocess.run()`. Returns stripped stdout as a plain string; raises
+`RuntimeError` with the real stderr on nonzero exit.
+
+**Why args are a list, not a shell string:** `subprocess.run()` with a list
+bypasses shell parsing entirely — each flag and its value must be a
+separate list element (`"--name", account`, not `"--name " + account` or an
+f-string). Side benefit: no shell-injection risk from a resource name
+containing spaces or special characters, since nothing passes through a
+shell.
+
+**Windows-specific gotcha, already hit once (July 27):** `az` installs as
+`az.cmd` on Windows. `subprocess.run(["az", ...])` with the default
+`shell=False` calls `CreateProcess` directly, which doesn't resolve `.cmd`
+via `PATHEXT` the way an interactive shell does — fails with
+`FileNotFoundError: [WinError 2]`. Fixed by resolving the executable
+explicitly via `shutil.which("az")` first, then passing that resolved path
+into `subprocess.run()`.
+
+**Convention this enables:** every credential (`get_subscription_key()`,
+`get_storage_key()`, `get_search_admin_key()`, etc.) is fetched live
+through this one function on every run and never written to disk or
+cached — the "live-fetch-never-persist" pattern used throughout
+`m3_analyze.py` and `m5_index.py`.
+
+**`--query` shape varies by command family, not just by convenience:**
+`cognitiveservices account keys list` and `search admin-key show` both
+return flat objects (`--query key1` / `--query primaryKey`), but `storage
+account keys list` returns a *list* of `{keyName, value}` objects (`--query
+[0].value`). Same-sounding command families don't share flag names or
+response shapes — check the actual command's real output shape each time,
+don't assume it matches a sibling command. Same species of mistake as
+`get_search_admin_key()`'s `--name` vs. `--service-name` bug, caught and
+fixed Aug 11.
+
+### Azure AI Search's push API is eventually consistent for counts/stats
+
+**What happens:** `SearchClient.upload_documents()` returning
+`succeeded=True` for every document means the service accepted the
+writes — it does not mean every read path reflects them yet.
+`get_document_count()` in particular can report a stale (lower, even
+zero) number for a few seconds after a successful upload. Microsoft
+describes the push API as "closest to real-time," not instantaneous;
+there's no published guaranteed latency, and an open Azure SDK for
+Python GitHub issue (#40644) reports the identical symptom — a stale
+count immediately after a push write, worked around with a manual
+`time.sleep()`.
+
+**Why it's easy to misdiagnose as a bug:** the per-item upload result
+(the authoritative signal that a write was accepted) and the aggregate
+count (a separately-consistent read) can genuinely disagree for a short
+window even when nothing is wrong. A verification check written to run
+once, immediately after upload, will intermittently report a false
+failure — indistinguishable at a glance from a real one.
+
+**Fix used here:** `main()`'s closing verification (`m5_index.py`) is a
+bounded, tolerant loop — recheck `get_document_count()` a few times
+with a short pause between attempts (`while True:` / `break` on match or
+timeout), rather than a single immediate check. A single retry with a
+fixed sleep would also work; the loop just avoids hardcoding a specific
+wait time that isn't documented anywhere as sufficient.
+
+**Real instance:** `m5_index.py`'s `main()`, Aug 18 — first end-to-end
+run reported `Indexed: 0 documents` immediately after `upload_chunks()`
+confirmed all 16 succeeded. Confirmed as lag, not a real failure, via a
+standalone recheck a few seconds later (returned 16) before any code was
+changed.
+
+### Classic `AzureOpenAI` client vs. v1 GA `OpenAI` + `base_url`
+
+**What happens:** `AzureOpenAI(azure_endpoint=..., api_key=..., api_version=...)`
+404s against a deployment (embeddings, here) no matter which `api_version`
+string gets passed — including `"v1"`, which looks like it should be the
+fix and isn't.
+
+**Why:** `api_version` is a real, required parameter on the classic
+client, but `"v1"`/`"preview"` were never valid values for it. Azure's v1
+GA surface is a structurally different API contract, not a new version
+string on the old one — it requires the plain `OpenAI` client (the same
+class used against the public OpenAI API) pointed at
+`base_url=f"{endpoint}/openai/v1/"`, with `api_version` dropped from the
+constructor entirely, since the parameter doesn't exist on this class.
+
+**Where this showed up:** `m5_index.py`'s `build_embedding_client()` —
+found and root-caused against Microsoft's own v1 GA migration guidance
+Aug 11, rebuilt and verified live (1536-dim vector returned) Aug 12.
+
+**Habit worth building:** if changing an `api_version` value doesn't fix a
+404 no matter what's tried, stop guessing at values — check whether the
+API surface itself expects a structurally different client, not just a
+different string passed to the one already in hand.
+
+### Vector search's top-1 result is not guaranteed to be the right chunk
+
+**What happens:** a single vector-search query can return its closest
+match by cosine score with the actually-relevant chunk ranked second (or
+lower) and a superficially-similar-but-substantively-wrong chunk ranked
+first — sometimes by a very thin margin. Nothing errors; the search
+"succeeds" and returns a real, valid top-1 result, it's just not the
+chunk that answers the question.
+
+**Why it's easy to miss:** a manual spot-check that only looks at
+`results[0]` (the natural first instinct — "here's the top hit, is it
+right?") can look convincingly wrong even when the retrieval step is
+functioning exactly as designed. The fix isn't in `search_chunks()`
+itself; it's in not asking a single top-1 result to carry more certainty
+than vector similarity actually provides.
+
+**Real instance:** `search_chunks()` (`m5_retrieve.py`), first live test,
+Aug 20 — query "What is the loan amount?" ranked `III. SECURITY.`
+("The loan is unsecured.") first (score 0.6589), with `I. THE PARTIES.`
+(contains the actual $50,000.00 figure) second at 0.6501 — a 0.009 gap.
+`II. PAYMENTS.` (also genuinely relevant — monthly payment amount)
+ranked third at 0.6323. All three came back within `top_k=3`.
+
+**Why this isn't a bug to fix:** the Aug 7 M5 design note deliberately
+set `top_k≥2` for exactly this reason, before `search_chunks()` was
+written — "top-1 would structurally guarantee the same miss rather than
+test whether chunked retrieval does better or worse on it." This test
+run is that reasoning confirmed against a real query, not a hypothetical
+one: retrieval with `top_k=3` still surfaced both relevant chunks despite
+neither ranking first.
+
+**Habit worth building:** when spot-checking retrieval quality, always
+look at the full returned set for the configured `top_k`, not just the
+top-ranked result — a "wrong" top-1 doesn't mean retrieval failed if the
+right chunk still made the cut lower down. Downstream, this is also the
+reason `build_context()` should join *all* retrieved chunks into the
+prompt, not just the highest-scored one — the chat model gets a chance to
+pick the right fact out of several candidates, the same job humans do
+scanning a page of search results.
+
+---
+
 ## Key resources (current, live)
 
 | Item | Value |
@@ -917,7 +1650,7 @@ accumulates for them — no point building empty structure now.
 | Storage account | `stiipdevwus01` |
 | Sample doc location | container `docs`, blob `loan-agreement-promissory-note.pdf` |
 | Key Vault | `kv-iip-dev-wus-01` |
-| Chat deployments | `gpt-5-2` (Content Understanding analyzer), `gpt-5-4`, `gpt-5-4-mini` (RAG/Q&A candidates) |
+| Chat deployments | `gpt-5-2` (Content Understanding analyzer) · **`gpt-5-4-mini` — decided M5 RAG/Q&A model** (Aug 6: quality parity + ~3x cost advantage over `gpt-5-4`, full evidence in Aug 6 session notes) · `gpt-5-4` — evaluated, not chosen, kept deployed in case a future comparison run wants it |
 | Embedding deployment | `text-embedding-3-small` |
 | Analyzer | `iip_loan_agreement_analyzer` (`ai-103/infrastructure/content-understanding/loan-agreement-analyzer.json`) |
 | AI Search service | `srch-iip-dev-wus-01` (Free tier, West US) — `https://srch-iip-dev-wus-01.search.windows.net`, provisioned Aug 7 for M5 |
@@ -926,13 +1659,127 @@ accumulates for them — no point building empty structure now.
 
 ## Next action
 
-**M5 is in progress.** Design settled Aug 7 (Azure AI Search, chunk-by-section,
-`loan-agreement-index` schema, top-k ≥ 2 — see Aug 7 session notes above) and
-`srch-iip-dev-wus-01` is provisioned. Concrete next step for the next session:
-write the first pass of the indexing script (chunk the loan agreement
-markdown by section, embed via `text-embedding-3-small`, upload to
-`loan-agreement-index`) — Gerard's draft first, reviewed in rounds, same
-working style as every `m6_*.py` file. Not started yet.
+**`m5_index.py` is fully complete and verified end-to-end (Aug 18).**
+Every function — `chunk_by_section()` (Aug 10, regex bug fixed Aug 14,
+signature-block split closed Aug 17), `get_search_admin_key()`,
+`load_document_markdown()` (both Aug 11), `build_embedding_client()`,
+`ensure_index_exists()`, `embed_chunks()` (Aug 12/Aug 14), and
+`upload_chunks()` (Aug 18) — is built and verified, and `main()` has run
+clean start to finish against the real document: 16 chunks → embedded →
+uploaded → indexed, confirmed live via `tester.py`
+(`from m5_index import main; main()`).
+
+**This closes the indexing half of M5, not all of M5.** Per the
+Milestones table above, M5 also requires a retrieval/query script — the
+actual Q&A half — which is now started but not yet verified live; see
+"Immediate next step" below.
+
+`build_embedding_client()` closed Aug 12: rebuilt around the `OpenAI` +
+`base_url` v1 GA pattern identified Aug 11 (full detail in `## Key
+Lessons` — classic `AzureOpenAI` vs. v1 GA `OpenAI` + `base_url`),
+verified live via `client.embeddings.create()` returning a 1536-dim
+vector against `text-embedding-3-small`, matching `EMBEDDING_DIMENSIONS`.
+`EMBEDDING_API_VERSION` removed from `.env` — no longer read anywhere
+once the client stopped taking an `api_version` argument.
+
+`ensure_index_exists()` also closed Aug 12: check-first against
+`SearchIndexClient.get_index()` / `ResourceNotFoundError`, schema built
+from `SimpleField`/`SearchableField`/`SearchField` plus a `VectorSearch`
+config (`HnswAlgorithmConfiguration` + `VectorSearchProfile`), verified
+idempotent via two live back-to-back calls against
+`srch-iip-dev-wus-01`. Full detail, including the
+`SearchFieldDataType.Collection()`-vs-`.Single()` mixup and the stale-
+IntelliSense-suggestion comparison, in today's session notes above.
+
+**Boundary now crossed, as named going in:** remaining stubs are real
+Azure SDK for Python (`azure-search-documents`), a different, more
+standardized ecosystem than the `openai` package `build_embedding_client()`
+sat in — held true through `ensure_index_exists()`, expect the same for
+`embed_chunks()`/`upload_chunks()`.
+
+**Working-style rule, effective since Aug 10 (reconfirmed Aug 11):** for
+SDK-object-construction-shaped work — unfamiliar class names or client
+shapes, whether flagged as such upfront or only discovered partway into a
+stub — skip independent guessing once it's recognized as that category;
+treat it as reference-lookup/investigation territory and get a guided
+walkthrough instead. For core-Python-shaped work (control flow, data
+structures, regex), keep attempting independently first, capped at 15-20
+minutes before asking for a hint. Check `python-patterns.md` before
+guessing on anything that feels like a repeat of a prior shape — real
+instance today: `load_document_markdown()`'s missing `["result"]` key,
+now logged there.
+
+Refinement to the guided-walkthrough format itself, surfaced during
+`embed_chunks()` (Aug 14): explaining an SDK call by narrating its syntax
+first (what each argument/method does) wasn't landing — too much of the
+answer's shape got handed over at once, indistinguishable from what
+IntelliSense also dumped unprompted, leaving nothing to actually reason
+through. What worked instead, per Gerard's own diagnosis: narrate the
+*data flow* first, in plain English, naming which already-built object
+is being fed into which call and why ("we're taking the client object
+`build_embedding_client()` built, and using its `.embeddings.create()`
+method to send it every chunk's content") — *then* show the syntax. And
+for any genuinely new Python idiom (not a repeat of a known shape), show
+the long-form/manual version side by side with the shorthand, mapped
+piece by piece, rather than asserting "this is shorthand for that" and
+moving on. Apply this format going forward for both remaining
+`azure-search-documents` stubs and any future guided walkthrough, not
+just this one instance.
+
+`embed_chunks()` closed Aug 14, plus a real live-only bug found and fixed
+in `chunk_by_section()` the same day — full detail, including the
+tester-file trap that made two correct regex fixes look like they'd
+failed, in the Aug 14 session notes above.
+
+`chunk_by_section()` fully closed Aug 17 — signature-block split written,
+debugged through two real iterations (a missed write-back, then a dict-
+aliasing misunderstanding that happened to be harmless), and verified
+live against the real document: 16 chunks, XV clean, signature block
+intact in its own chunk. A same-day stale-import false alarm (fix looked
+broken, wasn't — a persistent session hadn't re-imported the edited
+module) is logged in full in the Aug 17 session notes above, with a new
+`python-patterns.md` entry so it's recognized faster next time.
+
+`upload_chunks()` and `main()`'s closing verification both closed Aug
+18 — full detail, including the eventual-consistency false alarm and
+the "loop and a half" retry-loop design, in today's session notes above
+and the new "Key Lessons" entry on Azure Search's push-API consistency
+model.
+
+**M5 is done — both halves built and verified live.** Full history in
+the Aug 18 through Aug 20 session notes above; short version: `m5_index.py`
+builds and populates `loan-agreement-index` (Aug 18), `m5_retrieve.py`
+queries it end to end and answers correctly, with a real, live-confirmed
+finding that vector search's top-ranked result isn't guaranteed to be
+the right chunk — and that joining all `top_k` retrieved chunks into
+context (not just the top one) is what actually protects against that
+(Aug 20).
+
+**Immediate next step:** M7 — the single orchestrator agent milestone
+(see the Milestones table at the top of this file for the full scope:
+drafts content against a template, reuses M6's evaluation-harness
+pattern for QA, adds a computer-vision module for the one AI-103 exam
+domain not otherwise touched). Not started; no design conversation has
+happened on it yet. First step whenever that begins: same "state what it
+needs to do before typing" discipline used throughout M5 and M6 — talk
+through the shape before writing anything.
+
+Two small, non-blocking items available whenever convenient, neither
+gating M7:
+
+1. **Generalize `m5_retrieve.py`'s hardcoded test question.** Currently a
+   fixed string in `main()`; a CLI arg (`sys.argv`) or an interactive
+   `input()` prompt would make it usable for more than one question
+   without editing the file. Deferred deliberately per the original plan
+   — "generalize... only after this runs clean once," which it now has —
+   not forgotten, just not urgent.
+2. **Consider whether M5's retrieval quality needs systematic evaluation.**
+   Today's one-question spot check was manual (a human reading printed
+   scores against a document they'd already read). If M5 ever needs more
+   rigor than that, M6's evaluator-harness pattern (`Groundedness`/
+   `Relevance`/`F1Score` via `azure-ai-evaluation`) is the proven template
+   to reuse — not proposed as work to do now, just flagged as a known,
+   real gap rather than an assumed non-issue.
 
 Separately, five small M6 infra items carried forward from Aug 6, none of
 which block M5 but all real and worth closing out rather than re-discovering:
