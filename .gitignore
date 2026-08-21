@@ -35,3 +35,15 @@ screenshots/
 # .gitignore change alone).
 youtube-channel-consulting/
 _to_delete/
+
+# Interview prep documents (employer-specific, not portfolio content)
+Axon_*.docx
+
+# Scratch / ad-hoc dev scripts and personal utilities (not milestone deliverables)
+Get-RgResources.ps1
+ai-103/scripts/m6_probe.py
+ai-103/scripts/scratch.py
+ai-103/scripts/tester*.py
+
+# Generated QR codes (regenerable output, not source)
+resources/qr_codes/
