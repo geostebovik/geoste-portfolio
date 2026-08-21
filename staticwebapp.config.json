@@ -1,0 +1,8 @@
+{
+  "routes": [
+    {
+      "route": "/ai-103/*",
+      "statusCode": 404
+    }
+  ]
+}
