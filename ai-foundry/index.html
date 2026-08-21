@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI using Azure AI Foundry — G. Ostebovik</title>
+<meta name="description" content="Intelligent Insights Platform (IIP) — a Document Intelligence System built on Azure AI Foundry, in progress toward the AI-103 certification.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --black-soft: #111111;
+    --black-card: #161616;
+    --black-border: #222222;
+    --orange: #FD5A1E;
+    --orange-dim: rgba(253, 90, 30, 0.15);
+    --cream: #EFE4B0;
+    --cream-dim: rgba(239, 228, 176, 0.7);
+    --cream-muted: rgba(239, 228, 176, 0.65);
+    --white: #f5f0e8;
+    --muted: #888880;
+    --muted-light: #a8a49c;
+    --green: #34d399;
+    --amber: #f59e0b;
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    line-height: 1.6;
+  }
+
+  a { color: inherit; }
+
+  /* ── Nav ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    border-bottom: 1px solid var(--black-border);
+    position: sticky;
+    top: 0;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+
+  .nav-brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-brand span { color: var(--orange); }
+
+  .nav-links { list-style: none; display: flex; gap: 2rem; }
+
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--muted-light);
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--orange); }
+
+  @media (max-width: 700px) {
+    nav { padding: 1.25rem 1.25rem; }
+    .nav-links { gap: 1.1rem; }
+  }
+
+  /* ── Hero ── */
+  .hero {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 4.5rem 1.5rem 2.5rem;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.05;
+    margin-bottom: 1.1rem;
+  }
+
+  .hero-description {
+    font-size: 1.05rem;
+    color: var(--cream-dim);
+    max-width: 640px;
+    margin-bottom: 2rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--black-border);
+  }
+
+  .stat-value {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.9rem;
+    color: var(--orange);
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Honesty banner ── */
+  .status-banner {
+    max-width: 880px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem;
+  }
+
+  .status-banner-inner {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    background: var(--orange-dim);
+    border: 1px solid rgba(253, 90, 30, 0.35);
+    border-radius: 3px;
+    padding: 1.1rem 1.3rem;
+  }
+
+  .status-banner-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    margin-top: 0.45rem;
+    flex-shrink: 0;
+  }
+
+  .status-banner p {
+    font-size: 0.88rem;
+    color: var(--cream-dim);
+  }
+
+  .status-banner strong { color: var(--white); }
+
+  /* ── Sections ── */
+  .section {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section-number {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--orange);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.6rem;
+  }
+
+  .body-text {
+    color: var(--cream-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .body-text code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--black-card);
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    color: var(--cream);
+  }
+
+  .pipeline-list {
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+    margin: 1.25rem 0;
+  }
+
+  .pipeline-list li {
+    display: flex;
+    gap: 0.8rem;
+    align-items: baseline;
+    font-size: 0.9rem;
+    color: var(--cream-dim);
+  }
+
+  .pipeline-list .tag {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    min-width: 108px;
+  }
+
+  .out-of-scope {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--black-border);
+  }
+
+  /* ── Milestones ── */
+  .milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--black-border);
+    border: 1px solid var(--black-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .milestone {
+    display: grid;
+    grid-template-columns: 56px 90px 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--black-soft);
+    padding: 1rem 1.2rem;
+  }
+
+  @media (max-width: 600px) {
+    .milestone {
+      grid-template-columns: 40px 1fr;
+      grid-template-areas: "id status" "id text";
+    }
+    .milestone-id { grid-area: id; }
+    .milestone-status { grid-area: status; }
+    .milestone-text { grid-area: text; }
+  }
+
+  .milestone-id {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--muted-light);
+    padding-top: 0.15rem;
+  }
+
+  .milestone.not-started .milestone-id { color: var(--muted); }
+
+  .milestone-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 0.2rem;
+  }
+
+  .milestone-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .milestone.complete .milestone-status { color: var(--green); }
+  .milestone.complete .milestone-status-dot { background: var(--green); }
+
+  .milestone.not-started .milestone-status { color: var(--muted); }
+  .milestone.not-started .milestone-status-dot { background: var(--muted); border: 1px solid var(--muted-light); }
+
+  .milestone-text {
+    font-size: 0.88rem;
+    color: var(--cream-dim);
+  }
+
+  .milestone.not-started .milestone-text { color: var(--muted-light); }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 3rem 1.5rem 2.5rem;
+    border-top: 1px solid var(--black-border);
+    margin-top: 2rem;
+  }
+
+  .footer-brand {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .footer-brand span { color: var(--orange); }
+</style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#skills">Skill Domains</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+      <li><a href="/resume/">Resume</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-eyebrow">AI-103 · In Progress</div>
+    <h1>Intelligent Insights Platform</h1>
+    <p class="hero-description">
+      A Document Intelligence System built on Azure AI Foundry — OCR and structured
+      extraction via Content Understanding, RAG-grounded summarization and Q&amp;A over a
+      real vector index, responsible-AI evaluation, and a multi-agent orchestration
+      pattern. Built while studying for AI-103 (Developing AI Apps and Agents on
+      Azure), the associate-level follow-on to AZ-900 and AZ-104, both already earned.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-value">6 / 7</span><span class="stat-label">Milestones complete</span></div>
+      <div class="stat"><span class="stat-value">M7</span><span class="stat-label">Currently in progress</span></div>
+      <div class="stat"><span class="stat-value">2</span><span class="stat-label">Certs already earned</span></div>
+    </div>
+  </section>
+
+  <div class="status-banner">
+    <div class="status-banner-inner">
+      <div class="status-banner-dot"></div>
+      <p>
+        <strong>This is an honest, in-progress snapshot</strong> — not a finished
+        project writeup. The full treatment (architecture diagrams, expandable project
+        detail, security write-up) matches the rest of this site once the whole IIP
+        arc is complete through M7. Until then, this page tracks real milestone
+        status, updated as work happens.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">What it does</h2>
+    </div>
+    <p class="body-text">
+      Upload a technical document — a clean PDF export, a flatbed scan, or an angled
+      phone photo — and the pipeline extracts text and structured fields, answers
+      natural-language questions grounded in the document's actual content (not the
+      model's memory), and checks its own output for fabrication before returning it.
+    </p>
+    <ul class="pipeline-list">
+      <li><span class="tag">Extraction</span> Azure Content Understanding — structured JSON with confidence scores and source grounding, validated against clean PDF, flatbed scan, and angled-photo conditions of the same document.</li>
+      <li><span class="tag">RAG / Q&amp;A</span> Chunked, embedded, and indexed into Azure AI Search; queries retrieve and join multiple ranked chunks (not just the top hit) before grounding a chat completion — a design choice a live test proved actually matters.</li>
+      <li><span class="tag">Evaluation</span> A custom evaluator harness (Groundedness / Relevance / F1) used to pick the production model on evidence, not assumption — confirmed a real ~3x cost advantage at equal quality.</li>
+      <li><span class="tag">Agents</span> <em>(M7, not yet built)</em> A single orchestrator agent drafting content against a template, reusing the M6 evaluator pattern for QA, plus a computer-vision audit module.</li>
+    </ul>
+    <p class="out-of-scope">
+      Deliberately out of scope: image/video generation and speech modalities — poor
+      fit for a document-intelligence use case. Covered through study material for the
+      exam, not the build. A documented choice, not a gap.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Milestones</h2>
+    </div>
+    <div class="milestone-list">
+
+      <div class="milestone complete">
+        <div class="milestone-id">M0</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Tore down the original West US 3 resource group and all resources — zero carryover into the rebuild.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M1</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Redeployed Azure AI Foundry fresh in West US, with quota re-verified against the new region before building on it.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M2</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Custom document analyzer built and validated against the clean-PDF loan agreement sample document.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M3</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Submit-and-poll extraction pipeline written, debugged, and validated end-to-end against the analyzer.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M4</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Extraction validated across all three image-quality conditions — clean PDF export, flatbed scan, and an angled phone photo of the same document.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M5</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">RAG-grounded Q&amp;A working end-to-end against a real Azure AI Search vector index — live-verified with a retrieval-ranking finding: the top-ranked chunk isn't always the correct one, so the pipeline joins every retrieved chunk into context rather than trusting rank alone.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M6</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Evaluator harness built and run twice against independent question sets; selected the production model on confirmed quality parity plus a real ~3x per-token cost advantage, not on assumption.</div>
+      </div>
+
+      <div class="milestone not-started">
+        <div class="milestone-id">M7</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Not started</div>
+        <div class="milestone-text">Single orchestrator agent over a synthetic content-review scenario — drafts against a template, reuses the M6 evaluator pattern for QA, and adds a computer-vision audit module covering the one AI-103 exam domain not otherwise touched. Closes out Phase 1 of the IIP build.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">oste<span>bovik</span>.net · AI-103 · M0–M6 complete, M7 in progress</div>
+  </footer>
+
+</body>
+</html>
