@@ -2,3 +2,4 @@
 *.py text eol=lf
 *.bicep text eol=lf
 *.bicepparam text eol=lf
+*.html text eol=lf
