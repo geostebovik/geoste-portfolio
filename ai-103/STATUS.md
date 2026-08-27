@@ -66,7 +66,8 @@ accumulates for them — no point building empty structure now.
   exam domain not otherwise touched through M6. No longer tied to Anne's
   engagement or any specific unvalidated business premise; "is this a real
   business" is now a separate, evidence-gated question, not assumed live.
-  Not started. → Phase 1 (of IIP labs) complete.
+  Not built yet — scaffolding complete and design decision made (Aug 21),
+  see Next action below. → Phase 1 (of IIP labs) complete once built.
 
 ---
 
@@ -1756,12 +1757,32 @@ context (not just the top one) is what actually protects against that
 (Aug 20).
 
 **Immediate next step:** M7 — the single orchestrator agent milestone
-(see the Milestones table at the top of this file for the full scope:
-drafts content against a template, reuses M6's evaluation-harness
-pattern for QA, adds a computer-vision module for the one AI-103 exam
-domain not otherwise touched). Not started; no design conversation has
-happened on it yet. First step whenever that begins: same "state what it
-needs to do before typing" discipline used throughout M5 and M6 — talk
+(see the Milestones table at the top of this file for the full scope).
+Design conversation started Aug 21. Scaffolding built: a fictional
+business (Riverside Hardware & Supply, orange/cream brand), a fact sheet,
+a description template, and a content-item rubric with two clean control
+items plus one planted flaw per audit dimension (legibility, brand
+consistency, info accuracy) — all under `iip-docs/m7-riverside-hardware/`,
+plus the five synthetic thumbnails themselves, deterministically rendered
+via `build.py` (HTML/CSS -> Playwright screenshot, not a generative image
+model — exact control over color/contrast/text mattered more than
+photorealism for planted test fixtures). A Foundry Agent Service primer
+was written (`agent-service-primer.md`), since M2-M6 never touched that
+SDK surface (`azure-ai-agents`, distinct from the `openai`-package client
+used through M6 — and distinct from the retiring Assistants API pattern,
+hard retirement Aug 26, 2026).
+
+**Real design decision made and logged (Aug 21):** the orchestrator agent
+will hold the M6 evaluator and the computer-vision audit as *tools it
+decides to call* (agentic/tool-calling pattern via `ToolSet`/`FunctionTool`,
+auto function-calling enabled), not a fixed procedural pipeline calling
+each step in order. Chosen deliberately, accepting the added complexity,
+for closer alignment with AI-103's agentic exam domain and for career
+relevance — not a default, a real choice.
+
+Not yet built. First step next session: design the agent's instructions
+text and the tool function signatures/wrappers — same "state what it
+needs to do before typing" discipline used throughout M5 and M6, talk
 through the shape before writing anything.
 
 Two small, non-blocking items available whenever convenient, neither
@@ -1820,3 +1841,198 @@ which block M5 but all real and worth closing out rather than re-discovering:
 
 These are independent of M5's progress — clear them whenever convenient, not
 a gate on the indexing script above.
+
+---
+
+**Real design decision made and logged (Aug 25):** M7's orchestrator is
+intended to eventually run public-facing on ostebovik.net — reachable by
+real site visitors submitting their own images, not just the fixed
+five-thumbnail rubric it's being built against right now. Decided in
+conversation, not defaulted into: nothing in this file, the M7 handoff
+docs, or `agent-service-primer.md` had committed to a deployment model
+before this. The scaffolding as built — fixed rubric, known inputs and
+outputs, same discipline as M5/M6 — still reads like a local evaluation
+harness, and stays that way for the current build. This is a statement of
+intent for later, not a change to what's being coded this week.
+
+**Not yet designed, real gap, do not skip when this becomes live:** a
+public endpoint that accepts arbitrary images from anonymous visitors and
+feeds them into a billed Azure AI resource needs its own security/cost
+pass before it exists — content moderation on submitted images, rate
+limiting, file size/type validation, probably an auth or CAPTCHA gate, and
+a hard cost ceiling. None of this is designed yet, not even loosely. Do
+not wire the M7 orchestrator to a live public route until this list has
+an actual design behind it, not just this flag.
+
+**One concrete near-term consequence, already applied:** `build_vision_
+messages()` in `m7_vision_test.py` takes `mime_type` as a parameter
+(default `"image/png"`) instead of hardcoding it into the data URL,
+specifically because visitor-submitted images down the road won't all be
+PNGs. Small change made now while the cost of doing so is near zero — not
+scope creep, just not closing a door for free.
+
+---
+
+**Vision capability confirmed live (Aug 25).** `m7_vision_test.py` run
+clean, first attempt: `build_client()`, `encode_image()`,
+`build_vision_messages()`, and `main()` all written and working end to
+end — `gpt-5-4-mini` accepted the base64-embedded PNG via the vision
+content-array format and returned an accurate, specific description
+(correctly caught the two-line headline with its dash break, the brand
+text, and the actual color palette, not a generic scene description).
+Result saved to `scripts/results/20260825-120404_vision_test.json`.
+
+This closes the "first concrete step" named in the Aug 21 plan. Vision
+support was strongly indicated going in by two independent signals (MS
+docs' family-level claim, the Foundry Toolkit catalog's per-model Image
+Attachment tag) — it's now live-verified against the actual deployment,
+not just documented secondhand.
+
+**Immediate next step, unchanged from Aug 21:** design the orchestrator
+agent's instructions text and the tool function signatures/wrappers for
+the M6 evaluator and the CV-audit tool it will call — same "state what it
+needs to do before typing" discipline used throughout M5/M6, talk through
+the shape before writing anything. Today's session was the prerequisite
+check, not the design work itself; that's still fully ahead.
+
+---
+
+**M7 evaluator-tool session (Aug 26).** Design conversation for
+`m7_evaluator_tool.py` resolved the open fork from Aug 21/25: confirmed via
+Microsoft's own docs (`GroundednessEvaluator`/`RelevanceEvaluator` class
+references, cross-checked against the SDK source on GitHub -- not guessed)
+that each evaluator object is independently callable on a single item and
+returns a dict of scores immediately, no `evaluate()`/batch-JSONL-file
+machinery required. `RelevanceEvaluator.__call__(*, query: str, response: str)`
+-- no `context` param in the single-eval form; `GroundednessEvaluator.__call__(
+*, response: str, context: str, query: Optional[str] = None)`.
+
+**Real design decision made and logged (Aug 26):** `m7_evaluator_tool.py`'s
+tool is scoped to Groundedness + Relevance only, not all four evaluators
+`m6_evaluate.py` uses. `SimilarityEvaluator`/`F1ScoreEvaluator` both require a
+`ground_truth` to score against, and M7's drafted marketing copy has no
+defined "correct answer" -- a fabricated ground truth would produce a number
+that looks like a real quality signal without being one. `m6_evaluate.py`
+itself is untouched; this scoping is specific to the new tool. Also decided:
+`response` passed to the tool is the drafted title *and* description
+combined, not description alone (a false claim could land in either); and
+`context` (the fact sheet) is deliberately **not** a parameter the agent
+supplies at call time -- it's loaded once from `fact-sheet.md` at module
+level, so the agent can never substitute its own version of "ground truth"
+for the groundedness check.
+
+**Infra: `CHAT_DEPLOYMENT_GPT_5_2` added to `.env` and `.env.example` (Aug
+26).** Value `gpt-5-2`, matching `m6_evaluate.py`'s existing hardcoded judge
+deployment -- this doesn't change `m6_evaluate.py`'s behavior, it just makes
+the value available under a proper env var name for the new tool to read.
+Closes half of the Aug 6 infra item #2 ("`m6_evaluate.py`'s hardcoded judge
+deployment"); migrating `m6_evaluate.py` itself off the hardcode is still
+optional, not done.
+
+**`scripts/m7_evaluator_tool.py` build started (Aug 26).** `build_judge_config()`
+written and verified correct -- mirrors `m6_evaluate.py`'s `model_config()`
+shape. Three real bugs hit and fixed during the build, each caught by
+comparing against the working `m6_evaluate.py`/`m7_vision_test.py` examples
+rather than guessed: `get_endpoint()` called with no arguments (needs
+`account, rg`); `AzureOpenAIModelConfiguration`'s endpoint param misnamed
+`endpoint` instead of `azure_endpoint`; and a nonexistent env var name
+(`AIF_AZURE_DEPLOYMENT`) instead of the real `CHAT_DEPLOYMENT_GPT_5_2`.
+`FACT_SHEET_PATH` built correctly off `Path(__file__).parent`, avoiding the
+known cwd gotcha. Module-level `context` load (`fact-sheet.md`'s text, read
+once) is functional but doesn't yet match the codebase's `with open(...) as
+f:` convention used everywhere else -- flagged, not urgent.
+
+**Not yet written -- the actual next step:** `evaluate_draft(query: str,
+response: str) -> dict` is currently an empty stub (`return
+evaluation_results` with `evaluation_results` never defined). Left this way
+deliberately -- the fix-and-verify loop on `build_judge_config()` worked well
+enough as a teaching pattern that the next piece is being attempted
+independently first, same as always. Body needs: call
+`groundedness_eval(response=response, context=context, query=query)` and
+`relevance_eval(query=query, response=response)`, merge both dicts, return
+the result -- and the two evaluator objects themselves (`groundedness_eval`,
+`relevance_eval`) still need to be constructed once, module-level, from
+`build_judge_config()`'s result; that's not written yet either.
+
+**Housekeeping note:** this STATUS.md update was itself missed at the actual
+end of the Aug 26 session -- caught and backfilled here on Aug 27, at the
+start of the next session, rather than losing the day's detail to memory.
+Full point-by-point handoff for this same work also lives in the Claude
+project as `claude/2026-08-27-m7-session-prompt.md`.
+
+**Immediate next step, unchanged in substance:** finish `evaluate_draft()` and
+the module-level evaluator objects in `m7_evaluator_tool.py`, add a small
+`if __name__ == "__main__":` smoke test (same discipline `m7_vision_test.py`
+used before anything got built on top of it), confirm live. After that, the
+two design items flagged since Aug 21/25 are still ahead: the orchestrator
+agent's instructions text, and the CV-audit tool wrapper built on
+`m7_vision_test.py`'s proven vision-call pattern.
+
+
+---
+
+**`evaluate_draft()` finished and verified live (Aug 27).** The two evaluator
+objects (`evaluators["groundedness"]`, `evaluators["relevance"]`) got built
+module-level from `build_judge_config()`'s result, matching `m6_evaluate.py`'s
+own `evaluators` dict pattern rather than the two-flat-variables shape first
+sketched — a better fit since it reuses the same key names the merge step
+needs anyway. One real bug caught before the first run: IntelliSense
+suggested calling `.evaluate(...)` on the evaluator objects, which doesn't
+match what got confirmed via MS docs on Aug 26 (the objects are directly
+callable, no `.evaluate()` method) — caught by checking against the
+documented signature rather than trusting the suggestion, fixed before
+running anything. `evaluation_results` ends up nested (`{"groundedness":
+{...}, "relevance": {...}}`), a deliberate choice over a flat merge to avoid
+a key collision between the two evaluators' own output dicts.
+
+**Smoke test built and run against real fixture data, not invented text
+(Aug 27).** `main()` / `if __name__ == "__main__":` uses Item 1 ("How to Mix
+Exterior Paint Colors at Home") — the clean-control item from
+`content-items-plan.md` — with the title and description already written as
+the worked example in `description-template.md`, so the test checks against
+a documented expected result instead of just confirming the code doesn't
+throw.
+
+**Real design decision made and logged (Aug 27): what `query` represents for
+M7.** First run used the bare item topic as `query`
+("How to Mix Exterior Paint Colors at Home") and `RelevanceEvaluator` failed
+it (2.0, threshold 3) — reasoning: the response is promotional copy for an
+in-store service, not literal at-home mixing instructions, so it didn't
+"answer" the topic read as a how-to question. Root cause: `RelevanceEvaluator`
+is shaped for RAG Q&A (query = a real question, response = the answer to
+it); feeding it a bare topic title as if it were a question was a mismatch
+with what the description is actually for (hook/body/CTA marketing copy, per
+`description-template.md`'s own format spec) — not a defect in the drafted
+text or the evaluator. Fix: reframed `query` as the actual drafting
+instruction the orchestrator agent will eventually be given —
+`"Draft a video title and description for a piece of content about:
+'<topic>,' grounded in the store's fact sheet."` — closer to what
+`RelevanceEvaluator` is meant to grade against. Rerun: relevance passed
+(3.0, right at threshold — reasoning still notes some at-home/in-store
+tension, just not enough to fail). Confirmed live, not just predicted.
+
+**Side finding from the same rerun:** groundedness's score didn't move (4.0,
+still pass) but its *reasoning* did — this run's judge specifically flagged
+that "matched to any swatch or sample you bring in" and "we'll mix it while
+you shop" aren't stated in `fact-sheet.md`'s Services list, just plausible
+marketing embellishment. Checked against the fact sheet directly: correct,
+those two claims aren't there. Worth understanding why the reasoning changed
+between runs even though `response`/`context` didn't: `evaluate_draft()`
+passes `query` into *both* evaluator calls (`GroundednessEvaluator.__call__`
+takes `query` as an optional param, confirmed Aug 26), so the relevance fix
+also shifted what the groundedness judge scrutinized. Not a bug — documented
+behavior, just easy to miss since only the relevance side was the intended
+target. The embellishment itself is a pre-existing minor nit in
+`description-template.md`'s own reference example, not something introduced
+by this test — flagged here, not fixed, not urgent.
+
+**`m7_evaluator_tool.py` considered done and verified.** Both evaluators now
+pass against Item 1's real fixture data, matching `content-items-plan.md`'s
+documented expectation ("description drafts clean and grounded") for the
+first time, with defensible, non-rubber-stamp reasoning behind both scores
+rather than a suspiciously clean pass.
+
+**Immediate next step, unchanged:** the orchestrator agent's instructions
+text and the CV-audit tool wrapper (built on `m7_vision_test.py`'s proven
+vision-call pattern) — both flagged since Aug 21/25, talk through shape
+before writing anything, same discipline as always.
