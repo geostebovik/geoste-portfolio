@@ -2036,3 +2036,63 @@ rather than a suspiciously clean pass.
 text and the CV-audit tool wrapper (built on `m7_vision_test.py`'s proven
 vision-call pattern) — both flagged since Aug 21/25, talk through shape
 before writing anything, same discipline as always.
+
+
+---
+
+**Repo housekeeping and site work (Aug 27, second half of session).** Pushed
+today's M7 commit (`4f8d62d` — `m7_evaluator_tool.py`, the Riverside Hardware
+rubric, `m7_vision_test.py`, `agent-service-primer.md`) to `origin/main`.
+While confirming the push, found a real gap in `.gitattributes`: it only
+forced `eol=lf` on `*.sh`/`*.py`/`*.bicep`/`*.bicepparam`, never on HTML or
+YAML — so `az-104/networking/index.html` and the SWA GitHub Actions workflow
+file had both silently drifted to CRLF locally (100% line-ending noise, zero
+real content difference from what's committed, confirmed byte-for-byte
+before touching anything). Closed both gaps: `*.html text eol=lf` added and
+`az-104/networking/index.html` renormalized (`8be60e5`); `*.yml`/`*.yaml
+text eol=lf` added and the workflow file renormalized (`70c5880`) after
+confirming directly against github.com that
+`azure-static-web-apps-polite-beach-008d6f51e.yml` is in fact the only and
+active deploy workflow, not an orphaned one. Both fixes used the same
+scoped-path `git add --renormalize` pattern already established for the M6
+CRLF fix, not a repo-wide pathspec.
+
+**`gh` CLI installed and authenticated on the Windows machine (Aug 27).**
+Real capability gained for direct use in PowerShell/terminal — but does not
+extend to Claude's `device_bash` sandbox, which runs in its own isolated
+Linux VM with access only to the mounted folders, not to programs installed
+on Windows. Same is true of `az`: neither CLI is reachable from that sandbox
+even when installed and authenticated on the actual machine. Worth
+remembering next time this comes up rather than re-discovering it.
+
+**Application Insights web tracking added to the live portfolio site (Aug
+27).** `appi-prod-wus3-01` was already fully provisioned (workspace-based,
+correctly linked to `law-prod-wus3-01`, 30-day retention) and its own bicep
+module comment already said "Captures page views, browser performance, and
+custom events" — but nothing in `index.html` actually loaded the
+client-side SDK before now; the connection string was only ever wired
+server-side as an SWA app setting. Fetched the current, official
+Application Insights JS SDK loader snippet live from Microsoft's docs
+(deliberately not reconstructed from memory, given how easy a long minified
+loader is to get subtly wrong) and inserted it at the top of `<head>` with
+the real connection string. Confirmed the connection string is meant to be
+public in client-side code (a write-only ingestion identifier, not a
+security token) before treating it as safe to commit in plain text.
+Verified before committing: LF line endings preserved, file parses clean
+under Python's HTML parser, `git diff` shows a purely additive 10-line
+change with nothing else in the file touched. Committed as `7ec477f`.
+Live-verification method flagged for next check: Application Insights' own
+dashboards lag a few minutes on ingestion, but the Portal's Live Metrics
+pane under `appi-prod-wus3-01` → Investigate updates in near real time —
+better first check than waiting on the normal charts.
+
+**End of session: all pushed, `origin/main` clean at `7ec477f`.** Confirmed
+directly (`git fetch` + compare, not assumed) — nothing outstanding on the
+git side going into the next session.
+
+**Immediate next step, unchanged from today's housekeeping:** the
+orchestrator agent's instructions text and the CV-audit tool wrapper (built
+on `m7_vision_test.py`'s proven vision-call pattern) -- both flagged since
+Aug 21/25, talk through shape before writing anything, same discipline as
+always. Today's work was infra/site hygiene, not M7 build progress — M7
+itself is exactly where the last entry left it.
