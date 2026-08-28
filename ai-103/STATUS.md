@@ -11,6 +11,11 @@ Commands/CLI reference lives separately: `iip-cli-runbook.md` in this same
 `ai-103/` folder — that page already works well as the "code samples"
 reference and didn't need rebuilding.
 
+Current-state map lives separately too: `m7-orientation.md` in this same
+folder (added Aug 28) — a one-page "what does M7 look like right now, what's
+built vs. designed vs. still open" snapshot, kept current on purpose. This
+file stays the chronological log; that one is the "you are here" pointer.
+
 A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
@@ -2096,3 +2101,77 @@ on `m7_vision_test.py`'s proven vision-call pattern) -- both flagged since
 Aug 21/25, talk through shape before writing anything, same discipline as
 always. Today's work was infra/site hygiene, not M7 build progress — M7
 itself is exactly where the last entry left it.
+
+---
+
+**Application Insights Live Metrics limitation identified, page-view tracking confirmed working (Aug 28).**
+Live Metrics blade for `appi-prod-wus3-01` shows "Not available: couldn't connect to your application"
+— checked Microsoft's own docs (`live-stream` article): Live Metrics is a **server-side-SDK-only**
+feature (.NET, ASP.NET Core, Java, Node.js, Python server SDKs). It does not work with the
+client-side/browser JavaScript SDK under any configuration, because it requires a continuous
+open connection between a running app process and the portal so the portal can push filters —
+a static site with no backend process has nothing to hold that connection open. This is a
+structural mismatch with `ostebovik.net`'s architecture (Azure Static Web App, no server API),
+not a misconfiguration. Live Metrics will never work here and should not be used to verify this
+integration going forward.
+
+Real confirmation instead came from Monitoring > Metrics: "Page views (Count)" for
+`appi-prod-wus3-01` showed 2 recorded page views from testing the day after the Aug 27 change
+(`7ec477f`). That's the correct verification path for a static-site client-side AI SDK
+integration — **Application Insights web tracking is confirmed working.**
+
+---
+
+**M7 session (Aug 28): orientation doc, FunctionTool mechanics, CV-audit tool
+framework built and first-drafted.** Full detail lives in this session's
+history above (Live Metrics finding) and in the new files themselves; this
+entry is the session-close summary.
+
+- Confirmed Aug 27's unpushed commit (`63aa616`) is now pushed — `origin/main`
+  even with local `main` as of tonight. A stale `.git/index.lock` (left by a
+  `device_bash`-run `git fetch` that couldn't clean up after itself, since
+  that sandbox can't delete files without explicit permission) sat unresolved
+  most of the session; cleared tonight with Gerard's explicit delete-permission
+  grant, immediately before this commit.
+- Application Insights Live Metrics investigated and resolved as a
+  non-issue — see the dedicated entry above (Live Metrics is server-side-SDK
+  only, confirmed against Microsoft's docs; real tracking confirmation came
+  from the Metrics blade instead, which showed real page views).
+- **New file: `m7-orientation.md`.** A current-state-only architecture map
+  (not a log, not a plan) built after Gerard flagged genuine difficulty
+  tracking where each session's work fit into the whole, across the growing
+  pile of docs/scripts. Also now holds a consolidated backlog section pulling
+  together every scattered "not urgent" item from past sessions into one
+  place, per Gerard's stated preference — check there first for deferred
+  work, not STATUS.md scrollback.
+- **`agent-service-primer.md` extended** with a verified section on how
+  `FunctionTool` actually reads a Python function (docstring format is
+  reST-style `:param:`/`:return:`/`:rtype:`, not free-form; functions should
+  return JSON strings, not raw dicts) — checked against the real
+  `azure-ai-agents` SDK source after an initial search surfaced a different,
+  not-applicable function-calling pattern.
+- **New file: `scripts/m7_cv_audit_tool.py`.** Framework built (client with
+  its own bumped `STRUCTURED_OUTPUT_API_VERSION`, since the shared
+  `CHAT_API_VERSION` predates structured-outputs support — logged in the
+  orientation doc's backlog, not fixed now), `ThumbnailAudit` pydantic
+  schema (text_legible/brand_consistent/info_accurate/notes), and
+  `audit_thumbnail()`'s full signature/docstring. Gerard wrote the actual
+  `system_prompt`/`user_prompt` himself as a deliberate prompt-engineering
+  exercise — hit a real Python syntax error (a plain-quoted string can't
+  span multiple lines; needed a triple-quote), fixed together, then
+  incorporated real fact-sheet interpolation, a brand-consistency carve-out,
+  and trimmed a redundant JSON-shape instruction now that structured outputs
+  handles that. Verified live (not just read-through): ran
+  `build_audit_messages()` directly and confirmed the real fact sheet content
+  interpolates correctly with no leaked placeholder text.
+- **Not yet run against real Azure at all.** `audit_thumbnail()` itself
+  (the actual `response_format=ThumbnailAudit` call) has never executed —
+  whether structured outputs actually works against the `gpt-5.4-mini`
+  deployment on the bumped API version is a genuine unknown, not assumed
+  either way.
+
+**Next action:** write `main()`'s test loop in `m7_cv_audit_tool.py` —
+run `audit_thumbnail()` against all 5 `content-items-plan.md` fixtures,
+compare actual output to that file's expected-results table, same discipline
+as `m7_evaluator_tool.py`'s own `main()`. This is also the first real test of
+whether structured outputs works on this deployment at all.

@@ -109,6 +109,66 @@ alternative (a script calling each step in order), accepting the added
 complexity, for closer alignment with AI-103's agentic exam domain and for
 career relevance. Logged in `STATUS.md`'s Next action section too.
 
+## How FunctionTool actually reads your function (added Aug 28, ahead of the CV-audit build)
+
+**Verified against the Azure SDK repo directly** (`azure-ai-agents` README, its linked
+`FunctionTool.md` spec, and the real `user_functions.py` sample) rather than assumed —
+worth doing since a search initially surfaced a *different* function-calling pattern (the
+newer Responses-API style, with a hand-written JSON schema) that looks similar but is not
+what this project uses. Confirms the primer's original warning about "looks similar, is
+actually a different SDK shape" applies here too, not just to the Assistants API trap.
+
+**The analogy:** the model never sees your Python source. `FunctionTool` builds it a job
+posting instead, and the model only ever reads the posting — never the code behind it.
+That posting comes from three things Foundry pulls off your function automatically:
+
+- the function's **name** — what the model calls the tool
+- its **type hints** — the required fields on the job posting (what arguments, what type)
+- its **docstring** — the actual instructions: what the tool is for, and what each argument means
+
+Skip the docstring and the posting still has a name and a list of blank fields, but no
+explanation of what the job even is — the model either won't pick the tool up, or will
+guess wrong about how to fill in the fields.
+
+**The runtime flow, step by step:**
+
+1. You write an ordinary Python function.
+2. `FunctionTool(user_functions)` inspects the whole set of them and auto-builds a schema
+   for each — no manual JSON schema to hand-write, unlike the newer Responses-API style.
+3. During a run, if the agent's instructions + the conversation make a tool look useful, it
+   doesn't call your function — it emits a request: "call this tool with these arguments."
+4. `enable_auto_function_calls()` is what intercepts that request, actually calls your real
+   Python function with those arguments, and takes whatever it returns.
+5. That return value gets handed back into the thread as the tool's answer. The model reads
+   it and decides what to do next — call another tool, or respond.
+
+**The docstring format is not free-form — it's a specific reST-style syntax**, confirmed
+against the real sample file:
+
+```python
+def fetch_current_datetime(format: Optional[str] = None) -> str:
+    """
+    Get the current time as a JSON string, optionally formatted.
+
+    :param format (Optional[str]): The format in which to return the current time. Defaults to None, which uses a standard format.
+    :return: The current time in JSON format.
+    :rtype: str
+    """
+```
+
+`:param name (type): description` per parameter, then `:return:` and `:rtype:`. Not
+Google-style `Args:` blocks, not a bare sentence — this exact tag syntax.
+
+**Return-value convention that affects both M7 tools directly:** every sample function in
+the SDK's own repo returns a **JSON string** (`-> str`, body ends in `json.dumps(...)`),
+not a raw `dict`, even when the data is naturally dict-shaped. `evaluate_draft()` in
+`m7_evaluator_tool.py` currently returns a raw `dict` — fine as an internal helper, but the
+thing actually registered with `FunctionTool` should be a thin wrapper that calls it and
+returns `json.dumps(result)`, matching the established convention, with `:rtype: str`
+in its docstring. Same plan applies to the CV-audit tool once it's built.
+
+Sources: [azure-ai-agents README](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/README.md), [FunctionTool.md spec](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/FunctionTool.md), [user_functions.py sample](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/samples/utils/user_functions.py).
+
 ## The three agent types (context, not a decision point yet)
 
 Foundry Agent Service actually offers three ways to build an agent:
