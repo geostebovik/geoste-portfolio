@@ -37,18 +37,21 @@ nothing more.
                 +---------------------+----------------------+
                 |                                              |
       Tool 1: draft evaluator                        Tool 2: CV-audit
-      STATUS: built + verified                        STATUS: designed, not coded
-      (wraps m7_evaluator_tool.py)                     (will build on m7_vision_test.py's
-                |                                        proven vision-call pattern)
-      Uses GroundednessEvaluator +                      Will check 3 things:
-      RelevanceEvaluator (Azure AI                        - text_legible
-      Evaluation SDK)                                      - brand_consistent
-                |                                           - info_accurate
-      Checks drafted title/description                     (+ notes: reasoning)
-      text against fact-sheet.md                                    |
-                                                          Checks thumbnail images
-                                                          against fact-sheet.md's
-                                                          brand guide + posted hours
+      STATUS: built + verified                        STATUS: main() written + run
+      (wraps m7_evaluator_tool.py)                       live (Aug 29-31). Structured
+                |                                        outputs confirmed working
+      Uses GroundednessEvaluator +                        against gpt-5.4-mini on the
+      RelevanceEvaluator (Azure AI                         bumped API version -- no
+      Evaluation SDK)                                      fallback needed.
+                |                                      Checks 3 things:
+      Checks drafted title/description                   - text_legible
+      text against fact-sheet.md                          - brand_consistent
+                                                            - info_accurate
+                                                            (+ notes: reasoning)
+                                                      Latest 5-fixture run: 4/5.
+                                                      item3 fails BOTH text_legible
+                                                      AND brand_consistent -- open
+                                                      regression, see item 2 below.
 ```
 
 Both tools check a different *kind* of output against the same ground
@@ -60,18 +63,40 @@ CV-audit run should score exactly as documented there — that table is what
 
 ## What's actually left to build, in order
 
-1. **CV-audit tool wrapper** — turn `m7_vision_test.py`'s proven vision call
-   into an actual `FunctionTool`-compatible function: JSON-string return,
-   reST-style docstring (`:param:`/`:return:`/`:rtype:`), scored against the
-   3-field rubric above. See the Aug 28 FunctionTool section in
-   `agent-service-primer.md` for the mechanics.
-2. **`evaluate_draft()` wrapper** — a thin function around the already-working
+1. ~~CV-audit tool wrapper~~ — **done (Aug 28).** `m7_cv_audit_tool.py` has
+   the client, `ThumbnailAudit` schema, and `audit_thumbnail()` fully
+   written, including the real system/user prompts (Gerard wrote those
+   himself as a prompt-engineering exercise). Never run against real Azure.
+2. ~~Run `main()`'s fixture test loop~~ — **done (Aug 29-31).** Structured
+   outputs (`response_format=ThumbnailAudit`) confirmed working live against
+   `gpt-5.4-mini` on the bumped `STRUCTURED_OUTPUT_API_VERSION` -- no
+   fallback needed. First live run: 4/5, item3 failed `text_legible` only.
+   Root-caused through a reliability/generalization testing process (full
+   detail in STATUS.md's Aug 29-31 entries and
+   `probe_legibility_variants.py` / `probe_legibility_detail_level.py`):
+   the original wording asked whether *any* text was legible, which the
+   always-present business-name wordmark trivially satisfied regardless of
+   what happened to the manipulated title text -- an existential-vs-universal
+   quantifier bug, not a vision-perception limit. Rewrote `text_legible`'s
+   wording to require each distinct text element to be judged on its own,
+   with an explicit instruction not to let one legible element cover for
+   another.
+   **New regression, unresolved -- this is the actual next step.** A later
+   full 5-item run under the corrected (and actually saved) wording again
+   showed 4/5, but this time item3 failed on **both** `text_legible` and
+   `brand_consistent` -- `brand_consistent` had never failed before this
+   run. Not yet determined whether this is run-to-run noise (no
+   `temperature` pinned anywhere in the client) or a real ripple effect from
+   editing the `text_legible` section of a shared multi-field system prompt.
+   Needs several plain reruns to characterize before touching the prompt
+   again.
+3. **`evaluate_draft()` wrapper** — a thin function around the already-working
    evaluator that returns `json.dumps(...)` instead of a raw dict, with its
    own reST docstring. Small, but not done yet.
-3. **Orchestrator instructions text** — the actual job description telling
+4. **Orchestrator instructions text** — the actual job description telling
    the agent when to draft, when to call each tool, and what to do with a
    failing result (redraft? flag for review?). Not yet written.
-4. **Wire it together** — `AgentsClient` + `ToolSet` + `enable_auto_function_calls`,
+5. **Wire it together** — `AgentsClient` + `ToolSet` + `enable_auto_function_calls`,
    then run all 5 `content-items-plan.md` items through it and compare actual
    results to the expected-results table.
 
@@ -103,6 +128,60 @@ session's narrative paragraph in `STATUS.md`.
   against the fact sheet directly, not just a judge-model guess. Small,
   cosmetic, doesn't block anything — it's the template's own example text,
   not something a real drafted item inherited.
+
+**CV-audit investigation threads (added Aug 31, none block the regression fix above):**
+
+- **Diagnostic-variant findings, not yet fully closed.** Four controlled
+  thumbnail variants built (`iip-docs/m7-riverside-hardware/
+  build_legibility_diagnostics.py`, deliberately separate from the official
+  `build.py`/`ITEMS` content) isolating one variable at a time: diag-a
+  (heavy clutter), diag-b (near-zero title/background contrast), diag-c
+  (title color pushed as close to background as CSS would render), diag-d
+  (3px title font). Clutter and gradual contrast were both ruled out as
+  causes -- even diag-b/c returned `text_legible: True` under the original
+  wording, confirming the real bug was the quantifier issue fixed above, not
+  a vision-perception limit. Two open threads: (1) diag-d showed genuine
+  1-in-4 run-to-run variance under the corrected wording
+  (`probe_legibility_variants.py`, 5 runs/variant, 80% stability threshold)
+  -- worth more runs before treating either diag-c or diag-d's boundary as
+  settled; (2) a drafted-but-untested wording addition for the
+  "expected-but-absent" case ("if a headline/title element would normally
+  be expected and none is visibly distinguishable from the background,
+  treat that as illegible, not merely absent") was considered for diag-c
+  specifically and never applied or tested.
+- **`"detail": "high"` on the image_url content ruled out as a cause.**
+  Tested via `probe_legibility_detail_level.py` against diag-c/d at default
+  vs. high detail -- results were consistent with the quantifier-bug
+  explanation, not detail level. Not worth revisiting unless the regression
+  investigation turns up something that specifically implicates it.
+- **`temperature` is unpinned everywhere in `m7_cv_audit_tool.py` and its
+  test scripts.** Given how much run-to-run variance has shown up across
+  this investigation (diag-d's split result being the clearest case),
+  pinning `temperature=0` is worth a deliberate decision once the
+  brand_consistent regression is resolved -- may make reproducibility
+  testing more meaningful, or may mask real model uncertainty worth
+  knowing about.
+- **General confabulation risk in vision-judgment `notes` fields, beyond
+  text_legible.** Printing the model's actual `notes` reasoning (first done
+  in the `probe_legibility_detail_level.py` run) is what surfaced the
+  wordmark-only citation pattern that led to the root cause above -- worth
+  the same scrutiny for `info_accurate` and `brand_consistent`, neither of
+  which has had its own `notes` output examined this closely yet.
+- **`build.py`'s own `/tmp` + naive `file://` string-concat bug, not
+  fixed.** `build_legibility_diagnostics.py` had the identical bug
+  (hardcoded `/tmp` path, `"file://" + path` string concatenation instead
+  of a proper file URI) and was fixed using `tempfile.gettempdir()` +
+  `pathlib.Path.as_uri()` -- see the new `python-patterns.md` entry.
+  `build.py` itself, the official content-generation script, still has the
+  same bug, left deliberately untouched since this session's diagnostic
+  work didn't need to touch it. Will bite the moment it's run on Windows
+  without WSL/Cloud Shell.
+- **Test/QA script naming convention adopted, not retroactive.** New
+  descriptive test/QA scripts now use a `probe_<what-it-tests>.py` pattern
+  (e.g. `probe_legibility_variants.py`, `probe_legibility_detail_level.py`)
+  instead of `testerN.py`. Existing `tester.py` / `tester2.py` /
+  `tester3.py` are staying as-is -- no retroactive rename or doc-churn on
+  already-closed artifacts.
 
 **M6 infra (carried forward from Aug 6, none block M5/M7):**
 

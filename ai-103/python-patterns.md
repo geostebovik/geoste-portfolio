@@ -555,5 +555,49 @@ escape sequences literally instead of rendering them.
 
 ---
 
+## Hardcoded `/tmp` + naive `file://` string concatenation is not a valid Windows file URL
+
+**The bug:** building a local file URL by hand — `"file://" + str(path)` —
+instead of using `pathlib.Path.as_uri()`, combined with hardcoding a Unix
+temp directory (`/tmp/...`) instead of `tempfile.gettempdir()`. On Linux/Mac
+this often happens to work by accident; on Windows it doesn't, because a
+Windows path has a drive letter (`C:\\...`) and backslashes, which naive
+string concatenation doesn't turn into a well-formed `file://` URI at all.
+
+**Why it's easy to miss:** the bug only surfaces where the code actually
+runs, not where it's written or reviewed. `build.py`'s own pattern (`/tmp/
+m7-riverside-hardware` + `"file://" + str(html_path)`) presumably worked
+fine in whatever environment it was first tested in, and copying that
+pattern into a new script feels like reusing an already-proven approach,
+not introducing a new bug — nothing about the code *looks*
+platform-specific.
+
+**Real instance:** `build_legibility_diagnostics.py`, written new this
+session, inherited this exact pattern from `build.py` uncritically (my
+mistake, not caught in review before the first run). Playwright's
+`page.goto()` failed with `net::ERR_FILE_NOT_FOUND` on the Windows device
+this session actually runs against, since `"file://" + "/tmp/
+m7-legibility-diagnostics/diag-a.html"` isn't a real path on this machine
+at all — there is no `/tmp` directory, and even if there were, the string
+is missing the drive letter a real Windows file URI needs
+(`file:///C:/...`). Fixed with `tempfile.gettempdir()` (resolves to the
+correct temp directory on whatever OS is actually running) and
+`pathlib.Path(...).as_uri()` (builds a correct, OS-appropriate `file://`
+URI, drive letter included on Windows).
+
+**Habit worth building:** any time a path is about to become a URL string,
+reach for `Path.as_uri()` instead of string concatenation — same instinct
+as not hand-building a URL query string when `urllib.parse` exists. And
+treat `/tmp` as a Unix-only assumption on sight, even inside code that's
+"just a temp file, doesn't matter" — `tempfile.gettempdir()` costs nothing
+and is correct everywhere.
+
+**Where this showed up:** `build_legibility_diagnostics.py`
+(`iip-docs/m7-riverside-hardware/`), Aug 31. **Known, not fixed:**
+`build.py` in the same folder has the identical pattern and has not been
+touched — flagged in `m7-orientation.md`'s backlog.
+
+---
+
 *(Add more entries here as new patterns come up — living document, edited
 in place, same rule as `STATUS.md`.)*

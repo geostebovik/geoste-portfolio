@@ -2175,3 +2175,106 @@ run `audit_thumbnail()` against all 5 `content-items-plan.md` fixtures,
 compare actual output to that file's expected-results table, same discipline
 as `m7_evaluator_tool.py`'s own `main()`. This is also the first real test of
 whether structured outputs works on this deployment at all.
+
+---
+
+**M7 session (Aug 29-31): CV-audit `main()` written and run live for the
+first time; text_legible root-caused via staged reliability/generalization
+testing; new brand_consistent regression found, unresolved.**
+
+- **`main()` written (by Gerard, reviewed together)** in
+  `m7_cv_audit_tool.py`: loops the five `content-items-plan.md` fixtures,
+  calls `audit_thumbnail()` on each, diffs actual vs. expected across all
+  three fields, prints a pass/fail summary. Fixed a handful of typos before
+  the first run (missing space, `/n` vs `\n`, "Aditing") plus one real bug
+  on my side -- an f-string double-brace (`f"{{k: actual[k] for k in
+  expected}}"`) that never evaluates the dict comprehension, since double
+  braces escape to literal text; Gerard fixed it correctly with single-brace
+  spacing.
+- **`EXPECTED_RESULTS` discussed and deliberately kept hardcoded** in
+  `m7_cv_audit_tool.py` rather than externalized to a separate file -- a
+  real best-practice tradeoff talked through, not a default: at this
+  project's size a separate file is one more thing to keep in sync for no
+  real benefit. Verified the dict's values against `content-items-plan.md`
+  directly before the first run.
+- **First live run: structured outputs confirmed working.**
+  `response_format=ThumbnailAudit` against `gpt-5.4-mini` on the bumped
+  `STRUCTURED_OUTPUT_API_VERSION` worked with no fallback needed -- the last
+  genuine unknown from Aug 28's framework build, now resolved. Result: 4/5,
+  item3 (`item3-tool-rental-FLAW-legibility.png`) failed `text_legible`
+  only.
+- **Confirmed reproducibility before drawing any conclusion**, per Gerard's
+  explicit call that one failure isn't evidence. Reran item3 alone 5x
+  against the *original* wording (`tester2.py`, reused rather than adding a
+  new file) -- 5/5 `True`, i.e. the original single failure didn't
+  reproduce as a stable pattern on its own. That result was ambiguous
+  (noise? boundary condition?), so testing moved to controlled variants
+  rather than guessing.
+- **Built four controlled diagnostic thumbnail variants** to isolate one
+  variable at a time (`iip-docs/m7-riverside-hardware/
+  build_legibility_diagnostics.py`, kept deliberately separate from the
+  official `build.py`/`ITEMS`): diag-a (heavy visual clutter), diag-b
+  (near-zero title/background contrast), diag-c (title color pushed as
+  close to background as CSS allows), diag-d (3px title font). Hit and
+  fixed a real cross-platform bug along the way -- see the new
+  `python-patterns.md` entry. All four variants under the *original*
+  wording came back `text_legible: True` at 5/5 (`probe_legibility_
+  variants.py`, renamed from `tester4.py`), ruling out clutter and gradual
+  contrast loss as the cause entirely -- even zero-contrast and 3px-font
+  images were reported legible.
+- **Printed the model's full `notes` reasoning for the first time**
+  (`probe_legibility_detail_level.py`) instead of just the boolean, at both
+  default and `"detail": "high"` -- detail level made no difference. The
+  notes revealed the actual mechanism: every response cited only the
+  ever-present "RIVERSIDE HARDWARE & SUPPLY" business-name wordmark as
+  evidence of legibility, never the manipulated title text. **Root cause:
+  an existential-vs-universal quantifier bug.** The original wording asked
+  whether *any* text was legible -- trivially satisfied by the wordmark
+  regardless of what happened to the title, and not a vision-perception
+  limitation at all.
+- **Rewrote `text_legible`'s wording** (Gerard drafted, I critiqued each
+  draft -- flagged one real regression risk in an earlier draft that would
+  have told the model to assume unverifiable "invisible" text exists,
+  reinforcing the confabulation pattern rather than fixing it) to require
+  each distinct text element to be judged on its own, with an explicit "do
+  not weight any single element more heavily than another" instruction.
+  **Confirmed saved in the live file as of tonight** (`m7_cv_audit_tool.py`,
+  the `text_legible` line in `build_audit_messages()`).
+- **Reran diag-c/d under the corrected wording:** diag-c stable at 5/5
+  `True`; diag-d showed genuine run-to-run variance, 1 `False` / 4 `True`
+  -- a real signal that the corrected wording sits near a genuine boundary
+  for very small fonts, not settled either way yet.
+- **New regression found on the final full run.** A complete 5-fixture run
+  under the corrected (and, this time, actually-saved) wording again
+  produced 4/5 -- but item3 now fails on **both** `text_legible` and
+  `brand_consistent`, which had never failed before. Gerard caught his own
+  process error here: an earlier "full run" that appeared to show all-pass
+  was actually rerun on an unsaved edit and isn't valid data. Not yet
+  determined whether the regression is run-to-run noise (no `temperature`
+  pinned anywhere in the client) or a real ripple effect from editing
+  `text_legible`'s section of a shared multi-field system prompt --
+  **this is tomorrow's first priority.**
+- **New file:** `iip-docs/m7-riverside-hardware/build_legibility_
+  diagnostics.py` (diagnostic variant builder, separate from official
+  content).
+- **New files:** `scripts/probe_legibility_variants.py` (renamed from
+  `tester4.py`) and `scripts/probe_legibility_detail_level.py` -- both
+  under a new `probe_<what-it-tests>.py` naming convention adopted for
+  descriptive test/QA scripts going forward (existing `tester.py` /
+  `tester2.py` / `tester3.py` intentionally not renamed -- no retroactive
+  doc-churn on closed artifacts).
+- **`scripts/requirements.txt`:** added `pydantic` and `playwright` (both
+  real, previously-uncaptured dependencies). Playwright also needed a
+  separate `playwright install chromium` step to fetch the browser binary
+  -- `pip install` alone doesn't do that.
+- **Full backlog additions** (diagnostic-thread details, `temperature`
+  pinning consideration, `build.py`'s own latent path bug, a general
+  confabulation-risk note) filed in `m7-orientation.md`'s backlog rather
+  than here -- check there, not this entry, for the full list.
+
+**Next action:** resolve the `brand_consistent` regression on item3 first --
+several plain reruns under the current saved wording, no prompt changes
+yet, to characterize whether it's noise or a real ripple effect. Then
+confirm diag-c/d stability with more runs, decide on the untested
+"expected-but-absent" wording for diag-c, and do one more full 1-5
+regression pass before considering `text_legible` closed.
