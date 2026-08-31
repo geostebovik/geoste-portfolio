@@ -34,6 +34,28 @@ from openai import AzureOpenAI
 from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
 from m7_vision_test import encode_image  # reuse, don't rewrite -- no api_version dependency
 
+# Answer key for the fixtures in iip-docs/m7-riverside-hardware/ -- mirrors
+# content-items-plan.md's expected-results table. A PNG in that folder only
+# gets audited if it's a key here; anything else is skipped and reported,
+# not silently processed. Add new fixtures here, not by relying on a
+# filename pattern.
+EXPECTED_RESULTS = {
+    "item1-paint-mixing-CLEAN.png": {
+        "text_legible": True, "brand_consistent": True, "info_accurate": True,
+    },
+    "item2-seasonal-checklist-CLEAN.png": {
+        "text_legible": True, "brand_consistent": True, "info_accurate": True,
+    },
+    "item3-tool-rental-FLAW-legibility.png": {
+        "text_legible": False, "brand_consistent": True, "info_accurate": True,
+    },
+    "item4-key-cutting-FLAW-brand.png": {
+        "text_legible": True, "brand_consistent": False, "info_accurate": True,
+    },
+    "item5-propane-refill-FLAW-info-accuracy.png": {
+        "text_legible": True, "brand_consistent": True, "info_accurate": False,
+    },
+}
 
 # Bumped independently of the shared CHAT_API_VERSION -- see module docstring.
 # TODO: confirm this is still the right version once you've read the current
@@ -85,8 +107,6 @@ def build_audit_client() -> AzureOpenAI:
 def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
     """Build the chat.completions messages list for the audit call.
 
-    TODO -- write the actual system prompt. It needs to instruct the model
-    on exactly what each rubric field means:
       - text_legible: is any text rendered IN THE IMAGE actually readable
       - brand_consistent: is the dominant palette orange (#FD5A1E family) /
         cream (#EFE4B0 family) -- flag anything materially different
@@ -107,7 +127,7 @@ def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[d
         {fact_sheet}
 
         Checks:
-        - text_legible: is any text rendered IN THE IMAGE actually readable? Font variations that do not impact readability are not an issue
+        - text_legible: are distinct text elements legible on their own — one legible element, such as the business name, does not make other, separate text elements legible. Do not weight any single text element more heavily than another, regardless of legibility. Font variations that do not negatively impact human readability are not an issue
         - brand_consistent: is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family) -- flag anything materially different. Small color variations that do not impact brand consistency are not an issue
         - info_accurate: do any visible claims (hours, services) in the image match the fact sheet content above
         - notes: brief reasoning for whatever it flagged (or "no issues found" if everything passed)
@@ -169,11 +189,39 @@ def audit_thumbnail(image_path: str) -> str:
 
 
 def main():
-    # TODO -- run this against all 5 content-items-plan.md fixtures
-    # (item1-paint-mixing-CLEAN.png ... item5-propane-refill-FLAW-info-accuracy.png)
-    # and compare actual output to that file's expected-results table,
-    # same discipline as m7_evaluator_tool.py's main().
-    pass
+
+    folder = Path(__file__).parent / ".." / "iip-docs" / "m7-riverside-hardware"
+
+    all_pngs = sorted(folder.glob("*.png"))
+    fixtures = [f for f in all_pngs if f.name in EXPECTED_RESULTS]
+    skipped = [f for f in all_pngs if f.name not in EXPECTED_RESULTS]
+
+    if skipped:
+        print(f"Skipping {len(skipped)} PNG(s) not in EXPECTED_RESULTS: "
+              f"{[f.name for f in skipped]}\n")
+
+    pass_count = 0
+
+    for image_file in fixtures:
+        print(f"Auditing {image_file.name}...")
+        actual = json.loads(audit_thumbnail(str(image_file)))
+        expected = EXPECTED_RESULTS[image_file.name]
+
+        mismatches = [
+            field for field in ("text_legible", "brand_consistent", "info_accurate")
+            if actual[field] != expected[field]
+        ]
+
+        if mismatches:
+            print(f" MISMATCH on {mismatches} -- expected {expected}, "
+                f"got { {k: actual[k] for k in expected} }")
+        else:
+            print(" PASS -- all three dimensions matched expected")
+            pass_count += 1
+
+        print(f" notes: {actual['notes']}\n")
+
+    print(f"{pass_count}/{len(fixtures)} fixtures matched expected results.")
 
 
 if __name__ == "__main__":
