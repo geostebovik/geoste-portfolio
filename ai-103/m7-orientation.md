@@ -48,10 +48,15 @@ nothing more.
       text against fact-sheet.md                          - brand_consistent
                                                             - info_accurate
                                                             (+ notes: reasoning)
-                                                      Latest 5-fixture run: 4/5.
-                                                      item3 fails BOTH text_legible
-                                                      AND brand_consistent -- open
-                                                      regression, see item 2 below.
+                                                      Latest 5-fixture run (Sep 1,
+                                                      7x, temp/seed pinned): 4/5
+                                                      stable. item3 fails
+                                                      text_legible only --
+                                                      brand_consistent regression
+                                                      resolved (was noise).
+                                                      info_accurate fixed on item2
+                                                      (was 4/7, now 7/7 clean). See
+                                                      item 2 below for what's left.
 ```
 
 Both tools check a different *kind* of output against the same ground
@@ -81,15 +86,38 @@ CV-audit run should score exactly as documented there — that table is what
    wording to require each distinct text element to be judged on its own,
    with an explicit instruction not to let one legible element cover for
    another.
-   **New regression, unresolved -- this is the actual next step.** A later
-   full 5-item run under the corrected (and actually saved) wording again
-   showed 4/5, but this time item3 failed on **both** `text_legible` and
-   `brand_consistent` -- `brand_consistent` had never failed before this
-   run. Not yet determined whether this is run-to-run noise (no
-   `temperature` pinned anywhere in the client) or a real ripple effect from
-   editing the `text_legible` section of a shared multi-field system prompt.
-   Needs several plain reruns to characterize before touching the prompt
-   again.
+   **`brand_consistent` regression resolved (Sep 1) -- was noise.**
+   `temperature=0`/`seed=42` pinned on the audit call specifically to
+   settle this, then 7 plain reruns of all 5 fixtures: `brand_consistent`
+   never failed on item3 once. Most likely the noise (or the invalid
+   unsaved-edit run) already flagged as suspect from the Aug 31 write-up.
+   Closed.
+
+   **New finding from those same 7 runs, since fixed: `info_accurate` was
+   genuinely unstable on item2 (4 True / 3 False out of 7) even with
+   temperature and seed pinned.** `content-items-plan.md` confirmed item2 is
+   designed with zero factual claims, so any `False` was a wrong answer, not
+   an open question. Root cause: the wording never distinguished a
+   topic/headline from an explicit factual assertion, so the model
+   inconsistently read item2's "Seasonal Home Maintenance Checklist" title
+   as an implied service claim. Wording rewritten (several iterations --
+   Gerard drafted, Claude critiqued each pass) to use "assertions" instead
+   of "claims"/"offerings" and to explicitly exempt headlines/titles from
+   being checkable. Verified via the new `probe_fixture_stability.py` (7
+   runs, automated): item2 now 7/7 clean, items 1/4/5 unaffected. See
+   `content-items-plan.md`'s "Design constraint for future items" for the
+   consequence this has on any new fixture design.
+
+   **`text_legible` on item3 -- this is the actual next step.** 7/7 stable
+   fail across the same batch, identical reasoning every run (explicitly
+   engages the manipulated headline, judges it legible "despite the
+   low-contrast overlay"). Fully characterized, not noise: a real mismatch
+   between the fixture's design intent (`content-items-plan.md`: "readable
+   to a human only with effort, if at all") and the model's actual
+   legibility threshold. Needs a calibration decision, not just a wording
+   clarity fix -- risk of overcorrecting into a new false-positive problem
+   on item1/2/4/5's genuinely-legible text, same shape as the bug just fixed
+   on item2.
 3. **`evaluate_draft()` wrapper** — a thin function around the already-working
    evaluator that returns `json.dumps(...)` instead of a raw dict, with its
    own reST docstring. Small, but not done yet.
@@ -154,19 +182,26 @@ session's narrative paragraph in `STATUS.md`.
   vs. high detail -- results were consistent with the quantifier-bug
   explanation, not detail level. Not worth revisiting unless the regression
   investigation turns up something that specifically implicates it.
-- **`temperature` is unpinned everywhere in `m7_cv_audit_tool.py` and its
-  test scripts.** Given how much run-to-run variance has shown up across
-  this investigation (diag-d's split result being the clearest case),
-  pinning `temperature=0` is worth a deliberate decision once the
-  brand_consistent regression is resolved -- may make reproducibility
-  testing more meaningful, or may mask real model uncertainty worth
-  knowing about.
-- **General confabulation risk in vision-judgment `notes` fields, beyond
-  text_legible.** Printing the model's actual `notes` reasoning (first done
-  in the `probe_legibility_detail_level.py` run) is what surfaced the
-  wordmark-only citation pattern that led to the root cause above -- worth
-  the same scrutiny for `info_accurate` and `brand_consistent`, neither of
-  which has had its own `notes` output examined this closely yet.
+- ~~`temperature` unpinned in `m7_cv_audit_tool.py`~~ — **decided and done
+  (Sep 1).** Pinned `temperature=0`/`seed=42` on the audit call, ahead of
+  the brand_consistent reruns rather than after -- see `STATUS.md`'s Sep 1
+  entry for why that ordering mattered. Neither param guarantees bit-exact
+  determinism on Azure OpenAI, just substantially reduces variance (item2's
+  `info_accurate` still swung 4/7-3/7 under pinning before its wording got
+  fixed -- pinning narrows the noise, doesn't eliminate every source of it).
+  Test scripts (`probe_*.py`) still don't pin it -- worth doing if any of
+  them get reused for a real stability question rather than a one-off
+  screen.
+- **General confabulation risk in vision-judgment `notes` fields --
+  partially closed.** `info_accurate`'s `notes` got the same close-reading
+  treatment as `text_legible` did originally (Sep 1) and surfaced a real
+  bug: the model was reading item2's headline as an implied service claim.
+  Fixed -- see item 2 in "What's actually left to build" above. `
+  brand_consistent`'s `notes` still haven't been examined this closely --
+  it passed clean 7/7 in the Sep 1 batch, so there's no active reason to,
+  but the general risk (confabulating plausible-sounding justification
+  rather than grounded evidence) hasn't been ruled out there, just hasn't
+  shown up yet either.
 - **`build.py`'s own `/tmp` + naive `file://` string-concat bug, not
   fixed.** `build_legibility_diagnostics.py` had the identical bug
   (hardcoded `/tmp` path, `"file://" + path` string concatenation instead

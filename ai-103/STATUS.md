@@ -2278,3 +2278,96 @@ yet, to characterize whether it's noise or a real ripple effect. Then
 confirm diag-c/d stability with more runs, decide on the untested
 "expected-but-absent" wording for diag-c, and do one more full 1-5
 regression pass before considering `text_legible` closed.
+
+**M7 session (Sep 1): brand_consistent regression resolved (was noise), temperature/seed pinned, info_accurate wording fixed and verified on item2.**
+
+**Confirmed the working folder fresh (`ai-103`) and read `m7-orientation.md`
+first, per standing rule, before touching anything.** Git state going in
+matched the Aug 31 write-up exactly (`HEAD` `a7085c7`, three days of
+uncommitted work) -- but by the time this session picked it up live, that
+work had already landed as `540a6fb`/`7924df2` (from a separate thread of
+work this same day), so nothing was actually uncommitted. Worth noting for
+next time: the "next session prompt" doc can go stale between being written
+and being picked up if other work touches the same repo in between --
+`git status`/`git log` fresh at session start, don't just trust the doc's
+git-state section.
+
+**`temperature=0`/`seed=42` pinned on the audit call (`m7_cv_audit_tool.py`,
+`audit_thumbnail()`), ahead of the brand_consistent reruns rather than
+after.** Deliberate reordering from the plan Aug 31 left off on: pinning
+first turns "run it a few times and eyeball stability" into a clean
+noise-vs-ripple-effect test instead of conflating two unknowns in one
+unpinned signal. Dated comment left on the `.parse()` call explaining the
+reasoning and noting neither param guarantees bit-exact determinism on
+Azure OpenAI, just substantially reduces variance.
+
+**7 manual runs of the unmodified (pre-fix) tool, all 5 fixtures, temperature
+and seed pinned.** Findings, tabulated per fixture across all 7 runs:
+
+- **`brand_consistent` never failed on item3 once.** The regression this
+  session was written to chase looks resolved -- most likely the noise (or
+  the specific invalid unsaved-edit run) STATUS.md already flagged as
+  suspect from the Aug 31 write-up. Treating this thread as closed.
+- **item3's `text_legible` failed 7/7, identical reasoning every run**
+  ("headline... also readable despite the low-contrast overlay"). Not the
+  old wordmark-citation bug -- the model explicitly engages the manipulated
+  headline every time and still judges it legible. Fully characterized now,
+  not noise: this is a real mismatch between the fixture's design intent
+  (`content-items-plan.md`: "readable to a human only with effort, if at
+  all") and the model's actual legibility threshold. Open item, next up.
+- **item2's `info_accurate` came back genuinely unstable: 4 True / 3 False
+  out of 7, even with temperature and seed both pinned.** New finding, never
+  documented before. Checked `content-items-plan.md` directly: item2 is
+  designed with "no factual claims" at all, so any `False` here is a wrong
+  answer by design intent, not an open interpretive question. Root cause:
+  the model was inconsistently reading the headline ("Seasonal Home
+  Maintenance Checklist") as an implied service claim -- `info_accurate`'s
+  wording never distinguished a topic/headline from an explicit factual
+  assertion.
+
+**`info_accurate`'s wording rewritten to fix item2, iteratively -- Gerard
+drafted each pass, Claude critiqued.** Went through several revisions:
+"claims" -> "offerings" (flagged as moving the wrong direction -- "offering"
+leans toward "thing sold," which is closer to the misreading causing the
+bug, not further from it) -> "assertions" (the actual right term for this
+job -- a declarative statement asserted as fact, standard fact-checking
+vocabulary). Added an explicit independent-evaluation clause (kept
+"accuracy, or lack thereof" over "inaccuracy" alone -- deliberately both-
+directional, since an accurate claim shouldn't excuse an inaccurate one but
+also shouldn't get contaminated by one, the same halo-effect risk flagged
+for `brand_consistent`). Final, missing piece added last: "A headline or
+title describing the content's topic is not itself a checkable assertion"
+-- this was the actual fix; the noun-choice iteration helped but wasn't
+sufficient on its own. `build_audit_messages()`'s docstring updated to match
+(had gone stale on the old wording).
+
+**Verified via a new script, `probe_fixture_stability.py` -- 7 runs,
+automated, matching the manual batch size.** Result: item2 now 7/7 clean
+pass, up from 4/7 -- fully converged, not just improved. Items 1/4/5
+unaffected (still 7/7 as before), item3 unchanged at 7/7 fail on
+`text_legible` -- confirms the fix was isolated to exactly the field it was
+supposed to touch, no ripple into anything else. Script mirrors
+`probe_legibility_variants.py`'s conventions (module docstring, `RUNS`/
+`STABLE_THRESHOLD` constants, no `main()` wrapper) and saves full per-run
+records (booleans + notes, not just a tally) as timestamped JSON in
+`scripts/results/`.
+
+**New design constraint logged in `content-items-plan.md`, not just code.**
+The headline-exemption fix means a future flawed item's info-accuracy
+violation can't live inside the item's own headline/title -- it has to be a
+separate visible element, the way item5's "OPEN 24/7" callout already is.
+Logged there specifically (not just as a code comment) since that's the doc
+actually consulted when designing new fixture images, not something that'd
+get read mid-image-creation.
+
+**Next action:** item3's `text_legible` miss on the tool-rental fixture --
+same "one thing at a time" discipline that just worked for `info_accurate`.
+Open question is a calibration one, not a wording-clarity one: either the
+fixture's low-contrast manipulation isn't strong enough to cross this
+model's actual legibility threshold, or the wording needs to define
+"legible" more strictly (e.g. "readable at a glance, without deliberate
+effort") to match the fixture's own design intent. Real risk to watch for:
+overcorrecting could make item1/2/4/5's genuinely-legible text start failing
+too -- a new false-positive problem mirroring the one just fixed on item2.
+Use `probe_fixture_stability.py` to verify whatever gets drafted, same
+rhythm as today.
