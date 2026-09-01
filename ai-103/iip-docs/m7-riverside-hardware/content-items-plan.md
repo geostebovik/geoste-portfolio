@@ -63,3 +63,22 @@ or a missed/misattributed flag (flawed items), with no ambiguity about which
 dimension caused a given result. Bundling multiple flaws into one thumbnail
 would make it impossible to tell whether the CV module caught the right thing
 for the right reason.
+
+## Design constraint for future items (added 2026-09-01)
+
+`info_accurate`'s check wording (`m7_cv_audit_tool.py`, `build_audit_messages()`)
+now exempts headlines/titles that merely name a topic from being treated as
+checkable assertions. This was fixed after item2's own headline, "Seasonal
+Home Maintenance Checklist", kept getting misread as an implied service claim
+— a 43% false-positive rate on a supposedly clean control, confirmed stable
+under pinned `temperature=0`/`seed=42` (not sampling noise).
+
+**Consequence: any future item's planted info-accuracy flaw must live in a
+separate visible text element — a callout, a stated-hours line, a footer
+claim — not inside the item's own headline/title.** Item5's "OPEN 24/7"
+callout is the pattern to copy: it's visually and structurally distinct from
+the item's headline ("Propane Tank Refill Safety Tips"), so it isn't caught
+by the headline exemption. A headline that itself states the false claim
+(e.g. a title like "Open 24/7 — Come By Anytime") would likely get waved off
+under the current wording as "just a title, not a checkable assertion" — the
+same escape hatch that fixed item2.

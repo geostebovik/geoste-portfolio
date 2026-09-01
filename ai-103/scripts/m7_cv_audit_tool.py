@@ -111,10 +111,20 @@ def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[d
       - brand_consistent: is the dominant palette orange (#FD5A1E family) /
         cream (#EFE4B0 family) -- flag anything materially different
         (the fact sheet's own example: blue/gray)
-      - info_accurate: do any visible claims (hours, services) in the
-        image match the fact sheet content below -- this is why the fact
-        sheet text is interpolated into the prompt, same principle as
-        evaluate_draft() passing `context` to the text evaluators
+      - info_accurate: do the visible assertions (hours, services) in
+        the image match the fact sheet content below, evaluated
+        independently per assertion -- a headline/title naming a topic
+        does NOT count as a checkable assertion (fixed 2026-09-01 after
+        item2's clean-control headline, "Seasonal Home Maintenance
+        Checklist", kept reading as an implied service claim -- 43% false
+        positive rate across 7 manual runs, all under pinned
+        temperature=0/seed=42, so not sampling noise). See
+        content-items-plan.md's "Design constraint for future items" --
+        this exemption means a future flawed item's info-accuracy violation
+        MUST live in a separate visible element, not the item's own
+        headline. This is why the fact sheet text is interpolated into the
+        prompt, same principle as evaluate_draft() passing `context` to the
+        text evaluators
       - notes: brief reasoning for whatever it flagged (or "no issues
         found" if everything passed)
 
@@ -129,7 +139,7 @@ def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[d
         Checks:
         - text_legible: are distinct text elements legible on their own — one legible element, such as the business name, does not make other, separate text elements legible. Do not weight any single text element more heavily than another, regardless of legibility. Font variations that do not negatively impact human readability are not an issue
         - brand_consistent: is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family) -- flag anything materially different. Small color variations that do not impact brand consistency are not an issue
-        - info_accurate: do any visible claims (hours, services) in the image match the fact sheet content above
+        - info_accurate: do the visible assertions (hours, services) in the image match the fact sheet content and if not, identify the discrepancy. Do not allow any single assertion's accuracy, or lack thereof, to affect another. Evaluations are to be independently made and reported. A headline or title describing the content's topic is not itself a checkable assertion. Do not make assumptions about the business details beyond what is in the fact sheet
         - notes: brief reasoning for whatever it flagged (or "no issues found" if everything passed)
 
         Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty."""
@@ -178,10 +188,19 @@ def audit_thumbnail(image_path: str) -> str:
     # response text, with a try/except around the parse (the model can
     # still occasionally return near-miss JSON without structured outputs
     # enforcing the shape).
+    # temperature/seed pinned 2026-09-01 -- see the backlog's temperature-
+    # pinning item in m7-orientation.md. Decided ahead of the brand_consistent
+    # regression reruns rather than after, specifically so those reruns can
+    # tell apart "real ripple effect from the text_legible wording change"
+    # from ordinary run-to-run sampling noise, instead of conflating both
+    # under one unpinned signal. Neither param guarantees bit-exact
+    # determinism on Azure OpenAI, but both substantially reduce variance.
     response = client.beta.chat.completions.parse(
         model=model,
         messages=messages,
         response_format=ThumbnailAudit,
+        temperature=0,
+        seed=42,
     )
 
     result: ThumbnailAudit = response.choices[0].message.parsed
