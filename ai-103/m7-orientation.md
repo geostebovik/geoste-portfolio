@@ -8,6 +8,13 @@ of M7 moves from *designed* to *built*, or *built* to *verified* — otherwise
 it goes stale and becomes one more untrustworthy doc, which defeats the point
 of having it.
 
+**End-of-session checklist (added 2026-09-02):** before closing for the day,
+reconcile the Todoist "IIP — AI-103 Punch List" against what this session
+actually resolved — close or update any task a doc here already documents as
+done. Added after the `brand_consistent` regression task sat open in Todoist
+a full day past `m7-orientation.md` already recording it as resolved (Sep 1
+resolution, caught and fixed Sep 2).
+
 ## Where M7 sits in the whole picture
 
 IIP (this repo) is the hands-on lab work behind two things at once: the
@@ -48,15 +55,15 @@ nothing more.
       text against fact-sheet.md                          - brand_consistent
                                                             - info_accurate
                                                             (+ notes: reasoning)
-                                                      Latest 5-fixture run (Sep 1,
-                                                      7x, temp/seed pinned): 4/5
-                                                      stable. item3 fails
-                                                      text_legible only --
-                                                      brand_consistent regression
-                                                      resolved (was noise).
-                                                      info_accurate fixed on item2
-                                                      (was 4/7, now 7/7 clean). See
-                                                      item 2 below for what's left.
+                                                      Sep 2: two wording edits, each
+                                                      fixed its target and broke a
+                                                      different check (14/15 both
+                                                      times, different cell). Cross-
+                                                      check contamination proven
+                                                      bidirectional. DECIDED: split
+                                                      into 2 calls -- text_legible
+                                                      alone; brand+info together.
+                                                      See item 2 below.
 ```
 
 Both tools check a different *kind* of output against the same ground
@@ -108,16 +115,75 @@ CV-audit run should score exactly as documented there — that table is what
    `content-items-plan.md`'s "Design constraint for future items" for the
    consequence this has on any new fixture design.
 
-   **`text_legible` on item3 -- this is the actual next step.** 7/7 stable
-   fail across the same batch, identical reasoning every run (explicitly
-   engages the manipulated headline, judges it legible "despite the
-   low-contrast overlay"). Fully characterized, not noise: a real mismatch
-   between the fixture's design intent (`content-items-plan.md`: "readable
-   to a human only with effort, if at all") and the model's actual
-   legibility threshold. Needs a calibration decision, not just a wording
-   clarity fix -- risk of overcorrecting into a new false-positive problem
-   on item1/2/4/5's genuinely-legible text, same shape as the bug just fixed
-   on item2.
+   ~~**`text_legible` on item3**~~ -- **resolved Sep 2.** Fixture strength
+   was ruled out first by measuring item3's actual WCAG contrast ratio from
+   `build.py`'s colors: **1.19:1**, against a 3:1 large-text minimum -- the
+   fixture was never underpowered, so the bar in the wording was the
+   problem. Gerard added "or vice versa" (an illegible element can't drag a
+   legible one down) plus an explicit bar: "readable by a typical human
+   without undue effort or assistance." Result: item3 went 7/7 True to
+   **0/7 True (7/7 correctly False)**, right reasoning every run, and
+   `text_legible` is now correct and stable on all five fixtures.
+
+   **`info_accurate` regressions -- THIS is the actual next step (Sep 2).**
+   The `text_legible` edit above, with no other clause touched, knocked
+   `info_accurate` off on two fixtures: **item2 7/7 -> 4/7**, **item3 7/7 ->
+   2/7** (baseline diff:
+   `results/20260901-145716_fixture_stability.json` vs.
+   `results/20260902-103821_fixture_stability.json`). **Cross-check
+   contamination is therefore confirmed** -- the three checks share one
+   system prompt, and strengthening one instruction outvotes instructions
+   near it. The Aug 31 dismissal of contamination for `brand_consistent`
+   still stands on its own evidence; what's falsified is the general
+   assumption that editing one check can't disturb another. **Standing
+   consequence: any wording edit to any check now requires a full
+   5-fixture `probe_fixture_stability.py` run, never a single-fixture
+   spot check.**
+
+   Three distinct causes behind the failures, from the run's `notes`:
+   (a) illegibility contaminating info accuracy -- "too obscured to verify
+   all text cleanly ... marking info accuracy as false" (item3 runs 3, 6);
+   (b) the Sep 1 headline-as-assertion bug returning verbatim (item2, and
+   item3 run 4) -- the exemption is still in the prompt, just outvoted;
+   (c) the boolean contradicting its own `notes` (item3 runs 2, 5) -- prose
+   reasons to a pass, field says `False`.
+
+   **Outcome (Sep 2 PM): the `info_accurate` edit cleared BOTH regressions
+   -- and broke `text_legible` in the reverse direction.** Final wording:
+   "When nothing legible contradicts the fact sheet, record it as True"
+   (defining the passing condition by what's *absent* rather than what's
+   confirmed, so unreadable text drops out of the comparison instead of
+   counting as a failed match). item2 `info_accurate` 4/7 -> **7/7**, item3
+   `info_accurate` 2/7 -> **7/7** -- and cause (b) resolved without the
+   headline exemption being touched at all. But item3's `text_legible`
+   reverted 0/7 -> **7/7 True (wrong)** on a clause verified byte-for-byte
+   unchanged, with the original bug's reasoning back verbatim ("readable
+   despite the low-contrast overlay"). Two edits, 14/15 correct both times,
+   a different cell failing each time.
+
+   **DECISION (Sep 2): split the audit into two calls.** The pre-registered
+   trigger -- further edits causing regressions elsewhere -- was met. The
+   mechanism is salience competition between instructions sharing one
+   prompt, not any individual sentence being wrong (proven by cause (b)
+   fixing itself when neighboring text changed). Wording tuning has
+   unbounded cost with no convergence guarantee; the split has a bounded,
+   known one. **Two calls, not three:** every contamination event has been
+   between `text_legible` and `info_accurate`; `brand_consistent` was 7/7
+   correct on every fixture in every run and never implicated. So
+   `text_legible` gets its own call, `brand_consistent` + `info_accurate`
+   stay together. Added cost (one extra image upload per audit, two prompts
+   to maintain) accepted deliberately.
+
+   **Next step: implement the split with both clauses' wording FROZEN as-is.**
+   Do not tune wording and split in the same step. Each clause has been
+   proven correct in some configuration; the split's first probe run tests
+   whether both can be correct simultaneously. Open design question to
+   decide deliberately: two calls produce two reasoning strings and the
+   schema has one `notes` field -- concatenate, lose per-call attribution,
+   or restructure `notes` into per-check keys and change the tool's return
+   shape? `audit_thumbnail()` should still merge into a single
+   `ThumbnailAudit` so the orchestrator's tool contract doesn't change.
+   Cause (c) is unaffected by the split and stays in the backlog.
 3. **`evaluate_draft()` wrapper** — a thin function around the already-working
    evaluator that returns `json.dumps(...)` instead of a raw dict, with its
    own reST docstring. Small, but not done yet.
@@ -137,6 +203,33 @@ session's narrative paragraph in `STATUS.md`.
 
 **M7 / current build:**
 
+- **`notes` is not always faithful to the boolean it accompanies (found Sep
+  2).** In 2 of 7 item3 runs the prose reasoned explicitly to a pass ("so
+  the info check passes for the visible assertions") while `info_accurate`
+  came back `False`. Structured outputs guarantee the response *shape*, not
+  that the free-text and boolean fields came from the same line of
+  reasoning. Close-reading `notes` is still the best diagnostic available
+  and found both real bugs to date -- but it is now known to be unreliable
+  at roughly 2-in-7 on a contested field, so a conclusion drawn from a
+  single run's notes needs a second run before it's trusted. Not fixed by
+  splitting the prompt; it's an LLM-as-judge reliability problem, not a
+  contamination one.
+- ~~**Decision point: split the three checks into separate calls?**~~ --
+  **DECIDED Sep 2: yes, into two calls** (`text_legible` alone;
+  `brand_consistent` + `info_accurate` together). Trigger condition was met
+  the same day it was written: two consecutive wording edits each fixed
+  their target and broke a different check. Added cost accepted. Not a
+  backlog item any more -- it's the next build step, see "What's actually
+  left to build" item 2. Note this does NOT fix the `notes`/boolean
+  contradiction above, which is a separate class of problem.
+- **`.git/index.lock` files left behind by Claude's desktop-bridge shell
+  (diagnosed Sep 2).** Not a repo problem, not VS Code: `git status` run
+  through the bridge takes the optional index lock and then can't unlink it
+  (that shell is barred from deleting files in mounted folders). Confirmed
+  by file ownership, timestamp, and the "unable to unlink ... Operation not
+  permitted" warning in the command's own output. Fix: `git
+  --no-optional-locks status` / `GIT_OPTIONAL_LOCKS=0` for read-only
+  queries from that shell; stale locks get deleted from Windows.
 - **Normalize `CHAT_API_VERSION` across the project (added Aug 28).**
   `m7_cv_audit_tool.py` pins its own `STRUCTURED_OUTPUT_API_VERSION` at
   `"2024-08-01-preview"` (needed for structured outputs) instead of using

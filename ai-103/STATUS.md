@@ -20,7 +20,7 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** August 20, 2026
+**Status as of:** September 2, 2026
 
 ---
 
@@ -2371,3 +2371,267 @@ overcorrecting could make item1/2/4/5's genuinely-legible text start failing
 too -- a new false-positive problem mirroring the one just fixed on item2.
 Use `probe_fixture_stability.py` to verify whatever gets drafted, same
 rhythm as today.
+
+
+**M7 session (Sep 2): `text_legible` calibrated and fixed on item3 -- and
+cross-check contamination confirmed, with `info_accurate` regressing on
+item2 and item3 as a direct consequence of that fix.**
+
+**Confirmed the working folder fresh and read `m7-orientation.md` first,
+per standing rule.** Git state clean going in: `HEAD` `4b52e2b`, `main` in
+sync with `origin/main`, nothing uncommitted but the session-prompt doc
+itself.
+
+**Fixture-strength hypothesis ruled out by arithmetic, before spending a
+run on it.** The Sep 1 handoff left two competing explanations for item3's
+7/7 `text_legible` miss: (1) the fixture's low-contrast manipulation isn't
+strong enough to cross the model's real legibility threshold, or (2) the
+wording's bar for "legible" is looser than the fixture's design intent.
+Pulled item3's actual colors from `build.py` (`title_color` `#F2803D` on
+`bg_color` `#FD5A1E`) and computed the WCAG contrast ratio: **1.19:1**,
+against a 3:1 minimum for large text and 4.5:1 for normal text. The fixture
+is not underpowered -- it sits at roughly a third of even the lenient
+large-text threshold, matching `content-items-plan.md`'s "readable to a
+human only with effort, if at all" closely. Hypothesis 1 closed without a
+35-call run.
+
+**Wording change (Gerard drafted, Claude critiqued -- same rhythm as Sep
+1).** Two edits to `text_legible`'s clause only; no other check touched:
+added "or vice versa" so an illegible element can't drag a legible one
+down (the reverse direction of the halo effect already guarded the other
+way), and added a bar -- "Legible should be defined as readable by a
+typical human without undue effort or assistance." The "typical human"
+anchor is the load-bearing part: the model can resolve text from pixel data
+that a person glancing at a thumbnail could not, so the question had to be
+posed about a human observer rather than about the model's own capability.
+
+**Claude predicted this wording would fail, and was wrong -- logged
+because the prediction was stated before the run.** The critique argued
+"undue" was a hedge (excessive effort, not merely effort) that would leave
+the same loophole open, and predicted item3 would stay `True` with notes
+reading "some effort but readable." The run falsified that: item3's
+`text_legible` went **7/7 True to 0/7 True (7/7 correctly False)**, with
+consistent right-reason notes every run -- "the business name at the bottom
+is readable, but the main headline text in the center is too faint/overlaid
+to be clearly legible as a separate text element." Both the Aug 29
+quantifier fix and the new bar are holding, and `text_legible` is now
+correct and stable across all five fixtures.
+
+**The overcorrection risk did land -- but in a different check than the one
+warned about.** The stated risk going in was that a stricter legibility bar
+would make item1/2/4/5's genuinely-legible text start failing. It did not
+(`text_legible` is now 7/7 correct on every fixture). Instead
+`info_accurate` regressed, on a clause that was never edited this session.
+Diffed run-for-run against the Sep 1 baseline
+(`results/20260901-145716_fixture_stability.json` vs.
+`results/20260902-103821_fixture_stability.json`), single variable changed:
+
+| fixture | field | Sep 1 | Sep 2 |
+|---|---|---|---|
+| item3 | `text_legible` | 7/7 True (wrong) | **0/7 True -- fixed** |
+| item3 | `info_accurate` | 7/7 True (correct) | **2/7 True -- regressed** |
+| item2 | `info_accurate` | 7/7 True (correct) | **4/7 True -- regressed** |
+
+Everything else identical across both runs (item1 clean 7/7 on all three,
+item4 `brand_consistent` 0/7, item5 `info_accurate` 0/7 -- all as
+expected).
+
+**Cross-check contamination is now confirmed, and this is the session's
+headline finding.** The hypothesis was raised Aug 31 for `brand_consistent`,
+tested, and dismissed as noise -- that dismissal remains correct on its own
+evidence (`brand_consistent` never failed across 7 pinned runs, and still
+doesn't). What is now falsified is the broader working assumption behind it:
+that editing one check's wording cannot disturb another check. It can. The
+three checks share one system prompt, and strengthening one instruction
+shifts the balance against instructions near it. **Practical consequence:
+any wording edit to any check requires a full 5-fixture regression run, not
+a targeted single-fixture check.** `probe_fixture_stability.py` already does
+exactly this -- the harness caught a two-fixture regression from a one-line
+edit within minutes of the change, which is the process working as designed.
+
+**item2's regression is the Sep 1 bug returning verbatim, not a new one.**
+Notes on the failing runs: "Info accuracy fails because the visible title
+asserts 'Seasonal Home Maintenance Checklist,' but the fact sheet does not
+list this as a business service." The headline exemption added Sep 1 is
+still present in the prompt, untouched -- it simply stopped being obeyed
+3/7 of the time once `text_legible`'s clause grew longer and more emphatic
+about scrutinizing every text element independently. The exemption wasn't
+deleted; it was outvoted.
+
+**item3's `info_accurate` failures split into three distinct causes**, only
+one of which is the same bug as item2's:
+
+1. **Illegibility contaminating info accuracy (runs 3, 6).** "because the
+   image is too obscured to verify all text cleanly, I am marking info
+   accuracy as false due to insufficiently clear visible assertions." The
+   rubric has no way to express "not assessable," so *unverifiable*
+   collapses into *inaccurate*. This is arguably caused by the legibility
+   fix succeeding: now that the model correctly concludes the headline is
+   illegible, it reaches for the only adjacent verdict the schema offers.
+2. **Headline-as-assertion (run 4)** -- same failure as item2's.
+3. **Boolean contradicting its own notes (runs 2, 5)** -- see below.
+
+**Methodological finding, and the most consequential one here: the `notes`
+field is not always a faithful account of the boolean it accompanies.** In
+2 of 7 item3 runs the prose reasons explicitly to a pass -- "so no info
+discrepancy is visible" and "so the info check passes for the visible
+assertions" -- while `info_accurate` is emitted as `False`. Every root-cause
+finding on this tool to date (the Aug 29 quantifier bug, the Sep 1 headline
+misread) has depended on `notes` explaining why a boolean came out as it
+did. Structured outputs guarantee the *shape* of the response, not that the
+free-text and boolean fields were produced by the same line of reasoning.
+Close-reading `notes` remains the best diagnostic available, but it is now
+known to be unreliable at roughly a 2-in-7 rate on a contested field, and
+conclusions drawn from a single run's notes should be treated accordingly.
+
+**Process notes from this session:**
+
+- **The unsaved-edit failure mode recurred, and was caught before a run
+  this time.** The wording edit was reported as made but was not on disk
+  (`git status` clean on the file, mtime a day old, and a repo-wide grep
+  for the new terms found nothing). Checking disk state before running is
+  now the standing pre-run step -- an invalid run against wording that
+  isn't live already cost this project one suspect data point on Aug 31.
+- **Recurring `.git/index.lock` files diagnosed.** Not a repo problem and
+  not VS Code: they are created by Claude's own `git status` calls through
+  the desktop bridge, which take the optional index lock and then cannot
+  unlink it (the bridge shell is barred from deleting files in mounted
+  folders). Confirmed by ownership (sandbox session user, not the Windows
+  account), by timestamp matching the exact command, and by the "unable to
+  unlink ... Operation not permitted" warning in that command's own output.
+  Fix: use `git --no-optional-locks status` (or `GIT_OPTIONAL_LOCKS=0`) for
+  read-only queries from that shell. Stale locks must be deleted from
+  Windows.
+- **End-of-session checklist added to `m7-orientation.md`**, after the
+  `brand_consistent` Todoist task sat open a full day past the doc already
+  recording it as resolved. Reconciling the Todoist punch list against what
+  the session actually resolved is now a documented closing step rather
+  than a thing to remember. That task is now closed.
+
+**Next action (SUPERSEDED same day -- see the continuation entry below):** two changes to `info_accurate`, implemented **separately**
+with a full `probe_fixture_stability.py` run between them, so the
+contamination just demonstrated can't hide a second time. (1) **Isolation
+clause** -- state that text which cannot be read is out of scope for
+`info_accurate`, and that only legible, checkable assertions are evaluated.
+This targets cause 1 above and is correct design independent of the bug:
+each check should own its own failure mode, the same principle as the "or
+vice versa" edit but applied *across* checks rather than within one.
+(2) **Re-strengthen the headline exemption** to survive alongside the
+longer `text_legible` clause, targeting item2's regression and item3's run
+4. Do not combine them. Expected end state: all five fixtures back to 7/7
+agreement with the `content-items-plan.md` table, with `text_legible`'s
+fix intact.
+
+**Held open as a documented decision point, not work to do now: whether the
+three checks should be split into separate calls.** One prompt and one call
+makes cross-check contamination structurally possible, and no amount of
+wording care removes that -- it can only be detected. Splitting would
+isolate the checks completely, at the cost of paying image tokens three
+times per audit, three prompts to maintain, and a messier tool contract for
+the orchestrator agent to call. It also would not fix the notes/boolean
+contradiction, which is a different class of problem. Trigger condition for
+revisiting: if the two fixes above do not return all five fixtures to
+stable agreement, or if further wording edits keep causing regressions
+elsewhere, the single-prompt design is fighting the work and the split
+becomes justified on evidence rather than on principle.
+
+
+**M7 session (Sep 2, continued): `info_accurate` fixed and both regressions
+cleared -- but `text_legible` broke in the reverse direction on a clause
+that was never touched. Prompt split decided.**
+
+**The `info_accurate` edit took three drafting passes (Gerard drafting,
+Claude critiquing), and the concept that finally landed is worth keeping.**
+Pass 1 asserted independence ("Accuracy is not dependent on legibility and
+vice versa") -- correct but inert, because it forbade a link without giving
+the model anywhere else to go; the failing runs had reasoned "I can't
+verify this, and I only have True or False, so False." Pass 2 added "When
+accuracy cannot be determined due to legibility issues, note this
+explicitly" -- Gerard caught the flaw himself: that instructs the `notes`
+field, not the boolean, so the model could comply perfectly and still emit
+`False`. Pass 3 landed it: **"When nothing legible contradicts the fact
+sheet, record it as True."** The transferable principle -- **define the
+passing condition by what is absent rather than what is confirmed** -- is
+the reason it worked. "When the assertions do match" (an intermediate draft)
+still required affirmative verification, which is exactly what illegibility
+prevents; "nothing legible contradicts" lets unreadable text drop out of
+the comparison instead of counting as a failed match. Deny-by-default vs.
+allow-by-default, applied to a rubric.
+
+**Result: both `info_accurate` regressions cleared completely.** item2 went
+4/7 back to **7/7**, item3 went 2/7 back to **7/7**.
+
+**But `text_legible` on item3 reverted to 7/7 True (wrong) -- and its clause
+was never edited.** Verified byte-for-byte on disk against the wording that
+produced 7/7 correct `False` that morning: identical. Same fixture, same
+pinned `temperature=0`/`seed=42`. The original bug's reasoning came back
+verbatim in the notes -- "the headline text 'Tool Rental 101: What We
+Offer' is also readable **despite the low-contrast overlay**" -- the same
+phrase from the pre-fix failure. Editing a different check's wording undid a
+fix that was not touched.
+
+| edit | target | result | collateral |
+|---|---|---|---|
+| `text_legible` (AM) | item3 legibility | fixed (0/7 True) | `info_accurate` broke: item2 4/7, item3 2/7 |
+| `info_accurate` (PM) | those two regressions | both fixed (7/7, 7/7) | `text_legible` broke: item3 7/7 True |
+
+14 of 15 cells correct both times, a different cell failing each time.
+
+**A second wrong prediction, and the way it was wrong is itself evidence.**
+Going into the PM run the stated expectation was that item2 would NOT fully
+recover, since the edit didn't address the headline-exemption cause. It
+recovered to 7/7 anyway -- the Sep 1 exemption started being obeyed again
+without being touched, purely because the surrounding text changed. That
+rules out "some individual sentence is wrong" and points at **salience
+competition between instructions sharing one prompt** as the actual
+mechanism. Contamination runs in both directions, helpful and harmful.
+
+**DECISION (Sep 2): split the audit into two calls, accepting the added
+cost.** The trigger condition written into this log and `m7-orientation.md`
+that same morning -- "if further wording edits keep causing regressions
+elsewhere, the single-prompt design is fighting the work and the split
+becomes justified on evidence rather than on principle" -- was met, on a
+criterion set before the data came in rather than after. What settles it is
+the asymmetry: continuing to tune wording has **unbounded** cost with no
+convergence guarantee, while the split has a **known, bounded** cost. And a
+magic phrasing that passed all 15 cells tomorrow would still leave the
+design fragile -- a new fixture, a model version bump, or a fourth check
+would re-roll the dice. The tool's job is to be reliable for the
+orchestrator, not to win at prompt golf.
+
+**Two calls, not three -- the split follows the observed collision, not the
+theoretical one.** Every contamination event across all three runs has been
+between `text_legible` and `info_accurate`. `brand_consistent` was 7/7
+correct on every fixture in every run (including item4's intended 0/7 fail)
+and was never once implicated, even when it was the suspect on Aug 31. So:
+`text_legible` gets its own call; `brand_consistent` + `info_accurate` stay
+together. One extra image upload per audit instead of two, two prompts to
+maintain instead of three. **Cost accepted deliberately** -- at this
+project's size, awareness of the cost is sufficient; the reliability of the
+tool the orchestrator depends on is worth more than the token delta.
+
+**`notes`/boolean contradiction did not recur in this run** -- all seven
+item3 notes matched their booleans. It appeared at 2-in-7 previously, so one
+clean run is not proof it's gone. The backlog item stands.
+
+**Next action: implement the two-call split, with both clauses' wording
+frozen exactly as they are now.** Do not tune wording and split in the same
+step -- the whole point of the split is to remove the variable that has
+been confounding every measurement today, and changing both at once
+reproduces the problem being solved. Each clause has already been proven
+correct in *some* configuration; the split's first probe run is the test of
+whether both can be correct *simultaneously*. Expected end state: all 15
+cells matching `content-items-plan.md`'s table.
+
+Implementation notes / open design question for that session:
+`build_audit_messages()` becomes two builders (or one parameterized by
+check group), and `audit_thumbnail()` makes two calls and merges the
+results into a single `ThumbnailAudit` so the orchestrator's tool contract
+doesn't change. **The real decision to make is what happens to `notes`:**
+two calls produce two reasoning strings, and the current schema has one
+`notes` field. Concatenate them, keep the schema and lose the per-call
+attribution, or restructure `notes` into per-check keys and change the
+tool's return shape? Worth deciding deliberately rather than defaulting --
+`notes` is the diagnostic surface every root-cause finding on this tool has
+depended on, and it's already known to be unreliable at ~2-in-7 on a
+contested field.

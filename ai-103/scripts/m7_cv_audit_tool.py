@@ -86,6 +86,26 @@ class ThumbnailAudit(BaseModel):
     notes: str
 
 
+class LegibilityAudit(BaseModel):
+    """Structured-output schema for call 1 of the split audit (legibility
+    only). Added 2026-09-02 -- see build_legibility_messages() for why the
+    audit is two calls now.
+    """
+    text_legible: bool
+    notes: str
+
+
+class ContentAudit(BaseModel):
+    """Structured-output schema for call 2 of the split audit (brand +
+    info accuracy). These two stay together deliberately: neither was ever
+    implicated in the cross-check contamination that forced the split, and
+    both need the fact sheet in context.
+    """
+    brand_consistent: bool
+    info_accurate: bool
+    notes: str
+
+
 def build_audit_client() -> AzureOpenAI:
     """Build the AzureOpenAI client for the audit call, using the bumped
     STRUCTURED_OUTPUT_API_VERSION rather than the shared CHAT_API_VERSION.
@@ -104,48 +124,14 @@ def build_audit_client() -> AzureOpenAI:
     )
 
 
-def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
-    """Build the chat.completions messages list for the audit call.
-
-      - text_legible: is any text rendered IN THE IMAGE actually readable
-      - brand_consistent: is the dominant palette orange (#FD5A1E family) /
-        cream (#EFE4B0 family) -- flag anything materially different
-        (the fact sheet's own example: blue/gray)
-      - info_accurate: do the visible assertions (hours, services) in
-        the image match the fact sheet content below, evaluated
-        independently per assertion -- a headline/title naming a topic
-        does NOT count as a checkable assertion (fixed 2026-09-01 after
-        item2's clean-control headline, "Seasonal Home Maintenance
-        Checklist", kept reading as an implied service claim -- 43% false
-        positive rate across 7 manual runs, all under pinned
-        temperature=0/seed=42, so not sampling noise). See
-        content-items-plan.md's "Design constraint for future items" --
-        this exemption means a future flawed item's info-accuracy violation
-        MUST live in a separate visible element, not the item's own
-        headline. This is why the fact sheet text is interpolated into the
-        prompt, same principle as evaluate_draft() passing `context` to the
-        text evaluators
-      - notes: brief reasoning for whatever it flagged (or "no issues
-        found" if everything passed)
-
-    Structure mirrors m7_vision_test.py's build_vision_messages(): a text
-    part plus an image part inside the user message's content list.
+def _build_messages(system_prompt: str, user_prompt: str, image_b64: str,
+                    mime_type: str) -> list[dict]:
+    """Assemble the system + user message envelope shared by both audit
+    calls. Structure mirrors m7_vision_test.py's build_vision_messages():
+    a text part plus an image part inside the user message's content list.
+    Factored out 2026-09-02 when the audit became two calls -- the envelope
+    is identical for both, only the prompts differ.
     """
-    system_prompt = f"""You are auditing an image from Riverside Hardware against the actual business details and the checks below. Evaluate exactly three things and always explain your findings, regardless of pass or fail.
-
-        Grounded truth:
-        {fact_sheet}
-
-        Checks:
-        - text_legible: are distinct text elements legible on their own — one legible element, such as the business name, does not make other, separate text elements legible. Do not weight any single text element more heavily than another, regardless of legibility. Font variations that do not negatively impact human readability are not an issue
-        - brand_consistent: is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family) -- flag anything materially different. Small color variations that do not impact brand consistency are not an issue
-        - info_accurate: do the visible assertions (hours, services) in the image match the fact sheet content and if not, identify the discrepancy. Do not allow any single assertion's accuracy, or lack thereof, to affect another. Evaluations are to be independently made and reported. A headline or title describing the content's topic is not itself a checkable assertion. Do not make assumptions about the business details beyond what is in the fact sheet
-        - notes: brief reasoning for whatever it flagged (or "no issues found" if everything passed)
-
-        Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty."""
-
-    user_prompt = "Audit the thumbnail image below against the Riverside Hardware & Supply brand guide and fact sheet and return your findings."
-
     return [
         {"role": "system", "content": system_prompt},
         {
@@ -161,50 +147,155 @@ def build_audit_messages(image_b64: str, mime_type: str = "image/png") -> list[d
     ]
 
 
+def build_legibility_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
+    """Build the messages for call 1 of the split audit: legibility only.
+
+    WHY THIS IS A SEPARATE CALL (decided 2026-09-02, full reasoning in
+    STATUS.md's Sep 2 entries): two consecutive wording edits each fixed
+    their target check and broke a different one. Tightening text_legible
+    broke info_accurate on items 2 and 3; fixing info_accurate broke
+    text_legible on item3 while text_legible's clause sat byte-for-byte
+    unchanged on disk, with the original bug's reasoning returning verbatim.
+    That is cross-check contamination in a shared system prompt,
+    demonstrated in both directions under pinned temperature/seed --
+    salience competition between instructions, not any one sentence being
+    wrong. brand_consistent was never implicated (7/7 correct on every
+    fixture in every run), so the split follows the collision the data
+    actually shows: text_legible alone here, brand_consistent +
+    info_accurate together in build_content_messages().
+
+    NOTE: this call deliberately does NOT interpolate fact-sheet.md.
+    Judging whether text is readable needs no ground truth about the
+    business -- only info_accurate does. Splitting therefore SHRINKS this
+    call's prompt rather than duplicating the old one, which is why the
+    added cost is one extra image upload rather than a doubling.
+
+      - text_legible: are distinct text elements legible on their own
+      - notes: reasoning, required whether it passed or failed
+
+    The text_legible clause below is FROZEN exactly as verified on
+    2026-09-02 (7/7 correct on all five fixtures, before the info_accurate
+    edit disturbed it). Do not tune wording and split in the same step --
+    removing that confound is the entire point of the split.
+    """
+    system_prompt = """You are auditing an image from Riverside Hardware against the check below. Evaluate exactly one thing and always explain your findings, regardless of pass or fail.
+
+        Check:
+        - text_legible: are distinct text elements legible on their own — one legible element, such as the business name, does not make other, separate text elements legible or vice versa. Legible should be defined as readable by a typical human without undue effort or assistance. Do not weight any single text element more heavily than another, regardless of legibility. Font variations that do not negatively impact human readability are not an issue
+        - notes: brief reasoning for whatever it flagged (or "no issues found" if it passed)
+
+        Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty."""
+
+    user_prompt = ("Audit the thumbnail image below for text legibility and "
+                   "return your findings.")
+
+    return _build_messages(system_prompt, user_prompt, image_b64, mime_type)
+
+
+def build_content_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
+    """Build the messages for call 2 of the split audit: brand consistency
+    and info accuracy, checked together against fact-sheet.md.
+
+    These two stay in one call on purpose. brand_consistent has never once
+    been implicated in a contamination event -- 7/7 correct on every fixture
+    across every run, including item4's intended failure -- and both checks
+    need the fact sheet in context, so separating them would pay a third
+    image upload to solve a problem that has never appeared. If a future
+    regression run ever shows these two interfering, the same evidence
+    standard applies and they split too.
+
+      - brand_consistent: is the dominant palette orange/cream
+      - info_accurate: do the visible assertions match the fact sheet
+      - notes: reasoning, required whether it passed or failed
+
+    Both clauses are FROZEN as verified 2026-09-02: info_accurate at 7/7 on
+    every fixture in the afternoon run (the wording that finally worked
+    defines the passing condition by absence -- "when nothing legible
+    contradicts the fact sheet, record it as True" -- so unreadable text
+    drops out of the comparison instead of counting as a failed match),
+    and brand_consistent unchanged since it has never needed a fix.
+    """
+    system_prompt = f"""You are auditing an image from Riverside Hardware against the actual business details and the checks below. Evaluate exactly two things and always explain your findings, regardless of pass or fail.
+
+        Grounded truth:
+        {fact_sheet}
+
+        Checks:
+        - brand_consistent: is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family) -- flag anything materially different. Small color variations that do not impact brand consistency are not an issue
+        - info_accurate: do the visible assertions (hours, services) in the image match the fact sheet content and if not, identify the discrepancy. When nothing legible contradicts the fact sheet, record it as True. Do not allow any single assertion's accuracy, or lack thereof, to affect another. Evaluations are to be independently made and reported. Accuracy is not dependent on legibility and vice versa. When accuracy cannot be determined due to legibility issues, note this explicitly. A headline or title describing the content's topic is not itself a checkable assertion. Do not make assumptions about the business details beyond what is in the fact sheet
+        - notes: brief reasoning for whatever it flagged (or "no issues found" if everything passed)
+
+        Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty."""
+
+    user_prompt = ("Audit the thumbnail image below against the Riverside "
+                   "Hardware & Supply brand guide and fact sheet and return "
+                   "your findings.")
+
+    return _build_messages(system_prompt, user_prompt, image_b64, mime_type)
+
+
 def audit_thumbnail(image_path: str) -> str:
     """
     Audit a marketing thumbnail image against Riverside Hardware & Supply's
-    brand guide and posted hours (fact-sheet.md): checks whether any text
+    brand guide and posted hours (fact-sheet.md): checks whether the text
     rendered in the image is legible, whether the dominant color palette
-    matches the brand's orange/cream family, and whether any factual claim
-    visible in the image (hours, services, etc.) matches the fact sheet.
+    matches the brand's orange/cream family, and whether the factual
+    assertions visible in the image (hours, services, etc.) match the fact
+    sheet.
+
+    Runs as TWO model calls as of 2026-09-02 (legibility, then brand +
+    info accuracy) and merges them, so that a wording change to one check
+    cannot disturb another -- see build_legibility_messages() for the
+    evidence behind that. The merge is deliberate: the return shape is
+    unchanged, so the orchestrator agent's tool contract does not change
+    just because the implementation did.
 
     :param image_path (str): Path to the thumbnail image file to audit.
     :return: JSON string with keys text_legible (bool), brand_consistent
         (bool), info_accurate (bool), and notes (str) explaining any flag
-        raised (or confirming a clean pass).
+        raised (or confirming a clean pass). Notes from the two calls are
+        concatenated with [legibility] / [content] labels so each verdict's
+        reasoning stays attributable to the call that produced it.
     :rtype: str
     """
     client = build_audit_client()
+    # Encode once, reuse for both calls -- the image is identical, only the
+    # prompts differ. Re-encoding per call would re-read the file for no gain.
     image_b64 = encode_image(Path(image_path))
-    messages = build_audit_messages(image_b64)
-
     model = os.environ["CHAT_DEPLOYMENT_GPT_5_4_MINI"]
 
-    # TODO -- run this for real against item1 (a CLEAN fixture) first. If
-    # response_format isn't accepted on this deployment/api_version combo,
-    # that raises here -- don't silently swallow it. Fallback plan if it
-    # doesn't work: plain chat.completions.create() + json.loads() on the
-    # response text, with a try/except around the parse (the model can
-    # still occasionally return near-miss JSON without structured outputs
-    # enforcing the shape).
-    # temperature/seed pinned 2026-09-01 -- see the backlog's temperature-
-    # pinning item in m7-orientation.md. Decided ahead of the brand_consistent
-    # regression reruns rather than after, specifically so those reruns can
-    # tell apart "real ripple effect from the text_legible wording change"
-    # from ordinary run-to-run sampling noise, instead of conflating both
-    # under one unpinned signal. Neither param guarantees bit-exact
-    # determinism on Azure OpenAI, but both substantially reduce variance.
-    response = client.beta.chat.completions.parse(
+    # temperature/seed pinned 2026-09-01 -- see the temperature-pinning item
+    # in m7-orientation.md's backlog. Neither param guarantees bit-exact
+    # determinism on Azure OpenAI, but both substantially reduce variance,
+    # which is what makes a 7-run stability probe interpretable at all.
+    # Both calls pin identically: an unpinned call in a split pair would
+    # reintroduce exactly the noise the split is meant to eliminate.
+    legibility: LegibilityAudit = client.beta.chat.completions.parse(
         model=model,
-        messages=messages,
-        response_format=ThumbnailAudit,
+        messages=build_legibility_messages(image_b64),
+        response_format=LegibilityAudit,
         temperature=0,
         seed=42,
-    )
+    ).choices[0].message.parsed
 
-    result: ThumbnailAudit = response.choices[0].message.parsed
-    return result.model_dump_json()
+    content: ContentAudit = client.beta.chat.completions.parse(
+        model=model,
+        messages=build_content_messages(image_b64),
+        response_format=ContentAudit,
+        temperature=0,
+        seed=42,
+    ).choices[0].message.parsed
+
+    # Merge back into the original three-boolean shape. Callers
+    # (probe_fixture_stability.py, main(), and eventually the orchestrator's
+    # FunctionTool) see no difference from the single-call version.
+    merged = ThumbnailAudit(
+        text_legible=legibility.text_legible,
+        brand_consistent=content.brand_consistent,
+        info_accurate=content.info_accurate,
+        notes=f"[legibility] {legibility.notes}\n[content] {content.notes}",
+    )
+    return merged.model_dump_json()
 
 
 def main():
