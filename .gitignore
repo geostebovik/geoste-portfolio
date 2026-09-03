@@ -47,3 +47,12 @@ ai-103/scripts/tester*.py
 
 # Generated QR codes (regenerable output, not source)
 resources/qr_codes/
+
+# Per-session handoff prompts (added 2026-09-03). These are working notes
+# between sessions, not portfolio content, and this repo root is shared by
+# more than one project -- an untracked prompt from one project shows up as
+# noise in the other's `git status`. Their durable content lives in the
+# Claude project docs and in STATUS.md, so nothing is lost by keeping them
+# out of git. No such file was ever tracked, so this takes effect
+# immediately -- no `git rm --cached` needed.
+*session-prompt*.md
