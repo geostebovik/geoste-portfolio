@@ -143,30 +143,36 @@ nothing more.
                 +---------------------+----------------------+
                 |                                              |
       Tool 1: draft evaluator                        Tool 2: CV-audit
-      STATUS: built + verified                        STATUS: main() written + run
-      (wraps m7_evaluator_tool.py)                       live (Aug 29-31). Structured
-                |                                        outputs confirmed working
-      Uses GroundednessEvaluator +                        against gpt-5.4-mini on the
-      RelevanceEvaluator (Azure AI                         bumped API version -- no
-      Evaluation SDK)                                      fallback needed.
-                |                                      Checks 3 things:
-      Checks drafted title/description                   - text_legible
-      text against fact-sheet.md                          - brand_consistent
-                                                            - info_accurate
-                                                            (+ notes: reasoning)
-                                                      SPLIT BUILT + RUN (Sep 2).
-                                                      Call A: text_legible (no fact
-                                                      sheet). Call B: brand + info.
-                                                      brand_consistent and
-                                                      info_accurate now 7/7 CORRECT
-                                                      on all 5 fixtures, verified
-                                                      across 3 runs. item1's
-                                                      over-claim FIXED + verified
-                                                      Sep 3. Only open cell: item3
-                                                      text_legible (6/7, 5/7, 3/7
-                                                      True; expected 0/7) --
-                                                      fixture-side only. See item
-                                                      2 below.
+      STATUS: built + verified                       STATUS: BUILT + VERIFIED
+      (wraps m7_evaluator_tool.py)                   (m7_cv_audit_tool.py)
+                |                                              |
+      Uses GroundednessEvaluator +                   HYBRID as of Sep 3 --
+      RelevanceEvaluator (Azure AI                   one measured check, two
+      Evaluation SDK)                                judged ones:
+                |                                      - text_legible
+      Checks drafted title/description                   DETERMINISTIC: Vision
+      text against fact-sheet.md                         Read locates text,
+                                                         m7_legibility_check.py
+                                                         measures WCAG contrast
+                                                         vs 3:1. No model
+                                                         judgment. 5/5 correct.
+                                                       - brand_consistent
+                                                       - info_accurate
+                                                         one model call w/ the
+                                                         fact sheet; 7/7 correct
+                                                         on all 5 fixtures
+                                                         across 3 runs
+                                                       (+ notes: [legibility]
+                                                         and [content] merged
+                                                         into one ThumbnailAudit)
+
+                                                     ALL 15 CELLS NOW CORRECT.
+                                                     History: split into 2 model
+                                                     calls Sep 2 (cross-check
+                                                     contamination); item1's
+                                                     over-claim fixed Sep 3;
+                                                     text_legible moved out of
+                                                     the model entirely Sep 3.
 ```
 
 Both tools check a different *kind* of output against the same ground
@@ -334,9 +340,26 @@ CV-audit run should score exactly as documented there — that table is what
    byte-identical. Because it ran on Linux, `build.py`'s `/tmp` + naive
    `file://` bug never applied and stays untouched in the Backlog.
 
-   **OPEN THREAD 2 -- item3's legibility threshold. THE ONLY OPEN CELL IN
-   THE MATRIX, and prompt-side is now closed off entirely (updated Sep 3).**
-   Four split runs have produced 0/7, 6/7, 5/7 and 3/7 True (expected 0/7).
+   ~~**OPEN THREAD 2 -- item3's legibility threshold.**~~ -- **CLOSED Sep 3
+   BY SOLVING IT, via a different attack vector.** The first conclusion that
+   day was to accept the limitation and move on; it was superseded within the
+   hour by a better one. Both levers *inside the model-judged approach* were
+   genuinely exhausted (evidence below) -- but that proved only that the check
+   had been assigned to the wrong kind of tool, not that it was unmeasurable.
+   **Contrast is computable.** So the judgment moved out of the model and only
+   the perception stayed in it: Azure AI Vision Read locates each text
+   element, `m7_legibility_check.py` measures WCAG contrast inside the word
+   polygons against a 3:1 large-text minimum. **Result: 5/5 fixtures correct,
+   deterministic, the same answer every run** -- on the cell that had produced
+   0/7, 6/7, 5/7 and 3/7. Full numbers and two recorded margins live in
+   `content-items-plan.md` item 3.
+   **The lesson worth carrying: move the judgment out of the model and leave
+   the perception in it.** OCR is a task with a ground truth, which models are
+   reliable at; "would a human find this hard to read" is not. The dead end
+   recorded below is kept deliberately -- the evidence in it is what justified
+   the redesign.
+   **Prompt-side was closed on evidence.** Four split runs produced 0/7, 6/7,
+   5/7 and 3/7 True (expected 0/7).
    The Sep 3 run used the *committed* wording -- the same one behind the 6/7
    -- against a byte-identical image, so that is a **3/7 swing on an
    identical prompt**, wider than the 2/7 figure in the Backlog. Do not read
@@ -367,10 +390,52 @@ CV-audit run should score exactly as documented there — that table is what
    effectively zero rather than asking the model to simulate an eye. Caveat:
    diag-b/c already returned True at near-zero contrast, but under the old
    quantifier-buggy wording; that combination is untested.
+   **Fixture-side is closed too -- measured Sep 3, not assumed.** The clutter
+   pattern sets item3's contrast floor. Composited over the `#FD5A1E`
+   background at 0.55 opacity, the tile colors land at `#f1662d` (1.003:1 vs
+   bg) and `#f77439` (**1.128:1** vs bg), so a title matching the background
+   *exactly* is worse (1.128:1 worst-case) than the true optimum `#F86A2E`
+   (**1.065:1**). Best achievable with clutter present is 1.065:1, against
+   1.191:1 today -- and the model already recovers text at 1.191:1. "Push the
+   contrast to effectively zero" is **not reachable while the clutter
+   exists**, and removing the clutter is a *plan* change, since
+   `content-items-plan.md` specifies a "busy/cluttered background" (the same
+   fixture-vs-answer-key distinction Thread 1 turned on).
+   **The conceptual problem underneath, which is the actual finding.** A
+   legibility flaw has to be perceptible-but-hard *for a human*, and that is
+   exactly the regime where the model has no analogue -- it decodes pixels
+   and has no notion that recovery was hard. Push the fixture past that
+   regime to genuinely invisible and it stops testing legibility and starts
+   testing *absence*, which is a different check needing the untested
+   expected-but-absent clause. So `text_legible`, as specified, is not
+   reliably measurable by an LLM-as-judge on this fixture -- and that is a
+   result worth reporting, not a cell to tune until it turns green. Recorded
+   in `content-items-plan.md` under item 3; its expected result was
+   deliberately **not** changed, since the audit still *should* flag
+   legibility -- moving the answer key to match the data is the goalpost move
+   Thread 1 rejected.
 
-3. **`evaluate_draft()` wrapper** — a thin function around the already-working
-   evaluator that returns `json.dumps(...)` instead of a raw dict, with its
-   own reST docstring. Small, but not done yet.
+   **ITEM 2 IS COMPLETE (Sep 3).** All 15 cells of the 5x3 matrix now
+   return the expected value: `text_legible` 5/5 deterministic,
+   `brand_consistent` and `info_accurate` 7/7 each across three runs.
+   `m7_cv_audit_tool.py` lost 96 lines in the surgery -- the
+   `LegibilityAudit` schema and `build_legibility_messages()` are gone, and
+   the "readable by a typical human without undue effort or assistance"
+   clause went with them rather than being frozen. `ThumbnailAudit` is
+   unchanged, so the orchestrator's tool contract never moved. New files:
+   `m7_legibility_check.py` (the measurement + `audit_legibility()` entry
+   point) and `probe_read_ocr.py` (the Read smoke test).
+
+3. **`evaluate_draft()` tool wrapper** — **NOTE (corrected Sep 3): the
+   function itself already exists and works.** `m7_evaluator_tool.py` line 45
+   has `evaluate_draft(query, response) -> dict`, verified live Aug 27. This
+   entry previously read "not done yet", which was wrong. What is missing is
+   the *tool-shaped* version: a `json.dumps(...)` return (Foundry's auto
+   function calling needs a string to put back in the thread, not a dict) and
+   a reST docstring with `:param:`/`:return:`. **The docstring is not
+   documentation here -- it IS the tool schema the orchestrator reads to
+   decide when to call this tool**, and `evaluate_draft()` currently has no
+   docstring at all.
 4. **Orchestrator instructions text** — the actual job description telling
    the agent when to draft, when to call each tool, and what to do with a
    failing result (redraft? flag for review?). Not yet written.
@@ -387,24 +452,34 @@ session's narrative paragraph in `STATUS.md`.
 
 **M7 / current build:**
 
-- **Harness resolution: a cell can move at least 3/7 between runs on an
-  IDENTICAL prompt and image (established Sep 2, revised Sep 3).**
-  **Correction:** this entry originally cited item1's `info_accurate` 7/7 ->
-  5/7 as its evidence. That movement turned out to have a *cause* -- a
-  fixture defect, fixed Sep 3, and the variance went with it. The floor is
-  still real, but its supporting example is now item3's `text_legible`,
-  which spans 6/7, 5/7 and 3/7 across three runs on the same image with
-  `temperature=0`/`seed=42` pinned. **Read every future run against this: a
-  1-2 run difference out of 7 is not an improvement or a regression, and on
-  a contested cell even 3/7 may not be.** Equally important, and the reason
-  the correction matters: **treat unexplained movement as a hypothesis to
-  chase first, and call it noise only after chasing it** -- the one case
-  this entry documented as irreducible turned out to be diagnosable. Big effects (the 7/7 -> 0/7 swings that drove the Sep 2
-  decisions) are still trustworthy; fine-grained wording comparisons need
-  more runs or a bigger effect to be readable. Raising `RUNS` in
-  `probe_fixture_stability.py` is the obvious lever if a question ever
-  genuinely turns on 1-2 runs -- at 2x the calls now that the audit is
-  split.
+- **Harness resolution: variance is a symptom of an undercalibrated
+  fixture, not a flat tax on every measurement (established Sep 2, twice
+  revised Sep 3).**
+  **Correction 1:** this entry originally cited item1's `info_accurate`
+  7/7 -> 5/7 as proof a cell moves 2/7 irreducibly. That movement turned out
+  to have a *cause* -- a fixture defect, fixed Sep 3 -- and the variance went
+  with it. **Treat unexplained movement as a hypothesis to chase first, and
+  call it noise only after chasing it.**
+  **Correction 2:** the floor is not a constant, it is a function of where
+  the cell sits. On Sep 3, **13 of 15 cells showed zero variance across
+  three runs**; only the cell near p=0.5 moved (item3's `text_legible`, at
+  6/7, 5/7, 3/7 on the same image with `temperature=0`/`seed=42` pinned).
+  Sampling theory says the same: at p=0.5 the standard error at n=7 is 0.19,
+  so plus or minus 2/7 is ordinary variation, while at p near 0 or 1 the
+  same n is rock solid -- item4 and item5 return 0/7 every single run.
+  **Read every future run against this: a 1-2 run difference out of 7 is not
+  an improvement or a regression, and on a contested cell even 3/7 may not
+  be.** Big effects (the 7/7 -> 0/7 swings that drove the Sep 2 decisions)
+  remain trustworthy.
+  **On raising `RUNS` (analyzed Sep 3): not to investigate a wobbling
+  cell.** Precision scales with the square root of n, so 4x the runs buys
+  only half the error bar -- and a cell reading p=0.67 against a target of 0
+  has a *location* problem, not a precision one. The one place more runs
+  genuinely pay is **certification, once, at the end**: 0/7 bounds the true
+  rate only below ~35% at 95% confidence, where 0/20 bounds it below ~14%
+  and 0/30 below ~10%. Worth one high-n run on the final configuration
+  before any stability claim goes on the portfolio site -- at 2x the calls
+  now that the audit is split.
 - **Open question deliberately NOT measured: does removing the fact sheet
   from the legibility call matter?** The split changed three things at once
   (checks separated, framing sentence, fact sheet dropped from call A).
@@ -469,7 +544,26 @@ session's narrative paragraph in `STATUS.md`.
   cosmetic, doesn't block anything — it's the template's own example text,
   not something a real drafted item inherited.
 
-**CV-audit investigation threads (added Aug 31, none block the regression fix above):**
+- **Two contrast margins recorded, deliberately not fixed (Sep 3).**
+  (1) item2's title clears the 3:1 bar by 0.032 (3.032:1), and item5's badge
+  sits at the same value for the same color pair -- clean controls on a knife
+  edge. Any change to those fixtures, or any move to the 4.5:1 normal-text
+  bar, flips them to false positives. Not fixed, because changing a control
+  that returns the right answer is the goalpost move rejected on item1 the
+  same day. (2) item3's brand line fails at 2.949:1 and was never planted;
+  item3's verdict is still correct, but its notes name two failing elements
+  where `content-items-plan.md` says the item "isolates one failure mode."
+  Both are documentation, not defects.
+- **A stability claim on the portfolio site needs one high-n run (Sep 3).**
+  `text_legible` is now deterministic and needs none. `brand_consistent` and
+  `info_accurate` are still model-judged, and 0/7 bounds a true failure rate
+  only below ~35% at 95% confidence -- 0/20 gets to ~14%, 0/30 to ~10%. Worth
+  one deliberate high-`RUNS` pass on the final configuration before any
+  "stable" claim goes public. Not needed for development.
+
+**CV-audit investigation threads (added Aug 31 -- the legibility ones below
+are now MOOT: `text_legible` left the model entirely on Sep 3, so no wording
+for it exists to tune. Kept as the record of what was ruled out and how):**
 
 - **Diagnostic-variant findings, not yet fully closed.** Four controlled
   thumbnail variants built (`iip-docs/m7-riverside-hardware/

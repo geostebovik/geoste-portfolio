@@ -33,6 +33,7 @@ from openai import AzureOpenAI
 
 from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
 from m7_vision_test import encode_image  # reuse, don't rewrite -- no api_version dependency
+from m7_legibility_check import audit_legibility
 
 # Answer key for the fixtures in iip-docs/m7-riverside-hardware/ -- mirrors
 # content-items-plan.md's expected-results table. A PNG in that folder only
@@ -83,15 +84,6 @@ class ThumbnailAudit(BaseModel):
     text_legible: bool
     brand_consistent: bool
     info_accurate: bool
-    notes: str
-
-
-class LegibilityAudit(BaseModel):
-    """Structured-output schema for call 1 of the split audit (legibility
-    only). Added 2026-09-02 -- see build_legibility_messages() for why the
-    audit is two calls now.
-    """
-    text_legible: bool
     notes: str
 
 
@@ -147,51 +139,6 @@ def _build_messages(system_prompt: str, user_prompt: str, image_b64: str,
     ]
 
 
-def build_legibility_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
-    """Build the messages for call 1 of the split audit: legibility only.
-
-    WHY THIS IS A SEPARATE CALL (decided 2026-09-02, full reasoning in
-    STATUS.md's Sep 2 entries): two consecutive wording edits each fixed
-    their target check and broke a different one. Tightening text_legible
-    broke info_accurate on items 2 and 3; fixing info_accurate broke
-    text_legible on item3 while text_legible's clause sat byte-for-byte
-    unchanged on disk, with the original bug's reasoning returning verbatim.
-    That is cross-check contamination in a shared system prompt,
-    demonstrated in both directions under pinned temperature/seed --
-    salience competition between instructions, not any one sentence being
-    wrong. brand_consistent was never implicated (7/7 correct on every
-    fixture in every run), so the split follows the collision the data
-    actually shows: text_legible alone here, brand_consistent +
-    info_accurate together in build_content_messages().
-
-    NOTE: this call deliberately does NOT interpolate fact-sheet.md.
-    Judging whether text is readable needs no ground truth about the
-    business -- only info_accurate does. Splitting therefore SHRINKS this
-    call's prompt rather than duplicating the old one, which is why the
-    added cost is one extra image upload rather than a doubling.
-
-      - text_legible: are distinct text elements legible on their own
-      - notes: reasoning, required whether it passed or failed
-
-    The text_legible clause below is FROZEN exactly as verified on
-    2026-09-02 (7/7 correct on all five fixtures, before the info_accurate
-    edit disturbed it). Do not tune wording and split in the same step --
-    removing that confound is the entire point of the split.
-    """
-    system_prompt = """You are auditing an image from Riverside Hardware against the check below. Evaluate exactly one thing and always explain your findings, regardless of pass or fail.
-
-        Check:
-        - text_legible: are distinct text elements legible on their own — one legible element, such as the business name, does not make other, separate text elements legible or vice versa. Legible should be defined as readable by a typical human without undue effort or assistance. Do not weight any single text element more heavily than another, regardless of legibility. Font variations that do not negatively impact human readability are not an issue
-        - notes: brief reasoning for whatever it flagged (or "no issues found" if it passed)
-
-        Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty."""
-
-    user_prompt = ("Audit the thumbnail image below for text legibility and "
-                   "return your findings.")
-
-    return _build_messages(system_prompt, user_prompt, image_b64, mime_type)
-
-
 def build_content_messages(image_b64: str, mime_type: str = "image/png") -> list[dict]:
     """Build the messages for call 2 of the split audit: brand consistency
     and info accuracy, checked together against fact-sheet.md.
@@ -243,12 +190,20 @@ def audit_thumbnail(image_path: str) -> str:
     assertions visible in the image (hours, services, etc.) match the fact
     sheet.
 
-    Runs as TWO model calls as of 2026-09-02 (legibility, then brand +
-    info accuracy) and merges them, so that a wording change to one check
-    cannot disturb another -- see build_legibility_messages() for the
-    evidence behind that. The merge is deliberate: the return shape is
-    unchanged, so the orchestrator agent's tool contract does not change
-    just because the implementation did.
+    Legibility is measured, not judged (changed 2026-09-03). Azure AI Vision
+    Read locates each text element and m7_legibility_check measures its WCAG
+    contrast against the 3.0:1 large-text minimum -- the same answer
+    every run. Four probe runs established that a vision model cannot reliably
+    judge whether text is hard for a HUMAN to read (0/7, 6/7, 5/7, 3/7 on one
+    fixture); it decodes pixels and has no notion that recovery was effortful.
+    See content-items-plan.md item 3.
+
+    Brand consistency and info accuracy remain one model call against
+    fact-sheet.md -- both are genuine judgment calls, and both have been 7/7
+    correct on all five fixtures across three runs.
+
+    The return shape is unchanged, so the orchestrator agent's tool contract
+    does not move just because the implementation did.
 
     :param image_path (str): Path to the thumbnail image file to audit.
     :return: JSON string with keys text_legible (bool), brand_consistent
@@ -258,9 +213,12 @@ def audit_thumbnail(image_path: str) -> str:
         reasoning stays attributable to the call that produced it.
     :rtype: str
     """
+    # Deterministic half: Read locates the text, arithmetic judges it.
+    # No model opinion is involved, so this needs no temperature/seed pinning
+    # and no stability probe -- it returns the same value every run.
+    text_legible, legibility_notes = audit_legibility(image_path)
+
     client = build_audit_client()
-    # Encode once, reuse for both calls -- the image is identical, only the
-    # prompts differ. Re-encoding per call would re-read the file for no gain.
     image_b64 = encode_image(Path(image_path))
     model = os.environ["CHAT_DEPLOYMENT_GPT_5_4_MINI"]
 
@@ -268,16 +226,6 @@ def audit_thumbnail(image_path: str) -> str:
     # in m7-orientation.md's backlog. Neither param guarantees bit-exact
     # determinism on Azure OpenAI, but both substantially reduce variance,
     # which is what makes a 7-run stability probe interpretable at all.
-    # Both calls pin identically: an unpinned call in a split pair would
-    # reintroduce exactly the noise the split is meant to eliminate.
-    legibility: LegibilityAudit = client.beta.chat.completions.parse(
-        model=model,
-        messages=build_legibility_messages(image_b64),
-        response_format=LegibilityAudit,
-        temperature=0,
-        seed=42,
-    ).choices[0].message.parsed
-
     content: ContentAudit = client.beta.chat.completions.parse(
         model=model,
         messages=build_content_messages(image_b64),
@@ -290,10 +238,10 @@ def audit_thumbnail(image_path: str) -> str:
     # (probe_fixture_stability.py, main(), and eventually the orchestrator's
     # FunctionTool) see no difference from the single-call version.
     merged = ThumbnailAudit(
-        text_legible=legibility.text_legible,
+        text_legible=text_legible,
         brand_consistent=content.brand_consistent,
         info_accurate=content.info_accurate,
-        notes=f"[legibility] {legibility.notes}\n[content] {content.notes}",
+        notes=f"[legibility] {legibility_notes}\n[content] {content.notes}",
     )
     return merged.model_dump_json()
 

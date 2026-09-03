@@ -8,3 +8,6 @@ azure-search-documents
 # exact version (venv1\Lib\site-packages\azure\ai\evaluation\_evaluate\_evaluate.py:797).
 # Bump deliberately, re-verify if evaluate()'s behavior around unmapped columns matters again.
 azure-ai-evaluation==1.18.3
+azure-ai-vision-imageanalysis
+pillow
+numpy

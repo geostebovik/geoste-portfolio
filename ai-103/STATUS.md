@@ -7,6 +7,25 @@ in the frozen archive `MASTER-REFERENCE-0724.md` in the Drive IIP folder —
 closed, not touched or re-read during normal sessions. This file is the only
 thing that should need reading/updating at the start of a normal session.
 
+**Attribution -- read this before treating anything here as a work claim.**
+This is a joint working log. The work it describes was done by Gerard and by
+Claude (Anthropic's assistant), in proportions that varied task to task.
+Where authorship is known it is named inline -- "Gerard drafted, Claude
+critiqued", "Claude wrote the restructure at Gerard's request". **Where no
+actor is named, that is not an authorship claim by either party.** Most of
+this log is written in passive voice, and passive voice here means
+*unrecorded*, not *Gerard's*. An audit on 2026-09-03 found 82 of 101
+work-product passages in the Aug 28 - Sep 3 span carried no attributor at
+all, including most of the analysis, the root-cause findings and the
+architecture decisions. Those gaps are deliberately left unfilled:
+reconstructing attribution after the fact is guesswork, and guessing in a
+document that feeds a resume is worse than an honest silence.
+
+**Going forward, attribution is written inline at the time the work is
+logged, or not at all.** Where it is genuinely unclear, the entry credits
+Claude rather than Gerard -- an under-credit costs nothing real, while an
+over-credit in resume material can cost a great deal.
+
 Commands/CLI reference lives separately: `iip-cli-runbook.md` in this same
 `ai-103/` folder — that page already works well as the "code samples"
 reference and didn't need rebuilding.
@@ -2182,7 +2201,10 @@ whether structured outputs works on this deployment at all.
 first time; text_legible root-caused via staged reliability/generalization
 testing; new brand_consistent regression found, unresolved.**
 
-- **`main()` written (by Gerard, reviewed together)** in
+- **`main()` written collaboratively (Gerard + Claude)** -- *attribution
+  corrected 2026-09-03: this entry originally read "written (by Gerard,
+  reviewed together)", which overstated Gerard's authorship. He
+  contributed to it; he did not write it on his own* -- in
   `m7_cv_audit_tool.py`: loops the five `content-items-plan.md` fixtures,
   calls `audit_thumbnail()` on each, diffs actual vs. expected across all
   three fields, prints a pass/fail summary. Fixed a handful of typos before
@@ -2951,3 +2973,177 @@ remain.**
    anything, and confirm items 1/2/4/5 come back byte-identical after.
    `text_legible` can no longer disturb the other two checks, so the full
    5-fixture probe is a check rather than a risk.
+
+**Thread 2 closed as a finding, not as a passing cell (Sep 3, later).**
+Decision after measuring the remaining fixture headroom: stop tuning item3
+and report the limitation. **Fixture-side is exhausted, measured rather than
+assumed** -- the clutter pattern sets item3's contrast floor. Composited over
+`#FD5A1E` at 0.55 opacity the tile colors land at `#f1662d` (1.003:1 vs bg)
+and `#f77439` (1.128:1 vs bg), so a title matching the background *exactly*
+is worse (1.128:1 worst-case) than the true optimum `#F86A2E` (1.065:1). Best
+achievable with clutter present is 1.065:1 against 1.191:1 today -- and the
+model already recovers text at 1.191:1. Removing the clutter to reach true
+zero would be a *plan* change, since `content-items-plan.md` specifies a
+"busy/cluttered background"; that is the same fixture-vs-answer-key
+distinction Thread 1 turned on, so it was not done silently.
+
+**The finding itself:** a legibility flaw must be perceptible-but-hard *for a
+human*, which is exactly the regime where an LLM-as-judge has no analogue --
+it decodes pixels and has no notion that recovery was hard. Pushed past that
+regime to genuinely invisible, the fixture stops testing legibility and
+starts testing *absence*, a different check needing the untested
+expected-but-absent clause. So `text_legible` as specified is not reliably
+measurable by this method. Recorded in `content-items-plan.md` under item 3,
+with **its expected result deliberately unchanged** -- the audit still
+*should* flag legibility, and moving the answer key to match the data is the
+goalpost move rejected on item1 this morning. Opportunity cost was the
+tiebreaker: Generative AI / agentic solutions is 30-35% of AI-103 and the
+orchestrator is still unbuilt.
+
+**Second revision to the harness-resolution finding, same day.** The floor is
+not a constant -- it is a function of where the cell sits. 13 of 15 cells
+showed *zero* variance across three runs; only the cell near p=0.5 moved. At
+p=0.5 the standard error at n=7 is 0.19, so plus or minus 2/7 is ordinary
+sampling variation, while at p near 0 or 1 the same n is rock solid (item4
+and item5 return 0/7 every run). **There is no flat "noise tax" on every
+measurement -- variance is a symptom that a fixture is undercalibrated.**
+This corrects this morning's framing in this same log, which implied an
+intrinsic harness property.
+
+**On raising `RUNS`: not to investigate, only to certify.** Precision scales
+with the square root of n, so 4x the runs buys half the error bar. item3
+pools to 14/21 (p ~ 0.67) against a target of 0 -- a *location* problem, not
+a precision one, and more runs would only sharpen a number already known to
+be far off target. Where it does pay: 0/7 bounds the true rate only below
+~35% at 95% confidence, so one high-n run (0/20 -> ~14%, 0/30 -> ~10%) on the
+final configuration is worth it before any stability claim goes on the
+portfolio site.
+
+**Next action: the orchestrator, finally.** CV-audit is done being tuned.
+1. **`evaluate_draft()` wrapper** -- thin function around the working M6
+   evaluator returning `json.dumps(...)`, with its own reST docstring.
+2. **Orchestrator instructions text.**
+3. **Wire it together** -- `AgentsClient` + `ToolSet` +
+   `enable_auto_function_calls`, then all five items end to end.
+4. Deferred to end of day: `STATUS.md` restructure (the `## Next action`
+   section has absorbed ~1,200 lines of session log and the session headings
+   stop at Aug 20).
+
+**M7 session (Sep 3, part 2): Thread 2 reopened and SOLVED -- `text_legible`
+moved out of the model entirely. All 15 cells of the audit matrix now
+correct. CV-audit is built and verified.**
+
+**The afternoon's conclusion superseded the morning's within the hour.** The
+morning closed Thread 2 as "a characterized limitation, accept it and move
+on." That stopped one step short. Both levers had genuinely been exhausted --
+but that proved the check was assigned to the wrong KIND of tool, not that it
+was unmeasurable. **Contrast is computable.** Vision models are for judgment
+calls; "is this text below a readable threshold" is arithmetic.
+
+**The architecture, and the transferable lesson: move the JUDGMENT out of the
+model and leave the PERCEPTION in it.** Azure AI Vision Read locates each
+text element (OCR is a task with a ground truth, which models are reliable
+at); `m7_legibility_check.py` measures WCAG contrast inside the word polygons
+and compares against the 3:1 large-text minimum. Read is only the LOCATOR and
+must not be the judge -- on the smoke test it recovered item3's headline at
+1.19:1 contrast, exactly the low-contrast recovery that made the model-judged
+version unreliable.
+
+**No new Azure resource.** `aif-dev-wus-01` is `kind=AIServices`, so Vision
+rides the same endpoint and key as the chat deployments. Region support was
+verified as a separate question, and that distinction is worth keeping:
+**region availability in Azure AI is PER-FEATURE, not per-service.** Image
+Analysis 4.0 is in West US but 4.0's *captioning* feature is not. "The
+service is in my region" is a different claim from "the feature I need is in
+my region."
+
+**Read's smoke test (`probe_read_ocr.py`, new) earned its keep three times
+over.** It confirmed reachability, showed the real response shape before
+anything was built on a described one, and produced a finding: Read
+transcribed item3's headline as "Tool Rental 101 what tye Offer" -- "What We"
+became "what tye" and the colon vanished -- with minimum word confidence
+**0.32**, against **0.957** on the business name in the same image. A
+geometry detail that changed the implementation: the LINE polygon spans
+x=56-873 while the WORDS occupy only x=60-777, so the line box carries ~96px
+of empty background. The check measures word polygons, not line polygons.
+
+**A bug in the measurement method, caught before it shipped.** The first
+version took the mean color of each pixel class. Antialiased glyph edges are
+blends of text and background, so including them pulls the two measured
+colors together and UNDERSTATES contrast. Measured against `build.py`'s
+declared colors on item3's brand line: class-mean gave 2.629:1 where the true
+value is 2.949:1 (off by 0.32); switching to the 10th/90th percentile of each
+class gave 2.967:1 (off by 0.02). The percentile version shipped, with the
+reason written into the constant's comment.
+
+**First full run -- 5/5 fixtures correct:**
+
+| fixture | title | brand | other | verdict | expected |
+|---|---|---|---|---|---|
+| item1 | 14.46 | 4.95 | | True | True |
+| item2 | 3.03 | 4.64 | | True | True |
+| item3 | **1.24** | **2.97** | | **False** | **False** |
+| item4 | 7.01 | 5.56 | | True | True |
+| item5 | 14.46 | 4.95 | badge 3.03 | True | True |
+
+Measured values match `build.py`'s declared colors exactly on 9 of 11
+elements. The only two that drift -- item3's title by 0.05, its brand line by
+0.02 -- are the only two with the clutter pattern behind them, which is
+precisely where a third color population intrudes on the two-population
+assumption. A well-behaved error profile: essentially exact on clean
+backgrounds, a few hundredths off where theory says it should be.
+
+**Minimum OCR confidence corroborates independently and was never used for
+the verdict:** 0.93-0.99 on every passing element, 0.32 on item3's headline.
+Two unrelated measurements agreeing is worth more than either alone -- but
+confidence is still a model output, so it goes in the notes as a diagnostic
+and the arithmetic produces the verdict. That distinction is the entire point
+of the redesign and should not be eroded later for convenience.
+
+**Surgery (unit D): `m7_cv_audit_tool.py` lost 96 lines.** Gone: the
+`LegibilityAudit` schema, `build_legibility_messages()`, and its model call
+-- which is where the "readable by a typical human without undue effort or
+assistance" clause lived. It is deleted rather than frozen, which resolves
+the tension flagged that morning about reverting to a wording already
+believed to be conceptually wrong. `audit_thumbnail()` now calls
+`audit_legibility()` for a bool and a reason. `ThumbnailAudit` is untouched,
+so the orchestrator's tool contract never moved -- the property the Sep 2
+split was designed to protect.
+
+**A dependency direction corrected while in there.** The production tool
+initially imported `build_vision_client` from `probe_read_ocr.py` -- a
+diagnostic script. Backwards. The client and the `audit_legibility()` entry
+point now live in `m7_legibility_check.py` and the probe imports from it,
+which also moved `load_dotenv()` out of module scope to match every other
+script in the folder.
+
+**Two self-inflicted errors worth logging.** (1) `pillow`/`numpy` were added
+to `requirements.txt` but never installed, so the first `--selftest` died on
+`ModuleNotFoundError`. (2) Worse: that selftest imported Pillow at module
+level while never using it, so the check advertised as "pure math, no Azure,
+costs nothing" was gated on an image library. Fixed with a lazy import, and
+verified by uninstalling Pillow entirely and re-running rather than assuming.
+
+**Verification standard used throughout, worth repeating.** Nothing was
+asserted that could be measured: the SDK response shape was observed before
+code depended on it; the measurement method was validated against declared
+colors before it judged anything; `pyflakes` confirmed the surgery left no
+dangling references; the Pillow-independence claim was proven by removing
+Pillow.
+
+**Next action: the orchestrator. Both tools are done.**
+
+1. **`evaluate_draft()` tool wrapper.** NOTE, corrected today: the function
+   already exists and works (`m7_evaluator_tool.py` line 45, verified live
+   Aug 27) -- `m7-orientation.md` wrongly said "not done yet". Missing is the
+   tool-shaped version: `json.dumps(...)` return, plus a reST docstring with
+   `:param:`/`:return:`. That docstring IS the tool schema the orchestrator
+   reads; the function currently has none.
+2. **Orchestrator instructions text** -- when to draft, when to call each
+   tool, what to do with a failing result (redraft vs. flag for review).
+3. **Wire it together** -- `AgentsClient` + `ToolSet` +
+   `enable_auto_function_calls`, then all five `content-items-plan.md` items
+   end to end against the expected-results table.
+4. Deferred to end of day: the `STATUS.md` restructure -- `## Next action` has
+   absorbed ~1,300 lines of session log and the `## Session --` headings stop
+   at Aug 20.
