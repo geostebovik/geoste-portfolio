@@ -2764,3 +2764,190 @@ time as always.**
    5-fixture probe -- though note that with the split, a `text_legible`
    change can no longer disturb `info_accurate` or `brand_consistent`, so
    the run is now a check rather than a risk.
+
+**M7 session (Sep 3): item1's defective control fixed and verified -- Thread 1
+closed on mechanism, not just count. Thread 2 narrowed to fixture-side only,
+and the harness noise floor turned out to be worse than documented.**
+
+**Session-start finding: connected folders did not persist into the session.**
+Both `ai-103` and the repo root had to be re-requested mid-session despite
+having been attached when the thread was opened. Also worth having written
+down: `.git` lives at `C:\Users\gerar\geoste-portfolio`, not in `ai-103`, so
+git run from the working folder alone fails with "not a git repository ...
+stopping at filesystem boundary" -- the repo root has to be connected too.
+Both access requests returned granted instantly rather than prompting, which
+is consistent either with a pre-existing authorization this session didn't
+inherit, or with folder requests being auto-approved; not distinguishable
+from Claude's side, worth checking in settings. The quiet failure mode is
+that an attached-but-not-connected folder returns directory *names* only with
+file contents withheld, which reads like a sparse folder rather than an
+access problem. Now covered by `m7-orientation.md`'s new session-start
+checklist.
+
+**The handoff's git-state section was stale for the second time.**
+`STATUS.md`, `m7-orientation.md` and `2026-09-01-m7-session-prompt.md` were
+described as uncommitted/untracked but had been swept up by `3abbae8` after
+the handoff was written. Same root cause as the first incident: the git-state
+section gets written before the day's final commit. Fix recorded in the
+end-of-session checklist -- write that section last.
+
+**Thread 2's unstaged wording line reverted before any measurement.** The
+third `text_legible` threshold wording was left uncommitted overnight. Two
+reasons to drop it rather than commit it: 6/7 vs 5/7 is inside the documented
+noise band, so it had shown no measured benefit; and it phrased the rule as a
+negation ("Text that is only readable with effort ... is not to be considered
+legible"), which is the enumerate-the-negative pattern the standing lessons
+warn against, where the committed line defines the verdict condition
+positively. Reverted by direct file write rather than `git checkout` to avoid
+stranding a `.git` lock through the bridge. Working tree back to `HEAD`
+before anything was run.
+
+**Thread 1 -- decision: correct the fixture, not the answer key.**
+`content-items-plan.md` was not wrong. It already specified item1's
+thumbnail as having "no factual claims in the image that could contradict the
+fact sheet," and already titled the item "How to Mix Exterior Paint Colors at
+Home." `build.py` rendered "Mix Any Exterior Paint Color -- In Store"
+instead, so the *fixture* was out of compliance with its own answer key on
+two counts. Moving the expected result would have left one clean control
+instead of two, halving the false-positive coverage that is the stated reason
+both controls exist.
+
+**Second-order reason the old headline was specifically bad, not merely
+wrong.** The Sep 1 `info_accurate` wording exempts headlines that merely name
+a topic from being checkable assertions. "How to Mix Exterior Paint Colors at
+Home" names a topic; "Mix Any Exterior Paint Color -- In Store" is an
+imperative offering claim with a universal quantifier. The old headline sat
+*on* the exemption boundary, which made item1 a measurement of where that
+exemption breaks rather than a clean-pass control -- and explains why it was
+bistable rather than simply failing.
+
+**Rebuild method: the environment was verified bit-exact before anything was
+overwritten.** `build.py` renders all five fixtures in one pass, so a naive
+rerun would have put fresh pixels under the 7/7 results the split had just
+bought -- item3's entire planted flaw is a 1.19:1 contrast margin, and
+`font-family: 'Arial','Helvetica'` resolves differently across platforms.
+Checked rather than assumed: re-rendered the *original* item1 in a Linux
+container and got a byte-identical SHA-256 against the file on disk. So the
+Aug 21 originals were never rendered on Windows -- they used Liberation Sans,
+the metric-compatible Arial substitute. Full rebuild then confirmed items
+2-5 byte-identical and item1 changed. Because the rebuild ran on Linux,
+`build.py`'s known `/tmp` + naive `file://` bug never entered the picture and
+was deliberately left untouched in the backlog -- one variable at a time.
+
+**Result (`20260903-104108`), against the two Sep 2 split runs:**
+
+| fixture | field | Sep 2 (151734) | Sep 2 (161534) | Sep 3 (104108) |
+|---|---|---|---|---|
+| item1 | `info_accurate` | 7/7 | 5/7 | **7/7 (expected)** |
+| item3 | `text_legible` | 6/7 | 5/7 | **3/7 (expected 0/7)** |
+
+The other 13 of 15 cells were identical across all three runs: items 1/2/5
+clean on legibility and brand, item4 `brand_consistent` 0/7, item5
+`info_accurate` 0/7 -- both planted flaws caught in every single run.
+
+**Thread 1 is closed on the mechanism, which is stronger than the count.**
+A single 7/7 would have been weak evidence on its own, since `151734` also
+read 7/7 before drifting to 5/7. The notes are what close it. Sep 2's two
+failures named the string directly -- "Info accuracy fails because the
+visible claim says 'Mix Any Exterior Paint Color -- In Store,' while the fact
+sheet only supports custom paint mixing generally and does not specify
+exterior paint colors or 'any' color." Sep 3's passes route through a
+different path entirely -- "Info accuracy passes because the visible text is
+a topic/title ... there are no legible claims about hours or services that
+contradict the fact sheet." That is the Sep 1 headline exemption firing as
+designed. The old failure mode wasn't outvoted or averaged away; the text it
+pointed at no longer exists.
+
+**Thread 2 got worse, and the harness noise floor is bigger than recorded.**
+item3's `text_legible` has now produced 6/7, 5/7 and 3/7 across three split
+runs. Today's run used the *committed* wording -- the same one behind the 6/7
+-- against a byte-identical image, so that is a **3/7 swing on an identical
+prompt**, exceeding the 2/7 figure established Sep 2.
+
+**Correction to the Sep 2 harness-resolution finding.** That entry cited
+item1's 7/7 -> 5/7 as its evidence that a cell moves 2/7 on an identical
+prompt. Today shows that movement *had a cause* -- a fixture defect, now
+removed, and the variance went with it. The noise floor is still real, but
+its supporting example is now item3's 3/7 spread, not item1's. Left as
+written, that entry teaches the wrong lesson: that unexplained movement is
+irreducible, when the one documented case turned out to be diagnosable. Read
+unexplained movement as a hypothesis to chase first, and as noise only after
+chasing it.
+
+**Trap in the console summary -- do not read today's item3 as progress.** At
+3/7, `majority = 3 >= 3.5` is False, so the summary prints "majority=False
+(**matches expected**)" for the first time since the split. It is not a pass:
+`agreement` is 43% against `STABLE_THRESHOLD = 0.8`, and the same line reads
+**NOT STABLE**. The cell became less readable, not more correct. Equally,
+6 -> 5 -> 3 is not a downward trend: three points, no controlled variable,
+and today repeated an earlier wording.
+
+**What the notes prove, and it closes out the wording approach entirely.**
+Today's batch is not the graded boundary described Sep 2 ("faint but still
+readable"). It is cleanly bimodal with no hedging anywhere. All four `False`
+runs reason correctly and apply the per-element rule -- "The business name at
+the bottom left is readable, but the other overlaid text in the center ... is
+too faint and blended into the background to be read clearly as a separate
+text element." All three `True` runs assert flatly -- "Distinct text elements
+are legible: the headline 'Tool Rental 101: What We Offer' can be read." No
+effort acknowledged, no hedge. So the `False` runs are not following the rule
+*better*; they are **seeing something the `True` runs do not see at all**.
+When the pixel decode succeeds, the model has no notion that recovery was
+hard, so no instruction can make it report effort it never experienced. The
+Sep 2 reframe was right and this is the proof. **Prompt-side is exhausted for
+this check; fixture-side is the only remaining lever.**
+
+**Open design question from the split, now resolved (observed, not
+decided).** The two calls' reasoning strings are merged into the single
+`notes` field by prefixed concatenation -- `[legibility] ... [content] ...`
+-- which preserves per-call attribution without changing `ThumbnailAudit`'s
+shape. `m7-orientation.md` still framed this as open; corrected.
+
+**Doc restructuring (`m7-orientation.md`).** Added a `## Session-start
+checklist` (folders connected, working folder stated, git read fresh and
+read-only, working tree matches `HEAD` before any measurement, Todoist punch
+list, read this doc before the handoff narrative). Promoted the
+end-of-session checklist from a header paragraph to a matching section and
+added the write-git-state-last rule to it. Added `## Standing lessons worth
+not relearning`, consolidated from the dated session prompts where they were
+being restated from memory each handoff and had begun to drift -- **session
+prompts should now reference that section rather than re-list it.**
+
+**New standing lesson, logged against Claude.** Claude twice asserted that
+`m7-orientation.md` contained a "tooling note" section and built a
+recommendation on it. It does not -- the phrase belongs to the dated session
+prompt, and the two files had been read in the same turn. The second
+assertion inherited confidence from the first rather than being re-derived.
+Same failure class the CV-audit exists to catch: an assertion past what the
+source supports, delivered in the register of something the source says.
+Caught by Gerard checking the file. Now item 7 of the standing lessons:
+claims about a document's structure get verified against the file, not
+recalled.
+
+**Process note worth keeping.** How to read the probe was pre-registered
+before the numbers came back -- item1 at 7/7 *or* 6/7 counts as a pass
+because 6/7 is inside the noise band, 4/7 or below would have meant the
+headline was not the mechanism. Deciding the reading rule before seeing the
+data is cheap and removes the temptation to rationalize whatever arrives.
+
+**Next action: Thread 1 is closed; three build items and one open cell
+remain.**
+
+1. **`evaluate_draft()` wrapper** -- thin function around the already-working
+   M6 evaluator returning `json.dumps(...)` instead of a raw dict, with its
+   own reST docstring. Small and unblocked.
+2. **Orchestrator instructions text** -- when to draft, when to call each
+   tool (CV-audit / `evaluate_draft`), and what to do with a failing result
+   (redraft vs. flag for review).
+3. **Wire it together** -- `AgentsClient` + `ToolSet` +
+   `enable_auto_function_calls`, then run all five `content-items-plan.md`
+   items through it and compare against the expected-results table.
+4. **Thread 2, fixture-side only** -- push item3's title/background contrast
+   to effectively zero in `build.py` rather than hunting a fourth phrasing.
+   Caveat still standing: diag-b/c returned `True` at near-zero contrast, but
+   under the old quantifier-buggy wording, so that combination is untested.
+   Rebuild the same way it was done today -- verify the environment
+   reproduces an unchanged fixture byte-identically *before* overwriting
+   anything, and confirm items 1/2/4/5 come back byte-identical after.
+   `text_legible` can no longer disturb the other two checks, so the full
+   5-fixture probe is a check rather than a risk.
