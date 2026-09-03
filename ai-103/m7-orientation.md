@@ -55,15 +55,15 @@ nothing more.
       text against fact-sheet.md                          - brand_consistent
                                                             - info_accurate
                                                             (+ notes: reasoning)
-                                                      Sep 2: two wording edits, each
-                                                      fixed its target and broke a
-                                                      different check (14/15 both
-                                                      times, different cell). Cross-
-                                                      check contamination proven
-                                                      bidirectional. DECIDED: split
-                                                      into 2 calls -- text_legible
-                                                      alone; brand+info together.
-                                                      See item 2 below.
+                                                      SPLIT BUILT + RUN (Sep 2).
+                                                      Call A: text_legible (no fact
+                                                      sheet). Call B: brand + info.
+                                                      brand_consistent and
+                                                      info_accurate now 7/7 CORRECT
+                                                      on all 5 fixtures. Open:
+                                                      item3 text_legible (~5-6/7
+                                                      True, wrong) and item1's
+                                                      over-claim. See item 2 below.
 ```
 
 Both tools check a different *kind* of output against the same ground
@@ -174,7 +174,8 @@ CV-audit run should score exactly as documented there — that table is what
    stay together. Added cost (one extra image upload per audit, two prompts
    to maintain) accepted deliberately.
 
-   **Next step: implement the split with both clauses' wording FROZEN as-is.**
+   ~~**Next step: implement the split with both clauses' wording FROZEN
+   as-is.**~~ -- **done Sep 2 PM, see below.**
    Do not tune wording and split in the same step. Each clause has been
    proven correct in some configuration; the split's first probe run tests
    whether both can be correct simultaneously. Open design question to
@@ -184,6 +185,53 @@ CV-audit run should score exactly as documented there — that table is what
    shape? `audit_thumbnail()` should still merge into a single
    `ThumbnailAudit` so the orchestrator's tool contract doesn't change.
    Cause (c) is unaffected by the split and stays in the backlog.
+   **SPLIT BUILT AND RUN (Sep 2 PM) -- it delivered what it was bought
+   for.** `m7_cv_audit_tool.py` now makes two calls: `build_legibility_
+   messages()` (text_legible only, no fact sheet -- legibility needs no
+   ground truth) and `build_content_messages()` (brand_consistent +
+   info_accurate, with the fact sheet), merged by `audit_thumbnail()` into
+   an unchanged `ThumbnailAudit` so the orchestrator's tool contract does
+   not move. Committed as `b8d100a` before its first live run.
+   **Result across two split runs: `info_accurate` and `brand_consistent`
+   are 7/7 CORRECT on all five fixtures** -- including item3, which the
+   combined prompt could never get right at the same time as
+   `text_legible`. Wording changes to one check can no longer disturb
+   another; that is now structural, not a matter of care.
+
+   **OPEN THREAD 1 -- item1's over-claim (a CLEAN control is defective).**
+   Found by accident: item1's `info_accurate` moved 7/7 -> 5/7 between two
+   split runs whose content-call prompt was byte-identical (`git diff`
+   confirmed only the `text_legible` line changed, and it lives in the other
+   call). Both failing runs gave the same coherent reason -- the headline
+   reads "Mix Any Exterior Paint Color -- In Store" while `fact-sheet.md`
+   says only "Custom paint mixing", with no "any" and no "exterior". Under
+   item1's own rule ("do not make assumptions ... beyond what is in the fact
+   sheet") those runs are arguably the *more* compliant ones. Same class as
+   item2's Sep 1 headline bug. **Fix is a decision, not a wording tweak:**
+   either `content-items-plan.md`'s expected result for item1 is wrong, or
+   `build.py`'s item1 headline must say something the fact sheet supports.
+   Recommended first -- a control that intermittently fails a check it
+   should pass corrupts every measurement taken against it. Rebuilding means
+   running `build.py`, whose known `/tmp` + naive `file://` path bug (see
+   Backlog) will bite on Windows without WSL/Cloud Shell.
+
+   **OPEN THREAD 2 -- item3's legibility threshold, now prompt-side
+   exhausted.** Three wordings have produced 0/7, 6/7 and 5/7 True (expected
+   0/7). The last two are a tie within this harness's resolution, not an
+   improvement. The notes show genuine boundary behavior, not confabulation:
+   "difficult to read without effort" -> False and "faint but still
+   readable" -> True in the same batch. **Reframe (Sep 2, correcting that
+   morning's reasoning):** the clause asks the model to judge readability
+   "by a typical human", but it has no human eye -- it decodes pixel values,
+   where item3's 1.19:1 contrast is faint to a person but easy to recover
+   numerically. The morning's contrast calculation answered "could a human
+   read this?" when the operative question was "will this model call it
+   readable?" Hypothesis 1 (fixture not strong enough) was closed on the
+   wrong evidence and **is back in play** -- push item3's contrast to
+   effectively zero rather than asking the model to simulate an eye. Caveat:
+   diag-b/c already returned True at near-zero contrast, but under the old
+   quantifier-buggy wording; that combination is untested.
+
 3. **`evaluate_draft()` wrapper** — a thin function around the already-working
    evaluator that returns `json.dumps(...)` instead of a raw dict, with its
    own reST docstring. Small, but not done yet.
@@ -202,6 +250,34 @@ add new items here going forward instead of leaving them buried in a
 session's narrative paragraph in `STATUS.md`.
 
 **M7 / current build:**
+
+- **Harness resolution: a cell can move 2/7 between runs on an IDENTICAL
+  prompt and image (established Sep 2).** item1's `info_accurate` went
+  7/7 -> 5/7 across two runs whose content-call prompt was byte-identical,
+  with `temperature=0`/`seed=42` pinned. **Read every future run against
+  this: a 1-2 run difference out of 7 is not an improvement or a
+  regression.** Big effects (the 7/7 -> 0/7 swings that drove the Sep 2
+  decisions) are still trustworthy; fine-grained wording comparisons need
+  more runs or a bigger effect to be readable. Raising `RUNS` in
+  `probe_fixture_stability.py` is the obvious lever if a question ever
+  genuinely turns on 1-2 runs -- at 2x the calls now that the audit is
+  split.
+- **Open question deliberately NOT measured: does removing the fact sheet
+  from the legibility call matter?** The split changed three things at once
+  (checks separated, framing sentence, fact sheet dropped from call A).
+  Decided not to spend a run isolating the third, on the reasoning that a
+  legibility check which only works when unrelated business context happens
+  to be in the prompt is *balanced*, not fixed -- the same accidental
+  coupling the split exists to remove. Recorded as a known confound rather
+  than a measurement. Revisit only if a fixture-side fix fails too.
+- **git WRITES through the desktop bridge strand lock and temp files (Sep
+  2).** The split commit left `.git/HEAD.lock`, `.git/objects/maintenance.
+  lock` and seven `tmp_obj_*` hard links behind -- that shell cannot unlink
+  files in mounted folders, and `HEAD.lock` blocks the next commit. Reads
+  are fine with `git --no-optional-locks`; **writes are not.** Standing
+  arrangement: Claude prepares the commit message, Gerard commits on
+  Windows. Cleanup needs `-Force`: `Get-ChildItem .git\objects -Recurse
+  -Filter tmp_obj_* -Force | Remove-Item -Force`.
 
 - **`notes` is not always faithful to the boolean it accompanies (found Sep
   2).** In 2 of 7 item3 runs the prose reasoned explicitly to a pass ("so

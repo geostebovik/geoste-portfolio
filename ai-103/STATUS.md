@@ -2614,8 +2614,9 @@ tool the orchestrator depends on is worth more than the token delta.
 item3 notes matched their booleans. It appeared at 2-in-7 previously, so one
 clean run is not proof it's gone. The backlog item stands.
 
-**Next action: implement the two-call split, with both clauses' wording
-frozen exactly as they are now.** Do not tune wording and split in the same
+**Next action (DONE same day -- see the continuation entry below): implement
+the two-call split, with both clauses' wording frozen exactly as they are
+now.** Do not tune wording and split in the same
 step -- the whole point of the split is to remove the variable that has
 been confounding every measurement today, and changing both at once
 reproduces the problem being solved. Each clause has already been proven
@@ -2635,3 +2636,131 @@ tool's return shape? Worth deciding deliberately rather than defaulting --
 `notes` is the diagnostic surface every root-cause finding on this tool has
 depended on, and it's already known to be unreliable at ~2-in-7 on a
 contested field.
+
+
+**M7 session (Sep 2, part 3): split built and run twice. The split did what
+it was bought for; `text_legible` on item3 is still open; and a latent
+defect turned up in item1, a "clean control", entirely by accident.**
+
+**Split implemented and committed as `b8d100a` before its first live run**
+(deliberately, as a restore point for code that had only been
+syntax-checked). Claude wrote the restructure at Gerard's request --
+`LegibilityAudit` / `ContentAudit` call schemas, `_build_messages()` +
+`build_legibility_messages()` + `build_content_messages()`,
+`audit_thumbnail()` making both calls and merging into an unchanged
+`ThumbnailAudit` so the orchestrator's future tool contract doesn't move --
+then walked through it line by line with Gerard before it was run. All three
+check clauses verified programmatically verbatim; only the framing sentence
+changed ("exactly three things" -> "one"/"two"), which a split makes
+unavoidable.
+
+**Split run 1 (`20260902-151734`): 14/15, and the split delivered its
+promise.** `info_accurate` went to **7/7 correct on all five fixtures**
+(including item3, which the combined prompt could never get right at the
+same time as `text_legible`), and `brand_consistent` 7/7 correct on all
+five. Four of five fixtures perfect, nothing unstable. The one miss: item3
+`text_legible` at 6/7 True. Notes showed the quantifier fix holding
+perfectly -- every run evaluated wordmark and headline separately -- with
+the *threshold* failing, and run 7 citing the bar by name: "the central
+title is faint and partially blended into the background. Distinct text
+elements are still legible **without undue effort**." The Sep 2 morning
+critique of "undue" was therefore correct after all; the combined prompt had
+been masking it, and isolation exposed it.
+
+**Confound acknowledged and deliberately not chased.** The split run changed
+three things, not one: checks separated (intended), framing sentence
+(unavoidable), and the fact sheet removed from the legibility call (Claude's
+design call -- legibility needs no ground truth). The third is a real
+confound. Decided **not** to spend a run isolating it, on this reasoning: if
+restoring the fact sheet flipped item3 correct, the result would be a
+legibility check that only works when unrelated business context happens to
+sit in the prompt -- balanced, not fixed, and the same accidental coupling
+the split exists to remove. Logged as an open question rather than a
+measurement, on purpose.
+
+**Wording pass on the threshold -- including an instructive wrong turn.**
+First draft read "Legible is defined as readable by a typical human with
+effort, if at all" -- which lifts `content-items-plan.md`'s description of
+the *fixture's flaw* and installs it as the definition of *passing*. Exactly
+inverted: it would have made the bar looser. Gerard caught it immediately
+after sending; the lesson worth keeping is that the answer key's language
+describes the FAILING state, so it belongs in a failing condition, not a
+passing one. Corrected version, phrased in the negative to mirror the answer
+key: **"Text that is only readable with effort by a typical human is not to
+be considered legible."** Note the deliberate word-sense split -- *readable*
+for the observation, *legible* for the verdict -- since collapsing the two
+into one word is precisely what the model has been doing ("the headline is
+visible" treated as settling it).
+
+**Split run 2 (`20260902-161534`): item3 `text_legible` 5/7 True, down from
+6/7 -- a tie within noise, not an improvement.** The notes show genuine
+boundary behavior rather than confabulation: run 3 "difficult to read
+without effort" -> False, run 7 "faint but still readable" -> True, both
+coherent, same image, same pinned params.
+
+**Reframe on why no wording has stabilized this (and a correction to the Sep
+2 morning reasoning).** The clause asks the model to judge readability "by a
+typical human." It has no human eye -- it decodes pixel values, where
+item3's 1.19:1 contrast is faint to a person but numerically easy to
+recover. It is being asked to simulate a perceptual limit it does not
+experience, which is why it sits near a coin flip. The morning's contrast
+calculation answered "could a human read this?" when the operative question
+was "will this model call it readable?" Those are different questions, and
+hypothesis 1 (fixture not strong enough) was closed on the wrong evidence.
+**The fixture-side fix is back in play** -- push item3's contrast to
+effectively zero so there is no fence to sit on. Caveat from the backlog:
+diag-b/c already returned True at near-zero contrast, but that was under the
+old quantifier-buggy wording; the combination is untested.
+
+**NEW FINDING, found by accident: item1 -- a CLEAN control -- carries an
+unintended over-claim.** Its `info_accurate` went 7/7 -> 5/7 between the two
+split runs. That cell lives in a different call with a different prompt, and
+`git diff` confirmed only the `text_legible` line changed, so cross-call
+contamination is structurally impossible. Both failing runs gave the same
+coherent reason: the thumbnail headline reads **"Mix Any Exterior Paint
+Color -- In Store"** while `fact-sheet.md`'s Services list says only
+**"Custom paint mixing"** -- no "any", no "exterior". Under item1's own rule
+("Do not make assumptions about the business details beyond what is in the
+fact sheet"), the runs that failed it are arguably the more compliant ones.
+Same class as item2's headline bug (Sep 1) and as the
+`description-template.md` embellishment already in the backlog. **Either
+item1's answer-key entry is wrong, or `build.py`'s headline for item1 needs
+to say something the fact sheet actually supports.** Not chased today.
+
+**Harness resolution, established today and worth remembering before reading
+any future run:** a cell can move 2/7 between runs with an identical prompt,
+identical image and pinned `temperature=0`/`seed=42`. So differences of 1-2
+runs out of 7 are not interpretable as improvement or regression. This does
+NOT touch the split decision, which rested on a 7/7 -> 0/7 swing, far
+outside that band -- but it does mean fine-grained wording comparisons need
+either more runs or a bigger effect to be readable.
+
+**Tooling lesson: git WRITES through the desktop bridge strand lock and temp
+files.** The Sep 2 commit left `.git/HEAD.lock`, `.git/objects/maintenance.
+lock` and seven `tmp_obj_*` hard links behind, because that shell cannot
+unlink files in mounted folders. `HEAD.lock` would have blocked the next
+commit. Read-only git through the bridge is fine with `--no-optional-locks`;
+**writes are not**. Going forward Claude prepares the commit message and
+Gerard runs the commit on Windows. Cleanup on Windows needs `-Force`
+(`Get-ChildItem .git\objects -Recurse -Filter tmp_obj_* -Force |
+Remove-Item -Force`) -- without it PowerShell refuses.
+
+**Next action: two independent threads, either order, one variable at a
+time as always.**
+
+1. **item1's over-claim (recommended first -- it's bounded and it corrupts a
+   control).** Decide whether `content-items-plan.md`'s expected result for
+   item1 is wrong or whether `build.py`'s headline should change to match
+   the fact sheet ("Custom Paint Mixing -- In Store" or similar). A control
+   that intermittently fails a check it is supposed to pass undermines every
+   future measurement taken against it. Rebuilding the fixture means running
+   `build.py` -- note its known `/tmp` + naive `file://` path bug (backlog)
+   will bite on Windows without WSL/Cloud Shell.
+2. **item3's legibility threshold.** Three wording attempts have now landed
+   at 0/7, 6/7 and 5/7 -- the last two indistinguishable. Recommend
+   switching from prompt-side to fixture-side per the reframe above:
+   strengthen the manipulation until the answer is unambiguous, rather than
+   asking the model to simulate an eye. Whatever changes, run the full
+   5-fixture probe -- though note that with the split, a `text_legible`
+   change can no longer disturb `info_accurate` or `brand_consistent`, so
+   the run is now a check rather than a risk.
