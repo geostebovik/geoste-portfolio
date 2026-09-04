@@ -36,8 +36,8 @@ Three parts, in order:
 
 > Ever stood in the paint aisle unsure which exterior color will actually hold up
 > outside? In this quick video we show you how we custom-mix exterior paint right
-> in store, matched to any swatch or sample you bring in. Stop by Riverside
-> Hardware & Supply, Monday–Saturday 8am–6pm, and we'll mix it while you shop.
+> in store. We walk through the whole process, start to finish. Stop by Riverside
+> Hardware & Supply, Monday–Saturday 8am–6pm.
 
 ## Tone rules (from the fact sheet's Brand Guide)
 
