@@ -11,3 +11,8 @@ azure-ai-evaluation==1.18.3
 azure-ai-vision-imageanalysis
 pillow
 numpy
+# Added 2026-09-04 for M7's orchestrator (m7_orchestrator.py).
+# SDK shapes verified by introspection against azure-ai-agents 1.1.0:
+# FunctionTool/ToolSet are in azure.ai.agents.models, NOT .tools.
+azure-ai-agents
+azure-identity
