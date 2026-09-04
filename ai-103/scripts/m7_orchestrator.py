@@ -106,7 +106,7 @@ def build_client() -> AgentsClient:
     """
     load_dotenv()
     return AgentsClient(
-        endpoint=os.environ["PROJECT_ENDPOINT"],
+        endpoint=os.environ["AIF_PROJECT_ENDPOINT"],
         credential=DefaultAzureCredential(),
     )
 

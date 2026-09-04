@@ -56,7 +56,10 @@ from azure.ai.agents import AgentsClient
 from azure.identity import DefaultAzureCredential
 
 agents_client = AgentsClient(
-    endpoint=os.environ["PROJECT_ENDPOINT"],   # the project endpoint, not the account endpoint
+    endpoint=os.environ["AIF_PROJECT_ENDPOINT"],   # the project endpoint, not the account endpoint
+    # NOTE: the variable NAME is this project's convention (.env uses an AIF_
+    # prefix -- AIF_ACCOUNT, AIF_RESOURCE_GROUP). Microsoft's own samples call it
+    # PROJECT_ENDPOINT; renamed here 2026-09-04 for house consistency.
     credential=DefaultAzureCredential(),
 )
 
@@ -85,9 +88,19 @@ and hand them to the agent via a `ToolSet`. With auto function-calling enabled,
 the agent decides *when* to call them during a run — you don't call them
 yourself in a fixed sequence.
 
+**Corrected 2026-09-04 — the import paths below were wrong as originally
+written.** This snippet showed `from azure.ai.agents import ToolSet` and
+`from azure.ai.agents.tools import FunctionTool`. There is no
+`azure.ai.agents.tools` module at all; both classes live in
+`azure.ai.agents.models`. Caught by Claude introspecting the installed
+`azure-ai-agents` 1.1.0 package before `m7_orchestrator.py` was written,
+rather than at runtime — as written it was an immediate `ImportError`.
+Ironic placement noted: this is the same "looks similar, is actually a
+different SDK shape" trap the section above warns about, sitting inside the
+warning.
+
 ```python
-from azure.ai.agents import ToolSet
-from azure.ai.agents.tools import FunctionTool
+from azure.ai.agents.models import FunctionTool, ToolSet
 
 toolset = ToolSet()
 toolset.add(FunctionTool(user_functions))       # user_functions = your Python callables
@@ -166,6 +179,16 @@ not a raw `dict`, even when the data is naturally dict-shaped. `evaluate_draft()
 thing actually registered with `FunctionTool` should be a thin wrapper that calls it and
 returns `json.dumps(result)`, matching the established convention, with `:rtype: str`
 in its docstring. Same plan applies to the CV-audit tool once it's built.
+
+**Superseded 2026-09-04 as to the *separate wrapper* part; the JSON-string
+convention itself held.** Both tools ended up shaped in place rather than
+wrapped: `audit_thumbnail()` was built `-> str` returning
+`merged.model_dump_json()` (Sep 3), and `evaluate_draft()` was changed the
+same way (Sep 4), which is also how the Todoist punch-list item described it.
+A separate wrapper would have meant two functions and two docstrings per tool
+for no gain, and the docstring is load-bearing here — it is the schema the
+model reads. This paragraph is left standing rather than deleted because the
+plan it describes is what the code was checked against.
 
 Sources: [azure-ai-agents README](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/README.md), [FunctionTool.md spec](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/FunctionTool.md), [user_functions.py sample](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/ai/azure-ai-agents/samples/utils/user_functions.py).
 

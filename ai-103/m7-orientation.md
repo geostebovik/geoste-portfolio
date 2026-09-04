@@ -137,8 +137,12 @@ nothing more.
 
 ```
                     Orchestrator agent (Foundry Agent Service)
-                    NOT YET BUILT — instructions text + toolset
-                              still to design/write
+                    BUILT + RUN Sep 4 -- m7_orchestrator.py registers both
+                    tools via ToolSet + enable_auto_function_calls.
+                    FIRST RUN: 15/15 cells correct across all five items,
+                    both tools called 10/10. One run, not a stability claim.
+                    Instructions text is still INSTRUCTIONS_V1, a
+                    deliberate throwaway -- the real one is what's left.
                                       |
                 +---------------------+----------------------+
                 |                                              |
@@ -426,7 +430,19 @@ CV-audit run should score exactly as documented there — that table is what
    `m7_legibility_check.py` (the measurement + `audit_legibility()` entry
    point) and `probe_read_ocr.py` (the Read smoke test).
 
-3. **`evaluate_draft()` tool wrapper** — **NOTE (corrected Sep 3): the
+3. ~~**`evaluate_draft()` tool wrapper**~~ — **DONE Sep 4, verified live.**
+   `evaluate_draft()` is now `-> str` ending in `json.dumps(...)`, with a reST
+   docstring that is the tool schema the orchestrator reads. A `_flatten()`
+   helper drops the SDK's `_properties` payload -- it carries the full judge
+   prompt including `fact-sheet.md` verbatim, roughly 3,900 tokens per call
+   (SDK-reported `prompt_tokens` 2,026 + 1,848) to deliver about 1 KB of
+   signal. Score, `passed` and `threshold` are the SDK's own values; no
+   threshold is invented. Non-finite scores are coerced to `null` because
+   `json.dumps` emits a bare `NaN`, which is not valid JSON and would reach
+   the agent unparseable. Claude wrote it; Gerard ran it and approved the
+   wording changes. The pre-Sep-4 text of this item follows.
+
+   **NOTE (corrected Sep 3): the
    function itself already exists and works.** `m7_evaluator_tool.py` line 45
    has `evaluate_draft(query, response) -> dict`, verified live Aug 27. This
    entry previously read "not done yet", which was wrong. What is missing is
@@ -438,10 +454,44 @@ CV-audit run should score exactly as documented there — that table is what
    docstring at all.
 4. **Orchestrator instructions text** — the actual job description telling
    the agent when to draft, when to call each tool, and what to do with a
-   failing result (redraft? flag for review?). Not yet written.
-5. **Wire it together** — `AgentsClient` + `ToolSet` + `enable_auto_function_calls`,
-   then run all 5 `content-items-plan.md` items through it and compare actual
-   results to the expected-results table.
+   failing result (redraft? flag for review?). **Still to write.** A
+   deliberately minimal `INSTRUCTIONS_V1` now exists in
+   `m7_orchestrator.py`, but it is a throwaway, not a draft of this: it says
+   to call both tools and says *nothing* about handling a failing result,
+   because what the agent does in that gap is what the first run exists to
+   observe. Decided Sep 4 to invert the documented order -- run first, then
+   write this against observed behavior -- on the standing lesson that model
+   behavior gets tested, not derived.
+   **One constraint is already established (Sep 4): branch on `passed`, not
+   on `reason`.** See the judge-reason backlog entry below. An instruction to
+   "revise according to the evaluator's reasoning" would have the agent strip
+   grounded copy.
+5. ~~**Wire it together**~~ — **DONE Sep 4. First run returned 15/15.**
+   All five items matched their expected row exactly; both tools were called
+   on every item. The reST docstrings functioned as tool schemas on the first
+   attempt, on a function that had no docstring at all that morning. Claude
+   wrote the script and predicted a messy first run; Gerard cleared the config
+   and ran it. Config note: `AIF_PROJECT_ENDPOINT` is the account's
+   `services.ai.azure.com` host plus `/api/projects/<project>`, from the
+   portal's project Overview -- the CLI's `properties.endpoints` is
+   account-level and does not contain it. Details of the original scaffolding
+   follow.
+
+   **SCAFFOLDED Sep 4, not yet run.**
+   `m7_orchestrator.py` (Claude wrote it) builds the `AgentsClient` against
+   the *project* endpoint with `DefaultAzureCredential`, registers both tools
+   in a `ToolSet`, calls `enable_auto_function_calls`, and runs each of the
+   five `content-items-plan.md` items **on its own thread** -- deliberate, so
+   one item's draft and tool results cannot sit in context while the next is
+   drafted, the same contamination the Sep 2 audit split removed. It prints
+   which tools the agent actually called, per item, against that item's
+   expected-results row.
+   **Blocked on two config items, both Gerard's:** `AIF_PROJECT_ENDPOINT` is not
+   in `.env` (the project endpoint, not the account endpoint M2-M6 use), and
+   `azure-ai-agents` / `azure-identity` were added to `requirements.txt` but
+   not yet installed. `DefaultAzureCredential` also means this is the first
+   M7 script to authenticate as Gerard rather than by account key, so an
+   RBAC gap on the project surfaces here first.
 
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
@@ -536,13 +586,104 @@ session's narrative paragraph in `STATUS.md`.
   whether to converge on Azure OpenAI's newer GA `v1` API surface instead
   of just picking a newer dated preview string, since preview versions are
   more likely to get retired later.
-- **Ungrounded embellishment in `description-template.md`'s own worked
-  example (flagged Aug 27).** Its reference example includes "matched to
-  any swatch or sample you bring in" and "we'll mix it while you shop" —
-  neither is stated in `fact-sheet.md`'s Services list. Confirmed real
-  against the fact sheet directly, not just a judge-model guess. Small,
-  cosmetic, doesn't block anything — it's the template's own example text,
-  not something a real drafted item inherited.
+- ~~**Ungrounded embellishment in `description-template.md`'s own worked
+  example (flagged Aug 27).**~~ -- **FIXED Sep 4, and the Aug 27 framing of it
+  was wrong on two counts.** The example included "matched to any swatch or
+  sample you bring in" and "we'll mix it while you shop", neither in
+  `fact-sheet.md`'s Services list.
+  **Correction 1: it was not "cosmetic".** The example sits three lines below
+  the template's own rule that any factual claim "must be traceable to
+  `fact-sheet.md`" (line 28-30), under a heading calling it "Example (clean,
+  no planted errors)", and is contradicted again by the tone rule at line 47.
+  The reference document violated its own rule while asserting it did not.
+  **Correction 2: a real drafted item DID inherit it.** `m7_evaluator_tool.py`'s
+  `main()` copies the example verbatim, and that smoke test is the only place
+  item1's text-side expected result is exercised. item1 is a *clean control*,
+  so it was carrying an unplanted flaw -- the text-side twin of Sep 3's Thread
+  1, and resolved the same way: correct the fixture, not the answer key.
+  **Fixed in both files, kept byte-identical** (verified programmatically, not
+  by eye). Claude found it and drafted the replacement wording; Gerard approved
+  the wording and it was applied to both.
+  **What the fix did NOT do: move either score.** Groundedness stayed 4.0,
+  relevance stayed 3.0. The warrant is direct inspection against the fact
+  sheet and the template's own rule -- not the numbers, which gave no evidence
+  either way. Anyone writing this up as "improved groundedness" would be
+  overclaiming.
+
+- **The judge's `reason` field is not a reliable guide to what to fix (Sep 4).
+  This is the one with a design consequence.** Across three runs of item1's
+  smoke test: Aug 27 flagged the two genuinely ungrounded claims; Sep 4 pre-fix
+  said "No clear factual errors relative to the context" and flagged nothing;
+  Sep 4 post-fix flagged two *different* phrases -- "we show you how we
+  custom-mix exterior paint right in store" and "held up outside" -- both of
+  which were present and unflagged in the previous two runs. Score was 4.0 in
+  all three, across two different texts.
+  **Stronger than the cross-run drift: one run contradicts itself internally.**
+  The Sep 4 post-fix reason calls the copy "implying an in-store service
+  consistent with the listed 'Custom paint mixing'" and then lists "we show you
+  how we custom-mix exterior paint right in store" as content "not explicitly
+  in the fact sheet". Same clause, endorsed and flagged in one paragraph. That
+  instance needs no cross-run comparison to stand up, and is the version worth
+  citing.
+  **Consequence for the orchestrator instructions text (item 4 above): branch
+  on `passed`, not on `reason`.** "Redraft when a check fails" is safe.
+  "Revise according to the evaluator's reasoning" is not -- an agent following
+  it today would strip grounded copy the judge endorsed one sentence earlier.
+  **Same reliability class as the `notes`-vs-boolean entry above**, different
+  tool. Worth noting the CV side already found this failure, better evidenced,
+  and *solved* it by moving judgment out of the model into WCAG arithmetic.
+  Finding it a second time in a weaker form does not double its value, and for
+  the portfolio the CV story is the stronger one to tell.
+
+- **`RelevanceEvaluator` comments on grounding it cannot see (Sep 4).** Its
+  Sep 4 reason says the draft "isn't grounded in any specific 'store fact
+  sheet' details" -- about a draft that names the store and quotes the exact
+  hours. It is never handed the fact sheet (no `context` parameter), so it is
+  delivering a verdict it structurally cannot check. Probable cause: the query
+  redesigned Aug 27 itself contains "grounded in the store's fact sheet", so
+  the relevance judge treats grounding as part of its remit. Untested. Not
+  chased, since testing a query variant is a second variable.
+
+- **item1's at-home vs in-store topic tension, deliberately not fixed (Sep 4).**
+  The item topic is "How to Mix Exterior Paint Colors at Home"; the copy sells
+  an in-store service. Both evaluators docked a point for exactly this, in both
+  Sep 4 runs -- it, not the embellishments, is what is actually costing the
+  scores. Left byte-for-byte alone while the embellishments were removed, so
+  the two changes stay attributable. Fixing it means either rewriting the copy
+  or changing the item topic in `content-items-plan.md`, and the second is an
+  answer-key change.
+
+- **`m7_evaluator_tool.py` runs Azure calls at import (noted Sep 4).**
+  `build_judge_config()` is called at module scope, so importing the module
+  shells out to Azure CLI for endpoint and key. That happens whenever anything
+  imports it -- including `m7_orchestrator.py` at tool-registration time, and
+  any future unit test. It works today; it means the module cannot be imported
+  without Azure auth. Not fixed, not blocking.
+
+- **The orchestrator paraphrases tool output rather than quoting it (Sep 4,
+  first run).** item3's summary quoted the real contrast figures; item1's
+  read as tidy prose ("Brand styling matches the approved Riverside Hardware
+  & Supply look") rather than the tool's actual notes. Same faithfulness
+  class as the `notes`-vs-boolean and `reason` entries above, but at the
+  layer a human actually reads. Matters most if any of this output is ever
+  shown on the portfolio site as evidence of what the audit found.
+
+- **Low-confidence OCR text is quoted in notes without being marked as such
+  (Sep 4).** `m7_legibility_check.py` reported item3's headline as "Tool
+  Rental 101 what tye Offer"; `build.py` line 156 renders "Tool Rental 101:
+  What We Offer". Genuine Read output at 0.32 minimum confidence, not
+  confabulation -- and corroborating, since the garbling is the illegibility
+  showing itself. But it reads as a possible hallucination to anyone who has
+  not seen the confidence number. A confidence tag on transcriptions below
+  roughly 0.5 would make the notes self-explaining. Small.
+
+- **`description-template.md` is not in the drafting loop (Sep 4).** The
+  orchestrator drafts from its instructions alone; nothing supplies the
+  title/description format, and nothing checks compliance -- `evaluate_draft`
+  grades groundedness and relevance, not shape. Caught because item2's first
+  run title dropped the required " - Riverside Hardware & Supply" suffix.
+  Not a defect in any tool; a gap the instructions text (item 4) has to close
+  deliberately, or the template stays decorative.
 
 - **Two contrast margins recorded, deliberately not fixed (Sep 3).**
   (1) item2's title clears the 3:1 bar by 0.032 (3.032:1), and item5's badge

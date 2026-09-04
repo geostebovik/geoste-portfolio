@@ -3131,19 +3131,221 @@ colors before it judged anything; `pyflakes` confirmed the surgery left no
 dangling references; the Pillow-independence claim was proven by removing
 Pillow.
 
-**Next action: the orchestrator. Both tools are done.**
+---
 
-1. **`evaluate_draft()` tool wrapper.** NOTE, corrected today: the function
-   already exists and works (`m7_evaluator_tool.py` line 45, verified live
-   Aug 27) -- `m7-orientation.md` wrongly said "not done yet". Missing is the
-   tool-shaped version: `json.dumps(...)` return, plus a reST docstring with
-   `:param:`/`:return:`. That docstring IS the tool schema the orchestrator
-   reads; the function currently has none.
-2. **Orchestrator instructions text** -- when to draft, when to call each
-   tool, what to do with a failing result (redraft vs. flag for review).
-3. **Wire it together** -- `AgentsClient` + `ToolSet` +
-   `enable_auto_function_calls`, then all five `content-items-plan.md` items
-   end to end against the expected-results table.
-4. Deferred to end of day: the `STATUS.md` restructure -- `## Next action` has
-   absorbed ~1,300 lines of session log and the `## Session --` headings stop
-   at Aug 20.
+**Session — September 4, 2026.**
+
+**The session-start checklist paid for itself immediately, and the git
+section was accurate for the first time in three handoffs.** Both folders
+verified genuinely readable rather than assumed (file *contents* returned,
+not just directory names -- the quiet failure mode the checklist warns
+about). `git status`/`git log` read fresh through
+`GIT_OPTIONAL_LOCKS=0 git --no-optional-locks`: clean, `main` in sync at
+`6484c62`, working tree matching HEAD. **Writing the handoff's git section
+after the day's final commit worked** -- that fix, added to the
+end-of-session checklist Sep 3, is now evidenced rather than hoped for.
+
+**Todoist punch list was unreadable for the first ~40 minutes.** Five
+attempts returned 502. Gerard confirmed Todoist itself was up in Chrome,
+which localised it: the errors carried `zone: api.anthropic.com` and named
+the *origin* as failing, so the break was in the connector path, not
+Todoist. It recovered on the fifth attempt. Worth recording as a known
+failure mode rather than a mystery -- the checklist item is not
+self-healing if the connector is down, and the session ran two hours on
+`m7-orientation.md` as sole source of truth.
+
+**`evaluate_draft()` is tool-shaped, verified live (Claude wrote it, Gerard
+ran it).** Now `-> str` ending in `json.dumps(...)`, with a reST docstring
+that is the tool schema, not documentation. A `_flatten()` helper reduces
+each evaluator's output to score / passed / threshold / reason / status.
+**The payload is why.** The SDK's raw return carries `_properties` holding
+the full judge prompt and completion -- for groundedness that embeds
+`fact-sheet.md` verbatim. SDK-reported `prompt_tokens`: 2,026 + 1,848. So
+returning it raw would push roughly 3,900 tokens per call into the agent
+thread to deliver about 1 KB of signal, re-feeding the orchestrator its own
+ground truth every time it evaluates a draft. Score, `passed` and
+`threshold` are the SDK's own values -- **no threshold is invented in this
+file**, correcting a claim Claude made earlier in the session from memory
+and had to retract. Non-finite scores coerce to `null`, because
+`json.dumps(float('nan'))` emits a bare `NaN` that is not valid JSON and
+would reach the agent unparseable. `status` is carried so a failed check and
+a failed judge call can be told apart. `all_passed` is derived here, not
+from the SDK, and is marked as such in the code.
+
+**Implemented in place, not as the separate wrapper `agent-service-primer.md`
+described.** `audit_thumbnail()` had already departed from that plan when it
+was built Sep 3, and the Todoist punch-list item described the in-place
+shape too -- the primer was the lone outlier and has been corrected.
+
+**`description-template.md`'s worked example was a defective clean control,
+not a cosmetic nit.** Claude found it and drafted the replacement; Gerard
+approved the wording; applied to the template and to `m7_evaluator_tool.py`'s
+`main()`, which copies it verbatim, and the two were verified byte-identical
+programmatically rather than by eye. The Aug 27 backlog framing was wrong on
+two counts, both now corrected in `m7-orientation.md`: the example violates
+the template's own traceability rule three lines above it while headed
+"Example (clean, no planted errors)"; and a real drafted item *did* inherit
+it, since `main()` is the only place item1's text-side expected result is
+exercised. Same fixture-not-answer-key resolution as Sep 3's Thread 1.
+**The fix moved neither score** (groundedness 4.0, relevance 3.0, unchanged).
+The warrant is inspection against the fact sheet, not the numbers.
+
+**Finding with a design consequence: the judge's `reason` is not a reliable
+guide to what to fix.** Three runs of item1's smoke test produced three
+different justifications for the same 4.0 across two different texts, and the
+Sep 4 post-fix run **contradicts itself inside one paragraph** -- calling the
+copy "consistent with the listed 'Custom paint mixing'" and then listing that
+same clause as "not explicitly in the fact sheet". Consequence, recorded
+against the still-unwritten orchestrator instructions: **branch on `passed`,
+not on `reason`.** "Redraft when a check fails" is safe; "revise according to
+the evaluator's reasoning" would have the agent strip grounded copy. Full
+entry, plus a related note that `RelevanceEvaluator` comments on grounding it
+is never given the context to check, in `m7-orientation.md`'s Backlog.
+
+**Perspective on the above, recorded deliberately.** Gerard's response to the
+day's findings was "and so what?", and it was the right question. The CV side
+already found this failure class, better evidenced, and *solved* it Sep 3 by
+moving judgment out of the model into WCAG arithmetic. Finding it again in a
+weaker form on the text side is worth one backlog entry and one line in the
+instructions text -- not a thread. Claude generated substantially more
+analysis than the day's task warranted, critiquing its own reasoning
+throughout while never asking whether the work was worth doing. Logged
+because the pattern cost most of a working session, and the milestone's
+largest remaining piece is still unbuilt.
+
+**Orchestrator scaffolded (Claude wrote `m7_orchestrator.py`), committed
+before its first run.** Deliberate, same reasoning as `b8d100a`: the run's
+result is then attributable to a known commit. It builds `AgentsClient`
+against the *project* endpoint with `DefaultAzureCredential`, registers both
+tools via `ToolSet` + `enable_auto_function_calls`, and runs each of the five
+`content-items-plan.md` items **on its own thread** -- deliberate, so one
+item's draft and tool results cannot sit in context while the next is
+drafted, the contamination the Sep 2 audit split removed. It reports which
+tools the agent actually called, per item, against that item's expected row.
+`INSTRUCTIONS_V1` is a deliberate throwaway: it says to call both tools and
+says nothing about handling a failing result, because that gap is what the
+first run exists to observe. **The documented order (instructions, then
+wiring) was deliberately inverted** on the standing lesson that model
+behavior gets tested, not derived -- writing polished instructions first
+means tuning prose against imagination, which is the trap the legibility
+clause fell into for four sessions.
+
+**`agent-service-primer.md` had a wrong import path, caught before it cost
+anything.** It showed `from azure.ai.agents.tools import FunctionTool`; no
+such module exists, and both `FunctionTool` and `ToolSet` live in
+`azure.ai.agents.models`. Found by Claude introspecting the installed
+`azure-ai-agents` 1.1.0 package in a scratch container rather than on
+Gerard's machine, before `m7_orchestrator.py` was written. As written it was
+an immediate `ImportError`, sitting inside the primer's own warning about
+"looks similar, is actually a different SDK shape". Corrected in place, with
+the original left visible. Also verified the same way rather than recalled:
+`FunctionTool` takes a `Set` not a list; `create_agent()` accepts `toolset=`;
+`enable_auto_function_calls` defaults to `max_retry=10`, so a confused agent
+thrashes ten times before giving up.
+
+**Config resolved, with one instruction of Claude's corrected.** The project
+endpoint is the account's `services.ai.azure.com` host plus
+`/api/projects/<project>`, read off the Foundry portal's project Overview.
+Claude's step-2 instruction sent Gerard to
+`az cognitiveservices account show --query properties.endpoints`, which
+returns ~70 *account*-level endpoints and does not contain the project
+endpoint at all -- the portal was the only source that had it. Added to
+`.env` and `.env.example`. **Named `AIF_PROJECT_ENDPOINT`, on Gerard's
+call.** The rest of `.env` uses an `AIF_` prefix (`AIF_ACCOUNT`,
+`AIF_RESOURCE_GROUP`), so the bare `PROJECT_ENDPOINT` Claude took from the
+primer's snippet -- which is Microsoft's sample name, not this project's
+convention -- was inconsistent with the file it was going into. Gerard's
+first instinct was the right one and Claude's code overrode it without
+checking. Renamed across all seven occurrences in five files (code, both
+env files, primer sample, and today's entries here and in
+`m7-orientation.md`) before committing, rather than left as a known
+inconsistency. The first run above was made against the pre-rename name.
+
+**FIRST ORCHESTRATOR RUN: 15/15 ON THE FIRST ATTEMPT.** Claude wrote
+`m7_orchestrator.py`; Gerard cleared the config and ran it. All five
+`content-items-plan.md` items returned exactly their expected row -- both
+clean controls clean, item3 legibility only, item4 brand only, item5 info
+accuracy only. **Both tools were called on all five items, 10 for 10.**
+That is the bar `m7-orientation.md` item 5 set, met on the first live run.
+
+**The reST docstrings worked as tool schemas on the first try.**
+`evaluate_draft()` had no docstring at all this morning. Claude predicted a
+messy first run and named `tools called: NONE` as the likely failure mode;
+that never occurred once. Prediction wrong, in the useful direction, and
+logged as such. item3's agent output also quotes 1.24:1 and 2.97:1, matching
+`content-items-plan.md`'s contrast table exactly -- the deterministic
+legibility path survives intact through tool, agent and prose summary.
+
+**This is NOT a stability claim.** One run. `text_legible` is
+deterministic, but `brand_consistent` and `info_accurate` remain
+model-judged, and the Backlog's own arithmetic says a single clean pass
+bounds very little. The high-`RUNS` certification pass is still owed before
+any "stable" claim goes on the portfolio site.
+
+**Four observations for the instructions text (item 4), which is what the
+throwaway `INSTRUCTIONS_V1` was built to produce:**
+
+1. **Default behavior on a failing result is report-and-advise, never
+   redraft.** On item3 the agent volunteered "the thumbnail should be revised
+   to improve text contrast and readability" without being told to.
+2. **The observation is incomplete, and this is the important part.** All
+   three failures were *thumbnail* failures, which the agent structurally
+   cannot fix -- it cannot regenerate an image. `evaluate_draft` passed on
+   all five items, so there are **zero observations of the one case where
+   redrafting is even possible.** The two tools have asymmetric remediation
+   and only the remediless half has been seen. Next probe: force a text
+   failure and watch what it does.
+3. **`description-template.md` is not in the loop at all.** item2's title
+   came back as bare "Seasonal Maintenance Checklist for Homeowners", missing
+   the ` - Riverside Hardware & Supply` suffix the template's title format
+   requires. Nothing caught it: `evaluate_draft` checks groundedness and
+   relevance, not format compliance. The template is currently decorative,
+   and the instructions text has to carry that format or nothing enforces it.
+4. **The agent paraphrases tool output into prose, and smooths it.** item3
+   quoted the real contrast figures; item1's notes read as tidy summary
+   ("Brand styling matches the approved Riverside Hardware & Supply look").
+   Same faithfulness risk as the `notes` and `reason` entries, now at the
+   orchestrator layer -- which is the layer a reader actually sees.
+
+**One OCR string checked rather than explained away.** Gerard noticed
+item3's notes quoting "Tool Rental 101 what tye Offer" and asked whether it
+was confabulated. Verified against `build.py` line 156, which renders "Tool
+Rental 101: What We Offer" -- so Read genuinely returned the mangled string,
+at the 0.32 minimum confidence already recorded for that element against
+0.93-0.99 elsewhere. **Not noise to clean up: the garbling is the
+illegibility showing its face**, a third independent signal agreeing with
+the contrast arithmetic and the confidence score. A clean transcription
+would have been the surprising result.
+
+**Retraction logged the same day it was made.** Claude asserted that the
+project instructions were stale for calling the Foundry account
+`aif-dev-wus-01` when the endpoints all read `aif-iip-dev-wus-01`. Wrong:
+line 1673 of this file already records "custom subdomain
+`aif-iip-dev-wus-01`", resource name and custom subdomain being different
+things, and Gerard's `az ... --name aif-dev-wus-01` call succeeding proves
+the name. A discrepancy asserted from partial evidence without checking the
+document -- standing lesson 7, third instance in one day, all three by
+Claude.
+
+**Next action: write the orchestrator instructions text (item 4).**
+
+1. **Write the real instructions text**, carrying the four observations
+   above and the constraint established earlier today: **branch on `passed`,
+   not on `reason`.** Gerard owns this wording. It is the last piece of M7
+   with genuine design content in it.
+2. **Decide the remediation asymmetry deliberately.** A failing
+   `evaluate_draft` can be answered by redrafting; a failing
+   `audit_thumbnail` cannot be answered by the agent at all. Those need
+   different instructions, and the second one needs a decision about what
+   "flag for review" concretely means as output.
+3. **Probe a forced text failure** before finalising the wording, so the
+   redraft path is written against observed behavior rather than assumed --
+   the same reasoning that produced this run.
+4. **Decide whether `description-template.md` enters the loop**, and if so
+   how: instructions text, a third tool, or accepting that format is
+   unchecked.
+5. **Owed before any public "stable" claim:** one high-`RUNS` pass on the
+   final configuration.
+6. **Still deferred: the `STATUS.md` restructure.** `## Next action` has now
+   absorbed ~1,600 lines and the `## Session --` headings still stop at
+   Aug 20.
