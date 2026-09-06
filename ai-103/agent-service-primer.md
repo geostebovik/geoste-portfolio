@@ -120,7 +120,7 @@ orchestrates draft → check → decide, via `ToolSet`/`FunctionTool` with auto
 function-calling enabled. Chosen deliberately over the simpler fixed-pipeline
 alternative (a script calling each step in order), accepting the added
 complexity, for closer alignment with AI-103's agentic exam domain and for
-career relevance. Logged in `STATUS.md`'s Next action section too.
+career relevance. Logged in `STATUS.md`'s Aug 21 session entry too.
 
 ## How FunctionTool actually reads your function (added Aug 28, ahead of the CV-audit build)
 

@@ -72,6 +72,14 @@ here already documents as done. Added after the `brand_consistent` regression
 task sat open in Todoist a full day past `m7-orientation.md` already recording
 it as resolved (Sep 1 resolution, caught and fixed Sep 2).
 
+**Log the session under its own `### Session — <date>` heading in `STATUS.md`,
+and *replace* `## Current next action` rather than appending to it** (added Sep
+6). This is the rule the Sep 6 restructure exists to enforce: `## Next action`
+had quietly absorbed ~1,650 lines of session log across Aug 21 – Sep 4 because
+each session appended its notes there instead of opening a heading, and the
+`## Session —` headings stopped dead at Aug 20. It cost nothing per session and
+a full cleanup session to undo.
+
 **Write the next handoff's git-state section after the day's final commit, not
 before** (added Sep 3). Both recorded staleness incidents trace to that one
 ordering mistake — see session-start item 3. A handoff that describes files as
@@ -500,6 +508,26 @@ Nothing here blocks anything else. Pulled together from scattered
 add new items here going forward instead of leaving them buried in a
 session's narrative paragraph in `STATUS.md`.
 
+**Repo / security hygiene:**
+
+- **Public-repo history purge — done, but never logged, and one tail end is
+  still open (recovered 2026-09-06).** On Aug 20 an unrelated client folder
+  (`youtube-channel-consulting/`, incl. a 28 KB internal status doc) was found
+  tracked in the **public** `geostebovik/geoste-portfolio` repo's git history.
+  HEAD was cleaned Aug 20; the Aug 21 prompt records the `git filter-repo`
+  rewrite + force-push as **done**. Verified locally 2026-09-06: zero commits
+  under any ref touch that path, which is what a successful rewrite looks like.
+  **None of this appears anywhere in `STATUS.md`** — the only record was the
+  Aug 21 session prompt, which was queued for deletion. Logged now so it stops
+  depending on a disposable handoff doc.
+  **Still open:** the **GitHub Support request to purge cached dangling
+  commits** left behind by the rewrite was *drafted Aug 21 and never
+  submitted* (restated Aug 26, then dropped out of every later doc). Until
+  GitHub garbage-collects them, the old blobs can still be reachable by direct
+  commit SHA on the remote, even though no branch or tag points at them.
+  Optional, blocks nothing, but it is the one part of this that a local check
+  cannot confirm — **verify against the remote, not the local clone.**
+
 **M7 / current build:**
 
 - **Harness resolution: variance is a symptom of an undercalibrated
@@ -807,10 +835,25 @@ for it exists to tune. Kept as the record of what was ruled out and how):**
 
 | Question | Doc |
 |---|---|
-| What happened last session, and why? | `STATUS.md` |
+| What does the system look like right now, and where do I pick up? | **this file** |
+| What is the single next thing to do? | `STATUS.md`'s `## Current next action` (one item; the *ordered* plan is this file's "What's actually left to build") |
+| What happened last session, and why? | `STATUS.md`'s `## Session log` — newest first |
+| What happened during M2–M6 (Jul 27 – Aug 7)? | `STATUS-archive-phase1.md` |
 | What's the full multi-phase plan / business context behind M7? | `agent-system-project-plan.md` |
 | How does a Foundry concept (agent/thread/tool/FunctionTool) actually work? | `agent-service-primer.md` |
 | What's the ground truth for Riverside Hardware content? | `iip-docs/m7-riverside-hardware/fact-sheet.md` |
 | What result should each test item produce? | `iip-docs/m7-riverside-hardware/content-items-plan.md` |
+| What format must a drafted title/description follow? | `iip-docs/m7-riverside-hardware/description-template.md` |
+| Have I hit this Python shape before? | `python-patterns.md` |
 | What CLI command do I need for X? | `iip-cli-runbook.md` |
-| What does the system look like right now, and where do I pick up? | **this file** |
+
+**Where a lesson goes — four buckets, no overlap.** Checked 2026-09-06; the
+split holds, but it had never been written down in one place, so state it
+here and route new lessons on the way in rather than sorting them later.
+
+| Kind of lesson | Doc |
+|---|---|
+| General Python language patterns | `python-patterns.md` |
+| Azure/SDK/infra gotchas — client shapes, service behavior, venv, paths | `STATUS.md`'s `## Key Lessons` |
+| A CLI command or an `az` quirk | `iip-cli-runbook.md` |
+| How to *work* — method, measurement, verification discipline | this file's "Standing lessons worth not relearning" |
