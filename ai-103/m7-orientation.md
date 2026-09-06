@@ -121,6 +121,16 @@ correct.
   belongs to the dated session prompt) and built a recommendation on top of
   it. Same failure class the CV-audit exists to catch: an assertion past what
   the source supports, delivered in the register of something the source says.
+- **Read each new finding against "what does this change?" before spending a
+  thread on it.** A finding worth one backlog line gets one backlog line.
+  Added Sep 6, promoted out of the Sep 4 session prompt before that prompt was
+  replaced. Sep 2, 3 and 4 all went into characterising tools that were
+  already passing their answer key, while the orchestrator — the
+  largest-weighted AI-103 domain and the entire reason M7 exists — sat
+  unbuilt. It then took one afternoon. The asymmetry is structural: a
+  model-judged check can always be probed one run further, and probing is
+  more interesting than building, so the drift is toward analysis and away
+  from the thing being analysed.
 
 ## Where M7 sits in the whole picture
 
@@ -474,6 +484,15 @@ CV-audit run should score exactly as documented there — that table is what
    on `reason`.** See the judge-reason backlog entry below. An instruction to
    "revise according to the evaluator's reasoning" would have the agent strip
    grounded copy.
+   **Three further sub-steps are NOT restated here — read `STATUS.md`'s
+   `## Current next action` before starting item 4.** It carries the
+   remediation asymmetry decision, the `description-template.md` question,
+   and one precondition that gates the writing: **probe a forced text
+   failure first.** `evaluate_draft` passed on all five items in the Sep 4
+   run, so there are currently zero observations of the redraft-capable
+   case — the half the instructions text most needs to get right. Pointer,
+   not a copy, added Sep 6: those steps get revised as work proceeds and
+   must have exactly one home.
 5. ~~**Wire it together**~~ — **DONE Sep 4. First run returned 15/15.**
    All five items matched their expected row exactly; both tools were called
    on every item. The reST docstrings functioned as tool schemas on the first

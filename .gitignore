@@ -25,6 +25,13 @@ infrastructure/prod.bicepparam
 # Root-level screenshots folder
 screenshots/
 
+# Root-level folder the Claude desktop app drops delivered files into
+# (added 2026-09-06). Appeared untracked at the root of this PUBLIC repo,
+# which is the same structural setup as the Aug 20 incident: a file arrives
+# in the repo root from an out-of-band process and gets swept in by a
+# `git add -A`. Contents are working deliverables, not portfolio content.
+Claude outputs/
+
 # Relocated Aug 20 -- unrelated client (YouTube Channel Consulting) work,
 # moved out to keep it off a public-facing portfolio repo. Real content now
 # lives at C:\Users\gerar\OneDrive\Documents\Data\IT Training\ycc-project.
