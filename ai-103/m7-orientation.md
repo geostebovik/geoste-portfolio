@@ -121,6 +121,18 @@ correct.
   belongs to the dated session prompt) and built a recommendation on top of
   it. Same failure class the CV-audit exists to catch: an assertion past what
   the source supports, delivered in the register of something the source says.
+- **Read what a scheduled task wrote before letting it stand.** Added Sep 7,
+  after the Friday check-in's first run. It did good work — it found that
+  "What's actually left to build" was reading as empty while two real next
+  items sat in the Backlog, and promoted them — and in the same commit it
+  added a dated weekly-log section to a file whose own header says it is a
+  current-state snapshot and not a log, and recorded "the schedule needs
+  checking" about a run that had been fired manually on purpose. Both were
+  stated with the same confidence as the correct findings. **An unattended
+  task cannot know what it was not told, and it commits anyway.** Treat its
+  output as a hypothesis and diff it before it is pushed — the same standing
+  lesson that applies to Claude's assertions, arriving from a scheduled task
+  instead.
 - **Check that the actor can see what the grader sees.** Added Sep 7, and it
   cost a whole instructions version. `INSTRUCTIONS_V2` told the orchestrator to
   ground every claim in `fact-sheet.md` while the fact sheet reached only the
@@ -597,25 +609,6 @@ CV-audit run should score exactly as documented there — that table is what
    the right number. **Certifying a path that has never run certifies nothing**,
    which is why 6 comes first.
 
-## Week check-in — 2026-09-07
-
-Reconciled against the Todoist punch list, not self-report. **The week's list
-was cleared in full, and the `[stretch]` item went with it** — "M7: Draft
-orchestrator instructions text" (added Aug 31, completed Sep 7) was labelled
-stretch precisely because it was contingent on the two core items landing
-first. Both did (fixture loop Sep 2, `evaluate_draft` wrapper Sep 4), and the
-stretch item landed too. **Read that as pace running ahead of plan**, and size
-next Monday's list accordingly — with the caveat that checking the label
-against the ordered build list above puts that item at **#4, a core build
-step**, not extra scope. So the week did not do more than the plan; it did the
-plan faster, and reached the largest-weighted AI-103 domain a week early.
-
-Three items from that week's list closed against the doc as it already stood
-(items 1–5 were all recorded done before this check-in ran), so the sync work
-here was re-derivation rather than correction: items 6 and 7 above now carry
-the top of the list, which until today lived only in the Backlog and
-`STATUS.md`.
-
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
 Nothing here blocks anything else. Pulled together from scattered
@@ -702,15 +695,23 @@ session's narrative paragraph in `STATUS.md`.
   success. It did run on the local machine with both folders connected, edited
   this file, and committed — and "commit and push before closing" is now an
   explicit final step in the task, as this entry asked.
-  **Two things it surfaced that are still open.** (1) It **fired on a Monday**,
-  not a Friday — and on the same day the Monday planning session had already
-  closed the old punch list (21:12Z) and opened the next one (21:13Z), so it
-  reviewed a week that had already been reconciled minutes earlier. The
-  schedule needs checking. (2) It runs **unattended**, so steps 2–4 of its own
-  brief — ask how the week went, what slipped, how it felt, which milestone —
-  have no one to answer them. Everything in this entry and the check-in section
-  above is therefore derived from Todoist and git, and **the Reflection field in
-  that week's Notion row is Gerard's to fill in**, not the task's to invent.
+  **One thing its first run surfaced, still open.** Its brief's steps 2–4 —
+  ask how the week went, what slipped, how it felt, which milestone — assume
+  Gerard is present to answer. On a manual fire he was not, so the run derived
+  everything from Todoist and git and left the Notion row's Reflection field
+  as an explicit placeholder rather than inventing one. That was the right
+  call; it also means the task needs to detect the difference. **Two prompt
+  changes owed:** it must not add dated sections to this file (it added one on
+  the first run — this doc is a current-state snapshot, and a weekly log
+  section here is how `STATUS.md`'s `## Next action` absorbed 1,650 lines
+  before the Sep 6 restructure), and it must say when it was fired manually
+  rather than on schedule, so it does not record schedule conclusions from a
+  test.
+  **Correction, logged 2026-09-07:** that first run wrote "it fired on a
+  Monday, not a Friday … the schedule needs checking" into this file. The
+  schedule is fine — Gerard test-fired it deliberately. A confident wrong
+  conclusion from an unattended task, committed to a doc: standing lesson 7,
+  this time not from Claude.
 
 - **Harness resolution: variance is a symptom of an undercalibrated
   fixture, not a flat tax on every measurement (established Sep 2, twice
