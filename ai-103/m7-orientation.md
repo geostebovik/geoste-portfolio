@@ -121,6 +121,25 @@ correct.
   belongs to the dated session prompt) and built a recommendation on top of
   it. Same failure class the CV-audit exists to catch: an assertion past what
   the source supports, delivered in the register of something the source says.
+- **Check that the actor can see what the grader sees.** Added Sep 7, and it
+  cost a whole instructions version. `INSTRUCTIONS_V2` told the orchestrator to
+  ground every claim in `fact-sheet.md` while the fact sheet reached only the
+  judge and the CV audit — an open-book exam where the grader has the book and
+  the student does not. The agent behaved rationally: it removed everything it
+  could not verify until the copy said nothing, and one item declined to act
+  and named the missing document. The symptom looked like four separate
+  problems (groundedness stuck, relevance collapsed, redrafts exhausted, one
+  item refusing) and was one cause. **Before instructing an agent to comply
+  with a source, confirm the agent has the source.**
+- **An instruction must not contradict the tool's own documented contract.**
+  Added Sep 7. `INSTRUCTIONS_V2` told the agent to pass a bare topic as
+  `evaluate_draft`'s `query`; that function's docstring says in as many words
+  not to, and predicts the exact failure that followed. The clause was written
+  to remove a real variance, and standardised on the one value documented as
+  broken. **Read the tool before writing the instruction that calls it** — and
+  note the sting in the tail: the warning was in the docstring but truncated
+  out of the schema, so the agent had never seen it either. Neither party was
+  reading the contract.
 - **Read each new finding against "what does this change?" before spending a
   thread on it.** A finding worth one backlog line gets one backlog line.
   Added Sep 6, promoted out of the Sep 4 session prompt before that prompt was
@@ -155,12 +174,17 @@ nothing more.
 
 ```
                     Orchestrator agent (Foundry Agent Service)
-                    BUILT + RUN Sep 4 -- m7_orchestrator.py registers both
-                    tools via ToolSet + enable_auto_function_calls.
-                    FIRST RUN: 15/15 cells correct across all five items,
-                    both tools called 10/10. One run, not a stability claim.
-                    Instructions text is still INSTRUCTIONS_V1, a
-                    deliberate throwaway -- the real one is what's left.
+                    BUILT + RUN Sep 4. INSTRUCTIONS TEXT DONE Sep 7 --
+                    m7_orchestrator.py registers THREE tools via ToolSet +
+                    enable_auto_function_calls, temperature pinned to 0
+                    (the Agents SDK has no `seed` parameter at all, so runs
+                    are narrowed, never repeatable).
+                    INSTRUCTIONS_V3: 15/15 on two consecutive runs, 5/5 text
+                    checks, zero redrafts, all three tools called every item.
+                    NOT a stability claim -- the high-RUNS pass is still owed,
+                    and the redraft path has ZERO observations.
+                    V1 (throwaway) and V2 (regressed to 12/15) are kept in
+                    the file; provenance records which one each run used.
                                       |
                 +---------------------+----------------------+
                 |                                              |
@@ -195,11 +219,22 @@ nothing more.
                                                      over-claim fixed Sep 3;
                                                      text_legible moved out of
                                                      the model entirely Sep 3.
+                    Tool 3: get_fact_sheet (m7_fact_sheet_tool.py)
+                    ADDED Sep 7. Returns fact-sheet.md verbatim to the
+                    AGENT. Until then the fact sheet reached the judge and
+                    the CV audit but never the drafter, while the
+                    instructions told it to ground everything in that
+                    document -- an open-book exam where only the grader had
+                    the book. That is what INSTRUCTIONS_V2's 12/15 was.
+                    Whole file, deliberately: the judge grades against the
+                    whole file, and a curated subset would reintroduce the
+                    same drafter/grader mismatch in miniature.
 ```
 
-Both tools check a different *kind* of output against the same ground
-truth — `fact-sheet.md` — the same role the loan agreement PDF played for
-M5's RAG pipeline. `content-items-plan.md` is the answer key: 5 test items
+The two checking tools each check a different *kind* of output against the same
+ground truth — `fact-sheet.md` — the same role the loan agreement PDF played for
+M5's RAG pipeline. Since Sep 7 the drafter is measured against a document it can
+also read. `content-items-plan.md` is the answer key: 5 test items
 (2 clean controls, 3 each carrying exactly one planted flaw) that a finished
 CV-audit run should score exactly as documented there — that table is what
 "done and working" gets measured against, not a vibe check.
@@ -470,29 +505,51 @@ CV-audit run should score exactly as documented there — that table is what
    documentation here -- it IS the tool schema the orchestrator reads to
    decide when to call this tool**, and `evaluate_draft()` currently has no
    docstring at all.
-4. **Orchestrator instructions text** — the actual job description telling
-   the agent when to draft, when to call each tool, and what to do with a
-   failing result (redraft? flag for review?). **Still to write.** A
-   deliberately minimal `INSTRUCTIONS_V1` now exists in
-   `m7_orchestrator.py`, but it is a throwaway, not a draft of this: it says
-   to call both tools and says *nothing* about handling a failing result,
-   because what the agent does in that gap is what the first run exists to
-   observe. Decided Sep 4 to invert the documented order -- run first, then
-   write this against observed behavior -- on the standing lesson that model
-   behavior gets tested, not derived.
-   **One constraint is already established (Sep 4): branch on `passed`, not
-   on `reason`.** See the judge-reason backlog entry below. An instruction to
-   "revise according to the evaluator's reasoning" would have the agent strip
-   grounded copy.
-   **Three further sub-steps are NOT restated here — read `STATUS.md`'s
-   `## Current next action` before starting item 4.** It carries the
-   remediation asymmetry decision, the `description-template.md` question,
-   and one precondition that gates the writing: **probe a forced text
-   failure first.** `evaluate_draft` passed on all five items in the Sep 4
-   run, so there are currently zero observations of the redraft-capable
-   case — the half the instructions text most needs to get right. Pointer,
-   not a copy, added Sep 6: those steps get revised as work proceeds and
-   must have exactly one home.
+4. ~~**Orchestrator instructions text**~~ — **DONE Sep 7 as
+   `INSTRUCTIONS_V3`.** Claude drafted; Gerard owned the wording, made every
+   decision below, and wrote the redraft clause's operative fix. Three
+   versions, and the middle one regressed — the arc is the finding.
+
+   **V1** was the deliberate throwaway: call both tools, silent on failure.
+   It scored 15/15 on the audit and never exercised a redraft, because
+   nothing failed on the text side that morning.
+
+   **V2 regressed to 12/15 on two bugs, both Claude's.** (a) It instructed
+   the agent to ground every claim in `fact-sheet.md` — a document the
+   orchestrator had never been given, since the fact sheet reaches the judge
+   and the CV audit only. The agent stripped every unverifiable specific
+   until the copy was empty, groundedness sat at 2.0, relevance fell 4.0 →
+   2.0 for being uninformative, and item3 refused to act, correctly naming
+   the missing fact sheet. The redraft clause ("remove, and do not add detail
+   to compensate") could only subtract with no source to add from.
+   (b) The `query` clause told the agent to pass a bare topic, which
+   `evaluate_draft`'s own docstring explicitly forbids — "a bare title scores
+   as an unanswered question" — written to close a variance and standardised
+   on the one broken value.
+
+   **V3 fixed both and scored 15/15 twice, 5/5 text checks, zero redrafts.**
+   `get_fact_sheet()` is a third tool rather than inlined text — **Gerard's
+   call**, on his standing preference for the tool-shaped option, and the
+   better fit for AI-103's largest domain. The redraft clause now substitutes
+   rather than only subtracts (**Gerard's wording**). The `query` clause uses
+   the exact sentence the tool's docstring specifies — still zero variance,
+   now the correct constant.
+
+   **The four Sep 4 observations, as V3 answers them.** Report-only is the
+   default and every part of remediation is instructed (observation 1, as
+   corrected Sep 7 — the agent advises on passes, not failures). Redrafting
+   is capped at two and stops on pass (observation 2, still unobserved — see
+   Backlog). `description-template.md` is enforced in the instructions rather
+   than by a fourth tool (observation 3), and every CTA now carries real
+   hours or the real phone number. Tool output must be quoted exactly,
+   garbled OCR included (observation 4) — confirmed working: the Sep 7 runs
+   quote 1.24:1 and "Tool Rental 101 what tye Offer" verbatim.
+
+   **What is NOT settled by this item being done:** the redraft path has zero
+   observations, the certification pass is unrun, and the orchestrator's model
+   was never chosen deliberately. All three are Backlog entries below, and the
+   first is `STATUS.md`'s current next action.
+
 5. ~~**Wire it together**~~ — **DONE Sep 4. First run returned 15/15.**
    All five items matched their expected row exactly; both tools were called
    on every item. The reST docstrings functioned as tool schemas on the first
@@ -548,6 +605,61 @@ session's narrative paragraph in `STATUS.md`.
   cannot confirm — **verify against the remote, not the local clone.**
 
 **M7 / current build:**
+
+- **The redraft path has ZERO observations (Sep 7).** `INSTRUCTIONS_V3`'s
+  remediation clauses — cap of two, "replace unsupported claims with supported
+  ones", stop-on-pass — have never run: both V3 runs passed every item on the
+  first draft. Same gap Sep 4 recorded, from the opposite direction. Forcing a
+  failure needs a topic `fact-sheet.md` cannot support, which is a
+  `content-items-plan.md` change and therefore a plan decision, not just a run
+  — the fixture-vs-answer-key distinction from Sep 3's Thread 1. **This is the
+  current next action.**
+- **The redraft cap of 2 was set on judgement, not evidence (Sep 7).** Gerard's
+  call, deliberately, with 10 (the `enable_auto_function_calls` default) ruled
+  out as uncalled-for. The run record now counts `evaluate_draft` calls and
+  redrafts per item, so the certification pass can replace the judgement with a
+  number: if the second attempt is never used, drop to 1; if items routinely
+  exhaust both and still fail, 3 is arguable.
+- **The orchestrator's model was never chosen (Sep 7).** `gpt-5-4` entered in
+  `8cb92aa` — the commit where Claude wrote `m7_orchestrator.py` — unremarked
+  and undiscussed. Every tool-level result beneath it (`audit_thumbnail`, every
+  fixture-stability run) was measured on `gpt-5-4-mini`, which M6 chose on
+  parity plus ~3x cost. Measured cost as of Sep 7: ~11.6K tokens per item, ~58K
+  per five-item run. **Do not decide this on token price alone** — before the
+  quota change `gpt-5-4-mini` was provisioned at 3 RPM against `gpt-5-4`'s 30,
+  and an argument for mini was made twice that morning without checking. Decide
+  it with a paired run once the wording is stable.
+- **The judge deployment is inherited, not chosen (Sep 7).** `evaluate_draft`
+  judges on `gpt-5-2`, hardcoded in `m7_evaluator_tool.py` and carried over from
+  M6, where the hardcoded judge deployment is already a backlog item. `gpt-5-2`
+  is the Content Understanding analyzer model. Nobody picked it for M7.
+- **The orchestrator's drafting cannot be made repeatable (Sep 7).**
+  `temperature=0` is pinned, but the Agents SDK exposes no `seed` at all —
+  verified by introspection, and unlike the chat-completions path the CV audit
+  uses, where `seed=42` works. So run-to-run comparison at this layer is
+  narrowed but never deterministic, which is why single runs are anecdotes here
+  and the multi-run probe is the only instrument.
+- **No multi-run harness exists for the orchestrator (Sep 7).**
+  `probe_fixture_stability.py` covers the CV audit only. The certification pass
+  needs its own, or an extension of that one.
+- **`gpt-5-4-mini` showed 46% rate limiting in the portal (Sep 7), unexplained.**
+  Mini is what `audit_thumbnail` runs on. Worth asking whether any of the
+  historical CV-audit variance — the 0/7, 6/7, 5/7, 3/7 spread on `text_legible`
+  before the check moved out of the model — had a rate-limit component. The old
+  evidence cannot answer it; a fresh probe at the raised quota could.
+- **`IIP-revised-project-plan.md` (July 15) is stale and is in the Claude
+  Project (Sep 7).** It describes M6 as "responsible-AI instrumentation", M7 as
+  a "light multi-agent pattern", and computer vision as explicitly out of scope
+  — all superseded. It is one of three docs a fresh cloud session reads as
+  current, and it is where the Monday punch-list task's wrong milestone list
+  came from. Fix by adding a dated superseded header naming what still holds
+  (phases 2/3, platform decision, naming) rather than by rewriting it.
+- **The Friday check-in task was moved to cloud and not reviewed (Sep 7).** Its
+  job is updating this file, which requires Gerard's machine; running in the
+  cloud without a device binding it cannot do that, and would likely summarise
+  in chat instead — which looks like success. Also needs "commit and push before
+  closing" as an explicit final step, now that the Sunday task reads these docs
+  from the repo's raw URLs.
 
 - **Harness resolution: variance is a symptom of an undercalibrated
   fixture, not a flat tax on every measurement (established Sep 2, twice
@@ -860,7 +972,8 @@ for it exists to tune. Kept as the record of what was ruled out and how):**
 | What happened during M2–M6 (Jul 27 – Aug 7)? | `STATUS-archive-phase1.md` |
 | What's the full multi-phase plan / business context behind M7? | `agent-system-project-plan.md` |
 | How does a Foundry concept (agent/thread/tool/FunctionTool) actually work? | `agent-service-primer.md` |
-| What's the ground truth for Riverside Hardware content? | `iip-docs/m7-riverside-hardware/fact-sheet.md` |
+| What's the ground truth for Riverside Hardware content? | `iip-docs/m7-riverside-hardware/fact-sheet.md` (the agent reads it at runtime via `scripts/m7_fact_sheet_tool.py`) |
+| What does the orchestrator instruct the agent to do, and why? | the wording is `INSTRUCTIONS_V3` in `scripts/m7_orchestrator.py` — the only source of truth; `m7-instructions-draft.md` holds the rationale and version history only |
 | What result should each test item produce? | `iip-docs/m7-riverside-hardware/content-items-plan.md` |
 | What format must a drafted title/description follow? | `iip-docs/m7-riverside-hardware/description-template.md` |
 | Have I hit this Python shape before? | `python-patterns.md` |

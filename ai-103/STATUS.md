@@ -53,43 +53,36 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 4, 2026 (last work session). Restructured
-2026-09-06 — documentation only, no project work.
+**Status as of:** September 7, 2026. M7's orchestrator instructions text
+(`INSTRUCTIONS_V3`) is written, wired and passing 15/15 on two consecutive
+runs. Restructured 2026-09-06 — documentation only, no project work.
 
 ---
 
 ## Current next action
 
-**Next action: write the orchestrator instructions text** — item 4 of
-`m7-orientation.md`'s "What's actually left to build, in order". Set Sep 4;
-that doc's Backlog and build list stay the authoritative plan, this is the
-one-line pointer to the current front of it.
+**Next action: observe the redraft path, then certify.** Item 4 of
+`m7-orientation.md`'s build list — the orchestrator instructions text — is
+**done as of 2026-09-07**. What remains before M7 can be called finished is
+evidence, not construction.
 
-1. **Write the real instructions text**, carrying the four observations from
-   the Sep 4 first orchestrator run (see the Sep 4 session entry, and
-   `m7-orientation.md`'s Backlog) and the constraint established Sep 4:
-   **branch on `passed`, not on `reason`.** Gerard owns this wording. It is the last piece of M7
-   with genuine design content in it.
-2. **Decide the remediation asymmetry deliberately.** A failing
-   `evaluate_draft` can be answered by redrafting; a failing
-   `audit_thumbnail` cannot be answered by the agent at all. Those need
-   different instructions, and the second one needs a decision about what
-   "flag for review" concretely means as output.
-3. **Probe a forced text failure** before finalising the wording, so the
-   redraft path is written against observed behavior rather than assumed --
-   the same reasoning that produced the Sep 4 run.
-4. **Decide whether `description-template.md` enters the loop**, and if so
-   how: instructions text, a third tool, or accepting that format is
-   unchecked.
-5. **Owed before any public "stable" claim:** one high-`RUNS` pass on the
-   final configuration.
-6. ~~**Still deferred: the `STATUS.md` restructure.**~~ **DONE 2026-09-06.**
-   `## Next action` had absorbed ~1,650 lines of session log and the
-   `## Session --` headings stopped at Aug 20; both fixed, plus the archive
-   split and the directional cross-references. See the header for the two
-   rules that keep it from happening again.
-
----
+1. **Get one clean observation of a failing `evaluate_draft`.** V3's
+   remediation clauses — the two-redraft cap, "replace unsupported claims with
+   supported ones", stop-on-pass — have **zero observations**. Both V3 runs
+   passed every item on the first draft. This is the same gap Sep 4 recorded,
+   arriving from the opposite direction: the drafting is now too reliable to
+   fail on its own. Forcing it means a topic the fact sheet cannot support,
+   which is a `content-items-plan.md` change, not just a run — treat it as a
+   plan decision, the same fixture-vs-answer-key distinction Sep 3's Thread 1
+   turned on.
+2. **Then the high-`RUNS` certification pass**, still owed before any public
+   "stable" claim. No harness exists for the orchestrator yet;
+   `probe_fixture_stability.py` covers the CV audit only. Budget from measured
+   numbers: ~11.6K tokens per item, ~58K per five-item run, so seven runs is
+   ~410K tokens and, at 30K TPM, at least fourteen minutes of pure throughput.
+3. **Decide the orchestrator's model deliberately** — see the Backlog entry.
+   It runs `gpt-5-4`; every tool-level result beneath it was measured on
+   `gpt-5-4-mini`.
 
 ## Milestones (Phase 1)
 
@@ -169,6 +162,39 @@ stray imports) live in `python-patterns.md` instead, so the two don't
 overlap — same split `python-patterns.md`'s own header already describes.
 Referenced from the Aug 7 and Aug 10 session notes as if it already
 existed; it didn't. Created Aug 11 to close that gap.
+
+### `FunctionTool` truncates every tool description at the first newline
+
+Found 2026-09-07 by introspecting the schema `FunctionTool` actually generates,
+after a new tool's description came back cut mid-sentence. It applies to the
+function description **and to every `:param:` description**, and it is silent —
+nothing errors, the tool still works, and the model simply receives a fragment.
+
+Before the fix, this is what the model saw for two tools that had been treated
+all along as carefully specified:
+
+```
+evaluate_draft
+  description: "Evaluate a drafted video title and description for Riverside Hardware &"
+  query:       "The drafting instruction the text was written to"
+  response:    "The drafted text to evaluate, title and"
+```
+
+One description ends on an ampersand. The `query` guidance — "Do not pass a
+bare topic: RelevanceEvaluator grades the response as an answer to this, and a
+bare title scores as an unanswered question" — **never reached the model at
+all**, which is why the agent improvised a different `query` per item on Sep 4
+and Sep 7 rather than following it.
+
+**The rule: the entire description must sit on one physical line, and so must
+each `:param:` description**, however that reads in source. Prose below the
+first line is for human readers only. Both tool modules now carry a note saying
+so, so the next person to reformat them does not silently undo it.
+
+**This qualifies the Sep 4 claim that "the reST docstrings functioned as tool
+schemas on the first attempt."** They functioned in the weak sense: the model
+received tool names and a truncated fragment, and got the calls right anyway.
+That is a weaker result than it was recorded as.
 
 ### `run_az()` — the subprocess wrapper every script's Azure calls go through
 
@@ -313,6 +339,193 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 7, 2026
+
+**M7's last piece of design work is built.** `INSTRUCTIONS_V3` is written,
+wired and passing 15/15 on two consecutive runs, with 5/5 items passing the
+text check. It took three versions to get there, and the second one regressed
+— that arc is the substance of the day and is recorded below rather than
+smoothed over. Claude drafted the instructions text; Gerard set the scope,
+made every decision flagged as his, and wrote the redraft clause's operative
+fix. Claude wrote all the code described here.
+
+**Both folders were unconnected at session start — the third recorded
+instance.** Gerard had attached them before opening the thread; `get_device_info`
+returned `connectedFolders: []` regardless. Session-start checklist item 1
+caught it in one call. **Folder attachment has now failed to survive into a
+session on Sep 3, Sep 4 and Sep 7; treat it as the expected state, not an
+anomaly.**
+
+**Run persistence added to `m7_orchestrator.py` — the day's enabling change.**
+Before it the script only printed, so the Sep 4 15/15 existed solely as console
+output quoted into this file: not re-readable, not diffable, and not usable as
+the artifact behind the certification pass still owed. Every run now writes
+`results/{timestamp}_orchestrator.json` carrying git HEAD, **whether the tree
+was dirty**, the model deployment, the instructions text verbatim, every tool
+call's arguments *and returned payload*, every message on the thread, token
+usage, and the rubric comparison parsed from `audit_thumbnail`'s JSON rather
+than the agent's prose. Claude proposed the design and Gerard approved it
+before any code was written.
+
+**SDK finding that shaped it: `run_steps` does not carry function tool
+outputs.** `RunStepFunctionToolCallDetails` (azure-ai-agents 1.1.0, verified by
+introspection, not recalled) has exactly `name` and `arguments` — no output —
+although `RunStepFunctionToolCall`'s own docstring claims it "represents the
+inputs and output consumed and emitted by the specified function".
+Code-interpreter and file-search calls do carry outputs; function calls do not,
+because `enable_auto_function_calls` submits them on the caller's behalf and
+the service never echoes them back. **The obvious implementation would have
+recorded what the agent sent in and nothing about what came back, and would
+have looked like it worked.** So both tools are registered through
+`functools.wraps` logging shims, and `build_toolset()` builds the definitions
+both ways and refuses to run if wrapping moved the schema — tested in a scratch
+container first, and byte-identical.
+
+**Result files are now curated rather than wholly ignored.** `STATUS.md` and
+`m7-orientation.md` cite result files as evidence — the
+`20260901-145716` vs `20260902-103821` baseline diff behind the contamination
+finding, among others — and **none of them were in the repo**;
+`ai-103/scripts/results/` was gitignored outright. On a repo that is resume
+material, a cited file that is not in it is a citation to nothing. `.gitignore`
+now uses `results/*` plus one explicit negation per file, so tracking a result
+is a deliberate act rather than a side effect of a pattern. Six cited files
+plus the day's orchestrator runs are tracked; everything else stays ignored.
+Verified with `git check-ignore` rather than by eye. Also added `*.json text
+eol=lf` to `.gitattributes` after the first six committed files immediately
+reappeared as modified — line endings only, the CRLF lesson in a new file type.
+
+**V1 reproduced 15/15 under the new harness**, same commit, same instructions,
+same model — so the persistence change moved nothing.
+
+**The forced text-failure probe was cancelled: item5 failed on its own.**
+`evaluate_draft` returned groundedness 2.0, `passed: false`, on a propane draft
+asserting safety guidance the fact sheet does not contain. The Sep 4 entry's
+"zero observations of the redraft-capable case" became one observation at no
+cost, and the probe planned for the day was dropped. **Note why Sep 4 saw five
+passes and Sep 7 saw a failure on identical instructions: the orchestrator's
+own drafting had no `temperature` pinned, so each run writes different copy and
+the judge scores different text.** "evaluate_draft passed on all five" was never
+a property of the system, only of that morning's drafts.
+
+**What the agent does with a failing check: nothing.** Exactly two tool calls
+on item5 — it reported the failure accurately and stopped. **This corrects Sep
+4's observation 1**, which read "default behavior on a failing result is
+report-and-advise, never redraft". The advice is not tied to failure: on the
+Sep 7 V1 run the agent volunteered improvement advice on item3, which *passed*,
+and said nothing on item4 and item5, which failed. **Report-only is the
+default; every part of remediation has to be instructed.**
+
+**Template compliance was worse than Sep 4 recorded.** Five items, four title
+formats: item1 truncated the store name to "Riverside Hardware", item2 dropped
+it entirely, item3/4 used "at", item5 used a pipe. item1's truncation is a
+brand-consistency error *in the text*, which nothing in the system can see —
+`audit_thumbnail` reads the image, `evaluate_draft` checks groundedness and
+relevance. Also newly recorded: **the agent writes `evaluate_draft`'s `query`
+argument itself and varies it**, so an input to its own evaluation was
+uncontrolled.
+
+**`INSTRUCTIONS_V2` regressed to 12/15. Two bugs, both Claude's, both found in
+one read of the persisted run.**
+
+  (a) **The drafter was told to ground everything in a fact sheet it had never
+  been given.** `fact-sheet.md` reaches the judge (`m7_evaluator_tool` passes it
+  as `context`) and the CV audit, but never the orchestrator. V1 never mentioned
+  it and the agent drafted freely; V2 mentioned it four times, so the agent
+  stripped every specific it could not verify until the copy said nothing —
+  item1's third attempt read "This video focuses on the topic of exterior paint
+  color mixing at home". Groundedness sat at 2.0, **relevance fell from 4.0 to
+  2.0 as the drafts emptied out** ("superficially relevant but not
+  informative"), and **item3 declined to act at all**, naming the missing fact
+  sheet as the reason — the correct diagnosis, from the agent. V2's redraft
+  clause made it worse by design: "remove unsupported claims and do not add
+  detail to compensate" can only subtract when there is no source to add from.
+  Four of five items burned the full cap; item1 never passed.
+
+  (b) **The `query` clause contradicted `evaluate_draft`'s own documented
+  contract.** V2 said to pass the bare topic verbatim. That docstring says: "Do
+  not pass a bare topic: RelevanceEvaluator grades the response as an answer to
+  this, and a bare title scores as an unanswered question." Claude wrote the
+  clause to close the query variance found that morning and standardised on the
+  one value the tool documents as broken. The predicted failure is exactly what
+  the relevance scores did.
+
+**Rate limits, and the quota that was never sized for this.** The first V2 run
+died entirely: `gpt-5-4` was provisioned at **capacity 3 — 3,000 TPM / 30 RPM**.
+The redraft loop roughly doubled item1's token use (5,875 vs ~2,670), tripped
+the ceiling inside a minute, and items 2–5 then failed instantly with zero
+usage. Gerard raised `gpt-5-4` and `gpt-5-4-mini` to 30K, then `gpt-5-2` to 30K
+after the second run pushed the *judge* (11 `evaluate_draft` calls × 2
+evaluators = 22 judge calls) against its own untouched 10K ceiling.
+**`gpt-5-2` is the judge deployment, hardcoded in `m7_evaluator_tool.py` and
+inherited from M6 — nobody chose it for M7.** Backlogged.
+**Correcting an earlier Claude recommendation in the same session:**
+`gpt-5-4-mini` was provisioned at **3 RPM**, so switching the orchestrator to
+mini on cost grounds — argued twice that morning — would have failed harder and
+faster than what was observed. Rate limits were sitting next to the token
+prices the argument was built on.
+
+**`INSTRUCTIONS_V3`: 15/15, 5/5 text checks, zero redrafts.** The fix was
+`get_fact_sheet()` — a third tool (`m7_fact_sheet_tool.py`) returning
+`fact-sheet.md` verbatim. **Delivered as a tool rather than inlined into the
+instructions on Gerard's call**, on his standing preference for the tool-shaped
+option: tool calling is AI-103's largest-weighted domain, and fetching grounding
+data on demand is closer to a real system than pasting it into a system prompt.
+The whole file is returned deliberately — the judge grades against the whole
+file, and handing the drafter a curated subset would reintroduce the same
+drafter/grader mismatch in miniature. **Gerard wrote the redraft clause's
+operative fix** — "remove unsupported claims and replace them with supported
+ones from the fact sheet" — which is what turns the loop from subtraction into
+substitution; he reached it independently before it was proposed. Every CTA now
+carries real hours or the real phone number, copied correctly, none invented.
+
+**`FunctionTool` truncates every description at the first newline.** Found
+while checking the new tool's generated schema, and it applied to the existing
+ones: `evaluate_draft` reached the model as *"Evaluate a drafted video title and
+description for Riverside Hardware &"* — cut mid-phrase on an ampersand — with
+its `query` parameter guidance discarded entirely. **So the model had never seen
+the bare-topic warning**, and the agent's varying `query` was improvisation in
+the absence of any guidance rather than a departure from it. This also qualifies
+Sep 4's "the reST docstrings functioned as tool schemas on the first attempt":
+they functioned in the weak sense — the model got names and a fragment. Full
+entry in Key Lessons. All three tools rewritten to carry the whole description
+on one physical line, each `:param:` likewise; verified against a real generated
+schema, not deduced. Done as an isolated change after V3 was already passing, so
+the two are separately attributable. **15/15 again afterwards**, and the
+reporting is now exactly the contract: verbatim contrast ratios, the garbled OCR
+string preserved as evidence, `FLAGGED FOR REVIEW: text_legible` as the literal
+final line, and no redesign advice on images the agent cannot change.
+
+**Still unobserved, and now the front of the work: the redraft path.** Both V3
+runs passed every item on the first draft, so the two-redraft cap, the
+substitution rule and the stop-on-pass rule have zero clean observations. The
+cap of 2 was set on Gerard's judgement rather than evidence; the run record now
+counts redrafts per item, so a later multi-run pass can replace that judgement
+with a number.
+
+**Scheduled tasks.** The Monday punch-list task ran, asked Gerard three
+questions in a thread nobody opened, and produced nothing — the punch list was
+unchanged since Aug 31 and still framed M7's critical path as a "[stretch]"
+item. **A scheduled task that ends by asking questions has a silent failure
+mode.** Moved to Sunday 17:00 MST (`0 0 * * 1` UTC — the day shifts) and
+rewritten to decide rather than ask, to state its assumptions, and to read the
+driving docs from the public repo's raw URLs, since it now runs in the cloud
+with no access to Gerard's machine. **The Friday check-in has the opposite
+constraint and was not reviewed today: it *writes* `m7-orientation.md`, which
+needs the machine, and cloud-only it cannot do its main job.**
+
+**Doc hygiene, recorded because it cost Gerard real effort twice.** The
+instructions text briefly had two homes — `m7_orchestrator.py` and a copy inside
+`m7-instructions-draft.md`. Gerard edited the copy twice, once to no effect at
+all, because it was not what runs. The wording has been removed from that file,
+which now holds only the rationale. Same failure the Sep 6 restructure exists to
+prevent, reintroduced by Claude three weeks later and in a smaller place.
+Separately: `IIP-revised-project-plan.md` (July 15) is still in the Claude
+Project describing M6 as "responsible-AI instrumentation", M7 as a "light
+multi-agent pattern", and computer vision as out of scope — all superseded, and
+it is what a fresh cloud session reads as current. Backlogged.
+
+---
 
 ### Session — September 6, 2026 — documentation only, no project work
 
