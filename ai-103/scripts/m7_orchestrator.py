@@ -77,7 +77,10 @@ RESULTS_DIR = SCRIPT_DIR / "results"
 
 AGENT_NAME = "riverside-content-agent"
 
-# Deliberately minimal. Silent on failure handling -- see the module docstring.
+# V1 is retained, unused, because every result before 2026-09-07 was measured
+# against it -- keeping it here makes a comparison run a one-line change rather
+# than a git archaeology exercise. Deliberately minimal; silent on failure
+# handling, which is what the Sep 4 and Sep 7 runs existed to observe.
 INSTRUCTIONS_V1 = """You draft and check short marketing video content for \
 Riverside Hardware & Supply, a small independent hardware store.
 
@@ -91,6 +94,72 @@ image. Do all of the following, in order:
 
 Always call both tools. Do not skip a check because the draft looks correct \
 to you."""
+
+# V2 written 2026-09-07. Gerard owns this wording; Claude drafted it against the
+# Sep 4 and Sep 7 runs and Gerard edited and approved it. Rationale for each
+# clause is in ../m7-instructions-draft.md.
+INSTRUCTIONS_V2 = """You draft and check short marketing video content for \
+Riverside Hardware & Supply, a small independent hardware store.
+
+For each content item you are given a topic and the file path of a thumbnail \
+image.
+
+DRAFT
+1. Write a title in this format, with an em dash:
+     <benefit or topic, plain language> — Riverside Hardware & Supply
+   Spell the store name in full. Do not abbreviate it, drop it, or use a
+   different separator.
+2. Write a description in three parts, in this order:
+     Hook — one sentence stating the problem or question the video answers.
+     Body — two or three sentences on what is covered.
+     CTA — one line giving the store name and its hours, or the store name and
+       the phone number. Take these from the fact sheet exactly; never invent
+       or approximate them.
+3. Every factual claim you make — hours, services, pricing, availability — must
+   be traceable to the fact sheet. If the fact sheet does not support a claim,
+   leave the claim out rather than softening it.
+
+CHECK THE TEXT
+4. Call evaluate_draft. Pass the topic you were given, verbatim and with
+   nothing added, as `query`. Pass your full title and description as
+   `response`.
+5. Decide on the `all_passed` field alone. Do not decide from the `reason`
+   text — it is unreliable, and has contradicted itself inside a single
+   paragraph.
+6. If `all_passed` is false, redraft and check again — at most twice. Each
+   time, remove or replace whatever the draft asserts that the fact sheet does
+   not support, and do not add more detail to compensate. Call evaluate_draft
+   on each new draft under the same rules. Stop as soon as `all_passed` is
+   true. If the third draft still fails, keep it and report every result.
+
+CHECK THE THUMBNAIL
+7. Call audit_thumbnail on the image path you were given.
+8. You cannot change the image. Never attempt to, and never suggest a specific
+   redesign. If any of its three checks is false, the item is flagged.
+
+REPORT — always, and in this order
+9.  The final title and description.
+10. The text check: each score, whether it passed, and the overall result. If
+    you redrafted, say how many times and give all results.
+11. The thumbnail check: the three checks and their results. Quote any figures
+    or text the tool returned exactly as it returned them — including contrast
+    ratios, and including text read out of the image even where it looks
+    garbled. Garbled text is evidence, not an error to tidy up.
+12. A final line that is exactly one of:
+      READY
+      FLAGGED FOR REVIEW: <the failing checks, comma separated>
+
+Do not offer improvement suggestions on a check that passed."""
+
+ACTIVE_INSTRUCTIONS_LABEL = "INSTRUCTIONS_V2"
+ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V2
+
+# Pinned 2026-09-07. NOTE: the Agents SDK exposes temperature and top_p but has
+# no `seed` parameter at all -- verified by introspection against
+# azure-ai-agents 1.1.0, and unlike the chat-completions path the CV audit uses,
+# where seed=42 is pinned. So this narrows drafting variance; it does not make a
+# run repeatable. Comparing two runs still needs the multi-run probe.
+AGENT_TEMPERATURE = 0.0
 
 # The five items from content-items-plan.md. `expected_audit` is that document's
 # expected-results table, carried here so a run is read against the rubric
@@ -174,8 +243,9 @@ def run_provenance() -> dict:
         "git_dirty_files": status.splitlines(),
         "model_deployment": os.environ.get("CHAT_DEPLOYMENT_GPT_5_4", ""),
         "agent_name": AGENT_NAME,
-        "instructions_label": "INSTRUCTIONS_V1",
-        "instructions": INSTRUCTIONS_V1,
+        "temperature": AGENT_TEMPERATURE,
+        "instructions_label": ACTIVE_INSTRUCTIONS_LABEL,
+        "instructions": ACTIVE_INSTRUCTIONS,
     }
 
 
@@ -350,6 +420,18 @@ def run_item(client, agent_id: str, item: dict) -> dict:
     actual = actual_audit(calls)
     usage = getattr(run, "usage", None)
 
+    # How many times the agent checked the text. The cap in INSTRUCTIONS_V2 was
+    # set at two redrafts on judgement, not evidence; recording this is what
+    # lets a later multi-run pass replace that judgement with a number.
+    draft_checks = [c for c in calls if c.get("tool") == "evaluate_draft"]
+    redrafts = max(0, len(draft_checks) - 1)
+    final_text_passed = None
+    if draft_checks and "output" in draft_checks[-1]:
+        try:
+            final_text_passed = json.loads(draft_checks[-1]["output"]).get("all_passed")
+        except (TypeError, ValueError):
+            final_text_passed = None
+
     record = {
         "id": item["id"],
         "topic": item["topic"],
@@ -358,6 +440,9 @@ def run_item(client, agent_id: str, item: dict) -> dict:
         "run_id": run.id,
         "run_status": str(run.status),
         "last_error": str(run.last_error) if getattr(run, "last_error", None) else None,
+        "evaluate_draft_calls": len(draft_checks),
+        "redrafts": redrafts,
+        "final_text_passed": final_text_passed,
         "expected_audit": item["expected_audit"],
         "actual_audit": actual,
         "audit_matches_expected": (actual == item["expected_audit"]) if actual else None,
@@ -376,6 +461,8 @@ def run_item(client, agent_id: str, item: dict) -> dict:
         print(f"run error:  {record['last_error']}")
     names = [s["name"] for s in record["requested_tool_calls"]]
     print(f"tools called ({len(names)}): {names or 'NONE'}")
+    print(f"text check: all_passed={final_text_passed}  "
+          f"evaluate_draft calls={len(draft_checks)} (redrafts={redrafts})")
     print(f"expected audit (content-items-plan.md): {json.dumps(item['expected_audit'])}")
     print(f"actual audit (from tool output):        {json.dumps(actual)}"
           f"   match={record['audit_matches_expected']}")
@@ -419,6 +506,9 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
             "cells_correct": correct,
             "cells_total": total,
             "tool_calls": sum(len(r.get("tool_calls") or []) for r in records),
+            "items_with_redrafts": sum(1 for r in records if r.get("redrafts")),
+            "redrafts_total": sum(r.get("redrafts") or 0 for r in records),
+            "items_text_passing": sum(1 for r in records if r.get("final_text_passed")),
         },
         "items": records,
     }
@@ -444,11 +534,13 @@ def main():
         agent = client.create_agent(
             model=os.environ["CHAT_DEPLOYMENT_GPT_5_4"],
             name=AGENT_NAME,
-            instructions=INSTRUCTIONS_V1,
+            instructions=ACTIVE_INSTRUCTIONS,
             toolset=toolset,
+            temperature=AGENT_TEMPERATURE,
         )
         print(f"agent created: {agent.id} ({AGENT_NAME}), "
-              f"model={os.environ['CHAT_DEPLOYMENT_GPT_5_4']}")
+              f"model={os.environ['CHAT_DEPLOYMENT_GPT_5_4']}, "
+              f"instructions={ACTIVE_INSTRUCTIONS_LABEL}, temperature={AGENT_TEMPERATURE}")
         try:
             for item in ITEMS:
                 records.append(run_item(client, agent.id, item))
