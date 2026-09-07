@@ -86,10 +86,16 @@ def _flatten(metric: str, result: dict) -> dict:
 
 
 def evaluate_draft(query: str, response: str) -> str:
-    """
-    Evaluate a drafted video title and description for Riverside Hardware &
-    Supply against the store's fact sheet, returning two independent quality
-    scores.
+    """Evaluate a drafted video title and description for Riverside Hardware & Supply against the store's fact sheet, returning two independent 1-5 scores: groundedness (are the draft's claims supported by the fact sheet) and relevance (does the draft answer the drafting instruction it was given), each with a pass/fail against the SDK's threshold of 3. Call it after drafting and before treating any text as finished. A failing score means the draft should be revised; it never means the fact sheet is wrong.
+
+    NOTE ON THE ONE-LINE DESCRIPTION AND :param: LINES ABOVE. FunctionTool
+    truncates every description at the first newline -- verified 2026-09-07 by
+    introspecting the generated schema. Before that fix this function reached
+    the model as "Evaluate a drafted video title and description for Riverside Hardware &", cut mid-phrase, and its
+    parameter guidance was discarded entirely. So the whole description, and
+    each :param: description, has to fit on one physical line however it reads
+    in source. Everything below this note is for human readers only; the model
+    never sees it.
 
     Groundedness asks whether the claims in the draft are supported by the
     fact sheet -- hours, services, contact details, brand voice. Relevance
@@ -108,14 +114,8 @@ def evaluate_draft(query: str, response: str) -> str:
     wording influences the groundedness reasoning as well as the relevance
     score. Verified behavior, logged 2026-08-27, not a defect.
 
-    :param query (str): The drafting instruction the text was written to
-        satisfy, phrased as a request -- e.g. "Draft a video title and
-        description for a piece of content about: '<topic>,' grounded in the
-        store's fact sheet." Do not pass a bare topic: RelevanceEvaluator
-        grades the response as an answer to this, and a bare title scores
-        as an unanswered question.
-    :param response (str): The drafted text to evaluate, title and
-        description together, title first.
+    :param query (str): The drafting instruction the text was written to satisfy, phrased as a full request -- use "Draft a video title and description for a piece of content about: '<topic>,' grounded in the store's fact sheet." Never pass a bare topic or title: RelevanceEvaluator grades the response as an answer to this, and a bare title scores as an unanswered question.
+    :param response (str): The drafted text to evaluate, title and description together, title first.
     :return: JSON string with one key per metric, "groundedness" and
         "relevance". Each holds score (float, 1-5), passed (bool), threshold
         (int), reason (str, the judge's written explanation of the score),

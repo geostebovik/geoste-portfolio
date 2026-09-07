@@ -182,13 +182,16 @@ def build_content_messages(image_b64: str, mime_type: str = "image/png") -> list
 
 
 def audit_thumbnail(image_path: str) -> str:
-    """
-    Audit a marketing thumbnail image against Riverside Hardware & Supply's
-    brand guide and posted hours (fact-sheet.md): checks whether the text
-    rendered in the image is legible, whether the dominant color palette
-    matches the brand's orange/cream family, and whether the factual
-    assertions visible in the image (hours, services, etc.) match the fact
-    sheet.
+    """Audit a marketing thumbnail image against Riverside Hardware & Supply's brand guide and fact sheet, returning three independent checks: text_legible (is every text element in the image readable), brand_consistent (is the dominant palette the brand's orange and cream family), and info_accurate (do the factual assertions visible in the image, such as hours or services, match the fact sheet). Call it on the thumbnail for every content item. You cannot change the image, so a failing check means the item is flagged for human review, not fixed.
+
+    NOTE ON THE ONE-LINE DESCRIPTION AND :param: LINES ABOVE. FunctionTool
+    truncates every description at the first newline -- verified 2026-09-07 by
+    introspecting the generated schema. Before that fix this function reached
+    the model as "Audit a marketing thumbnail image against Riverside Hardware & Supply's", cut mid-phrase, and its
+    parameter guidance was discarded entirely. So the whole description, and
+    each :param: description, has to fit on one physical line however it reads
+    in source. Everything below this note is for human readers only; the model
+    never sees it.
 
     Legibility is measured, not judged (changed 2026-09-03). Azure AI Vision
     Read locates each text element and m7_legibility_check measures its WCAG
