@@ -577,6 +577,45 @@ CV-audit run should score exactly as documented there — that table is what
    M7 script to authenticate as Gerard rather than by account key, so an
    RBAC gap on the project surfaces here first.
 
+6. **Get one clean observation of a failing `evaluate_draft`.** — **OPEN, and
+   now the top of this list.** Promoted out of the Backlog by the Sep 7
+   check-in, because items 1–5 are all done and "what's left to build" was
+   otherwise reading as empty when the work is not finished. `INSTRUCTIONS_V3`'s
+   remediation clauses — the two-redraft cap, "replace unsupported claims with
+   supported ones", stop-on-pass — have **zero observations**; both V3 runs
+   passed every item on the first draft. Forcing a failure needs a topic
+   `fact-sheet.md` cannot support, which is a `content-items-plan.md` edit and
+   therefore a **plan decision, not just a run** — the same
+   fixture-vs-answer-key distinction Sep 3's Thread 1 turned on. Decide
+   deliberately whether to add a sixth item or move an existing one. Backlog
+   keeps the detail; this line keeps the ordering.
+7. **Build a multi-run harness for the orchestrator, then certify.** — **OPEN,
+   and gated on item 6.** `probe_fixture_stability.py` covers the CV audit only.
+   Measured budget: ~11.6K tokens/item, ~58K per five-item run, so seven runs is
+   ~410K tokens and at least fourteen minutes at 30K TPM. The run record already
+   counts redrafts per item, so this pass also settles whether the cap of 2 was
+   the right number. **Certifying a path that has never run certifies nothing**,
+   which is why 6 comes first.
+
+## Week check-in — 2026-09-07
+
+Reconciled against the Todoist punch list, not self-report. **The week's list
+was cleared in full, and the `[stretch]` item went with it** — "M7: Draft
+orchestrator instructions text" (added Aug 31, completed Sep 7) was labelled
+stretch precisely because it was contingent on the two core items landing
+first. Both did (fixture loop Sep 2, `evaluate_draft` wrapper Sep 4), and the
+stretch item landed too. **Read that as pace running ahead of plan**, and size
+next Monday's list accordingly — with the caveat that checking the label
+against the ordered build list above puts that item at **#4, a core build
+step**, not extra scope. So the week did not do more than the plan; it did the
+plan faster, and reached the largest-weighted AI-103 domain a week early.
+
+Three items from that week's list closed against the doc as it already stood
+(items 1–5 were all recorded done before this check-in ran), so the sync work
+here was re-derivation rather than correction: items 6 and 7 above now carry
+the top of the list, which until today lived only in the Backlog and
+`STATUS.md`.
+
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
 Nothing here blocks anything else. Pulled together from scattered
@@ -613,7 +652,9 @@ session's narrative paragraph in `STATUS.md`.
   failure needs a topic `fact-sheet.md` cannot support, which is a
   `content-items-plan.md` change and therefore a plan decision, not just a run
   — the fixture-vs-answer-key distinction from Sep 3's Thread 1. **This is the
-  current next action.**
+  current next action, and as of the Sep 7 check-in it is also item 6 of
+  "What's actually left to build" above** — it was doing a build item's job
+  from the Backlog, where an ordered list would not find it.
 - **The redraft cap of 2 was set on judgement, not evidence (Sep 7).** Gerard's
   call, deliberately, with 10 (the `enable_auto_function_calls` default) ruled
   out as uncalled-for. The run record now counts `evaluate_draft` calls and
@@ -654,12 +695,22 @@ session's narrative paragraph in `STATUS.md`.
   current, and it is where the Monday punch-list task's wrong milestone list
   came from. Fix by adding a dated superseded header naming what still holds
   (phases 2/3, platform decision, naming) rather than by rewriting it.
-- **The Friday check-in task was moved to cloud and not reviewed (Sep 7).** Its
-  job is updating this file, which requires Gerard's machine; running in the
-  cloud without a device binding it cannot do that, and would likely summarise
-  in chat instead — which looks like success. Also needs "commit and push before
-  closing" as an explicit final step, now that the Sunday task reads these docs
-  from the repo's raw URLs.
+- ~~**The Friday check-in task was moved to cloud and not reviewed (Sep 7).**~~
+  — **partly closed by its own first run, same day.** The concern was that its
+  job is updating this file, which requires Gerard's machine; run in the cloud
+  without a device binding it could only summarise in chat, which *looks* like
+  success. It did run on the local machine with both folders connected, edited
+  this file, and committed — and "commit and push before closing" is now an
+  explicit final step in the task, as this entry asked.
+  **Two things it surfaced that are still open.** (1) It **fired on a Monday**,
+  not a Friday — and on the same day the Monday planning session had already
+  closed the old punch list (21:12Z) and opened the next one (21:13Z), so it
+  reviewed a week that had already been reconciled minutes earlier. The
+  schedule needs checking. (2) It runs **unattended**, so steps 2–4 of its own
+  brief — ask how the week went, what slipped, how it felt, which milestone —
+  have no one to answer them. Everything in this entry and the check-in section
+  above is therefore derived from Todoist and git, and **the Reflection field in
+  that week's Notion row is Gerard's to fill in**, not the task's to invent.
 
 - **Harness resolution: variance is a symptom of an undercalibrated
   fixture, not a flat tax on every measurement (established Sep 2, twice
