@@ -12,8 +12,23 @@
 venv*/
 __pycache__/
 
-# Generated script outputs (regenerable, not source)
-ai-103/scripts/results/
+# Generated script outputs (regenerable, not source).
+# Trailing /* rather than / so the negations below can re-include individual
+# files -- git will not descend into a directory that is itself excluded.
+ai-103/scripts/results/*
+
+# Curated exception (2026-09-07): result files that STATUS.md or
+# m7-orientation.md cite as evidence are tracked, so a reader can check the
+# claim instead of taking the prose on trust. This repo is resume material; a
+# cited file that is not in it is a citation to nothing. Add a line here when a
+# doc starts citing a new run -- deliberately one line per file, so tracking a
+# result is a decision rather than a side effect of a pattern.
+!ai-103/scripts/results/20260825-120404_vision_test.json
+!ai-103/scripts/results/20260901-145716_fixture_stability.json
+!ai-103/scripts/results/20260902-103821_fixture_stability.json
+!ai-103/scripts/results/20260902-151734_fixture_stability.json
+!ai-103/scripts/results/20260902-161534_fixture_stability.json
+!ai-103/scripts/results/20260903-104108_fixture_stability.json
 ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files

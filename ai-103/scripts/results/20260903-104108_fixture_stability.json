@@ -1,0 +1,327 @@
+{
+  "item1-paint-mixing-CLEAN.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'How to Mix Exterior Paint Colors at Home' and the footer 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the brand guide. Info accuracy passes because the visible text is only a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'How to Mix Exterior Paint Colors at Home' and the footer 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the logo guidance. Info accuracy passes because the visible text is a topic/title about mixing exterior paint colors and does not make any checkable claims about hours or services that contradict the fact sheet; no legible assertion conflicts with Riverside Hardware & Supply details."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title, the smaller bottom brand line, and the icon contains no text. No issues found.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the brand guide. Info is accurate: the visible text is a topic/title about mixing exterior paint colors and the store name; it does not assert any hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main headline 'How to Mix Exterior Paint Colors at Home' and the footer 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the logo guidance. Info accuracy passes because the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'How to Mix Exterior Paint Colors at Home' and the footer text 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible without undue effort.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon that matches the logo style. Info accuracy passes because the visible text is a topic/title only ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are clearly readable: the main title and the smaller 'RIVERSIDE HARDWARE & SUPPLY' text are both legible without undue effort.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text is a topic/title about mixing exterior paint colors and the Riverside Hardware & Supply name; it does not assert any hours or services that conflict with the fact sheet. No issues found."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main headline and the smaller 'RIVERSIDE HARDWARE & SUPPLY' text are both legible without undue effort.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the guide. Info accuracy passes because the visible text is a topic/title about mixing exterior paint colors and does not make any checkable claims about hours or services that contradict the fact sheet; no contradictory assertions are legible."
+    }
+  ],
+  "item2-seasonal-checklist-CLEAN.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Seasonal Home Maintenance Checklist' and the footer text 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses a dominant orange background with cream accents, matching the approved orange/cream family. The visible text is a generic title ('Seasonal Home Maintenance Checklist') and the store name; there are no legible hours or service claims that contradict the fact sheet, so info accuracy passes."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Seasonal Home Maintenance Checklist' and the footer text 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible.\n[content] Brand palette is consistent with the guide: the thumbnail uses an orange dominant background with a cream accent panel and a simple toolbox-style icon. No materially different dominant colors are present. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are legible: the main title 'Seasonal Home Maintenance Checklist' and the footer 'RIVERSIDE HARDWARE & SUPPLY' can be read without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses an orange dominant background with cream accents and a simple toolbox icon. No conflicting blue/gray scheme is present. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are legible: the main title 'Seasonal Home Maintenance Checklist' and the footer text 'RIVERSIDE HARDWARE & SUPPLY' can both be read without undue effort.\n[content] Brand is consistent: the thumbnail uses the Riverside orange/cream palette and a simple toolbox-style icon, which fits the guide. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible claims about hours or services that contradict the fact sheet."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are legible: the main title 'Seasonal Home Maintenance Checklist' and the footer 'RIVERSIDE HARDWARE & SUPPLY' can both be read without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses an orange dominant background with a cream accent panel and a simple toolbox icon. No materially different dominant colors are present. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Seasonal Home Maintenance Checklist' and the footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses an orange dominant background with a cream accent panel and a simple toolbox icon. No materially different dominant colors are present. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Seasonal Home Maintenance Checklist' and the footer 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses a dominant orange background with cream accents, which matches the approved orange/cream scheme. The visible text is a generic topic title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet, so info accuracy passes."
+    }
+  ],
+  "item3-tool-rental-FLAW-legibility.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The business name at the bottom left is readable, but the other overlaid text in the center ('Tool Rental 101: What We Offer') is too faint and blended into the background to be read clearly as a separate text element.\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply brand colors, and the toolbox icon matches the simple toolbox logo style. Info accuracy passes: the visible text is a topic/title ('Tool Rental 101: What We Offer') plus the business name, and it does not show any hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are legible: the headline 'Tool Rental 101: What We Offer' can be read, and the business name 'RIVERSIDE HARDWARE & SUPPLY' is also readable. No issues found.\n[content] Brand is consistent: the thumbnail uses an orange/cream-like palette with a simple toolbox icon, matching the guide\u2019s primary colors and logo style. Info accuracy also passes: the visible text is a topic/title ('Tool Rental 101: What We Offer') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The main headline text is only partially readable and appears washed out by the orange overlay, while other text elements are too faint or obscured to read clearly on their own.\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply brand guide, and the simple toolbox icon matches the logo style. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which is consistent with the fact sheet\u2019s listed tool rental service. No hours or other conflicting claims are visible, and nothing legible contradicts the fact sheet."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The main headline text is only partially readable and appears washed out/overlapped by the graphic, making distinct text elements hard to read. The bottom business name is legible, but the separate headline text is not clearly readable on its own.\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says \"Tool Rental 101: What We Offer,\" which is consistent with the listed tool rental service. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are legible: the headline 'Tool Rental 101: What We Offer' can be read, and the bottom-left business name 'RIVERSIDE HARDWARE & SUPPLY' is also readable. No issues found.\n[content] Brand palette is dominated by orange with cream/orange accents, which fits the Riverside Hardware & Supply guide. The visible text says 'Tool Rental 101: What We Offer,' which is consistent with the listed services (tool rental). No visible hours or other factual claims contradict the fact sheet, and nothing legible appears inaccurate."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The main headline text is only partially readable and appears washed out by the orange overlay; the smaller text elements are not clearly legible on their own. The business name at the bottom is readable, but other distinct text elements are not.\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text references 'Tool Rental' and 'What We Offer,' which are services listed in the fact sheet. No visible hours or other conflicting claims appear, and nothing legible contradicts the fact sheet."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are readable: the headline 'Tool Rental 101: What We Offer' is legible, and the business name 'RIVERSIDE HARDWARE & SUPPLY' is also clearly readable. No issues found.\n[content] Brand check passes: the thumbnail uses an orange/cream palette consistent with the Riverside Hardware & Supply brand guide, and the toolbox icon matches the simple toolbox logo direction. Info check passes: the visible text references 'Tool Rental' and 'What We Offer,' which are consistent with the fact sheet\u2019s listed services. No visible hours or other claims contradict the fact sheet, and nothing legible appears inaccurate."
+    }
+  ],
+  "item4-key-cutting-FLAW-brand.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The main headline 'Key Cutting While You Wait' is clearly readable, and the smaller business name 'RIVERSIDE HARDWARE & SUPPLY' is also legible. No issues found.\n[content] Brand consistency fails because the thumbnail\u2019s dominant palette is blue/gray, which is materially different from the required orange and cream brand colors. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches the fact sheet\u2019s key cutting service, and there are no visible hours or other assertions that contradict the fact sheet."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are clearly readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray rather than the required orange and cream palette. Info accuracy passes: the visible assertion 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in/no appointment), and no hours or other contradictory claims are visible."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both clear and legible.\n[content] Brand consistency fails because the thumbnail\u2019s dominant palette is blue/gray, which materially differs from the required orange-and-cream brand colors. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other contradictory claims are visible."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] The visible text elements are clear and readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which materially differs from the required orange/cream brand palette. Info accuracy passes: the visible service claim 'Key Cutting While You Wait' matches the fact sheet's walk-in key cutting service, and no visible hours or other contradictory assertions appear."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Distinct text elements are readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible on their own.\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray rather than the required orange and cream palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches an allowed service (key cutting, walk-in/no appointment), and no visible hours or other factual details contradict the fact sheet."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are clearly readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray rather than the required orange and cream palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in, no appointment), and no visible hours or other factual details contradict the fact sheet."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All distinct text elements are clearly readable: the main headline 'Key Cutting While You Wait' and the smaller footer text 'RIVERSIDE HARDWARE & SUPPLY' are both legible without undue effort.\n[content] Brand consistency fails because the thumbnail\u2019s dominant palette is blue/gray, which is materially different from the required orange and cream brand colors. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed Riverside Hardware & Supply service; no hours or other conflicting claims are visible."
+    }
+  ],
+  "item5-propane-refill-FLAW-info-accuracy.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible without undue effort.\n[content] Brand palette is consistent with the guide: the thumbnail uses orange and cream as the dominant colors, with a simple toolbox icon. Info accuracy fails because the image says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The propane tank refill service itself is listed in the fact sheet, so that part is fine."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title, the 'OPEN 24/7' label, and the 'RIVERSIDE HARDWARE & SUPPLY' footer text are clear and legible without undue effort.\n[content] Branding is consistent: the thumbnail uses the approved orange and cream palette and a simple toolbox icon. Info accuracy fails because the image says 'OPEN 24/7,' which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title 'Propane Tank Refill Safety Tips' is compatible with a listed service, so no issue there."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible without undue effort.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is not accurate because it says 'OPEN 24/7,' which conflicts with the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The 'Propane Tank Refill Safety Tips' topic is fine, since propane tank refill is a listed service."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible.\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the guide. Info accuracy fails because the image says \"OPEN 24/7,\" but the fact sheet says the store is only open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The title \"Propane Tank Refill Safety Tips\" is not itself a checkable factual claim."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible.\n[content] Brand palette is consistent with the guide: the thumbnail uses orange and cream as the dominant colors, with a simple toolbox icon. Info accuracy fails because the image says 'OPEN 24/7,' which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The 'Propane Tank Refill Safety Tips' topic is compatible with listed services, but the 24/7 claim is a factual error."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible.\n[content] Brand palette is consistent with the guide: the thumbnail uses orange and cream as the dominant colors, with a simple toolbox icon. Info accuracy fails because the image says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The 'Propane Tank Refill Safety Tips' title is not itself a contradiction, since propane refill is a listed service."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All distinct text elements are readable: the main title 'Propane Tank Refill Safety Tips,' the top-right 'OPEN 24/7,' and the bottom-left 'RIVERSIDE HARDWARE & SUPPLY' are clear and legible without undue effort.\n[content] Branding is consistent: the thumbnail uses the approved orange and cream palette and a simple toolbox icon. Info accuracy fails because the image states 'OPEN 24/7,' which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The 'Propane Tank Refill Safety Tips' title is not itself a factual conflict, since propane refill is a listed service."
+    }
+  ]
+}
