@@ -69,6 +69,7 @@ from azure.identity import DefaultAzureCredential
 
 from m7_cv_audit_tool import audit_thumbnail
 from m7_evaluator_tool import evaluate_draft
+from m7_fact_sheet_tool import get_fact_sheet
 
 
 SCRIPT_DIR = Path(__file__).parent
@@ -151,8 +152,80 @@ REPORT — always, and in this order
 
 Do not offer improvement suggestions on a check that passed."""
 
-ACTIVE_INSTRUCTIONS_LABEL = "INSTRUCTIONS_V2"
-ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V2
+# V3 written 2026-09-07, after V2 regressed to 12/15. Two bugs, both Claude's,
+# both fixed here: (1) the agent was told to ground its drafting in a fact sheet
+# it had never been given -- get_fact_sheet() now supplies it, and the redraft
+# clause substitutes instead of only subtracting (Gerard's fix); (2) clause 4
+# told the agent to pass a bare topic as `query`, which directly contradicts
+# evaluate_draft's own docstring -- "Do not pass a bare topic: RelevanceEvaluator
+# grades the response as an answer to this, and a bare title scores as an
+# unanswered question." Relevance duly fell from 4.0 to 2.0. Clause 4 now uses
+# the phrasing that docstring specifies, which fixes the contradiction and still
+# removes the run-to-run variance the bare-topic rule was written to close.
+INSTRUCTIONS_V3 = """You draft and check short marketing video content for \
+Riverside Hardware & Supply, a small independent hardware store.
+
+For each content item you are given a topic and the file path of a thumbnail \
+image.
+
+GET THE FACTS FIRST
+1. Call get_fact_sheet before writing anything. It returns the store's hours,
+   services, contact details and brand guide, and it is the only approved
+   source of facts about the store. Everything below depends on having it.
+
+DRAFT
+2. Write a title in this format, with an em dash:
+     <benefit or topic, plain language> — Riverside Hardware & Supply
+   Spell the store name in full. Do not abbreviate it, drop it, or use a
+   different separator.
+3. Write a description in three parts, in this order. Write it as flowing
+   copy — do not label the parts or print the words Hook, Body or CTA.
+     A hook: one sentence stating the problem or question the video answers.
+     A body: two or three sentences on what is covered, using the concrete
+       services and details the fact sheet gives you.
+     A closing line: the store name with its hours, or the store name with the
+       phone number, copied from the fact sheet exactly.
+4. Every factual claim — hours, services, pricing, availability — must be
+   traceable to the fact sheet. If the fact sheet does not support a claim,
+   leave it out. Do not compensate by writing vaguely: a description with no
+   specifics in it fails for being uninformative, so use the specifics the
+   fact sheet does give you.
+
+CHECK THE TEXT
+5. Call evaluate_draft. Pass your full title and description as `response`.
+   For `query`, use exactly this sentence with the topic filled in:
+     Draft a video title and description for a piece of content about:
+     '<topic>,' grounded in the store's fact sheet.
+6. Decide on the `all_passed` field alone. Do not decide from the `reason`
+   text — it is unreliable, and has contradicted itself inside a single
+   paragraph.
+7. If `all_passed` is false, redraft and check again — at most twice. Each
+   time, remove unsupported claims and replace them with supported ones from
+   the fact sheet. Call evaluate_draft on each new draft under the same rules.
+   Stop as soon as `all_passed` is true. If the third draft still fails, keep
+   it and report every result.
+
+CHECK THE THUMBNAIL
+8. Call audit_thumbnail on the image path you were given.
+9. You cannot change the image. Never attempt to, and never suggest a specific
+   redesign. If any of its three checks is false, the item is flagged.
+
+REPORT — always, and in this order
+10. The final title and description.
+11. The text check: each score, whether it passed, and the overall result. If
+    you redrafted, say how many times and give all results.
+12. The thumbnail check: the three checks and their results. Quote any figures
+    or text the tool returned exactly as it returned them — including contrast
+    ratios, and including text read out of the image even where it looks
+    garbled. Garbled text is evidence, not an error to tidy up.
+13. A final line that is exactly one of:
+      READY
+      FLAGGED FOR REVIEW: <the failing checks, comma separated>
+
+Do not offer improvement suggestions on a check that passed."""
+
+ACTIVE_INSTRUCTIONS_LABEL = "INSTRUCTIONS_V3"
+ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V3
 
 # Pinned 2026-09-07. NOTE: the Agents SDK exposes temperature and top_p but has
 # no `seed` parameter at all -- verified by introspection against
@@ -325,8 +398,9 @@ def build_toolset() -> ToolSet:
     ever changes that schema, the run stops rather than producing a result that
     looks comparable to earlier ones and is not.
     """
-    raw = FunctionTool({evaluate_draft, audit_thumbnail})
-    wrapped = FunctionTool({logged(evaluate_draft), logged(audit_thumbnail)})
+    raw = FunctionTool({evaluate_draft, audit_thumbnail, get_fact_sheet})
+    wrapped = FunctionTool({logged(evaluate_draft), logged(audit_thumbnail),
+                            logged(get_fact_sheet)})
     if _definitions(raw) != _definitions(wrapped):
         raise RuntimeError(
             "The logging wrapper changed the tool schema the model sees. "

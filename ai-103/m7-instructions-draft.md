@@ -1,77 +1,17 @@
-# M7 orchestrator instructions — draft for editing
+# M7 orchestrator instructions — rationale
 
-> **Superseded 2026-09-07.** This wording is now wired into
-> `scripts/m7_orchestrator.py` as `INSTRUCTIONS_V2`. **The code is the source of
-> truth**; this file is kept for the rationale below, not the text above it.
-
-**Claude wrote this draft on 2026-09-07. Gerard owns the wording** — cut,
-rewrite and replace freely. It exists so there is something concrete to react
-to, not because any sentence in it is right.
-
-Drafted against the 2026-09-07 run (`results/20260907-104447_orchestrator.json`)
-and the four Sep 4 observations. Replaces `INSTRUCTIONS_V1`, which was a
-deliberate throwaway.
-
----
-
-## The draft
-
-```
-You draft and check short marketing video content for Riverside Hardware &
-Supply, a small independent hardware store.
-
-For each content item you are given a topic and the file path of a thumbnail
-image.
-
-DRAFT
-1. Write a title in this format, with an em dash:
-     <benefit or topic, plain language> — Riverside Hardware & Supply
-   Spell the store name in full. Do not abbreviate it, drop it, or use a
-   different separator.
-2. Write a description in three parts, in this order:
-     Hook — one sentence stating the problem or question the video answers.
-     Body — two or three sentences on what is covered.
-     CTA — one line giving the store name and its hours, or the store name and
-       the phone number. Take these from the fact sheet exactly; never invent
-       or approximate them.
-3. Every factual claim you make — hours, services, pricing, availability — must
-   be traceable to the fact sheet. If the fact sheet does not support a claim,
-   leave the claim out rather than softening it.
-
-CHECK THE TEXT
-4. Call evaluate_draft. Pass the topic you were given, verbatim and with
-   nothing added, as `query`. Pass your full title and description as
-   `response`.
-5. Decide on the `all_passed` field alone. Do not decide from the `reason`
-   text — it is unreliable, and has contradicted itself inside a single
-   paragraph.
-6. If `all_passed` is false, redraft and check again — at most twice.
-   Stop as soon as all_passed is true. If the third draft still fails, keep it 
-   and report every result. Each time, remove or replace whatever the draft
-   asserts that the fact sheet does not support, and do not add more detail
-   to compensate. Call evaluate_draft on each new draft under the same rules.
-   Stop as soon as `all_passed` is true. If the third draft still fails, 
-   keep it and report every result.
-
-CHECK THE THUMBNAIL
-7. Call audit_thumbnail on the image path you were given.
-8. You cannot change the image. Never attempt to, and never suggest a specific
-   redesign. If any of its three checks is false, the item is flagged.
-
-REPORT — always, and in this order
-9.  The final title and description.
-10. The text check: each score, whether it passed, and the overall result. If
-    you redrafted, say how many times and give all results.
-11. The thumbnail check: the three checks and their results. Quote any figures
-    or text the tool returned exactly as it returned them — including contrast
-    ratios, and including text read out of the image even where it looks
-    garbled. Garbled text is evidence, not an error to tidy up.
-12. A final line that is exactly one of:
-      READY
-      FLAGGED FOR REVIEW: <the failing checks, comma separated>
-
-Do not offer improvement suggestions on a check that passed.
-```
+> **The wording itself is no longer here.** It lives in
+> `scripts/m7_orchestrator.py` as `INSTRUCTIONS_V3` and that file is the only
+> source of truth. A copy used to sit in this doc; on 2026-09-07 Gerard edited
+> that copy twice, once with no effect at all, because it was not what runs.
+> Two homes for one fact, which is the failure the Sep 6 `STATUS.md`
+> restructure exists to prevent. Removed rather than re-synced.
+>
+> Version history: **V1** the deliberate throwaway (15/15 audit, no redraft
+> path exercised). **V2** regressed to 12/15 — two bugs, both Claude's, both
+> diagnosed in one read from the persisted run and both fixed in V3. **V3**
+> adds the `get_fact_sheet` tool, corrects the `query` clause, and carries
+> Gerard's substitute-don't-only-subtract fix to the redraft clause.
 
 ---
 
