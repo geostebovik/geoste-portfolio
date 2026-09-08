@@ -237,6 +237,40 @@ pre-emptively hardened that morning, this number would not exist.
   CV-audit item on a different thumbnail, and every item runs on its own
   thread, so nothing is shared between them.
 
+### item 6 at n=21 — `20260908-143613`
+
+The v2 topic was run 21 times through `probe_orchestrator_stability.py`.
+
+| measure | result |
+|---|---|
+| first-draft relevance | **3.0 x19, 2.0 x2** (runs 13, 15) — dip rate 9.5% |
+| first-draft groundedness | 4.0 x21, zero variance |
+| distinct first drafts | **19 of 21**, at `AGENT_TEMPERATURE=0` |
+| stop-on-pass | fired on runs 13 and 15; **only run 15 is unambiguous** |
+
+**The step function is confirmed, and item 6 is confirmed to sit exactly on the
+step.** 19 of 21 first drafts landed on 3.0 — the threshold itself — which is
+what makes this fixture useful and also what makes it a poor pass/fail control:
+its verdict is decided by a coin-flip-adjacent margin, not by the design.
+Deliberately not "fixed", per item 1's precedent: the expected row still says
+what a correct pipeline should produce.
+
+**What it bought.** The redraft branch was reachable after all — not by making
+the topic harder, which two attempts showed does not move relevance, but by
+running the borderline fixture enough times for variance to push a draft under
+the bar. Run 15: draft 1 at 2.0, one redraft, draft 2 at 3.0, stopped with a
+call to spare.
+
+**What it did not settle.** The judge's primary criticism was identical on both
+drafts, and the variance on this cell is the same size as the score movement, so
+the recovery is unattributable. See `m7-orientation.md`'s Backlog.
+
+**Design constraint this adds:** a fixture whose expected verdict depends on a
+score landing exactly on the threshold is not a control — it is a coin flip with
+a documented bias. Any future text-path item should be designed to land clear of
+the bar in one direction, and item 6 should be read as a variance instrument
+rather than as a pass/fail cell.
+
 ## Item 7 — "Our Price-Match Guarantee and Return Policy"
 
 - **Planted flaw:** text-path, **unrecoverable**. v2, replacing the crew topic

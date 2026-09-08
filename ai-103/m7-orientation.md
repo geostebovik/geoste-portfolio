@@ -152,6 +152,13 @@ correct.
   note the sting in the tail: the warning was in the docstring but truncated
   out of the schema, so the agent had never seen it either. Neither party was
   reading the contract.
+- **`temperature=0` does not make an Agents-SDK run repeatable.** Added Sep 8,
+  correcting an assumption Claude reasoned from rather than checked. 21 runs of
+  one item at `AGENT_TEMPERATURE=0` produced **19 distinct drafts** — the SDK
+  exposes temperature and top_p but no `seed`, so temperature narrows the
+  distribution and does not collapse it. Consequence: any claim that "the
+  drafting is pinned, so the variance must be judge-side" is unsupported, and
+  separating the two needs a probe that removes the agent from the loop.
 - **Do not infer a gradient from a single point sitting on a threshold.**
   Added Sep 8. A relevance score of 3.0 against a threshold of 3 looked like a
   fixture that was nearly hard enough, so the plan was to push the topic
@@ -623,14 +630,22 @@ CV-audit run should score exactly as documented there — that table is what
    - **Degenerate only:** "replace unsupported claims with supported ones"
      ran, but with no valid material available it substituted meta-commentary
      about the fact sheet into customer-facing copy. See Backlog.
-   - **Still zero observations: `stop-on-pass`.** No draft has ever passed
-     after a failure.
-   - **And it may not be reachable by topic design.** Relevance returns 3.0
-     (pass) whenever the topic's spine is supported and 2.0 (fail) when it is
-     not, with nothing observed between — so the condition that produces a
-     first-draft failure is the same one that prevents recovery. The untried
-     regime is a **partially supported spine**. Gerard's decision: try it, or
-     document the clause as unobserved and certify saying so.
+   - ~~**Still zero observations: `stop-on-pass`.**~~ — **OBSERVED
+     2026-09-08 (`20260908-143613`, item6 x21, run 15).** Not by topic design,
+     which looked impossible, but by **variance**: item6 sits exactly on the
+     relevance threshold, 2 of 21 first drafts drew 2.0, and the redraft
+     recovered. Run 15 is the clean case — one redraft, passed, stopped with a
+     call to spare. **Run 13 does not count as a second**: it passed on draft 3,
+     the cap boundary, where stop-on-pass and keep-the-third produce identical
+     behavior. **n=1.**
+   - **What is NOT settled, and it is the reason this item stays open.** The
+     redraft may not have earned the pass. The judge's primary criticism was
+     identical on the failing and passing drafts, and the observed variance on
+     that cell is exactly the size of the score movement, so the recovery is
+     unattributable from one observation. **If the loop is retry-until-lucky
+     rather than remediation, a higher cap raises the false-pass rate** — which
+     inverts what the cap decision was assumed to rest on. The judge-isolation
+     probe (~39K tokens) settles it.
 7. **Build a multi-run harness for the orchestrator, then certify.** — **OPEN,
    and still gated on item 6's remaining decision.** `probe_fixture_stability.py`
    covers the CV audit only. Budget re-measured 2026-09-08: ~11.6K tokens per
@@ -662,16 +677,42 @@ session's narrative paragraph in `STATUS.md`.
   is "the fact sheet cannot support this topic". Score stability: item8 moved
   4.0 → 5.0 on an identical topic between runs, so treat individual scores as
   ±1 and read direction, not magnitude.
+- **The redraft loop may be retry-until-lucky rather than remediation
+  (Sep 8) — settle before certifying.** In the one clean stop-on-pass
+  observation, the judge's primary criticism was *identical* on the failing
+  draft and the passing one ("does not include the key requested specifics —
+  sizes, prices, and turnaround times"), while the score moved 2.0 → 3.0. The
+  redraft did make one change the judge had asked for, so it is not pure noise —
+  but the measured variance on that cell is exactly the size of the movement, so
+  the recovery cannot be attributed to the edit. **If redrafts re-roll rather
+  than improve, a higher cap means a higher false-pass rate**, which inverts the
+  reasoning behind "the multi-run pass will settle whether a cap of 2 is right".
+  Cheap resolution: call `evaluate_draft()` directly on run 15's exact failing
+  draft ~10 times with no agent in the loop (~39K tokens). That also separates
+  judge variance from draft variance.
+- **Token budgets read off `run.usage` undercount by roughly 40% (Sep 8).** The
+  agent's usage figures exclude the judge calls — `evaluate_draft` runs on a
+  separate deployment through the Evaluation SDK — and exclude the CV audit's
+  vision calls, which use their own client. Sep 8: 177,278 agent tokens recorded
+  against 17 `evaluate_draft` calls worth roughly 66K more, plus 14 vision calls
+  not counted at all. Every certification budget quoted so far is agent-only.
 - **The agent writes its grounding scaffolding into customer-facing copy when
-  it has nothing to substitute (Sep 8).** item7's redrafts produced *"Because
+  it has nothing to substitute (Sep 8) — now 3 for 3 on redrafts, and
+  blocking.** item7's redrafts produced *"Because
   the fact sheet only confirms the store's core services..."* and *"as
   presented in the store fact sheet"* and *"policies not listed there"* — the
   marketing description talking to the viewer about an internal document.
   Groundedness passed it three times, relevance marked it down for the wrong
   reason, and no `INSTRUCTIONS_V3` clause forbids it. This is the "replace
   unsupported claims with supported ones" clause degenerating when nothing
-  valid fits. **Decide before certifying, not after** — certifying with it
-  unfixed certifies this behavior.
+  valid fits. **Confirmed 2026-09-08 as not topic-specific:** all three redrafts
+  across the item6 x21 probe's runs 13 and 15 produced it too — "focuses on what
+  the fact sheet confirms", "sticks to the details confirmed in the fact sheet",
+  "sticks to the details confirmed in the store fact sheet". It is what the agent
+  does *whenever it redrafts*, not something item7's topic provoked. **Decide
+  before certifying, not after** — any certification covering a redraft path
+  certifies this behavior. `INSTRUCTIONS_V4` is Gerard's wording; fixtures stay
+  frozen so it is one variable.
 - **`unmeasured()` is verified logic on an unexercised path (Sep 8).** Written
   after item1's `server_error`, unit-tested against a synthetic crashed record,
   and never run against a real crash because the next run completed cleanly.

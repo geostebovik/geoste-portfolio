@@ -17,34 +17,30 @@ were split into `STATUS-archive-phase1.md` in this same folder.
 own `### Session — <date>` heading at the top of the log; it does not get
 appended to `## Current next action
 
-**Next action: decide whether stop-on-pass is observable at all, then
-certify.** Two runs on 2026-09-08 moved the redraft branch from zero
-observations to partial. What is left is one clause and one decision.
+**Next action: settle whether the redraft loop remediates or re-rolls, then fix
+the meta-commentary gap, then certify.** As of 2026-09-08 the redraft branch is
+observed; what is unresolved is whether the observation means what it appears to.
 
-1. **`stop-on-pass` still has zero observations.** The cap fired
-   (`20260908-133724`, item7: three `evaluate_draft` calls, `redrafts` = 2,
-   third draft kept, `FLAGGED FOR REVIEW: text check`) and the keep-and-report
-   clause fired with it. But no draft has ever passed *after* a failure, so the
-   early exit has never run. **And the two runs suggest it may not be reachable
-   by topic design** — see "The relevance step function" in the Sep 8 entry.
-   Relevance returns 3.0 (pass) whenever the topic's spine is supported and 2.0
-   (fail) when it is not, with nothing observed in between; the condition that
-   produces a first-draft failure is the same condition that prevents recovery.
-   The one untried regime is a **partially supported spine** — a topic half
-   answerable, where the redraft can drop the unsupported half and lean into
-   the supported one. Gerard's decision: try that, or document the clause as a
-   known unobserved path and certify without it, saying so plainly.
-2. **Then the high-`RUNS` certification pass.** No harness exists for the
-   orchestrator yet; `probe_fixture_stability.py` covers the CV audit only.
-   Measured 2026-09-08: ~11.6K tokens per item, ~102K for an eight-item run
-   (item7 alone cost 20.8K on three judge calls). Seven runs is ~715K tokens at
-   the current item count.
-3. **Fix the meta-commentary gap first, or record it as accepted.** item7's
-   redrafts wrote the grounding document into customer-facing copy — "as
-   presented in the store fact sheet", "policies not listed there". Nothing in
-   the pipeline catches it. Certifying with it unfixed certifies that behavior.
-4. **Decide the orchestrator's model deliberately** — see the Backlog entry.
-   It runs `gpt-5-4`; every tool-level result beneath it was measured on
+1. **Judge-isolation probe -- cheap, and it answers two questions at once.** Call
+   `evaluate_draft()` directly on run 15's exact failing draft text, ~10 times,
+   with no agent in the loop. ~39K tokens, a couple of minutes. It separates
+   judge variance from draft variance (falsifying or confirming the mechanism
+   claimed on Sep 8), and it establishes whether a fixed borderline draft
+   re-scores across the 3.0 threshold -- which is the same question as whether
+   the redraft loop is remediation or retry-until-lucky.
+2. **`INSTRUCTIONS_V4`: forbid referencing the fact sheet in customer-facing
+   copy.** Gerard's wording, fixtures frozen, one variable. 3 of 3 redrafts
+   produced it. Certifying before this fix certifies the behavior.
+3. **Then the high-`RUNS` certification pass.** `probe_orchestrator_stability.py`
+   exists and works; `--items` and `--runs` take it from here. Re-measured
+   budget: ~11.6K tokens per item per run agent-side, ~20.8K for an item that
+   exhausts the cap. **NOTE: those figures exclude the judge and the vision
+   calls**, which run on separate deployments and do not appear in `run.usage` --
+   17 `evaluate_draft` calls on Sep 8 added roughly 66K tokens invisible to the
+   run records. Any budget quoted from `usage` alone undercounts by something
+   like 40% before vision.
+4. **Decide the orchestrator's model deliberately** -- see the Backlog entry. It
+   runs `gpt-5-4`; every tool-level result beneath it was measured on
    `gpt-5-4-mini`.
 
 ## Milestones (Phase 1)
@@ -376,6 +372,68 @@ when nothing valid fits.
   `_git()` hard-codes `--no-optional-locks` so a refreshed index is never
   persisted. Now measured by content (`git diff --name-only HEAD` plus
   untracked). Run 2 recorded `dirty=False` correctly.
+
+**Run 3 (`20260908-143613`) -- the first orchestrator stability probe, item6 x21.
+`stop-on-pass` fired.** `probe_orchestrator_stability.py` was written and run the
+same afternoon; its `main()` worked on the first attempt. 21/21 measured, no
+crashes, `git_dirty` False.
+
+| measure | result |
+|---|---|
+| first-draft relevance | **3.0 x19, 2.0 x2** (runs 13 and 15) |
+| first-draft groundedness | 4.0 x21 -- zero variance |
+| redrafts | run 13: 2 (passed on draft 3); run 15: 1 (passed on draft 2) |
+| final passed | 21/21 |
+
+**Only run 15 is a clean observation.** Draft 1 failed at relevance 2.0, one
+redraft, draft 2 passed, and the agent stopped -- two `evaluate_draft` calls
+where three were allowed. That is clause 7's early exit, unambiguously. **Run 13
+does not count as a second**: it passed on draft 3, the cap boundary, where
+stop-on-pass and "keep the third draft" both produce the same behavior, so the
+stop is not attributable to the early-exit clause. **n=1.**
+
+**21 runs was Gerard's call and the numbers justify it.** The dip rate is 2/21 =
+9.5%; at 7 runs the expected count is 0.67, so the likeliest outcome would have
+been zero hits and a wrong conclusion that the variance route was shut. A 0/7
+null would also have bounded the true rate only at ~43% (rule of three) --
+worthless. Claude proposed 7.
+
+**The prediction's outcome held; its stated mechanism did not.** Claude
+predicted the dip would come from JUDGE-side variance, reasoning that
+`AGENT_TEMPERATURE=0` pins the drafting. It does not: **19 distinct first drafts
+across 21 runs.** With no `seed` parameter in the Agents SDK, temperature=0
+narrows but does not repeat. So what is demonstrated is *pipeline* variance, and
+judge variance cannot be separated from draft variance in this data. Both
+failing runs happen to share a draft-opener variant ("Need to know whether..."
+rather than "Need to know what to..."), but run 8 used that opener and scored
+3.0. A cheap probe settles it -- call `evaluate_draft()` directly on run 15's
+exact failing draft ~10 times with no agent in the loop, ~39K tokens.
+
+**Finding 4 -- the redraft may not have earned the pass, and this is the one
+that bears on certification.** Run 15's judge reasons, draft 1 versus draft 2:
+
+> **2.0:** "does not address the requested topic details -- propane tank sizes,
+> prices, or turnaround times... It also adds unrelated services"
+>
+> **3.0:** "does not include the key requested specifics -- sizes, prices, and
+> turnaround times... It's on-topic but incomplete and somewhat generic."
+
+The primary criticism is unchanged. The redraft did make one real change the
+judge asked for -- it dropped the unrelated services -- so this is not pure
+noise. But the dominant complaint was never fixable, and **the observed variance
+on this cell (2.0 <-> 3.0) is exactly the size of the movement**, so the recovery
+cannot be attributed to the edit from one observation. On this fixture the
+redraft loop may be functioning as **retry-until-lucky** rather than
+remediation. If so, a higher cap means more dice rolls and a higher false-pass
+rate -- which means the cap's correct value depends on a prior question the
+multi-run pass was assumed to answer directly.
+
+**Finding 3 escalates: the meta-commentary defect is 3 for 3 on redrafts.** All
+three redrafts across runs 13 and 15 inserted it -- "focuses on what the fact
+sheet confirms", "sticks to the details confirmed in the fact sheet", "sticks to
+the details confirmed in the store fact sheet". It is **not** confined to
+item7's unrecoverable topic; it is what the agent does whenever it redrafts. Any
+certification that includes a redraft path certifies this behavior.
 
 **Process note worth keeping.** The morning's plan was to harden item6's topic
 pre-emptively, on conjecture, before any run. Gerard stopped it: with no
