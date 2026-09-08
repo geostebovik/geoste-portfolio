@@ -234,39 +234,90 @@ ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V3
 # run repeatable. Comparing two runs still needs the multi-run probe.
 AGENT_TEMPERATURE = 0.0
 
-# The five items from content-items-plan.md. `expected_audit` is that document's
+# The items from content-items-plan.md. `expected_audit` is that document's
 # expected-results table, carried here so a run is read against the rubric
-# rather than by eye. Two clean controls, three single planted flaws.
+# rather than by eye. Items 1-5 are the CV-audit set: two clean controls, three
+# single planted flaws, and they define the 5x3 = 15-cell matrix every prior run
+# is reported against.
+#
+# Items 6 and 7 were added 2026-09-08 and are a different category: the flaw is
+# in the TOPIC, for evaluate_draft to catch, not in the thumbnail. They exist
+# because INSTRUCTIONS_V3's remediation clauses (the two-redraft cap, "replace
+# unsupported claims with supported ones", stop-on-pass) have zero observations
+# -- both V3 runs passed every item on the first draft. `text_path: True` keeps
+# their audit cells out of the 15-cell matrix so that figure stays comparable
+# across runs; both totals are printed and persisted.
+#
+# `expected_text` is pre-registered, before the run, per content-items-plan.md.
+# expected_redrafts is None where more than one count is correct -- item6 may
+# recover on the first or the second redraft, and both are the clause working.
 ITEMS = [
     {
         "id": "item1",
         "topic": "How to Mix Exterior Paint Colors at Home",
         "thumbnail": "item1-paint-mixing-CLEAN.png",
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
         "id": "item2",
         "topic": "Seasonal Maintenance Checklist for Homeowners",
         "thumbnail": "item2-seasonal-checklist-CLEAN.png",
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
         "id": "item3",
         "topic": "Tool Rental 101: What We Offer",
         "thumbnail": "item3-tool-rental-FLAW-legibility.png",
         "expected_audit": {"text_legible": False, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
         "id": "item4",
         "topic": "Key Cutting While You Wait",
         "thumbnail": "item4-key-cutting-FLAW-brand.png",
         "expected_audit": {"text_legible": True, "brand_consistent": False, "info_accurate": True},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
         "id": "item5",
         "topic": "Propane Tank Refill Safety Tips",
         "thumbnail": "item5-propane-refill-FLAW-info-accuracy.png",
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": False},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
+    },
+    {
+        # Recoverable text failure. The spine is supported -- the fact sheet
+        # lists tool rental with daily and weekly rates -- but it carries no
+        # prices at all, and "Rates Explained" demands numbers. The redraft has
+        # somewhere real to go (rate structure, phone number, hours), which is
+        # what puts "replace unsupported claims with supported ones" under test
+        # rather than plain deletion. Pre-registered alternative: the agent may
+        # decline to invent prices and pass on the first draft. That is a
+        # finding -- the instructions outrunning the fixture -- not a defect.
+        "id": "item6",
+        "topic": "Tool Rental Pricing: Daily and Weekly Rates Explained",
+        "thumbnail": "item1-paint-mixing-CLEAN.png",
+        "text_path": True,
+        "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": False, "final_passed": True, "expected_redrafts": None},
+    },
+    {
+        # Unrecoverable text failure. fact-sheet.md's own "Out of scope"
+        # section declares this absent -- "No employee names, no ownership
+        # history" -- so there is no judgment call about supportability. No
+        # substitution exists, so all three drafts should fail and the cap
+        # should fire. Pre-registered alternative: the agent may refuse to
+        # draft and name the missing facts, as item3 did under INSTRUCTIONS_V2
+        # on 2026-09-07. Correct behavior, different result -- it leaves the
+        # cap still unobserved.
+        "id": "item7",
+        "topic": "Meet the Riverside Crew: The People Behind the Counter",
+        "thumbnail": "item1-paint-mixing-CLEAN.png",
+        "text_path": True,
+        "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": False, "final_passed": False, "expected_redrafts": 2},
     },
 ]
 
@@ -499,12 +550,31 @@ def run_item(client, agent_id: str, item: dict) -> dict:
     # lets a later multi-run pass replace that judgement with a number.
     draft_checks = [c for c in calls if c.get("tool") == "evaluate_draft"]
     redrafts = max(0, len(draft_checks) - 1)
-    final_text_passed = None
-    if draft_checks and "output" in draft_checks[-1]:
+
+    def _all_passed(call: dict | None):
+        """all_passed out of one evaluate_draft call, or None if unreadable."""
+        if not call or "output" not in call:
+            return None
         try:
-            final_text_passed = json.loads(draft_checks[-1]["output"]).get("all_passed")
+            return json.loads(call["output"]).get("all_passed")
         except (TypeError, ValueError):
-            final_text_passed = None
+            return None
+
+    # Both ends of the chain, added 2026-09-08. The last call alone cannot
+    # distinguish "passed on the first draft" from "failed then recovered",
+    # which is the entire distinction items 6 and 7 were added to observe.
+    first_text_passed = _all_passed(draft_checks[0] if draft_checks else None)
+    final_text_passed = _all_passed(draft_checks[-1] if draft_checks else None)
+
+    expected_text = item.get("expected_text") or {}
+    text_matches_expected = None
+    if expected_text and draft_checks:
+        expected_redrafts = expected_text.get("expected_redrafts")
+        text_matches_expected = (
+            first_text_passed == expected_text.get("first_pass")
+            and final_text_passed == expected_text.get("final_passed")
+            and (expected_redrafts is None or redrafts == expected_redrafts)
+        )
 
     record = {
         "id": item["id"],
@@ -514,9 +584,13 @@ def run_item(client, agent_id: str, item: dict) -> dict:
         "run_id": run.id,
         "run_status": str(run.status),
         "last_error": str(run.last_error) if getattr(run, "last_error", None) else None,
+        "text_path": bool(item.get("text_path")),
         "evaluate_draft_calls": len(draft_checks),
         "redrafts": redrafts,
+        "first_text_passed": first_text_passed,
         "final_text_passed": final_text_passed,
+        "expected_text": expected_text or None,
+        "text_matches_expected": text_matches_expected,
         "expected_audit": item["expected_audit"],
         "actual_audit": actual,
         "audit_matches_expected": (actual == item["expected_audit"]) if actual else None,
@@ -535,8 +609,14 @@ def run_item(client, agent_id: str, item: dict) -> dict:
         print(f"run error:  {record['last_error']}")
     names = [s["name"] for s in record["requested_tool_calls"]]
     print(f"tools called ({len(names)}): {names or 'NONE'}")
-    print(f"text check: all_passed={final_text_passed}  "
+    print(f"text check: first={first_text_passed} final={final_text_passed}  "
           f"evaluate_draft calls={len(draft_checks)} (redrafts={redrafts})")
+    if expected_text:
+        print(f"expected text (content-items-plan.md): "
+              f"first={expected_text.get('first_pass')} "
+              f"final={expected_text.get('final_passed')} "
+              f"redrafts={expected_text.get('expected_redrafts')}"
+              f"   match={text_matches_expected}")
     print(f"expected audit (content-items-plan.md): {json.dumps(item['expected_audit'])}")
     print(f"actual audit (from tool output):        {json.dumps(actual)}"
           f"   match={record['audit_matches_expected']}")
@@ -551,10 +631,20 @@ def run_item(client, agent_id: str, item: dict) -> dict:
 # Results
 # ---------------------------------------------------------------------------
 
-def cells_correct(records: list[dict]) -> tuple[int, int]:
-    """Correct cells out of the 5x3 matrix, counted against the answer key."""
+def cells_correct(records: list[dict], matrix_only: bool = False) -> tuple[int, int]:
+    """Correct audit cells, counted against content-items-plan.md's answer key.
+
+    `matrix_only` restricts the count to items 1-5 -- the 5x3 = 15-cell matrix
+    every run before 2026-09-08 was reported against. Items 6 and 7 carry audit
+    cells too (they reuse item1's clean thumbnail), but folding them in would
+    silently change the headline from 15 to 21 and make no prior run comparable
+    without arithmetic. Both totals are printed and persisted; which one becomes
+    the headline is a decision to make against a real run, not in advance.
+    """
     correct = total = 0
     for record in records:
+        if matrix_only and record.get("text_path"):
+            continue
         actual = record.get("actual_audit") or {}
         for key, expected in record["expected_audit"].items():
             total += 1
@@ -571,6 +661,7 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
     """
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     correct, total = cells_correct(records)
+    m_correct, m_total = cells_correct(records, matrix_only=True)
     path = RESULTS_DIR / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_orchestrator.json"
     payload = {
         "run": provenance,
@@ -579,6 +670,12 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
             "items_matching_expected": sum(1 for r in records if r.get("audit_matches_expected")),
             "cells_correct": correct,
             "cells_total": total,
+            "matrix_cells_correct": m_correct,
+            "matrix_cells_total": m_total,
+            "text_path_items_matching_expected": sum(
+                1 for r in records if r.get("text_path") and r.get("text_matches_expected")
+            ),
+            "text_path_items": sum(1 for r in records if r.get("text_path")),
             "tool_calls": sum(len(r.get("tool_calls") or []) for r in records),
             "items_with_redrafts": sum(1 for r in records if r.get("redrafts")),
             "redrafts_total": sum(r.get("redrafts") or 0 for r in records),
@@ -628,7 +725,17 @@ def main():
         # it is the exact failure this file was changed to stop.
         path = write_results(provenance, records)
         correct, total = cells_correct(records)
-        print(f"\n{correct}/{total} cells match content-items-plan.md")
+        m_correct, m_total = cells_correct(records, matrix_only=True)
+        print(f"\n{m_correct}/{m_total} audit cells match content-items-plan.md "
+              f"(items 1-5, the matrix prior runs are reported against)")
+        if total != m_total:
+            print(f"{correct}/{total} audit cells including the text-path items")
+        text_items = [r for r in records if r.get("text_path")]
+        for record in text_items:
+            print(f"  {record['id']}: first={record.get('first_text_passed')} "
+                  f"final={record.get('final_text_passed')} "
+                  f"redrafts={record.get('redrafts')} "
+                  f"-> matches expected: {record.get('text_matches_expected')}")
         print(f"results written: {path}")
 
 

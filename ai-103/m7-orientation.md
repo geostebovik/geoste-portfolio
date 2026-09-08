@@ -757,6 +757,20 @@ session's narrative paragraph in `STATUS.md`.
   arrangement: Claude prepares the commit message, Gerard commits on
   Windows. Cleanup needs `-Force`: `Get-ChildItem .git\objects -Recurse
   -Filter tmp_obj_* -Force | Remove-Item -Force`.
+  **A failed `git commit --amend` strands `HEAD.lock` specifically, not
+  `index.lock` (Sep 7).** The obvious cleanup command looks for the wrong
+  file and reports "cannot find path", which reads like nothing is wrong.
+  `Remove-Item .git\HEAD.lock` is the fix. Worth knowing because the amend's
+  companion `git push` in the same block succeeded, so the failure was
+  silent from the remote's side.
+  **"Reads are fine" is too broad -- corrected Sep 8.** `git diff` on a file
+  whose stat cache is stale refreshes the index, which is a write: it
+  stranded an empty `.git/index.lock` even under `GIT_OPTIONAL_LOCKS=0 git
+  --no-optional-locks`. Neither switch covers it. So the rule is not
+  read-vs-write by command name; it is that **any git command which may
+  touch the index can strand a lock through this shell.** `git log`,
+  `git show` and `git rev-parse` remain safe. Cleanup: `Remove-Item
+  .git\index.lock`.
 
 - **`notes` is not always faithful to the boolean it accompanies (found Sep
   2).** In 2 of 7 item3 runs the prose reasoned explicitly to a pass ("so
