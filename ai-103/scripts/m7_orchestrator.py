@@ -240,13 +240,14 @@ AGENT_TEMPERATURE = 0.0
 # single planted flaws, and they define the 5x3 = 15-cell matrix every prior run
 # is reported against.
 #
-# Items 6 and 7 were added 2026-09-08 and are a different category: the flaw is
-# in the TOPIC, for evaluate_draft to catch, not in the thumbnail. They exist
+# Items 6-8 were added 2026-09-08 and are a different category: the flaw is in
+# the TOPIC, for evaluate_draft to catch, not in the thumbnail. They exist
 # because INSTRUCTIONS_V3's remediation clauses (the two-redraft cap, "replace
 # unsupported claims with supported ones", stop-on-pass) have zero observations
-# -- both V3 runs passed every item on the first draft. `text_path: True` keeps
-# their audit cells out of the 15-cell matrix so that figure stays comparable
-# across runs; both totals are printed and persisted.
+# -- every V3 run has passed every item on the first draft, including the first
+# two text-path fixtures. `text_path: True` keeps their audit cells out of the
+# 15-cell matrix so that figure stays comparable across runs; both totals are
+# printed and persisted. Item 8 is a reproduction control, not a flaw fixture.
 #
 # `expected_text` is pre-registered, before the run, per content-items-plan.md.
 # expected_redrafts is None where more than one count is correct -- item6 may
@@ -288,36 +289,60 @@ ITEMS = [
         "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
-        # Recoverable text failure. The spine is supported -- the fact sheet
-        # lists tool rental with daily and weekly rates -- but it carries no
-        # prices at all, and "Rates Explained" demands numbers. The redraft has
-        # somewhere real to go (rate structure, phone number, hours), which is
-        # what puts "replace unsupported claims with supported ones" under test
-        # rather than plain deletion. Pre-registered alternative: the agent may
-        # decline to invent prices and pass on the first draft. That is a
-        # finding -- the instructions outrunning the fixture -- not a defect.
+        # Recoverable text failure, v2. The v1 topic (tool-rental pricing)
+        # scored groundedness 4.0 / relevance 3.0 and passed first draft in
+        # 20260908-115858: the agent never invented a price, so clause 4 held
+        # and there was nothing to remediate. The v1 run established that
+        # INSTRUCTIONS_V3 will not produce an unsupported claim on an
+        # answerable topic, so supportability is not a reachable door --
+        # responsiveness is. fact-sheet.md gives four words on this service
+        # ("Propane tank refill") against a topic demanding three specific
+        # dimensions, so an honest draft is thin ON TOPIC while hours, phone,
+        # address, tagline and four adjacent services sit unused for the
+        # redraft to substitute in. Moved one measured step from relevance 3.0
+        # (the threshold itself), not as far as it would go: branches 2 and 3
+        # in content-items-plan.md call for opposite corrections.
         "id": "item6",
-        "topic": "Tool Rental Pricing: Daily and Weekly Rates Explained",
+        "topic": "Propane Tank Refill: Sizes, Prices and Turnaround",
         "thumbnail": "item1-paint-mixing-CLEAN.png",
         "text_path": True,
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
         "expected_text": {"first_pass": False, "final_passed": True, "expected_redrafts": None},
     },
     {
-        # Unrecoverable text failure. fact-sheet.md's own "Out of scope"
-        # section declares this absent -- "No employee names, no ownership
-        # history" -- so there is no judgment call about supportability. No
-        # substitution exists, so all three drafts should fail and the cap
-        # should fire. Pre-registered alternative: the agent may refuse to
-        # draft and name the missing facts, as item3 did under INSTRUCTIONS_V2
-        # on 2026-09-07. Correct behavior, different result -- it leaves the
-        # cap still unobserved.
+        # Unrecoverable text failure, v2. The v1 topic (the crew) was declared
+        # out of scope by fact-sheet.md itself and still scored 4.0/4.0: the
+        # judge excused the unsupported generality ("which is fine since none
+        # exist in scope") and the agent padded with the grounded services
+        # list. The correction is a topic where that padding is transparently
+        # non-responsive -- a services list does not answer a policy question
+        # -- so relevance punishes rather than forgives. No policy facts of any
+        # kind exist in the fact sheet, so no substitution is available.
         "id": "item7",
-        "topic": "Meet the Riverside Crew: The People Behind the Counter",
+        "topic": "Our Price-Match Guarantee and Return Policy",
         "thumbnail": "item1-paint-mixing-CLEAN.png",
         "text_path": True,
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
         "expected_text": {"first_pass": False, "final_passed": False, "expected_redrafts": 2},
+    },
+    {
+        # REPRODUCTION CONTROL, not a flaw fixture. The v1 item7 topic carried
+        # forward unchanged, to test whether the groundedness-forgives-
+        # generalities result reproduces -- one observation against a
+        # documented ~2/7 noise floor is a hypothesis, not a result.
+        #
+        # expected_text here encodes the OBSERVED 2026-09-08 behavior, not a
+        # standard of correctness. text_matches_expected True means THE FINDING
+        # REPRODUCED; False means it did not. By the topic's design intent,
+        # passing is the wrong answer -- this row deliberately does not say so,
+        # because "did it reproduce" and "is it correct" are different
+        # questions and one boolean cannot carry both. See content-items-plan.md.
+        "id": "item8",
+        "topic": "Meet the Riverside Crew: The People Behind the Counter",
+        "thumbnail": "item1-paint-mixing-CLEAN.png",
+        "text_path": True,
+        "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
 ]
 
@@ -357,7 +382,16 @@ def run_provenance() -> dict:
     m7-orientation.md's build list iterates exactly that string, and every
     future run has to be readable against the wording it actually ran under.
     """
-    status = _git("status", "--porcelain")
+    # `git status --porcelain` reports STAT differences, not content ones, and
+    # _git() hard-codes --no-optional-locks so a refreshed index is never
+    # persisted -- which means a file whose mtime moved without its bytes
+    # changing is reported dirty on every run, forever. That fired 2026-09-08:
+    # q_a_pairs_sample.txt was byte-identical to HEAD by every check that reads
+    # bytes, and still flagged the run dirty. A warning that cries wolf is worse
+    # than none, so dirtiness is now measured by content.
+    tracked = _git("diff", "--name-only", "HEAD")
+    untracked = _git("ls-files", "--others", "--exclude-standard")
+    status = "\n".join(x for x in (tracked, untracked) if x)
     return {
         "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
         "script": Path(__file__).name,
@@ -631,6 +665,15 @@ def run_item(client, agent_id: str, item: dict) -> dict:
 # Results
 # ---------------------------------------------------------------------------
 
+def measured(record: dict) -> bool:
+    """Did this item's audit actually return a verdict?
+
+    False when the run did not complete, or completed without audit_thumbnail
+    producing one. Either way there is nothing to grade -- see unmeasured().
+    """
+    return bool(record.get("actual_audit"))
+
+
 def cells_correct(records: list[dict], matrix_only: bool = False) -> tuple[int, int]:
     """Correct audit cells, counted against content-items-plan.md's answer key.
 
@@ -645,12 +688,42 @@ def cells_correct(records: list[dict], matrix_only: bool = False) -> tuple[int, 
     for record in records:
         if matrix_only and record.get("text_path"):
             continue
+        if not measured(record):
+            continue
         actual = record.get("actual_audit") or {}
         for key, expected in record["expected_audit"].items():
             total += 1
             if actual.get(key) == expected:
                 correct += 1
     return correct, total
+
+
+def unmeasured(records: list[dict], matrix_only: bool = False) -> list[dict]:
+    """Items whose audit never produced a verdict, with why.
+
+    Added 2026-09-08, after item1 died on an Azure `server_error` between
+    evaluate_draft and audit_thumbnail. Its three cells had no actual value, so
+    the old counter scored them as three WRONG verdicts and the run read 12/15
+    -- indistinguishable from a real regression in a tool that was in fact
+    correct on every fixture it reached. In a seven-run certification pass one
+    transient server error would have read as instability in the audit. A cell
+    that was never measured is not a failed cell, and the two must not share a
+    denominator.
+    """
+    out = []
+    for record in records:
+        if matrix_only and record.get("text_path"):
+            continue
+        if measured(record):
+            continue
+        out.append({
+            "id": record["id"],
+            "cells": len(record["expected_audit"]),
+            "run_status": record.get("run_status"),
+            "last_error": record.get("last_error"),
+            "tools_called": [s["name"] for s in record.get("requested_tool_calls") or []],
+        })
+    return out
 
 
 def write_results(provenance: dict, records: list[dict]) -> Path:
@@ -662,6 +735,7 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     correct, total = cells_correct(records)
     m_correct, m_total = cells_correct(records, matrix_only=True)
+    not_measured = unmeasured(records)
     path = RESULTS_DIR / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_orchestrator.json"
     payload = {
         "run": provenance,
@@ -672,6 +746,8 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
             "cells_total": total,
             "matrix_cells_correct": m_correct,
             "matrix_cells_total": m_total,
+            "unmeasured_items": not_measured,
+            "unmeasured_cells": sum(u["cells"] for u in not_measured),
             "text_path_items_matching_expected": sum(
                 1 for r in records if r.get("text_path") and r.get("text_matches_expected")
             ),
@@ -726,10 +802,16 @@ def main():
         path = write_results(provenance, records)
         correct, total = cells_correct(records)
         m_correct, m_total = cells_correct(records, matrix_only=True)
-        print(f"\n{m_correct}/{m_total} audit cells match content-items-plan.md "
+        print(f"\n{m_correct}/{m_total} MEASURED audit cells match content-items-plan.md "
               f"(items 1-5, the matrix prior runs are reported against)")
         if total != m_total:
-            print(f"{correct}/{total} audit cells including the text-path items")
+            print(f"{correct}/{total} measured audit cells including the text-path items")
+        for u in unmeasured(records):
+            print(f"NOT MEASURED: {u['id']} -- {u['cells']} cells have no verdict. "
+                  f"run_status={u['run_status']} error={u['last_error']} "
+                  f"tools={u['tools_called']}")
+            print("  These are excluded from the counts above. An unmeasured cell "
+                  "is not a failed cell; rerun the item before reading the score.")
         text_items = [r for r in records if r.get("text_path")]
         for record in text_items:
             print(f"  {record['id']}: first={record.get('first_text_passed')} "

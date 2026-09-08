@@ -13,9 +13,10 @@ true-positive one) and three items each carrying exactly one planted flaw, one
 per audit dimension named in `STATUS.md`'s M7 scope (brand consistency,
 legibility, info accuracy).
 
-**Items 6 and 7 were added 2026-09-08 and are a different category** — they
+**Items 6, 7 and 8 were added 2026-09-08 and are a different category** — they
 plant their flaw in the *topic*, for `evaluate_draft` to catch, not in the
-thumbnail. See "Text-path items 6 and 7" below. The 5x3 audit matrix items 1-5
+thumbnail (item 8 is a reproduction control rather than a flaw fixture). See
+"Text-path items 6-8" below. The 5x3 audit matrix items 1-5
 define is unchanged by them, and stays the figure prior runs are compared
 against.
 
@@ -133,16 +134,16 @@ also transcribed wrong ("What We Offer" → "what tye Offer").
 
 ---
 
-## Text-path items 6 and 7 (added 2026-09-08)
+## Text-path items 6-8 (added 2026-09-08, v1 superseded the same day)
 
-**A different category from items 1-5, deliberately.** Every item above
-plants its flaw in the *thumbnail*, for the CV audit to catch. These two plant
-it in the *topic*, for `evaluate_draft` to catch. They exist because
-`INSTRUCTIONS_V3`'s remediation clauses -- the two-redraft cap, "replace
-unsupported claims with supported ones", stop-on-pass -- have **zero
-observations**: both V3 runs passed every item on the first draft, so the
-entire redraft branch has never executed. Certifying a path that has never run
-certifies nothing, which is why the multi-run pass is gated behind these.
+**A different category from items 1-5, deliberately.** Every item above plants
+its flaw in the *thumbnail*, for the CV audit to catch. These plant it in the
+*topic*, for `evaluate_draft` to catch. They exist because `INSTRUCTIONS_V3`'s
+remediation clauses -- the two-redraft cap, "replace unsupported claims with
+supported ones", stop-on-pass -- have **zero observations**: every V3 run has
+passed every item on the first draft, so the entire redraft branch has never
+executed. Certifying a path that has never run certifies nothing, which is why
+the multi-run pass is gated behind these.
 
 **Why a plan change and not just a run.** Forcing the failure requires a topic
 the fact sheet cannot support, and the topic set is specified here. That makes
@@ -152,85 +153,133 @@ an existing topic would have destroyed a graded cell in a 5x3 matrix that has
 returned 15/15 twice, and each of the five has a stated job here -- two
 controls, three single planted flaws. None was spare.
 
-**Why a false-premise topic works.** It fails through one of two doors and
-there is no third. Either the agent restates the unsupported premise, and
-`GroundednessEvaluator` marks it down against this fact sheet; or it writes
-around the premise, and `RelevanceEvaluator` marks it down, because the query
-passed to that evaluator has the topic embedded verbatim and the response no
-longer answers it. Either door sets `all_passed` false, which is the field the
-instructions branch on. What separates item 6 from item 7 is whether the
-topic's **spine** is supported or only its **details**.
-
-**Both reuse `item1-paint-mixing-CLEAN.png`.** No fixture is re-rendered and
+**All reuse `item1-paint-mixing-CLEAN.png`.** No fixture is re-rendered and
 `build.py` is untouched -- deliberate, because a naive rerun of `build.py`
 risks putting fresh pixels under item3's 1.19:1 contrast margin (see item 1's
 rebuild note). `audit_thumbnail()` never receives the topic, so the audit
 verdict is unaffected by the mismatch. **Known confound, accepted and recorded
-rather than fixed:** the agent *does* see a paint-mixing thumbnail attached to
-a tool-rental topic and may remark on the mismatch in its report. That is noise
-in the prose, not in the graded cells.
+rather than fixed:** the agent does see a paint-mixing thumbnail attached to an
+unrelated topic and may remark on it in its report. Noise in the prose, not in
+the graded cells.
 
-## Item 6 — "Tool Rental Pricing: Daily and Weekly Rates Explained"
+### What the first attempt taught, and why these topics changed
 
-- **Planted flaw:** text-path, **recoverable**
+**Run `20260908-115858` -- both v1 items passed on the first draft.** The v1
+design rested on a claim that turned out to be false: that a topic the fact
+sheet cannot support must fail groundedness. Measured results:
+
+| v1 item | topic | groundedness | relevance | redrafts |
+|---|---|---|---|---|
+| item6 | Tool Rental Pricing: Daily and Weekly Rates Explained | 4.0 | **3.0** | 0 |
+| item7 | Meet the Riverside Crew: The People Behind the Counter | 4.0 | 4.0 | 0 |
+
+**Three things follow, and they are what these v2 topics are built on.**
+
+1. **`INSTRUCTIONS_V3` is designed to prevent the failure being observed.** A
+   compliant agent answers any answerable topic honestly and passes. v1 item6
+   never invented a price -- it wrote "explains that the store offers daily and
+   weekly rates", asserting only that rates exist. Clause 4 held exactly as
+   written. So the first draft can only fail if the *honest* answer fails, and
+   there are two doors: the honest answer contradicts the fact sheet (it will
+   not -- clause 4 stops it), or the honest answer is **too thin to be
+   responsive**. Only the second door is reachable.
+2. **Groundedness forgives unsupported *generalities*; it penalises
+   unsupported *specifics*.** v1 item7's topic is declared out of scope by
+   `fact-sheet.md` itself, and it still scored 4.0 -- higher than item6. The
+   judge named the gap and excused it: *"adds a general claim about 'team
+   behind the counter' without specific employee details (which is fine since
+   none exist in scope)."* The agent then padded with grounded but off-topic
+   material -- the full services list, the phone number verbatim -- and
+   relevance rated the whole thing 4.0 for aligning with the theme. **The
+   evaluators score the draft as a whole, not the topic-specific claims**, so
+   padding defeats both. **n=1**; item8 exists to test whether it reproduces.
+3. **Recoverability is not about whether the topic is answerable.** It is about
+   whether **unused grounded material exists to thicken the redraft with** --
+   which is V2's 2026-09-07 collapse read in reverse, where the agent stripped
+   because it had nothing to add.
+
+**The measured lever.** v1 item6's relevance came in at exactly 3.0 against a
+threshold of 3 -- the lowest score anywhere in that run, sitting on the bar.
+One notch lower and it fails. So the v2 design pushes on responsiveness, not on
+supportability, and it pushes from a measured starting point rather than a
+guess. This is what running the v1 fixtures as designed bought: had they been
+pre-emptively hardened that morning, this number would not exist.
+
+## Item 6 — "Propane Tank Refill: Sizes, Prices and Turnaround"
+
+- **Planted flaw:** text-path, **recoverable**. v2, replacing the tool-rental
+  pricing topic that scored 4.0/3.0 and passed.
 - **Thumbnail:** `item1-paint-mixing-CLEAN.png` (reused clean control)
-- **Where the flaw lives:** the spine is supported -- this fact sheet lists
-  "Tool rental (daily and weekly rates)" as a service. The *details* are not:
-  it carries no prices at all, and "Rates Explained" demands numbers. A draft
-  that answers the topic as asked has to invent figures.
-- **The substitution the redraft has available:** the daily/weekly rate
-  structure itself, the phone number (555) 014-7742 for current rates, and
-  Mon-Sat 8:00 AM - 6:00 PM. This is what makes the item recoverable, and it
-  is the specific clause under test -- *replace* unsupported claims with
-  supported ones, rather than only deleting them.
+- **Where the flaw lives:** `fact-sheet.md` says exactly four words on this
+  service -- "Propane tank refill". The topic demands three specific dimensions
+  and the fact sheet supplies none of them, so an honest draft is nearly empty
+  *on the topic*. This attacks responsiveness, the one door the v1 run proved
+  is reachable, rather than supportability, which it proved is not.
+- **The substitution the redraft has available:** hours, phone number, address,
+  the tagline, brand voice, and the four adjacent services -- all unused by a
+  thin first draft. This is what makes the item recoverable, and it is the
+  clause under test: *replace* unsupported claims with supported ones, rather
+  than only deleting them.
 - **Expected result:** first `evaluate_draft` call fails; the agent redrafts
-  and the run ends passed, within the cap of two. Redraft count of 1 or 2 are
+  and the run ends passed, within the cap of two. Redraft counts of 1 or 2 are
   both correct. CV audit passes all three dimensions.
-- **Pre-registered branches, all three recorded before the run.** Item 6 sits
-  in a regime no run has yet touched: fact sheet present, topic spine
-  supported, specific details absent. `INSTRUCTIONS_V3`'s two 15/15 runs used
-  fully supported topics; `INSTRUCTIONS_V2`'s collapse had no fact sheet at
-  all. So the item is a measurement whose value does not depend on it failing,
-  and **the direction of any correction is not knowable in advance** -- which
-  is why the topic was not pre-emptively hardened. Registering the direction
-  along with each branch is the point:
-  1. **Fails, then recovers within the cap.** The intended observation. The
-     substitution clause and stop-on-pass are exercised; nothing to change.
-  2. **Passes on the first draft.** The fixture is too weak, not broken. It
-     would mean clause 4 is stronger than the fixture -- a finding worth
-     reporting. Correction: a **harder** topic, built from the draft text and
-     the judge's `reason` this run persists. Not a rewritten answer key.
-  3. **Fails and never recovers; the cap fires.** The fixture is too strong --
-     it has become a second item 7, and leaves substitution and stop-on-pass
-     still unobserved. Correction: an **easier** topic, in the opposite
-     direction from branch 2.
-  Branches 2 and 3 call for opposite corrections, so pre-emptively "raising
-  the odds of failure" would be a coin-flip on the sign of the error. A
-  hardened topic also stacks a second unsupported element on the first, which
-  makes a fail-to-fail result ambiguous between "the cap fired correctly" and
-  "the topic was unsatisfiable" -- a compound variable, and the mistake the
-  Sep 2 audit split was implemented with frozen wording to avoid.
+- **Pre-registered branches, all three, with the direction each implies:**
+  1. **Fails, then recovers within the cap.** The intended observation.
+  2. **Passes on the first draft.** Fixture still too weak. Correction: harder
+     again — and at that point the honest conclusion may be that
+     `INSTRUCTIONS_V3` cannot be made to fail on a well-formed topic, which is
+     itself the reportable result.
+  3. **Fails and never recovers.** Overshot into item 7's territory.
+     Correction: **easier**, the opposite direction from branch 2.
+  Branches 2 and 3 call for opposite corrections, which is why the topic was
+  moved one measured step rather than as far as it would go.
+- **Subject overlap with item 5 is coincidental and harmless** — item 5 is a
+  CV-audit item on a different thumbnail, and every item runs on its own
+  thread, so nothing is shared between them.
 
-## Item 7 — "Meet the Riverside Crew: The People Behind the Counter"
+## Item 7 — "Our Price-Match Guarantee and Return Policy"
 
-- **Planted flaw:** text-path, **unrecoverable**
+- **Planted flaw:** text-path, **unrecoverable**. v2, replacing the crew topic
+  that scored 4.0/4.0 and passed.
 - **Thumbnail:** `item1-paint-mixing-CLEAN.png` (reused clean control)
-- **Where the flaw lives:** the spine itself is unsupported, and this fact
-  sheet says so in its own words -- "Out of scope ... No employee names, no
-  ownership history." There is no judgment call about whether the topic is
-  supportable; the ground truth declares it absent.
+- **Where the flaw lives:** `fact-sheet.md` contains no policies of any kind —
+  no price matching, no returns, no warranty, no terms. **Crucially, the
+  services list is not a substitute for a policy question**, so the padding
+  strategy that rescued the v1 crew topic is transparently non-responsive here
+  and relevance should punish it rather than forgive it. That is the specific
+  correction the v1 result calls for.
 - **The substitution available:** none. That is the point.
-- **Expected result:** all three drafts fail, the two-redraft cap fires
-  (3 `evaluate_draft` calls, `redrafts` = 2), the agent keeps the third draft
-  per clause 7, and the final line is `FLAGGED FOR REVIEW` naming the text
-  check. CV audit still passes all three dimensions.
-- **Pre-registered alternative, recorded before the run:** the agent may
-  refuse to draft at all and name the missing facts, the way item3 did under
-  `INSTRUCTIONS_V2` on 2026-09-07. **That is correct behavior and a different
-  result** -- it would leave the cap still unobserved, and the follow-up would
-  be a topic the agent will attempt but cannot satisfy, not a rewritten
-  instruction. Registering both branches here, before the run, is what stops
-  the reading of the result from being decided by whichever one arrives.
+- **Expected result:** all three drafts fail, the cap fires (3 `evaluate_draft`
+  calls, `redrafts` = 2), the agent keeps the third draft per clause 7, and the
+  final line is `FLAGGED FOR REVIEW` naming the text check. CV audit passes.
+- **Pre-registered alternative:** the agent may refuse to draft and name the
+  missing facts, as item3 did under `INSTRUCTIONS_V2` on 2026-09-07. Correct
+  behavior, different result — it leaves the cap still unobserved, and the
+  follow-up would be a topic the agent will attempt but cannot satisfy.
+
+## Item 8 — "Meet the Riverside Crew: The People Behind the Counter"
+
+- **Purpose: a reproduction control, not a flaw fixture.** This is the v1
+  item7 topic, carried forward **unchanged**, to test whether finding 2 above
+  reproduces. One observation against a documented ~2/7 noise floor is a
+  hypothesis with a mechanism, not a result.
+- **Thumbnail:** `item1-paint-mixing-CLEAN.png` (reused clean control)
+- **Expected result — and read this carefully, because it is unlike every
+  other row in this document.** The expected row encodes the **observed**
+  2026-09-08 behavior (passes first draft, groundedness 4.0, relevance 4.0,
+  zero redrafts), **not** a standard of correctness. A `text_matches_expected`
+  of True here means *the finding reproduced*; False means it did not. Nothing
+  about this row asserts that passing is the right answer — by the design
+  intent of the topic, it is the wrong one. Registering it this way is what
+  keeps "did it reproduce" separate from "is it correct", which are different
+  questions that a single boolean would otherwise conflate.
+- **If it reproduces**, the groundedness-forgives-vagueness behavior goes into
+  the docs as a property of the evaluator, with the consequence that
+  `INSTRUCTIONS_V3` clause 4's "do not compensate by writing vaguely" is not
+  enforced by anything downstream of it.
+- **If it does not reproduce**, the v1 result was noise and the finding is
+  withdrawn, not softened.
+
 
 ## Why one flaw per item, not multiple
 
