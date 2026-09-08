@@ -281,6 +281,44 @@ pre-emptively hardened that morning, this number would not exist.
   withdrawn, not softened.
 
 
+### Measured outcome of the v2 topics — run `20260908-133724`
+
+| item | topic | grounded | relevance | redrafts | branch |
+|---|---|---|---|---|---|
+| 6 | Propane Tank Refill: Sizes, Prices and Turnaround | 4.0 | **3.0** | 0 | **2** — passed first draft |
+| 7 | Our Price-Match Guarantee and Return Policy | 4.0 ×3 | **2.0** ×3 | **2** | cap fired as designed |
+| 8 | Meet the Riverside Crew (control) | **5.0** | 4.0 | 0 | reproduced |
+
+**item 7 did what it was built to do.** Three `evaluate_draft` calls, the cap
+firing at two redrafts, the third draft kept, `FLAGGED FOR REVIEW: text check`.
+The correction from v1 was right: a services list is transparently
+non-responsive to a policy question, and relevance punished it — 2.0 on every
+draft — where it had forgiven the same padding on the crew topic.
+
+**item 6 landed on 3.0 for the second time, and that is the important
+number.** The v1 topic scored 3.0; this one demands three specific dimensions
+against four words in the fact sheet and also scored 3.0. **Relevance did not
+move.** Against item 7's 2.0 the pattern is a step, not a slope: spine
+supported → 3.0 → passes however much specificity the topic demands; spine
+absent → 2.0 → fails, with nothing to substitute. **So the recoverable-failure
+fixture this section was written to build may not exist in this design** — the
+condition producing a first-draft failure is the same one preventing recovery.
+Recorded rather than tuned, per item 3's precedent. The untried regime is a
+**partially supported spine** — a topic half answerable, where a redraft can
+drop the unsupported half and lean into the supported one.
+
+**item 8 reproduced at n=2, so the finding stands.** Groundedness rose to 5.0
+while the topic remained one `fact-sheet.md` declares out of scope. Combined
+with item 7's three drafts, that is five observations of groundedness scoring
+4.0-5.0 on drafts its own reason text calls non-responsive. See
+`m7-orientation.md`'s Backlog for the consequence.
+
+**Design constraint this adds, alongside the 2026-09-01 one below:** a
+text-path item's planted flaw cannot be "the fact sheet does not support this
+topic". Groundedness will not fail it. The flaw has to be one relevance can
+see — a topic the draft cannot answer — and that lands in the unrecoverable
+regime unless the spine is partially supported.
+
 ## Why one flaw per item, not multiple
 
 Isolating exactly one planted issue per flawed item makes the audit results

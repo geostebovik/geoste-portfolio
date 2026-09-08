@@ -15,72 +15,35 @@ were split into `STATUS-archive-phase1.md` in this same folder.
 
 **Two rules that keep it from decaying again.** (1) A session entry gets its
 own `### Session — <date>` heading at the top of the log; it does not get
-appended to `## Current next action`, which holds exactly one item — the
-current one — and gets *replaced*, not extended. (2) Cross-references name a
-date, never a direction: "the Aug 14 session notes", not "the notes above".
-Direction words were already wrong in several places before this restructure,
-because the file had drifted into three different orderings at once.
+appended to `## Current next action
 
-**Attribution -- read this before treating anything here as a work claim.**
-This is a joint working log. The work it describes was done by Gerard and by
-Claude (Anthropic's assistant), in proportions that varied task to task.
-Where authorship is known it is named inline -- "Gerard drafted, Claude
-critiqued", "Claude wrote the restructure at Gerard's request". **Where no
-actor is named, that is not an authorship claim by either party.** Most of
-this log is written in passive voice, and passive voice here means
-*unrecorded*, not *Gerard's*. An audit on 2026-09-03 found 82 of 101
-work-product passages in the Aug 28 - Sep 3 span carried no attributor at
-all, including most of the analysis, the root-cause findings and the
-architecture decisions. Those gaps are deliberately left unfilled:
-reconstructing attribution after the fact is guesswork, and guessing in a
-document that feeds a resume is worse than an honest silence.
+**Next action: decide whether stop-on-pass is observable at all, then
+certify.** Two runs on 2026-09-08 moved the redraft branch from zero
+observations to partial. What is left is one clause and one decision.
 
-**Going forward, attribution is written inline at the time the work is
-logged, or not at all.** Where it is genuinely unclear, the entry credits
-Claude rather than Gerard -- an under-credit costs nothing real, while an
-over-credit in resume material can cost a great deal.
-
-Commands/CLI reference lives separately: `iip-cli-runbook.md` in this same
-`ai-103/` folder — that page already works well as the "code samples"
-reference and didn't need rebuilding.
-
-Current-state map lives separately too: `m7-orientation.md` in this same
-folder (added Aug 28) — a one-page "what does M7 look like right now, what's
-built vs. designed vs. still open" snapshot, kept current on purpose. This
-file stays the chronological log; that one is the "you are here" pointer.
-
-A gotchas/tips-and-tricks page and a master index page (once there's enough
-split across pages to justify one) are deferred until real material
-accumulates for them — no point building empty structure now.
-
-**Status as of:** September 7, 2026. M7's orchestrator instructions text
-(`INSTRUCTIONS_V3`) is written, wired and passing 15/15 on two consecutive
-runs. Restructured 2026-09-06 — documentation only, no project work.
-
----
-
-## Current next action
-
-**Next action: observe the redraft path, then certify.** Item 4 of
-`m7-orientation.md`'s build list — the orchestrator instructions text — is
-**done as of 2026-09-07**. What remains before M7 can be called finished is
-evidence, not construction.
-
-1. **Get one clean observation of a failing `evaluate_draft`.** V3's
-   remediation clauses — the two-redraft cap, "replace unsupported claims with
-   supported ones", stop-on-pass — have **zero observations**. Both V3 runs
-   passed every item on the first draft. This is the same gap Sep 4 recorded,
-   arriving from the opposite direction: the drafting is now too reliable to
-   fail on its own. Forcing it means a topic the fact sheet cannot support,
-   which is a `content-items-plan.md` change, not just a run — treat it as a
-   plan decision, the same fixture-vs-answer-key distinction Sep 3's Thread 1
-   turned on.
-2. **Then the high-`RUNS` certification pass**, still owed before any public
-   "stable" claim. No harness exists for the orchestrator yet;
-   `probe_fixture_stability.py` covers the CV audit only. Budget from measured
-   numbers: ~11.6K tokens per item, ~58K per five-item run, so seven runs is
-   ~410K tokens and, at 30K TPM, at least fourteen minutes of pure throughput.
-3. **Decide the orchestrator's model deliberately** — see the Backlog entry.
+1. **`stop-on-pass` still has zero observations.** The cap fired
+   (`20260908-133724`, item7: three `evaluate_draft` calls, `redrafts` = 2,
+   third draft kept, `FLAGGED FOR REVIEW: text check`) and the keep-and-report
+   clause fired with it. But no draft has ever passed *after* a failure, so the
+   early exit has never run. **And the two runs suggest it may not be reachable
+   by topic design** — see "The relevance step function" in the Sep 8 entry.
+   Relevance returns 3.0 (pass) whenever the topic's spine is supported and 2.0
+   (fail) when it is not, with nothing observed in between; the condition that
+   produces a first-draft failure is the same condition that prevents recovery.
+   The one untried regime is a **partially supported spine** — a topic half
+   answerable, where the redraft can drop the unsupported half and lean into
+   the supported one. Gerard's decision: try that, or document the clause as a
+   known unobserved path and certify without it, saying so plainly.
+2. **Then the high-`RUNS` certification pass.** No harness exists for the
+   orchestrator yet; `probe_fixture_stability.py` covers the CV audit only.
+   Measured 2026-09-08: ~11.6K tokens per item, ~102K for an eight-item run
+   (item7 alone cost 20.8K on three judge calls). Seven runs is ~715K tokens at
+   the current item count.
+3. **Fix the meta-commentary gap first, or record it as accepted.** item7's
+   redrafts wrote the grounding document into customer-facing copy — "as
+   presented in the store fact sheet", "policies not listed there". Nothing in
+   the pipeline catches it. Certifying with it unfixed certifies that behavior.
+4. **Decide the orchestrator's model deliberately** — see the Backlog entry.
    It runs `gpt-5-4`; every tool-level result beneath it was measured on
    `gpt-5-4-mini`.
 
@@ -339,6 +302,89 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 8, 2026
+
+**Two orchestrator runs. The redraft branch executed for the first time, and
+the reason it took two attempts is the finding.**
+
+**Run 1 (`20260908-115858`) — both text-path fixtures passed on the first
+draft, falsifying the design premise behind them.** items 6 and 7 v1 (tool
+rental pricing; the crew topic) were built on the claim that a topic the fact
+sheet cannot support must fail groundedness. Measured: item6 groundedness 4.0 /
+relevance 3.0; item7 4.0/4.0. Zero redrafts on both.
+
+**Run 2 (`20260908-133724`) — 15/15 matrix, no unmeasured items, clean
+provenance, and item7 v2 fired the cap.** Three `evaluate_draft` calls,
+`redrafts` = 2, third draft kept per clause 7, final line
+`FLAGGED FOR REVIEW: text check`. The two-redraft cap and the keep-and-report
+clause are now **observed**.
+
+**Finding 1 — groundedness does not measure responsiveness.** Five
+observations across the two runs, all one direction. All three item7 drafts
+scored groundedness **4.0, passed** while relevance scored **2.0, failed** —
+and the groundedness reason says outright that the draft does not answer:
+*"it fails to address the requested topic ... Therefore, it is only partially
+responsive"*, scored 4.0. item8 (the v1 crew topic carried forward unchanged as
+a reproduction control) reproduced at groundedness **5.0**. So
+`GroundednessEvaluator` measures *is what you said supported*, not *did you
+answer*; `RelevanceEvaluator` is the only check in the pair that sees
+responsiveness. **Consequence: for any topic the fact sheet does not cover,
+`all_passed` is effectively relevance-gated — groundedness cannot fail a draft
+that pads with true statements.** Score stability caveat: item8 moved 4.0 → 5.0
+between runs on an identical topic, so the direction reproduces and the number
+is worth about ±1.
+
+**Finding 2 — the relevance step function, and why the recoverable fixture may
+not exist.** v1 item6 (tool rental pricing) scored relevance **3.0**. v2 item6
+(propane refill, three specific dimensions demanded against four words in the
+fact sheet) also scored **3.0** — the harder topic did not move it at all.
+Against item7's 2.0, where the spine itself is absent, the pattern is a step,
+not a slope: **spine supported → 3.0 → passes regardless of how much
+specificity the topic demands; spine absent → 2.0 → fails, with nothing to
+substitute, so it cannot recover.** If that holds, the condition producing a
+first-draft failure is the same condition preventing recovery, and a
+recoverable-failure fixture is structurally impossible in this design. Claude
+had inferred a gradient from a single point sitting on the threshold; two runs
+say otherwise. Standing lesson added below.
+
+**Finding 3 — the agent wrote its own scaffolding into the copy, and nothing
+caught it.** With no supported material to substitute, item7's redrafts
+substituted meta-commentary instead. Draft 2: *"Because the fact sheet only
+confirms the store's core services, this video stays focused on..."* Draft 3:
+*"a practical overview of Riverside Hardware & Supply as presented in the store
+fact sheet"* and *"questions about store policies not listed there"*. That is
+customer-facing marketing copy discussing an internal grounding document.
+Groundedness passed it three times, relevance marked it down for being
+off-topic rather than for this, and no `INSTRUCTIONS_V3` clause forbids it.
+This is the "replace unsupported claims with supported ones" clause degenerating
+when nothing valid fits.
+
+**Two instrument defects found and fixed, both surfaced by run 1.**
+
+- **A crashed item was scored as wrong verdicts.** item1 died on an Azure
+  `server_error` between `evaluate_draft` and `audit_thumbnail`; its three cells
+  had no verdict and counted as three failures, reading 12/15 —
+  indistinguishable from a regression in a tool that was correct on every
+  fixture it reached. In a seven-run certification pass one transient error
+  would have read as instability. `cells_correct()` now excludes unmeasured
+  items and `unmeasured()` reports them with the error and the tools that ran.
+  Unit-tested against a synthetic crash; **never exercised against a real one**,
+  since run 2 completed cleanly.
+- **`run_provenance()` reported a false dirty tree.** It used
+  `git status --porcelain`, which reports stat rather than content, while
+  `_git()` hard-codes `--no-optional-locks` so a refreshed index is never
+  persisted. Now measured by content (`git diff --name-only HEAD` plus
+  untracked). Run 2 recorded `dirty=False` correctly.
+
+**Process note worth keeping.** The morning's plan was to harden item6's topic
+pre-emptively, on conjecture, before any run. Gerard stopped it: with no
+baseline there would be no way to attribute the change. Running the v1 fixtures
+as designed is what produced the 3.0-on-threshold measurement, the groundedness
+property, and the step-function finding — none of which would exist if the
+fixtures had been "improved" first. **Two of the three branches pre-registered
+for item6 called for opposite corrections, so hardening early was a coin flip on
+the sign of the error.**
 
 ### Session — September 7, 2026
 

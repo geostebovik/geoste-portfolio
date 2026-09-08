@@ -152,6 +152,31 @@ correct.
   note the sting in the tail: the warning was in the docstring but truncated
   out of the schema, so the agent had never seen it either. Neither party was
   reading the contract.
+- **Do not infer a gradient from a single point sitting on a threshold.**
+  Added Sep 8. A relevance score of 3.0 against a threshold of 3 looked like a
+  fixture that was nearly hard enough, so the plan was to push the topic
+  harder. A second topic in the same regime, demanding far more specificity,
+  returned 3.0 again — it is a step function, not a slope. The right reading of
+  a value sitting exactly on a bar is "this may be where the function lands",
+  not "one more nudge will tip it".
+- **Run the fixture you designed before improving it.** Added Sep 8, and it
+  was Gerard's call against Claude's suggestion. Pre-emptively hardening item6
+  that morning would have destroyed the baseline: with no observation of the
+  original, no later result could be attributed to the change. The three
+  pre-registered branches called for **opposite** corrections depending on the
+  outcome, so acting early was a coin flip on the sign of the error. Running as
+  designed is what produced the threshold measurement, the groundedness
+  property and the step-function finding — none of which would exist otherwise.
+- **A crashed item is not a failed item, and must never share a denominator
+  with one.** Added Sep 8 after an Azure `server_error` killed item1 mid-run
+  and its three unmeasured cells scored as three wrong verdicts, reading 12/15.
+  In a multi-run certification pass that reads as instability in a tool that
+  was correct on every fixture it reached.
+- **The bridge and Windows disagree about line endings, and VS Code
+  under-reports what changed.** Added Sep 8, two separate failures on one day.
+  See the two Backlog entries; both point the same way — **`git status` in
+  PowerShell is the authority**, not VS Code's Source Control view and not git
+  read through the bridge.
 - **Read each new finding against "what does this change?" before spending a
   thread on it.** A finding worth one backlog line gets one backlog line.
   Added Sep 6, promoted out of the Sep 4 session prompt before that prompt was
@@ -589,25 +614,34 @@ CV-audit run should score exactly as documented there — that table is what
    M7 script to authenticate as Gerard rather than by account key, so an
    RBAC gap on the project surfaces here first.
 
-6. **Get one clean observation of a failing `evaluate_draft`.** — **OPEN, and
-   now the top of this list.** Promoted out of the Backlog by the Sep 7
-   check-in, because items 1–5 are all done and "what's left to build" was
-   otherwise reading as empty when the work is not finished. `INSTRUCTIONS_V3`'s
-   remediation clauses — the two-redraft cap, "replace unsupported claims with
-   supported ones", stop-on-pass — have **zero observations**; both V3 runs
-   passed every item on the first draft. Forcing a failure needs a topic
-   `fact-sheet.md` cannot support, which is a `content-items-plan.md` edit and
-   therefore a **plan decision, not just a run** — the same
-   fixture-vs-answer-key distinction Sep 3's Thread 1 turned on. Decide
-   deliberately whether to add a sixth item or move an existing one. Backlog
-   keeps the detail; this line keeps the ordering.
+6. ~~**Get one clean observation of a failing `evaluate_draft`.**~~ —
+   **PARTIALLY DONE 2026-09-08. Two of four clauses observed; one may not be
+   observable.** Two runs, full detail in `STATUS.md`'s Sep 8 entry.
+   - **Observed:** the two-redraft cap and keep-the-third-and-report, both in
+     `20260908-133724` item7 — three `evaluate_draft` calls, `redrafts` = 2,
+     final line `FLAGGED FOR REVIEW: text check`.
+   - **Degenerate only:** "replace unsupported claims with supported ones"
+     ran, but with no valid material available it substituted meta-commentary
+     about the fact sheet into customer-facing copy. See Backlog.
+   - **Still zero observations: `stop-on-pass`.** No draft has ever passed
+     after a failure.
+   - **And it may not be reachable by topic design.** Relevance returns 3.0
+     (pass) whenever the topic's spine is supported and 2.0 (fail) when it is
+     not, with nothing observed between — so the condition that produces a
+     first-draft failure is the same one that prevents recovery. The untried
+     regime is a **partially supported spine**. Gerard's decision: try it, or
+     document the clause as unobserved and certify saying so.
 7. **Build a multi-run harness for the orchestrator, then certify.** — **OPEN,
-   and gated on item 6.** `probe_fixture_stability.py` covers the CV audit only.
-   Measured budget: ~11.6K tokens/item, ~58K per five-item run, so seven runs is
-   ~410K tokens and at least fourteen minutes at 30K TPM. The run record already
-   counts redrafts per item, so this pass also settles whether the cap of 2 was
-   the right number. **Certifying a path that has never run certifies nothing**,
-   which is why 6 comes first.
+   and still gated on item 6's remaining decision.** `probe_fixture_stability.py`
+   covers the CV audit only. Budget re-measured 2026-09-08: ~11.6K tokens per
+   item, ~102K for an eight-item run, with item7 alone at 20.8K on three judge
+   calls — so seven runs is ~715K tokens at the current item count, not the
+   ~410K figure written when the set was five items. **Certifying a path that
+   has never run certifies nothing**, and `stop-on-pass` is still that path.
+   Two things to settle before certifying rather than after: the
+   meta-commentary gap, and whether `unmeasured()` is trusted on a path that
+   has only ever been unit-tested.
+
 
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
@@ -615,6 +649,55 @@ Nothing here blocks anything else. Pulled together from scattered
 "not urgent" mentions across past sessions plus new ones as they come up —
 add new items here going forward instead of leaving them buried in a
 session's narrative paragraph in `STATUS.md`.
+
+- **`GroundednessEvaluator` does not measure responsiveness (Sep 8, n=5).**
+  It answers "is what you said supported", not "did you answer". All three
+  item7 drafts scored **4.0 and passed** while the reason text said outright
+  *"it fails to address the requested topic ... only partially responsive"*;
+  item8 reproduced the same behavior at **5.0**. `RelevanceEvaluator` is the
+  only check in the pair that sees responsiveness, so **for any topic the fact
+  sheet does not cover, `all_passed` is relevance-gated — groundedness cannot
+  fail a draft that pads with true statements.** Not a defect to fix; a
+  property to design around, and it invalidates any fixture whose planted flaw
+  is "the fact sheet cannot support this topic". Score stability: item8 moved
+  4.0 → 5.0 on an identical topic between runs, so treat individual scores as
+  ±1 and read direction, not magnitude.
+- **The agent writes its grounding scaffolding into customer-facing copy when
+  it has nothing to substitute (Sep 8).** item7's redrafts produced *"Because
+  the fact sheet only confirms the store's core services..."* and *"as
+  presented in the store fact sheet"* and *"policies not listed there"* — the
+  marketing description talking to the viewer about an internal document.
+  Groundedness passed it three times, relevance marked it down for the wrong
+  reason, and no `INSTRUCTIONS_V3` clause forbids it. This is the "replace
+  unsupported claims with supported ones" clause degenerating when nothing
+  valid fits. **Decide before certifying, not after** — certifying with it
+  unfixed certifies this behavior.
+- **`unmeasured()` is verified logic on an unexercised path (Sep 8).** Written
+  after item1's `server_error`, unit-tested against a synthetic crashed record,
+  and never run against a real crash because the next run completed cleanly.
+  Same class of claim as any clause with zero observations — do not describe it
+  as proven in the write-up.
+- **Line endings differ between the bridge and Windows on files
+  `.gitattributes` does not cover (Sep 8).** Git for Windows has
+  `core.autocrlf=true` and checks `.txt`/`.md` out as CRLF; the bridge's Linux
+  git has no such setting and reads CRLF-against-an-LF-blob as modified. Both
+  are right about their own view. `q_a_pairs_sample.txt` burned most of an hour
+  on this: Claude "fixed" it by stripping CRLF through the bridge, which is
+  what made Windows' `git update-index --refresh` report "needs update" — the
+  edit caused the problem it appeared to solve. **Consequence: do not rewrite
+  whole tracked text files through the bridge.** Targeted edits, or prepare the
+  change and let Gerard apply it. `.py`, `.json`, `.sh`, `.html`, `.yml` and
+  `.bicep` are covered by `.gitattributes` and are safe.
+- **VS Code's Source Control view under-reports bridge-side edits (Sep 8).**
+  Its file watcher does not fire for writes arriving through the mount, so the
+  panel shows fewer changed files than exist. **This is what dropped two doc
+  files from commit `98158d0`** — the commit message described fixture work
+  that was not in the commit. The failure is silent and points the wrong way,
+  which is how partial work gets committed and then run against. Refresh forces
+  it to catch up (the ⟳ icon, `Developer: Reload Window`, or clicking into the
+  GitHub extension — confirmed working). **`git status` in PowerShell is the
+  authority.** Standing consequence: every commit message Claude prepares now
+  names the exact files to stage.
 
 **Repo / security hygiene:**
 
