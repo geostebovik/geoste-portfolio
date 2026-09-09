@@ -224,8 +224,84 @@ REPORT — always, and in this order
 
 Do not offer improvement suggestions on a check that passed."""
 
-ACTIVE_INSTRUCTIONS_LABEL = "INSTRUCTIONS_V3"
-ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V3
+# V4 written 2026-09-09. Gerard's wording throughout; Claude specified what each
+# change had to accomplish and critiqued two drafts of clause 7. ONE DEFECT, TWO
+# CLAUSES, and the pairing is deliberate rather than a lapse in the
+# one-variable-at-a-time rule.
+#
+# THE DEFECT. Every redraft on record put the grounding document into
+# customer-facing copy -- "sticks to the details confirmed in the fact sheet",
+# "as presented in the store fact sheet", "questions about store policies not
+# listed there". Measured by check_meta_commentary.py over both 2026-09-08
+# results files: 5 of 5 redrafts, and -- not known until the detector existed --
+# 2 of 21 FIRST drafts, both of which PASSED with zero redrafts and would have
+# shipped. That last number is why the prohibition lives in the DRAFT section
+# (clause 4) and not only in the redraft clause: a fix confined to clause 7
+# would have left those two uncaught while appearing to work.
+#
+# WHY A PROHIBITION ALONE WOULD HAVE FAILED. V3's clause 7 offered the agent two
+# moves -- remove unsupported claims, replace them with supported ones. On a
+# topic the fact sheet cannot support, "remove" empties the copy (V2 measured
+# where that lands: relevance 4.0 -> 2.0, marked down for being uninformative)
+# and "replace" has no material. The meta-commentary was the agent inventing a
+# third move because the instructions gave it none. Forbidding that move without
+# supplying a legal one rebuilds V2's trap with one more wall. So clause 7 now
+# names the right path instead of blocking one more wrong one -- draft the
+# best-supportable copy from the valid details and ALLOW THE CHECK TO FAIL --
+# which is this project's own standing lesson ("define the condition that
+# produces the verdict, rather than enumerating what shouldn't cause it") applied
+# to the instructions rather than to a judge prompt. Clause 12's FLAGGED FOR
+# REVIEW already exists to carry a failure; the agent needed permission to use
+# it, not another way to win.
+#
+# PRE-REGISTERED RISK, to be read off the run rather than argued about
+# afterwards. "Allow the check to fail" sits before "Call evaluate_draft on each
+# new draft", so an agent could read it as permission to stop after the first
+# draft. If that happens, `redrafts` drops to 0 on item7 where V3 recorded 2, and
+# `evaluate_draft_calls` drops to 1. That is a behavior change beyond the
+# intended one and would mean the sentence needs relocating after the redraft
+# sequence, not rewording. Predicted BEFORE the run: it does not happen.
+INSTRUCTIONS_V4 = INSTRUCTIONS_V3.replace(
+    """4. Every factual claim — hours, services, pricing, availability — must be
+   traceable to the fact sheet. If the fact sheet does not support a claim,
+   leave it out. Do not compensate by writing vaguely: a description with no
+   specifics in it fails for being uninformative, so use the specifics the
+   fact sheet does give you.""",
+    """4. Every factual claim — hours, services, pricing, availability — must be
+   traceable to the fact sheet. If the fact sheet does not support a claim,
+   leave it out. Do not compensate by writing vaguely: a description with no
+   specifics in it fails for being uninformative, so use the specifics the
+   fact sheet does give you. Do not ever mention the fact sheet, the
+   instructions or the drafting process. The reader is the customer and has no
+   need to know about the internal process.""",
+).replace(
+    """7. If `all_passed` is false, redraft and check again — at most twice. Each
+   time, remove unsupported claims and replace them with supported ones from
+   the fact sheet. Call evaluate_draft on each new draft under the same rules.
+   Stop as soon as `all_passed` is true. If the third draft still fails, keep
+   it and report every result.""",
+    """7. If `all_passed` is false, redraft and check again — at most twice. Each
+   time, remove unsupported claims and replace them with supported ones from
+   the fact sheet. If the fact sheet does not support a claim, leave it out. Do
+   not compensate by writing vaguely or making unsupported claims. Instead, use
+   the valid details available to draft the best-supportable copy possible and
+   allow the check to fail. Call evaluate_draft on each new draft under the same
+   rules. Stop as soon as `all_passed` is true. If the third draft still fails,
+   keep it and report every result.""",
+)
+
+# Built by .replace() rather than retyped so the two clauses are the ONLY
+# difference from V3 -- a retyped 40-line string is an unverifiable diff, and
+# this project has already lost a data point to a change nobody could attribute.
+# These asserts fail loudly at import if either substitution missed its target,
+# which is the failure mode that would otherwise run a whole probe under V3 while
+# the provenance recorded V4.
+assert INSTRUCTIONS_V4 != INSTRUCTIONS_V3, "V4 substitutions matched nothing"
+assert "The reader is the customer" in INSTRUCTIONS_V4, "clause 4 edit missing"
+assert "allow the check to fail" in INSTRUCTIONS_V4, "clause 7 edit missing"
+
+ACTIVE_INSTRUCTIONS_LABEL = "INSTRUCTIONS_V4"
+ACTIVE_INSTRUCTIONS = INSTRUCTIONS_V4
 
 # Pinned 2026-09-07. NOTE: the Agents SDK exposes temperature and top_p but has
 # no `seed` parameter at all -- verified by introspection against
