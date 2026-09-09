@@ -17,31 +17,38 @@ were split into `STATUS-archive-phase1.md` in this same folder.
 own `### Session — <date>` heading at the top of the log; it does not get
 appended to `## Current next action
 
-**Next action: settle whether the redraft loop remediates or re-rolls, then fix
-the meta-commentary gap, then certify.** As of 2026-09-08 the redraft branch is
-observed; what is unresolved is whether the observation means what it appears to.
+**Next action: decide the judge deployment, then run the certification pass on
+pass/fail only.** As of 2026-09-09 both Sep 8 blockers are cleared -- the redraft
+loop is characterised and the meta-commentary defect is fixed and measured. What
+replaced them is a judge-quality question that has to be settled before any score
+is reported.
 
-1. **Judge-isolation probe -- cheap, and it answers two questions at once.** Call
-   `evaluate_draft()` directly on run 15's exact failing draft text, ~10 times,
-   with no agent in the loop. ~39K tokens, a couple of minutes. It separates
-   judge variance from draft variance (falsifying or confirming the mechanism
-   claimed on Sep 8), and it establishes whether a fixed borderline draft
-   re-scores across the 3.0 threshold -- which is the same question as whether
-   the redraft loop is remediation or retry-until-lucky.
-2. **`INSTRUCTIONS_V4`: forbid referencing the fact sheet in customer-facing
-   copy.** Gerard's wording, fixtures frozen, one variable. 3 of 3 redrafts
-   produced it. Certifying before this fix certifies the behavior.
-3. **Then the high-`RUNS` certification pass.** `probe_orchestrator_stability.py`
-   exists and works; `--items` and `--runs` take it from here. Re-measured
-   budget: ~11.6K tokens per item per run agent-side, ~20.8K for an item that
-   exhausts the cap. **NOTE: those figures exclude the judge and the vision
-   calls**, which run on separate deployments and do not appear in `run.usage` --
-   17 `evaluate_draft` calls on Sep 8 added roughly 66K tokens invisible to the
-   run records. Any budget quoted from `usage` alone undercounts by something
+1. **Decide the judge deployment.** `evaluate_draft` judges on `gpt-5-2`,
+   hardcoded in `m7_evaluator_tool.py`, inherited from M6 and never chosen by
+   anyone. This was a tidiness item; it is now a real decision.
+   `GroundednessEvaluator` returned **1.0 and 4.0 on interchangeable drafts of
+   the same item, with the same four observations in both reason texts** (Sep 9,
+   n=30). Microsoft's own documentation says the evaluator prompt was tuned
+   against GPT-4o, recommends judge models that are not in preview, and warns
+   that performance "can be especially poor" on smaller models -- so this is a
+   documented dependency, not a guess. Decide with a paired run on one item,
+   `gpt-5-2` against a current non-preview deployment, and read the SPREAD rather
+   than the mean.
+2. **Then the certification pass -- on pass/fail, not on scores.** Both text
+   items matched their pre-registered VERDICT at a rate the score instability
+   never touched (item6 29/30 first-draft pass; item7 26/30 exact match on
+   first=False final=False redrafts=2), so the verdict layer is certifiable now
+   and the score layer is not. Report `first_text_passed` as the headline:
+   `final_text_passed` is a function of the redraft cap rather than of system
+   quality, which is what the Sep 9 judge-isolation probe established.
+   **Budget note, unchanged:** ~11.6K tokens per item per run agent-side, ~20.8K
+   for an item that exhausts the cap, and both figures exclude the judge and
+   vision calls, which run on separate deployments and never appear in
+   `run.usage`. Any budget quoted from `usage` alone undercounts by something
    like 40% before vision.
-4. **Decide the orchestrator's model deliberately** -- see the Backlog entry. It
+3. **Decide the orchestrator's model deliberately** -- see the Backlog entry. It
    runs `gpt-5-4`; every tool-level result beneath it was measured on
-   `gpt-5-4-mini`.
+   `gpt-5-4-mini`. Unchanged from Sep 8, and now behind the judge decision.
 
 ## Milestones (Phase 1)
 
@@ -298,6 +305,150 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 9, 2026
+
+**Both Sep 8 blockers cleared. `INSTRUCTIONS_V4` fixed the meta-commentary
+defect, and the judge-isolation probe answered the redraft question by
+inverting it. A third finding arrived unlooked-for and is the one with the
+longest reach.**
+
+**Finding 1 -- the redraft loop re-rolls. A fixed failing draft passes 7 times
+out of 10, unchanged.** `probe_judge_isolation.py` (new, Claude wrote it; Gerard
+chose the paired design from the options offered) called `evaluate_draft()`
+directly on run 15's recorded drafts, 10 re-reads each, no agent in the loop, so
+every point of spread is judge-side by construction.
+
+| | relevance | passed |
+|---|---|---|
+| draft 1 (recorded FAILING) | 3.0 x7, 2.0 x3 | **7/10** |
+| draft 2 (recorded passing) | 3.0 x10 | 10/10 |
+| groundedness, both drafts | 4.0 x20 | zero variance |
+
+Run 15's recorded failure was a MINORITY draw -- draft 1's modal relevance is
+3.0, a pass. Redrafting and re-scoring at 3.0 is what re-reading the original
+would have done 70% of the time, so that stop-on-pass observation says nothing
+about whether the edit helped. **Consequence, and it inverts the cap decision:**
+at a 70% per-read pass rate, one read passes 70% of the time, a cap of 1 gives
+91%, a cap of 2 gives **97.3%**. Raising the cap raises the false-pass rate.
+**Wider consequence:** a certification pass reporting `final_text_passed` would
+measure the cap, not the system -- Sep 8's `final passed 21/21` is exactly what a
+70% item with three rolls produces, and was never evidence of quality.
+`first_text_passed` is the headline number; the probe already records it
+separately.
+**Not settled, and n cannot settle it here:** draft 2's 10/10 against draft 1's
+7/10 is Fisher p=0.21. The redraft may have improved the text. Deliberately not
+chased -- V4 was about to change redraft behavior, so measuring the old
+behavior's quality was measuring something already being replaced.
+
+**Finding 2 -- the meta-commentary defect is fixed, and the first-draft channel
+was worse than anyone had checked.** `check_meta_commentary.py` (new, Claude
+wrote it; Gerard approved building it) turns "3 of 3 redrafts, read by eye" into
+a measured field over any results file. Run retroactively over both Sep 8 files
+it found 5/5 redrafts as expected -- and **2 of 21 FIRST drafts**, item6 runs 6
+and 19, which nobody had looked at. Both PASSED with zero redrafts and would have
+shipped. That is worse than the redraft case, where item7 at least ended FLAGGED.
+**It also decided where the V4 fix belongs**: a clause-7-only fix would have left
+those two uncaught while appearing to work.
+
+`INSTRUCTIONS_V4` (Gerard's wording, both clauses; Claude specified what each had
+to accomplish and rejected the first clause-7 draft for missing the legal move --
+see `m7-instructions-draft.md`). Measured over 30 runs of item6 and item7, 113
+drafts:
+
+| | V3 baseline | V4 | Fisher two-sided |
+|---|---|---|---|
+| redrafts referencing the fact sheet | 5/5 | **0/53** | p = 2.2e-07 |
+| first drafts referencing the fact sheet | 2/21 | **0/60** | p = 0.065 |
+
+The redraft channel is settled. **The first-draft channel is suggestive, not
+significant** -- Claude predicted p≈0.0025 before the run by treating the 9.5%
+baseline as known; the honest test against the actual 2-of-21 gives 0.065, an
+error of an order of magnitude in the flattering direction. Reaching p<0.05 needs
+about 50 runs; deliberately not spent, on the grounds that the redraft result is
+decisive and moving one secondary p-value across an arbitrary line is the
+analysis-over-building drift this project already logs as a standing risk.
+
+**The pre-registered risk did not fire.** V4's "allow the check to fail" sits
+before "call evaluate_draft on each new draft", so it could have been read as
+permission to stop after draft 1. Predicted in the file BEFORE the run that it
+would not happen: item7 recorded `redrafts=2` on 26 of 30 runs, and the four
+zeros are runs whose first draft passed.
+
+**Stop-on-pass observed a second time** -- item6 run 30, and this time the dip
+was GROUNDEDNESS (2.0) rather than relevance. n=2 for clause 7's early exit.
+
+**Finding 3 -- `GroundednessEvaluator` contradicts itself on identical evidence,
+and this corrects Sep 8's Finding 1.** item7's groundedness ranged **1.0 to 4.0**
+across 30 runs, mean 2.667. Claude's first hypothesis -- that dropping the topic
+from the title collapses the score -- was **falsified by the data**: four drafts
+dropped the topic and still scored 4.0.
+
+The controlled pair is runs 1 and 6. Near-identical drafts: same title verbatim,
+same five services, same phone number, differing only in cosmetic phrasing. The
+judge's two reason texts make the SAME four observations -- the fact sheet has no
+policy content; the response lists services instead; those service claims ARE
+grounded; the response fails to address the topic. Then:
+
+> **1.0:** "...they are not relevant to the requested topic, so the response
+> fails to answer the question as asked."
+>
+> **4.0:** "...only partially addressing the prompt while remaining mostly
+> accurate to the fact sheet where it does make claims."
+
+**So groundedness inconsistently imports relevance into its own score** --
+sometimes grading support-given-claims (its documented job, 4.0), sometimes
+letting off-topic-ness dominate and collapsing to the floor. Sep 8's Finding 1
+("groundedness does not measure responsiveness, so `all_passed` is
+relevance-gated") was drawn from five observations, all 4.0-5.0, and is **wrong
+as stated**. Corrected in `m7-orientation.md`'s Backlog.
+
+**V4 is not the cause.** Under V4, P(groundedness=4.0) on item7 is 13/30 = 0.43;
+three consecutive 4.0 draws has probability 0.081. Sep 8's n=3 is not
+distinguishable from today's distribution -- the spread was always there and
+nobody had the runs to see it.
+
+**What it does and does not block.** The VERDICT layer is unaffected: item7
+matched its pre-registered `first=False final=False redrafts=2` on 26 of 30 runs.
+Certification of pass/fail is not blocked. Any claim about SCORES is, until the
+judge deployment is decided -- which is why that moved to the top of the next
+action.
+
+**Two instrument notes, neither chased.** (a) item6's `expected_text` encodes
+`first_pass: False`, a ~9.5% event, as the expected value, so
+`text_matches_expected` reads False on 29 of 30 runs for a system working
+correctly, and `text_path_items_matching_expected` reports ~10% for a clean run.
+Cosmetic, but it makes summaries lie. (b) item6's relevance was 3.0 x30 with zero
+variance under V4 against 2/21 dips under V3; that is **not** significant
+(p=0.16) and must not be read as V4 having stabilised anything.
+
+**Two process failures worth keeping, both Claude's.**
+- **The instrument overstated its own verdict.** `probe_judge_isolation.py`'s
+  first `compare()` tested only whether the two drafts' score RANGES intersect
+  and printed "retry-until-lucky" when they did. On this data it called OVERLAP
+  on [2.0, 3.0] against [3.0, 3.0] -- ranges touching at a single point while
+  describing 7/10 against 10/10. Rewritten to answer the two questions
+  separately, with Fisher's exact test on the pass RATES (a binary outcome, not
+  the ordinal scale) and "CANNOT TELL" as a first-class output. **The stale
+  verdict string is still inside `results/20260909-101238_judge_isolation.json`;
+  its numbers are correct and its `comparison` block is superseded.**
+- **`INSTRUCTIONS_V3` was edited in place** (Gerard applied the new clauses to
+  V3 rather than to a new version, and `ACTIVE_INSTRUCTIONS_LABEL` still read
+  V3). Caught by an mtime check before any commit. Left alone it would have
+  relabelled every Sep 7 and Sep 8 result -- the two 15/15 runs, the 21-run
+  probe, all four findings -- as measured against wording that did not exist when
+  they ran, and the next run would have recorded `instructions_label: V3` while
+  executing V4. V3 restored byte-for-byte; V4 is built by `.replace()` against it
+  with three asserts that fail at import if either substitution stops matching,
+  so the diff is provably the two clauses and nothing else.
+
+**Tooling.** The device shell could not mount the connected folders all session
+(`no Plan9 drive shares mounted`), so every command was Gerard's in PowerShell.
+Azure MCP and the newly-activated Microsoft Learn connector both worked, and MS
+Learn is what turned the judge-model backlog entry from a tidiness note into a
+documented dependency. Registry search found no GitHub connector; the dangling-
+commit question needs `git fetch origin <a real pre-purge SHA>` and those SHAs
+are no longer in the local clone.
 
 ### Session — September 8, 2026
 

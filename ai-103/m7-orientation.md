@@ -184,6 +184,31 @@ correct.
   See the two Backlog entries; both point the same way — **`git status` in
   PowerShell is the authority**, not VS Code's Source Control view and not git
   read through the bridge.
+- **n=3 is not a distribution, and a clean run of identical values is the
+  easiest thing to over-read.** Added Sep 9. Sep 8 recorded item7's groundedness
+  as 4.0 three times and generalised it into a property of the evaluator
+  ("groundedness does not measure responsiveness"). Thirty runs found the same
+  cell ranging 1.0–4.0, and three consecutive 4.0s from that distribution has
+  probability 0.081 — uncommon, not remarkable. **Repetition across a handful of
+  runs is not stability; it is a small sample that happened to agree.** The tell
+  is that the Sep 8 claim was stated as a mechanism, which is exactly the register
+  that discourages anyone from re-testing it.
+- **State the test before quoting the p-value, and check which baseline it
+  compares against.** Added Sep 9, Claude's error. Before the V4 run Claude
+  predicted 0/60 clean first drafts would land at p≈0.0025 — computed by treating
+  the 9.5% baseline as a KNOWN rate. The honest comparison is against the actual
+  2-of-21, which gives Fisher p=0.065. An order of magnitude, in the flattering
+  direction, on the number that decides whether a fix gets called proven. **A
+  baseline estimated from two events cannot support a confident denominator.**
+- **The instrument can over-claim too, and it does it silently.** Added Sep 9.
+  `probe_judge_isolation.py`'s first `compare()` collapsed a nuanced result into
+  a binary and printed "Reads as retry-until-lucky" on ranges that touched at a
+  single point while describing 7/10 against 10/10. Every over-claim this project
+  logs was a person or a model asserting past the evidence; this one was compiled
+  in and would have been quoted as output. **A verdict string in a script is a
+  claim, and needs the same scrutiny as a sentence in a write-up** — including a
+  legitimate "cannot tell" branch, because an instrument with no way to say that
+  will always say something else.
 - **Read each new finding against "what does this change?" before spending a
   thread on it.** A finding worth one backlog line gets one backlog line.
   Added Sep 6, promoted out of the Sep 4 session prompt before that prompt was
@@ -223,12 +248,19 @@ nothing more.
                     enable_auto_function_calls, temperature pinned to 0
                     (the Agents SDK has no `seed` parameter at all, so runs
                     are narrowed, never repeatable).
-                    INSTRUCTIONS_V3: 15/15 on two consecutive runs, 5/5 text
-                    checks, zero redrafts, all three tools called every item.
-                    NOT a stability claim -- the high-RUNS pass is still owed,
-                    and the redraft path has ZERO observations.
-                    V1 (throwaway) and V2 (regressed to 12/15) are kept in
-                    the file; provenance records which one each run used.
+                    ACTIVE: INSTRUCTIONS_V4 (2026-09-09). V4 = V3 plus two
+                    clauses, built by .replace() with asserts so the diff is
+                    provably those two and nothing else: clause 4 forbids
+                    mentioning the fact sheet/instructions/process in copy,
+                    clause 7 gives the redraft loop a legal move when nothing
+                    is supportable (draft the best-supportable copy and allow
+                    the check to fail). Measured: 0/53 redrafts and 0/60 first
+                    drafts referencing the fact sheet, over 30 runs.
+                    V3 scored 15/15 on two consecutive runs; its redraft path
+                    is now fully observed. V1 (throwaway) and V2 (regressed to
+                    12/15) are kept unused; provenance records which version
+                    each run used, which is why V3 was restored byte-for-byte
+                    rather than edited in place on Sep 9.
                                       |
                 +---------------------+----------------------+
                 |                                              |
@@ -622,41 +654,44 @@ CV-audit run should score exactly as documented there — that table is what
    RBAC gap on the project surfaces here first.
 
 6. ~~**Get one clean observation of a failing `evaluate_draft`.**~~ —
-   **PARTIALLY DONE 2026-09-08. Two of four clauses observed; one may not be
-   observable.** Two runs, full detail in `STATUS.md`'s Sep 8 entry.
-   - **Observed:** the two-redraft cap and keep-the-third-and-report, both in
-     `20260908-133724` item7 — three `evaluate_draft` calls, `redrafts` = 2,
-     final line `FLAGGED FOR REVIEW: text check`.
-   - **Degenerate only:** "replace unsupported claims with supported ones"
-     ran, but with no valid material available it substituted meta-commentary
-     about the fact sheet into customer-facing copy. See Backlog.
-   - ~~**Still zero observations: `stop-on-pass`.**~~ — **OBSERVED
-     2026-09-08 (`20260908-143613`, item6 x21, run 15).** Not by topic design,
-     which looked impossible, but by **variance**: item6 sits exactly on the
-     relevance threshold, 2 of 21 first drafts drew 2.0, and the redraft
-     recovered. Run 15 is the clean case — one redraft, passed, stopped with a
-     call to spare. **Run 13 does not count as a second**: it passed on draft 3,
-     the cap boundary, where stop-on-pass and keep-the-third produce identical
-     behavior. **n=1.**
-   - **What is NOT settled, and it is the reason this item stays open.** The
-     redraft may not have earned the pass. The judge's primary criticism was
-     identical on the failing and passing drafts, and the observed variance on
-     that cell is exactly the size of the score movement, so the recovery is
-     unattributable from one observation. **If the loop is retry-until-lucky
-     rather than remediation, a higher cap raises the false-pass rate** — which
-     inverts what the cap decision was assumed to rest on. The judge-isolation
-     probe (~39K tokens) settles it.
-7. **Build a multi-run harness for the orchestrator, then certify.** — **OPEN,
-   and still gated on item 6's remaining decision.** `probe_fixture_stability.py`
-   covers the CV audit only. Budget re-measured 2026-09-08: ~11.6K tokens per
-   item, ~102K for an eight-item run, with item7 alone at 20.8K on three judge
-   calls — so seven runs is ~715K tokens at the current item count, not the
-   ~410K figure written when the set was five items. **Certifying a path that
-   has never run certifies nothing**, and `stop-on-pass` is still that path.
-   Two things to settle before certifying rather than after: the
-   meta-commentary gap, and whether `unmeasured()` is trusted on a path that
-   has only ever been unit-tested.
+   **CLOSED 2026-09-09.** All four clauses are now observed, and the open
+   question underneath the item is answered.
+   - **Observed Sep 8:** the two-redraft cap and keep-the-third-and-report
+     (`20260908-133724` item7); stop-on-pass (`20260908-143613` run 15, n=1).
+   - **Observed again Sep 9:** stop-on-pass a second time
+     (`20260909-122233` item6 run 30) — and the dip was GROUNDEDNESS (2.0) this
+     time rather than relevance, where V3's was relevance. **n=2.**
+   - ~~"replace unsupported claims with supported ones" degenerated to
+     meta-commentary~~ — fixed by `INSTRUCTIONS_V4`, 0/53 redrafts. See the
+     Backlog.
+   - **The question that kept this open is answered, and it inverted.** The
+     redraft loop re-rolls: a fixed failing draft passes 7 of 10 re-reads
+     unchanged. So a pass after a redraft is not evidence the redraft worked, a
+     higher cap raises the false-pass rate, and `final_text_passed` is not the
+     number to certify on. Full detail in the Backlog entry and `STATUS.md`'s
+     Sep 9 session.
 
+7. **Certify — on pass/fail, not on scores.** — **OPEN, and no longer gated on
+   item 6.** The harness exists and has now done real work twice
+   (`probe_orchestrator_stability.py`, 21 runs Sep 8 and 30 runs Sep 9, both
+   clean, zero crashes). What changed on Sep 9 is what "certify" is allowed to
+   mean:
+   - **Certifiable now: the VERDICT layer.** item6 passed first-draft 29/30;
+     item7 matched its pre-registered `first=False final=False redrafts=2` on
+     26/30. That behavior held steady through score swings of three points, so it
+     is not resting on the judge's numbers.
+   - **Not certifiable yet: anything about SCORES.** `GroundednessEvaluator`
+     returned 1.0 and 4.0 on interchangeable drafts. Settle the judge deployment
+     first — it is now item 1 of `STATUS.md`'s next action.
+   - **Report `first_text_passed`, not `final_text_passed`.** The final figure is
+     a function of the redraft cap; a 70%-per-read item reads 97% after two
+     redrafts. Sep 8's `21/21` was that artifact.
+   - **Budget, re-measured Sep 8 and unchanged:** ~11.6K tokens per item per run
+     agent-side, ~20.8K for an item that exhausts the cap — both excluding the
+     judge and vision calls, which never appear in `run.usage` and push the true
+     figure up by roughly 40% before vision.
+   - Still true from Sep 8: `unmeasured()` remains unit-tested only, never
+     exercised against a real crash.
 
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
@@ -665,54 +700,81 @@ Nothing here blocks anything else. Pulled together from scattered
 add new items here going forward instead of leaving them buried in a
 session's narrative paragraph in `STATUS.md`.
 
-- **`GroundednessEvaluator` does not measure responsiveness (Sep 8, n=5).**
-  It answers "is what you said supported", not "did you answer". All three
-  item7 drafts scored **4.0 and passed** while the reason text said outright
-  *"it fails to address the requested topic ... only partially responsive"*;
-  item8 reproduced the same behavior at **5.0**. `RelevanceEvaluator` is the
-  only check in the pair that sees responsiveness, so **for any topic the fact
-  sheet does not cover, `all_passed` is relevance-gated — groundedness cannot
-  fail a draft that pads with true statements.** Not a defect to fix; a
-  property to design around, and it invalidates any fixture whose planted flaw
-  is "the fact sheet cannot support this topic". Score stability: item8 moved
-  4.0 → 5.0 on an identical topic between runs, so treat individual scores as
-  ±1 and read direction, not magnitude.
-- **The redraft loop may be retry-until-lucky rather than remediation
-  (Sep 8) — settle before certifying.** In the one clean stop-on-pass
-  observation, the judge's primary criticism was *identical* on the failing
-  draft and the passing one ("does not include the key requested specifics —
-  sizes, prices, and turnaround times"), while the score moved 2.0 → 3.0. The
-  redraft did make one change the judge had asked for, so it is not pure noise —
-  but the measured variance on that cell is exactly the size of the movement, so
-  the recovery cannot be attributed to the edit. **If redrafts re-roll rather
-  than improve, a higher cap means a higher false-pass rate**, which inverts the
-  reasoning behind "the multi-run pass will settle whether a cap of 2 is right".
-  Cheap resolution: call `evaluate_draft()` directly on run 15's exact failing
-  draft ~10 times with no agent in the loop (~39K tokens). That also separates
-  judge variance from draft variance.
+- ~~**`GroundednessEvaluator` does not measure responsiveness (Sep 8, n=5).**~~
+  — **WRONG AS STATED. Corrected 2026-09-09 at n=30.** The Sep 8 claim was that
+  groundedness answers "is what you said supported", never "did you answer", so
+  `all_passed` is relevance-gated for any uncovered topic. It rested on five
+  observations that all happened to land at 4.0–5.0. Thirty runs of item7 say
+  otherwise: groundedness ranged **1.0 to 4.0, mean 2.667**, on one item.
+  **The real behavior: groundedness INCONSISTENTLY imports relevance into its
+  own score.** The controlled pair is runs 1 and 6 of
+  `20260909-122233_orchestrator_stability.json` — near-identical drafts (same
+  title verbatim, same five services, same phone number, cosmetic phrasing
+  differences only) whose two reason texts make the SAME four observations: the
+  fact sheet has no policy content, the response lists services instead, those
+  service claims ARE grounded, the response fails to address the topic. Same
+  evidence, and then *"they are not relevant to the requested topic, so the
+  response fails to answer the question as asked"* scores **1.0** while *"only
+  partially addressing the prompt while remaining mostly accurate to the fact
+  sheet where it does make claims"* scores **4.0**.
+  **V4 did not cause this.** P(groundedness=4.0) on item7 under V4 is 13/30 =
+  0.43, so three consecutive 4.0s has probability 0.081 — Sep 8's n=3 is not
+  distinguishable from this distribution. The spread was always there; nobody
+  had the runs to see it.
+  **What survives from the Sep 8 entry:** individual scores are worth about ±1
+  and direction beats magnitude — if anything understated, since the observed
+  spread is three points.
+  **What this changes:** the VERDICT layer is unaffected (item7 matched its
+  pre-registered row 26/30), so pass/fail is certifiable and scores are not. It
+  also promotes the judge-deployment entry below from tidiness to a real
+  decision, with vendor documentation behind it.
+- ~~**The redraft loop may be retry-until-lucky rather than remediation
+  (Sep 8) — settle before certifying.**~~ — **SETTLED 2026-09-09. It re-rolls.**
+  `probe_judge_isolation.py` called `evaluate_draft()` on run 15's recorded
+  drafts with no agent in the loop, so every point of spread is judge-side by
+  construction. **The failing draft passed 7 of 10 re-reads with its text
+  unchanged** (relevance 3.0 ×7, 2.0 ×3); the passing draft was 3.0 ×10;
+  groundedness was 4.0 on all 20 reads. Run 15's recorded failure was a minority
+  draw — draft 1's modal score is a pass — so redrafting and re-scoring at 3.0 is
+  what re-reading the ORIGINAL would have done 70% of the time.
+  **The cap decision inverts, as predicted.** At 70% per read: one read 70%, a
+  cap of 1 gives 91%, a cap of 2 gives 97.3%. A higher cap buys more dice, not
+  better copy.
+  **And it reaches past the cap.** A certification pass reporting
+  `final_text_passed` measures the cap rather than the system — Sep 8's
+  `final passed 21/21` is exactly what a 70% item with three rolls produces, and
+  was never evidence of quality. **Report `first_text_passed` as the headline;**
+  the probe already records both separately.
+  **Left open deliberately:** draft 2's 10/10 against draft 1's 7/10 is Fisher
+  p=0.21, so the redraft may have improved the text. Not chased — V4 was about to
+  change redraft behavior, and measuring the quality of behavior you are
+  replacing measures nothing.
 - **Token budgets read off `run.usage` undercount by roughly 40% (Sep 8).** The
   agent's usage figures exclude the judge calls — `evaluate_draft` runs on a
   separate deployment through the Evaluation SDK — and exclude the CV audit's
   vision calls, which use their own client. Sep 8: 177,278 agent tokens recorded
   against 17 `evaluate_draft` calls worth roughly 66K more, plus 14 vision calls
   not counted at all. Every certification budget quoted so far is agent-only.
-- **The agent writes its grounding scaffolding into customer-facing copy when
+- ~~**The agent writes its grounding scaffolding into customer-facing copy when
   it has nothing to substitute (Sep 8) — now 3 for 3 on redrafts, and
-  blocking.** item7's redrafts produced *"Because
-  the fact sheet only confirms the store's core services..."* and *"as
-  presented in the store fact sheet"* and *"policies not listed there"* — the
-  marketing description talking to the viewer about an internal document.
-  Groundedness passed it three times, relevance marked it down for the wrong
-  reason, and no `INSTRUCTIONS_V3` clause forbids it. This is the "replace
-  unsupported claims with supported ones" clause degenerating when nothing
-  valid fits. **Confirmed 2026-09-08 as not topic-specific:** all three redrafts
-  across the item6 x21 probe's runs 13 and 15 produced it too — "focuses on what
-  the fact sheet confirms", "sticks to the details confirmed in the fact sheet",
-  "sticks to the details confirmed in the store fact sheet". It is what the agent
-  does *whenever it redrafts*, not something item7's topic provoked. **Decide
-  before certifying, not after** — any certification covering a redraft path
-  certifies this behavior. `INSTRUCTIONS_V4` is Gerard's wording; fixtures stay
-  frozen so it is one variable.
+  blocking.**~~ — **FIXED AND MEASURED 2026-09-09 by `INSTRUCTIONS_V4`.**
+  `check_meta_commentary.py` made this a measured field rather than an eyeball
+  count, and immediately found the defect was **not confined to redrafts**: 2 of
+  21 FIRST drafts on Sep 8 (item6 runs 6 and 19) did it too, both PASSED with
+  zero redrafts, and would have shipped — worse than the redraft case, where
+  item7 at least ended FLAGGED. That number is what decided V4's prohibition
+  belongs in clause 4 rather than only in clause 7: a clause-7 fix would have
+  left those two uncaught while appearing to work.
+  **Result over 30 runs, 113 drafts:** redrafts 5/5 → **0/53** (Fisher
+  p=2.2e-07); first drafts 2/21 → **0/60** (Fisher p=0.065).
+  **The redraft channel is settled; the first-draft channel is suggestive, not
+  significant.** Claude predicted p≈0.0025 before the run by treating the 9.5%
+  baseline as known rather than as two events; the honest test gives 0.065.
+  Reaching p<0.05 needs roughly 50 runs, deliberately not spent.
+  **Standing caveat: the detector is a phrase matcher, not a classifier.** A zero
+  is meaningful only for the phrasings in its `PATTERNS` list. After any future
+  wording change, sample the drafts by eye and confirm the copy is clean for the
+  right reason rather than trusting the count.
 - **`unmeasured()` is verified logic on an unexercised path (Sep 8).** Written
   after item1's `server_error`, unit-tested against a synthetic crashed record,
   and never run against a real crash because the next run completed cleanly.
@@ -739,6 +801,35 @@ session's narrative paragraph in `STATUS.md`.
   GitHub extension — confirmed working). **`git status` in PowerShell is the
   authority.** Standing consequence: every commit message Claude prepares now
   names the exact files to stage.
+
+- **item6's `expected_text` encodes a rare event as the expected one (Sep 9).**
+  `expected_text` is `first_pass: False`, but an item6 first-draft dip is roughly
+  a 9.5% event, so `text_matches_expected` reads False on 29 of 30 runs for a
+  system behaving exactly as measured, and `text_path_items_matching_expected`
+  reports ~10% for a clean run. Same class as the crashed-item denominator and
+  the false-dirty provenance: an instrument that reports a number pointing the
+  wrong way. Cosmetic — it touches no measurement taken so far — but it makes
+  summaries lie to anyone reading them cold.
+
+- **`run_provenance()` records agent fields for runs with no agent (Sep 9).**
+  It stores `agent_name`, `temperature`, `model_deployment` and the full
+  instructions text because it was written for the orchestrator. A judge-only
+  probe has none of those. `probe_judge_isolation.py` strips them locally and
+  substitutes `judge_deployment`; `probe_orchestrator_stability.py` also records
+  `script` as `m7_orchestrator.py` rather than its own name, since the field is
+  `Path(__file__).name` evaluated in the orchestrator's module. Both are small.
+  Fix them together, and not during a session that is measuring with them.
+
+- **A stale verdict string sits inside a committed results file (Sep 9).**
+  `results/20260909-101238_judge_isolation.json` was written by the first version
+  of `probe_judge_isolation.py`, whose `compare()` tested only whether two score
+  RANGES intersect and printed "retry-until-lucky" whenever they did. Its
+  **numbers are correct**; its `comparison` block is superseded by the rewritten
+  logic (two separate questions, Fisher's exact test on pass rates, "CANNOT TELL"
+  as a first-class output). Not re-run: re-running draws new samples rather than
+  re-analysing the old ones, so it would replace the dataset rather than correct
+  the record. A `--reanalyze` mode that re-reads an existing file without calling
+  the judge would fix this properly and is worth about twenty lines.
 
 **Repo / security hygiene:**
 
@@ -787,10 +878,25 @@ session's narrative paragraph in `STATUS.md`.
   quota change `gpt-5-4-mini` was provisioned at 3 RPM against `gpt-5-4`'s 30,
   and an argument for mini was made twice that morning without checking. Decide
   it with a paired run once the wording is stable.
-- **The judge deployment is inherited, not chosen (Sep 7).** `evaluate_draft`
-  judges on `gpt-5-2`, hardcoded in `m7_evaluator_tool.py` and carried over from
-  M6, where the hardcoded judge deployment is already a backlog item. `gpt-5-2`
-  is the Content Understanding analyzer model. Nobody picked it for M7.
+- **The judge deployment is inherited, not chosen (Sep 7) — PROMOTED 2026-09-09
+  from tidiness to the current next action.** `evaluate_draft` judges on
+  `gpt-5-2`, hardcoded in `m7_evaluator_tool.py` and carried over from M6, where
+  the hardcoded judge deployment is already a backlog item. `gpt-5-2` is the
+  Content Understanding analyzer model. Nobody picked it for M7.
+  **Two things changed on Sep 9.** (1) The judge was measured contradicting
+  itself — 1.0 and 4.0 on interchangeable drafts with the same reasoning in both
+  reason texts, see the corrected `GroundednessEvaluator` entry above. (2)
+  Microsoft's own documentation, read via the Microsoft Learn connector, states
+  the evaluator prompt was tuned against GPT-4o, recommends judge models that are
+  **not in preview**, and warns performance "can be especially poor" on smaller
+  models. So the judge choice is a documented dependency of score quality, not a
+  consistency nit.
+  **How to decide it:** a paired run on one item, `gpt-5-2` against a current
+  non-preview deployment, reading the SPREAD rather than the mean — the defect is
+  variance, so a mean would hide it. Sources:
+  learn.microsoft.com/python/api/azure-ai-evaluation/azure.ai.evaluation.groundednessevaluator
+  and learn.microsoft.com/azure/foundry-classic/how-to/develop/evaluate-sdk.
+
 - **The orchestrator's drafting cannot be made repeatable (Sep 7).**
   `temperature=0` is pinned, but the Agents SDK exposes no `seed` at all —
   verified by introspection, and unlike the chat-completions path the CV audit
@@ -1163,7 +1269,7 @@ for it exists to tune. Kept as the record of what was ruled out and how):**
 | What's the full multi-phase plan / business context behind M7? | `agent-system-project-plan.md` |
 | How does a Foundry concept (agent/thread/tool/FunctionTool) actually work? | `agent-service-primer.md` |
 | What's the ground truth for Riverside Hardware content? | `iip-docs/m7-riverside-hardware/fact-sheet.md` (the agent reads it at runtime via `scripts/m7_fact_sheet_tool.py`) |
-| What does the orchestrator instruct the agent to do, and why? | the wording is `INSTRUCTIONS_V3` in `scripts/m7_orchestrator.py` — the only source of truth; `m7-instructions-draft.md` holds the rationale and version history only |
+| What does the orchestrator instruct the agent to do, and why? | the wording is `ACTIVE_INSTRUCTIONS` in `scripts/m7_orchestrator.py` — `INSTRUCTIONS_V4` as of 2026-09-09, and the only source of truth; `m7-instructions-draft.md` holds the rationale and version history only. **Never edit a version in place** — every past result is labelled with the version it ran under, so changing one relabels history (caught Sep 9 before it reached a commit) |
 | What result should each test item produce? | `iip-docs/m7-riverside-hardware/content-items-plan.md` |
 | What format must a drafted title/description follow? | `iip-docs/m7-riverside-hardware/description-template.md` |
 | Have I hit this Python shape before? | `python-patterns.md` |
