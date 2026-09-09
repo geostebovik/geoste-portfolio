@@ -1,0 +1,389 @@
+{
+  "run": {
+    "timestamp": "2026-09-09T10:09:37-07:00",
+    "script": "probe_judge_isolation.py",
+    "git_head": "c38f09be5cd57a3282aac320eb1baf88c7f6d81f",
+    "git_branch": "main",
+    "git_dirty": true,
+    "git_dirty_files": [
+      "probe_judge_isolation.py"
+    ],
+    "note": "no agent in this run: evaluate_draft() called directly. Agent fields removed because none applied.",
+    "judge_deployment": "gpt-5-2"
+  },
+  "probe": {
+    "source_results": "20260908-143613_orchestrator_stability.json",
+    "item": "item6",
+    "source_run": 15,
+    "drafts": [
+      1,
+      2
+    ],
+    "reads_per_draft": 10
+  },
+  "comparison": {
+    "overlap": true,
+    "verdict": "OVERLAP -- the two drafts' relevance ranges intersect, so on this fixture the redraft did not move the text across the threshold; the re-read did. Reads as retry-until-lucky.",
+    "compared": [
+      "draft 1",
+      "draft 2"
+    ]
+  },
+  "drafts": [
+    {
+      "label": "draft 1",
+      "query": "Draft a video title and description for a piece of content about: 'Propane Tank Refill: Sizes, Prices and Turnaround,' grounded in the store's fact sheet.",
+      "response": "Propane tank refill \u2014 Riverside Hardware & Supply\nNeed to know whether Riverside Hardware & Supply can handle your propane refill? This video covers propane tank refill at Riverside Hardware & Supply, along with other practical services the store offers like key cutting with walk-in service, custom paint mixing, and tool rental with daily and weekly rates. It also gives you the store's hours so you know when to stop by.\nRiverside Hardware & Supply \u2014 Monday \u2013 Saturday 8:00 AM \u2013 6:00 PM; Sunday Closed",
+      "original_groundedness": 4.0,
+      "original_relevance": 2.0,
+      "original_all_passed": false,
+      "calls_requested": 10,
+      "calls_measured": 10,
+      "calls_errored": [],
+      "all_passed_count": 7,
+      "threshold_crossings": 7,
+      "groundedness": {
+        "n": 10,
+        "min": 4.0,
+        "max": 4.0,
+        "mean": 4.0,
+        "distinct": [
+          4.0
+        ],
+        "values": [
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ]
+      },
+      "relevance": {
+        "n": 10,
+        "min": 2.0,
+        "max": 3.0,
+        "mean": 2.7,
+        "distinct": [
+          2.0,
+          3.0
+        ],
+        "values": [
+          3.0,
+          2.0,
+          2.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          2.0
+        ]
+      },
+      "calls": [
+        {
+          "call": 1,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly names Riverside Hardware & Supply, mentions propane tank refill as a service, accurately lists other services from the context (key cutting walk-in, custom paint mixing, tool rental with daily/weekly rates), and states the correct hours (Mon\u2013Sat 8\u20136, Sunday closed). However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details (and none are available in the fact sheet), so it fails to fully address the requested content focus. Still, it avoids inventing unsupported numbers/timelines and remains consistent with the provided facts.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a video title and a brief description about propane refills at the store, but it does not address the requested specifics: tank sizes, prices, and turnaround times, nor does it appear grounded in a fact sheet. It also adds unrelated services (keys, paint, rentals).",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 2,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly names Riverside Hardware & Supply, mentions propane tank refill as a service, accurately lists other services that are explicitly in the context (key cutting walk-in/no appointment, custom paint mixing, tool rental with daily/weekly rates), and states the correct hours (Mon\u2013Sat 8\u20136; Sunday closed). However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not include any sizes, prices, or turnaround details (which are also not present in the fact sheet), and it shifts focus to other services. So it is grounded where it makes claims, but incomplete relative to the requested content.",
+          "relevance": 2.0,
+          "relevance_passed": false,
+          "relevance_reason": "The user asked for a video title and description about propane tank refills focusing on sizes, prices, and turnaround, grounded in a fact sheet. The response gives a generic title, mentions unrelated store services, and only adds hours, omitting the requested refill details.",
+          "threshold": 3,
+          "all_passed": false,
+          "error": null
+        },
+        {
+          "call": 3,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays anchored to the fact sheet: it correctly names the business (Riverside Hardware & Supply), references propane tank refill as a service listed, mentions other listed services (key cutting walk-in/no appointment, custom paint mixing, tool rental with daily/weekly rates), and states the store hours accurately (Mon\u2013Sat 8\u20136, Sunday closed). However, the query asked specifically for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details, and the title is generic rather than matching the requested phrasing. It\u2019s accurate but incomplete relative to the requested content (and the fact sheet doesn\u2019t provide those missing details anyway).",
+          "relevance": 2.0,
+          "relevance_passed": false,
+          "relevance_reason": "The user asked for a video title and description about propane tank refill focusing on sizes, prices, and turnaround, grounded in a fact sheet. The response provides a generic title and mentions other store services and hours, but omits sizes, prices, turnaround details, and any fact-sheet grounding.",
+          "threshold": 3,
+          "all_passed": false,
+          "error": null
+        },
+        {
+          "call": 4,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly names the business (Riverside Hardware & Supply), mentions propane tank refill as a service, accurately lists other services from the context (key cutting walk-in, custom paint mixing, tool rental with daily/weekly rates), and states the correct hours (Mon\u2013Sat 8:00 AM\u20136:00 PM; Sunday closed). However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details (and the fact sheet doesn\u2019t include them), so it fails to address key requested elements and instead broadens to other services. No unsupported factual claims are introduced, but the answer is incomplete relative to the query.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible title and a description about propane refills and store hours, but it doesn\u2019t address the requested specifics: tank sizes, prices, and turnaround times, nor does it clearly ground details in the store\u2019s fact sheet. It also adds unrelated services.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 5,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays anchored to the fact sheet: it correctly mentions propane tank refill as a service, accurately lists other services (key cutting walk-in/no appointment, custom paint mixing, tool rental with daily/weekly rates), and accurately states hours (Mon\u2013Sat 8\u20136, Sunday closed). However, the query asked for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround information (none exist in the fact sheet), and it broadens the description to other services rather than focusing on the requested details. It does not introduce false facts, but it is incomplete relative to the query\u2019s requested elements.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The user asked for a video title and description specifically about propane tank refill sizes, prices, and turnaround based on the store\u2019s fact sheet. The response gives a generic title and mentions other services and hours, but omits sizes, prices, and turnaround details central to the request.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 6,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly identifies the business name, mentions propane tank refill as a service, and accurately lists other services (key cutting walk-in, custom paint mixing, tool rental with daily/weekly rates) and the exact hours (Mon\u2013Sat 8\u20136, Sunday closed). However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details, and those details are not present in the context\u2014so it cannot fully satisfy the requested focus. It stays within the context without inventing prices/turnaround, but is incomplete relative to the query\u2019s requested content.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a brief description about propane refills at the store, but it fails to address the requested specifics (\u201cSizes, Prices and Turnaround\u201d) and is not grounded in a fact sheet. It adds unrelated services (keys, paint, tool rental).",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 7,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly mentions that Riverside Hardware & Supply offers propane tank refill, key cutting (walk-in, no appointment), custom paint mixing, and tool rental with daily and weekly rates, and it accurately states the hours (Mon\u2013Sat 8:00 AM\u20136:00 PM; Sunday closed). However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does provide a title and a brief description, but it does not include sizes, prices, or turnaround details (which also are not present in the context). It therefore answers only partially and remains generic relative to the requested focus, though it does not introduce factual errors beyond the context.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a basic title and a general description about propane refills at the store, but it doesn\u2019t address the requested specifics\u2014sizes, prices, and turnaround\u2014or cite details grounded in the store\u2019s fact sheet. It also adds unrelated services (keys, paint, tool rental).",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 8,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays within the fact sheet: it correctly names the business (Riverside Hardware & Supply), mentions propane tank refill as a service, and accurately lists other services present in the context (key cutting walk-in, custom paint mixing, tool rental with daily/weekly rates). It also states the hours exactly as given (Mon\u2013Sat 8:00 AM\u20136:00 PM; Sunday closed) and does not introduce conflicting claims (e.g., Sunday hours). However, the query asked for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details (which also are not present in the fact sheet), and the title is generic rather than matching the requested phrasing. So it is grounded/accurate but incomplete with respect to the requested content focus.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a basic title and a general description about propane refills at a specific store, but it does not cover the requested specifics\u2014tank sizes, prices, and turnaround\u2014nor does it appear grounded in a fact sheet. It also adds unrelated services.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 9,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is largely anchored in the fact sheet: it correctly references the propane tank refill service, mentions other listed services (key cutting walk-in, custom paint mixing, tool rental with daily/weekly rates), and accurately states the store hours (Mon\u2013Sat 8\u20136, Sunday closed). However, the query asks for a title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not include any sizes, prices, or turnaround details (and the fact sheet doesn\u2019t provide them), and it broadens the description to other services instead of focusing on the requested topic. It doesn\u2019t add incorrect facts, but it is incomplete relative to the requested content.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a description about propane refills at a specific store, but it does not address the requested focus on \u201csizes, prices and turnaround,\u201d nor does it show grounding in a fact sheet. It adds unrelated services and only includes store hours.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 10,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays anchored to the fact sheet by correctly naming the business (Riverside Hardware & Supply), mentioning propane tank refill as a service, accurately listing other services from the sheet (key cutting walk-in/no appointment, custom paint mixing, tool rental with daily/weekly rates), and providing the correct hours (Mon\u2013Sat 8\u20136; Sunday closed). However, the query asked for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not include any sizes, prices, or turnaround details (and none are available in the context), so it can\u2019t fully satisfy the requested content. It also adds no unsupported factual claims; it just promises coverage. Overall it is grounded but incomplete relative to the query.",
+          "relevance": 2.0,
+          "relevance_passed": false,
+          "relevance_reason": "The user asked for a video title and description about propane tank refills focusing on sizes, prices, and turnaround, grounded in a fact sheet. The response provides a generic title and mentions unrelated store services and hours, but omits sizes, prices, turnaround details, and fact-sheet grounding.",
+          "threshold": 3,
+          "all_passed": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "label": "draft 2",
+      "query": "Draft a video title and description for a piece of content about: 'Propane Tank Refill: Sizes, Prices and Turnaround,' grounded in the store's fact sheet.",
+      "response": "Propane tank refill basics \u2014 Riverside Hardware & Supply\nWondering what Riverside Hardware & Supply can tell you about propane tank refill before you stop in? This video focuses on the store's propane tank refill service and sticks to the details confirmed in the fact sheet. It also covers store hours so you can plan your visit and highlights Riverside Hardware & Supply as a single-location independent hardware store in Riverside.\nRiverside Hardware & Supply \u2014 (555) 014-7742",
+      "original_groundedness": 4.0,
+      "original_relevance": 3.0,
+      "original_all_passed": true,
+      "calls_requested": 10,
+      "calls_measured": 10,
+      "calls_errored": [],
+      "all_passed_count": 10,
+      "threshold_crossings": 0,
+      "groundedness": {
+        "n": 10,
+        "min": 4.0,
+        "max": 4.0,
+        "mean": 4.0,
+        "distinct": [
+          4.0
+        ],
+        "values": [
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ]
+      },
+      "relevance": {
+        "n": 10,
+        "min": 3.0,
+        "max": 3.0,
+        "mean": 3.0,
+        "distinct": [
+          3.0
+        ],
+        "values": [
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ]
+      },
+      "calls": [
+        {
+          "call": 1,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The query asks for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround,\u201d grounded in the fact sheet. The response provides a title and a short description that accurately mentions the propane tank refill service (listed in Services/Products) and correctly characterizes the business as an independent single-location hardware store in Riverside (matches Business section). It also includes the phone number exactly as in the Contact section. However, it does not actually address the key requested specifics\u2014sizes, prices, and turnaround\u2014none of which are provided in the fact sheet; the response avoids inventing them, but ends up incomplete relative to the query. It also mentions covering store hours, but does not state the hours in the description (still not incorrect). Therefore it is grounded and correct as far as it goes, but incomplete for the asked focus.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a generic title and brief description about propane refills but does not address the requested specifics: sizes, prices, and turnaround, nor does it clearly ground details in the fact sheet. It adds unrelated elements like store hours and single-location status without the key topic details.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 2,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays within facts supported by the fact sheet: it correctly mentions the business name, that it\u2019s an independent single-location hardware store in Riverside, that propane tank refill is a service, references store hours (without stating any incorrect hours), and provides the phone number exactly as listed. However, the query asks for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround information (which also are not in the fact sheet), and it\u2019s not clearly formatted as a distinct title plus a full description (it reads more like a brief blurb). It is grounded and avoids hallucinating details, but it is incomplete relative to the requested content focus.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a generic title and brief description about propane refills at Riverside Hardware, but it does not cover the requested specifics (tank sizes, prices, turnaround) nor does it show grounding in the store\u2019s fact sheet. It adds unrelated details like being single-location.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 3,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays within facts provided in the fact sheet: it correctly names Riverside Hardware & Supply, mentions propane tank refill as a service, and notes it is an independent single-location store in Riverside. It also references covering store hours (which exist in the fact sheet) and provides the correct phone number. However, the query asked for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not include any sizes, prices, or turnaround details (and the fact sheet doesn\u2019t provide them), so the result is generic and incomplete relative to the requested topic. It does not introduce unsupported specific claims about prices or timing, which is good, but it fails to fully address the requested content focus.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a brief description about a store\u2019s propane refill service, but it does not address the requested specifics\u2014tank sizes, prices, or turnaround times\u2014nor does it clearly demonstrate grounding in a fact sheet. It adds unrelated store identity details.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 4,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays within the fact sheet by referencing the propane tank refill service (explicitly listed), the store name, and that it\u2019s an independent single-location hardware store in Riverside (all supported). It also includes the phone number exactly as in the context. However, the query asked for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide any sizes, prices, or turnaround details (none are available in the fact sheet), and it doesn\u2019t clearly format a full title + description\u2014it's more of a brief blurb. While it avoids inventing unsupported details (good grounding), it is incomplete relative to the requested topic elements, so it is only partially correct.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a brief description about propane tank refills, but it does not address the requested specifics\u2014sizes, prices, and turnaround\u2014nor does it demonstrate grounding in any fact-sheet details. It adds store hours/independent store info instead of core topic points.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 5,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays within the fact sheet by correctly referencing Riverside Hardware & Supply, its propane tank refill service, and the phone number (555) 014-7742. It also mentions the store is an independent, single-location hardware store in Riverside, which matches the context. However, the query asks for a title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround,\u201d and the fact sheet provides no sizes, prices, or turnaround details. The response avoids inventing those specifics, but it also doesn\u2019t actually deliver the requested content focus (it\u2019s a generic blurb that says it will stick to confirmed details). It omits other available grounding details that could strengthen the description (e.g., address, exact hours, Sunday closed). Thus it is grounded but incomplete relative to the query.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a short description about a propane tank refill service, but it does not cover the requested specifics\u2014sizes, prices, and turnaround\u2014and it references a fact sheet without actually grounding content in concrete fact-sheet details.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 6,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response attempts to draft a video title and description about propane tank refills and references only facts present in the sheet (the store name, that propane tank refill is a service, and the phone number). However, it does not actually deliver on the requested topic details (\u201cSizes, Prices and Turnaround\u201d)\u2014it provides no sizes, prices, or turnaround information (which also are not in the fact sheet), and it adds generic filler like \u201ccovers store hours\u201d without stating the hours. It stays within the fact sheet (no clear factual errors), but it is incomplete relative to the query\u2019s requested content.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a short description about propane tank refills, but it doesn\u2019t address the requested specifics (sizes, prices, turnaround) or clearly ground those details in the store\u2019s fact sheet. It adds unrelated store identity/phone info instead of the needed service specifics.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 7,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is generally anchored to the fact sheet: it correctly names the business (Riverside Hardware & Supply), accurately states it offers propane tank refill (listed under Services/Products), and notes it is an independent single-location store in Riverside (matches Business section). It also provides the phone number exactly as in the Contact section. However, the query asks for a video title and description specifically about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not provide sizes, prices, or turnaround details (none exist in the context), and instead stays generic. It also mentions covering store hours, but does not actually include the hours in the description. So it is grounded where it makes factual claims, but incomplete relative to the requested content.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and short description about a propane refill service, but it doesn\u2019t cover the requested specifics (sizes, prices, turnaround) and isn\u2019t clearly grounded in any fact-sheet details beyond vague claims. It also adds unrelated store branding and phone number.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 8,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is generally anchored to the fact sheet: it correctly mentions the store name, that it\u2019s an independent single-location hardware store in Riverside, that propane tank refill is a service, and provides the listed phone number. However, the query asks for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The response does not include any sizes, prices, or turnaround information (and the fact sheet doesn\u2019t provide those details), so the description is incomplete relative to the requested topic. It also vaguely says it \u201ccovers store hours\u201d but does not actually state the hours (though this is not incorrect, just missing detail). No clear factual inaccuracies are introduced. Overall, it\u2019s partially correct but incomplete.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and brief description about propane tank refills, but it does not address the requested specifics\u2014sizes, prices, and turnaround\u2014nor does it clearly ground claims in a fact sheet (it mentions one without using details). It\u2019s on-topic but incomplete.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 9,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response stays aligned with the fact sheet by mentioning the propane tank refill service (explicitly listed), the business name, its independent single-location nature, and the phone number (all present in context). It avoids inventing sizes, prices, or turnaround times, which are requested by the query but not provided in the fact sheet\u2014so it does not introduce ungrounded details. However, as a result it only partially fulfills the query because it doesn\u2019t actually provide the requested sizes/prices/turnaround information or a clearly formatted title+description; it\u2019s more of a generic blurb. Grounded but incomplete relative to the prompt\u2019s specifics.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and brief description about a propane refill service, but it does not cover the requested specifics\u2014sizes, prices, and turnaround\u2014nor does it clearly ground those details in a fact sheet. It adds unrelated store/phone info instead.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        },
+        {
+          "call": 10,
+          "groundedness": 4.0,
+          "groundedness_passed": true,
+          "groundedness_reason": "Let's think step by step: The response is mostly grounded in the fact sheet: it correctly names Riverside Hardware & Supply, mentions it is an independent single-location hardware store in Riverside, references propane tank refill as a service, and provides the correct phone number ((555) 014-7742). However, the query asks for a video title and description about \u201cPropane Tank Refill: Sizes, Prices and Turnaround.\u201d The fact sheet provides no sizes, prices, or turnaround details, and the response also does not provide those specifics\u2014so it is incomplete relative to the requested topic. It avoids inventing unsupported details (good), but it doesn\u2019t fully address the requested content focus. Therefore it is partially correct but not complete.",
+          "relevance": 3.0,
+          "relevance_passed": true,
+          "relevance_reason": "The response provides a plausible video title and a brief description about propane tank refills, but it does not address the specific requested topic elements (sizes, prices, turnaround) and adds ungrounded details (store hours, location, phone) without showing fact-sheet grounding.",
+          "threshold": 3,
+          "all_passed": true,
+          "error": null
+        }
+      ]
+    }
+  ]
+}

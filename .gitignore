@@ -29,6 +29,16 @@ ai-103/scripts/results/*
 !ai-103/scripts/results/20260902-151734_fixture_stability.json
 !ai-103/scripts/results/20260902-161534_fixture_stability.json
 !ai-103/scripts/results/20260903-104108_fixture_stability.json
+# Added 2026-09-09. The convention above lapsed the moment the orchestrator work
+# started: every result from Sep 7 on was cited in the docs and tracked by
+# nobody, so five citations pointed at files that existed only on one laptop --
+# the same failure run persistence was added to fix, in a new form. These are the
+# files STATUS.md and m7-orientation.md name as evidence. ~1.2 MB total.
+!ai-103/scripts/results/20260908-115858_orchestrator.json
+!ai-103/scripts/results/20260908-133724_orchestrator.json
+!ai-103/scripts/results/20260908-143613_orchestrator_stability.json
+!ai-103/scripts/results/20260909-101238_judge_isolation.json
+!ai-103/scripts/results/20260909-122233_orchestrator_stability.json
 ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files
