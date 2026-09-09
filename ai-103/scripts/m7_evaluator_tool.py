@@ -16,10 +16,63 @@ FACT_SHEET_PATH = (
     / "fact-sheet.md"
 ).resolve()
 
+def judge_deployment() -> str:
+    """Which deployment judges. `JUDGE_DEPLOYMENT` wins; otherwise gpt-5-4.
+
+    ADDED 2026-09-09, together with the change of default recorded below. Every
+    result dated BEFORE 2026-09-09 was measured on gpt-5-2 and is not comparable
+    to one measured after, which is why `ACTIVE_JUDGE_DEPLOYMENT` exists and why
+    probes record it.
+
+    WHY IT EXISTS. Two reasons, one of them a standing backlog item.
+    (1) The judge deployment was hardcoded to `CHAT_DEPLOYMENT_GPT_5_2`, a
+        variable named after one specific model, carried over from M6 where the
+        hardcoded judge is already logged as a defect. Nobody ever chose gpt-5-2
+        for M7; it is the Content Understanding analyzer model. Reading a
+        purpose-named variable makes the judge a decision rather than an
+        inheritance.
+    (2) On 2026-09-09 `reasoning_effort` was found to be unreachable through the
+        Evaluation SDK -- accepted by `**kwargs` and retained nowhere -- so the
+        deployment is the ONLY judge-side variable that can be changed. An
+        experiment comparing judges needs a way to switch them that does not
+        involve editing this file between runs.
+
+    Probes set it in `os.environ` before importing this module, because
+    `build_judge_config()` runs at module scope. Anything importing this after
+    the variable is set picks it up; anything importing it before does not.
+
+    THE DEFAULT WAS CHOSEN 2026-09-09, on 60 measured judge calls. It was
+    `CHAT_DEPLOYMENT_GPT_5_2` until then -- inherited from M6, never chosen. Six
+    probe_judge_isolation runs, two drafts x three deployments x n=10:
+
+      item7 (a draft whose claims are supported but which dodges the topic)
+        gpt-5-2       groundedness 1.0 x8, 4.0 x2
+        gpt-5-4-mini  groundedness 2.0 x8, 4.0 x2
+        gpt-5-4       groundedness 4.0 x10   <- no variance
+      item6 (a well-posed draft)
+        all three     groundedness 4.0 x10, relevance 3.0 x10   <- identical
+
+    Microsoft documents groundedness as measuring whether claims are SUPPORTED,
+    not whether the response ANSWERS. gpt-5-4 applies that definition every
+    time; gpt-5-2 usually lets off-topic-ness dominate and collapses to the
+    floor. So this is not "newer is better" -- it is fidelity to the metric's
+    own contract, and the older deployment failing to implement it.
+
+    THE OBJECTION, AND THE ANSWER TO IT. gpt-5-4 is also what the orchestrator
+    drafts on, so the judge now shares a deployment with the drafter. The same
+    six runs answer it: `all_passed` was 0/10 on item7 and 10/10 on item6 for
+    ALL THREE judges, two of which are not the drafter. Zero crossings in 60
+    calls. Self-grading is not buying the drafter a favorable verdict -- that is
+    measured, not argued. Re-check it if either model changes.
+    """
+    load_dotenv()
+    return os.environ.get("JUDGE_DEPLOYMENT") or os.environ["CHAT_DEPLOYMENT_GPT_5_4"]
+
+
 def build_judge_config() -> AzureOpenAIModelConfiguration:
     load_dotenv()
 
-    account, rg, azure_deployment = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"], os.environ["CHAT_DEPLOYMENT_GPT_5_2"]
+    account, rg, azure_deployment = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"], judge_deployment()
 
     endpoint = get_endpoint(account, rg)
     key = get_subscription_key(account, rg)
@@ -38,6 +91,11 @@ with open(FACT_SHEET_PATH, "r", encoding="utf-8") as f:
     context = f.read()
 
 model_judge = build_judge_config()
+# Recorded at import so a probe or a run record can state which judge produced a
+# number without re-deriving it. A result whose judge is unstated is not
+# comparable to one from a different judge, and after 2026-09-09 that is a real
+# possibility rather than a theoretical one.
+ACTIVE_JUDGE_DEPLOYMENT = model_judge["azure_deployment"]
 evaluators = {
     "groundedness": GroundednessEvaluator(model_judge, is_reasoning_model=True),
     "relevance": RelevanceEvaluator(model_judge, is_reasoning_model=True)

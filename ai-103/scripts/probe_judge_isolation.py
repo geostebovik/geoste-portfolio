@@ -57,6 +57,13 @@ USAGE
   python probe_judge_isolation.py --drafts 1            # failing draft only
   python probe_judge_isolation.py --item item7 --run 1 --drafts 1,2,3
 
+  # Compare judges on the SAME fixed text. reasoning_effort turned out to be
+  # unreachable through the Evaluation SDK (2026-09-09), so the deployment is
+  # the only judge-side variable there is. The chosen deployment is recorded in
+  # the results file, so two runs on two judges stay distinguishable afterwards.
+  python probe_judge_isolation.py --results 20260909-122233_orchestrator_stability.json \
+      --item item7 --run 1 --drafts 1 --n 15 --judge-deployment gpt-5-4-mini
+
 BUDGET. Each evaluate_draft() call is TWO judge calls (groundedness carries
 fact-sheet.md, relevance does not) at roughly 3.9K tokens combined -- measured
 2026-09-04. So n=10 on two drafts is ~78K tokens and, at 30K TPM, a few minutes
@@ -75,15 +82,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# evaluate_draft is imported, never reimplemented: it is the function under
-# test. A local copy of the judge config would measure something adjacent to
-# what the orchestrator actually calls, which is the whole point of the probe.
-from m7_evaluator_tool import evaluate_draft
-
-# RESULTS_DIR and run_provenance come from the orchestrator for the same reason
-# probe_orchestrator_stability.py imports them: a measurement that is not
-# attributable to a commit cannot be re-derived later.
-from m7_orchestrator import RESULTS_DIR, run_provenance
+# NOTE ON IMPORT ORDER, added 2026-09-09 with --judge-deployment.
+# m7_evaluator_tool builds its judge config AT MODULE SCOPE, so the deployment is
+# fixed the moment it is imported. A --judge-deployment flag that set the
+# environment after that import would be silently ignored -- the exact
+# accepted-but-inert failure this probe's sibling was written to catch. So the
+# project imports below are deferred into main(), after the flag is applied.
+#
+# What is imported there, and why it is imported rather than reimplemented:
+#   evaluate_draft  -- the function under test; a local copy of the judge config
+#                      would measure something adjacent to what runs.
+#   RESULTS_DIR, run_provenance -- from the orchestrator, for the same reason
+#                      probe_orchestrator_stability.py takes them: a measurement
+#                      not attributable to a commit cannot be re-derived later.
 
 DEFAULT_RESULTS = "20260908-143613_orchestrator_stability.json"
 DEFAULT_ITEM = "item6"
@@ -138,7 +149,7 @@ def extract_drafts(path: Path, item_id: str, run_number: int) -> list[dict]:
     return drafts
 
 
-def judge_repeatedly(query: str, response: str, n: int) -> list[dict]:
+def judge_repeatedly(evaluate_draft, query: str, response: str, n: int) -> list[dict]:
     """Call evaluate_draft() n times on one fixed text.
 
     A judge call that errors is recorded with null scores and NOT retried. It
@@ -356,9 +367,20 @@ def main():
                         help="1-based draft numbers to re-judge (default 1,2)")
     parser.add_argument("--n", type=int, default=10,
                         help="re-reads per draft (default 10)")
+    parser.add_argument("--judge-deployment", default=None,
+                        help="deployment NAME to judge with (e.g. gpt-5-4-mini). "
+                             "Default is JUDGE_DEPLOYMENT or CHAT_DEPLOYMENT_GPT_5_2 "
+                             "from .env. Recorded in the results file, so two runs "
+                             "on different judges stay distinguishable.")
     args = parser.parse_args()
 
     load_dotenv()
+    # Applied BEFORE the imports below -- see the note at the top of this file.
+    if args.judge_deployment:
+        os.environ["JUDGE_DEPLOYMENT"] = args.judge_deployment
+
+    from m7_evaluator_tool import ACTIVE_JUDGE_DEPLOYMENT, evaluate_draft
+    from m7_orchestrator import RESULTS_DIR, run_provenance
 
     path = RESULTS_DIR / args.results
     if not path.exists():
@@ -386,7 +408,10 @@ def main():
     for agent_only in ("model_deployment", "agent_name", "temperature",
                        "instructions_label", "instructions"):
         provenance.pop(agent_only, None)
-    provenance["judge_deployment"] = os.environ.get("CHAT_DEPLOYMENT_GPT_5_2", "")
+    # Read off the module that actually built the config, not off the environment
+    # -- the environment says what was REQUESTED, this says what is in use.
+    provenance["judge_deployment"] = ACTIVE_JUDGE_DEPLOYMENT
+    provenance["judge_deployment_overridden"] = bool(args.judge_deployment)
 
     if provenance["git_dirty"]:
         print("WARNING: working tree is dirty. This result is not attributable to "
@@ -405,7 +430,8 @@ def main():
             print(f"\n{'=' * 70}\n{label} -- the text being judged\n{'=' * 70}")
             print(f"query   : {draft['query']}")
             print(f"response:\n{draft['response']}\n")
-            rows = judge_repeatedly(draft["query"], draft["response"], args.n)
+            rows = judge_repeatedly(evaluate_draft, draft["query"],
+                                    draft["response"], args.n)
             summaries.append(summarize(label, draft, rows))
     finally:
         # Written even on a crash: a partial batch is still evidence.

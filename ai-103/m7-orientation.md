@@ -184,6 +184,19 @@ correct.
   See the two Backlog entries; both point the same way — **`git status` in
   PowerShell is the authority**, not VS Code's Source Control view and not git
   read through the bridge.
+- **Before blaming a shared component, vary the one thing you have not varied.**
+  Added Sep 9, and it cost three revisions of one finding in a single day.
+  Groundedness scoring 1.0 and 4.0 on interchangeable drafts was written up as a
+  property of `GroundednessEvaluator` — a component shared by every run — on the
+  strength of 30 observations. All 30 were on ONE judge deployment. Ten calls each
+  on two others showed gpt-5-4 returning 4.0 every time, so the evaluator was
+  behaving exactly as documented and the model underneath it was not. **n was
+  never the problem; the design was.** Thirty runs of a single condition cannot
+  distinguish a property of the component from a property of the configuration —
+  only a second condition can, and it took ten calls.
+  **The tell to watch for:** a finding phrased as "X does Y" where X is
+  infrastructure everything shares. That phrasing is only earned once X has been
+  observed under more than one configuration.
 - **n=3 is not a distribution, and a clean run of identical values is the
   easiest thing to over-read.** Added Sep 9. Sep 8 recorded item7's groundedness
   as 4.0 three times and generalised it into a property of the evaluator
@@ -700,34 +713,45 @@ Nothing here blocks anything else. Pulled together from scattered
 add new items here going forward instead of leaving them buried in a
 session's narrative paragraph in `STATUS.md`.
 
-- ~~**`GroundednessEvaluator` does not measure responsiveness (Sep 8, n=5).**~~
-  — **WRONG AS STATED. Corrected 2026-09-09 at n=30.** The Sep 8 claim was that
-  groundedness answers "is what you said supported", never "did you answer", so
-  `all_passed` is relevance-gated for any uncovered topic. It rested on five
-  observations that all happened to land at 4.0–5.0. Thirty runs of item7 say
-  otherwise: groundedness ranged **1.0 to 4.0, mean 2.667**, on one item.
-  **The real behavior: groundedness INCONSISTENTLY imports relevance into its
-  own score.** The controlled pair is runs 1 and 6 of
-  `20260909-122233_orchestrator_stability.json` — near-identical drafts (same
-  title verbatim, same five services, same phone number, cosmetic phrasing
-  differences only) whose two reason texts make the SAME four observations: the
-  fact sheet has no policy content, the response lists services instead, those
-  service claims ARE grounded, the response fails to address the topic. Same
-  evidence, and then *"they are not relevant to the requested topic, so the
-  response fails to answer the question as asked"* scores **1.0** while *"only
-  partially addressing the prompt while remaining mostly accurate to the fact
-  sheet where it does make claims"* scores **4.0**.
-  **V4 did not cause this.** P(groundedness=4.0) on item7 under V4 is 13/30 =
-  0.43, so three consecutive 4.0s has probability 0.081 — Sep 8's n=3 is not
-  distinguishable from this distribution. The spread was always there; nobody
-  had the runs to see it.
-  **What survives from the Sep 8 entry:** individual scores are worth about ±1
-  and direction beats magnitude — if anything understated, since the observed
-  spread is three points.
-  **What this changes:** the VERDICT layer is unaffected (item7 matched its
-  pre-registered row 26/30), so pass/fail is certifiable and scores are not. It
-  also promotes the judge-deployment entry below from tidiness to a real
-  decision, with vendor documentation behind it.
+- **`GroundednessEvaluator` does not measure responsiveness — the Sep 8 claim
+  was RIGHT, and the correction written earlier on Sep 9 was wrong. Settled
+  2026-09-09 PM on 60 judge calls.** Three readings of one finding in one day,
+  kept in order because the sequence is the lesson:
+  1. **Sep 8, n=5 on gpt-5-2:** groundedness scored 4.0 on drafts its own reason
+     text called non-responsive. Concluded it measures *is what you said
+     supported*, not *did you answer*, so `all_passed` is relevance-gated.
+  2. **Sep 9 AM, n=30 on gpt-5-2:** groundedness ranged 1.0–4.0 on item7. Claude
+     corrected (1) into "groundedness inconsistently imports relevance into its
+     own score", and wrote that here as a property of the EVALUATOR.
+  3. **Sep 9 PM, n=10 × three deployments on the same two fixed drafts:** the
+     evaluator is fine; the judge model was not.
+
+  | judge | item7 groundedness | item6 groundedness |
+  |---|---|---|
+  | gpt-5-2 | 1.0 ×8, 4.0 ×2 | 4.0 ×10 |
+  | gpt-5-4-mini | 2.0 ×8, 4.0 ×2 | 4.0 ×10 |
+  | **gpt-5-4** | **4.0 ×10** | 4.0 ×10 |
+
+  Microsoft documents groundedness as measuring whether claims are SUPPORTED,
+  not whether the response ANSWERS. **gpt-5-4 applies that definition on every
+  call. gpt-5-2 usually lets off-topic-ness dominate and collapses to the
+  floor.** So reading (1) describes the metric's actual contract; reading (2)
+  attributed one model's failure to implement it to the SDK. Corrected here
+  rather than deleted, because the error is instructive: an n=30 result on ONE
+  model was generalised to a component shared by three.
+  **item6 is the control that makes this readable** — all three judges returned
+  groundedness 4.0 ×10 and relevance 3.0 ×10 on a well-posed draft, so the judge
+  is not generally noisy. It is exact where the question is well-posed and
+  divergent only where the question is ill-posed, which is where model capability
+  shows.
+  **What still holds from Sep 8:** `all_passed` is relevance-gated for any topic
+  the fact sheet cannot cover, and individual scores are worth about ±1.
+  **What it does NOT change:** the verdict layer. `all_passed` was 0/10 on item7
+  and 10/10 on item6 for every judge — zero crossings in 60 calls. Pass/fail is
+  judge-invariant, which is why certification on pass/fail was never blocked by
+  any of this.
+  Judge changed to gpt-5-4 the same day; see `m7_evaluator_tool.py`'s
+  `judge_deployment()`.
 - ~~**The redraft loop may be retry-until-lucky rather than remediation
   (Sep 8) — settle before certifying.**~~ — **SETTLED 2026-09-09. It re-rolls.**
   `probe_judge_isolation.py` called `evaluate_draft()` on run 15's recorded
@@ -878,24 +902,29 @@ session's narrative paragraph in `STATUS.md`.
   quota change `gpt-5-4-mini` was provisioned at 3 RPM against `gpt-5-4`'s 30,
   and an argument for mini was made twice that morning without checking. Decide
   it with a paired run once the wording is stable.
-- **The judge deployment is inherited, not chosen (Sep 7) — PROMOTED 2026-09-09
-  from tidiness to the current next action.** `evaluate_draft` judges on
-  `gpt-5-2`, hardcoded in `m7_evaluator_tool.py` and carried over from M6, where
-  the hardcoded judge deployment is already a backlog item. `gpt-5-2` is the
-  Content Understanding analyzer model. Nobody picked it for M7.
-  **Two things changed on Sep 9.** (1) The judge was measured contradicting
-  itself — 1.0 and 4.0 on interchangeable drafts with the same reasoning in both
-  reason texts, see the corrected `GroundednessEvaluator` entry above. (2)
-  Microsoft's own documentation, read via the Microsoft Learn connector, states
-  the evaluator prompt was tuned against GPT-4o, recommends judge models that are
-  **not in preview**, and warns performance "can be especially poor" on smaller
-  models. So the judge choice is a documented dependency of score quality, not a
-  consistency nit.
-  **How to decide it:** a paired run on one item, `gpt-5-2` against a current
-  non-preview deployment, reading the SPREAD rather than the mean — the defect is
-  variance, so a mean would hide it. Sources:
-  learn.microsoft.com/python/api/azure-ai-evaluation/azure.ai.evaluation.groundednessevaluator
-  and learn.microsoft.com/azure/foundry-classic/how-to/develop/evaluate-sdk.
+- ~~**The judge deployment is inherited, not chosen (Sep 7).**~~ — **CLOSED
+  2026-09-09. gpt-5-4, chosen on 60 measured judge calls.** It ran on `gpt-5-2`
+  from M6, unchosen; `gpt-5-2` is the Content Understanding analyzer model.
+  **What settled it:** on a draft whose claims are supported but which dodges the
+  topic, gpt-5-2 returned groundedness 1.0 ×8 / 4.0 ×2 and gpt-5-4 returned
+  4.0 ×10. On a well-posed draft all three deployments were identical. gpt-5-4 is
+  the only one that applies the metric's documented definition every time.
+  **The self-grading objection, answered with data rather than a hedge:** gpt-5-4
+  is also the orchestrator's drafting model. Across the same six runs `all_passed`
+  was 0/10 on item7 and 10/10 on item6 for ALL THREE judges, two of which are not
+  the drafter — zero crossings in 60 calls. The coupling exists and is documented;
+  it demonstrably is not buying the drafter a favorable verdict. Re-check if
+  either model changes.
+  **Two things ruled out on the way, both cheaply:** `reasoning_effort` is not
+  reachable through the Evaluation SDK (accepted by `**kwargs`, retained nowhere,
+  while `is_reasoning_model=True` lands visibly as `_is_reasoning_model`); and no
+  deployment spends hidden reasoning tokens when it grades — `completion_tokens`
+  matches the visible reason text to within a rounding error on all three
+  (197/891 chars, 127/568, 202/998). Reasoning depth is not the mechanism.
+  **Mechanism note:** `m7_evaluator_tool.judge_deployment()` reads
+  `JUDGE_DEPLOYMENT` and falls back to `CHAT_DEPLOYMENT_GPT_5_4`. Probes take
+  `--judge-deployment`, setting it before importing the evaluator module because
+  the judge config is built at module scope.
 
 - **The orchestrator's drafting cannot be made repeatable (Sep 7).**
   `temperature=0` is pinned, but the Agents SDK exposes no `seed` at all —

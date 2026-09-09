@@ -17,38 +17,34 @@ were split into `STATUS-archive-phase1.md` in this same folder.
 own `### Session — <date>` heading at the top of the log; it does not get
 appended to `## Current next action
 
-**Next action: decide the judge deployment, then run the certification pass on
-pass/fail only.** As of 2026-09-09 both Sep 8 blockers are cleared -- the redraft
-loop is characterised and the meta-commentary defect is fixed and measured. What
-replaced them is a judge-quality question that has to be settled before any score
-is reported.
+**Next action: run the certification pass on pass/fail.** As of 2026-09-09 PM the
+judge is decided and every prerequisite is closed. Nothing is blocking except the
+run itself.
 
-1. **Decide the judge deployment.** `evaluate_draft` judges on `gpt-5-2`,
-   hardcoded in `m7_evaluator_tool.py`, inherited from M6 and never chosen by
-   anyone. This was a tidiness item; it is now a real decision.
-   `GroundednessEvaluator` returned **1.0 and 4.0 on interchangeable drafts of
-   the same item, with the same four observations in both reason texts** (Sep 9,
-   n=30). Microsoft's own documentation says the evaluator prompt was tuned
-   against GPT-4o, recommends judge models that are not in preview, and warns
-   that performance "can be especially poor" on smaller models -- so this is a
-   documented dependency, not a guess. Decide with a paired run on one item,
-   `gpt-5-2` against a current non-preview deployment, and read the SPREAD rather
-   than the mean.
-2. **Then the certification pass -- on pass/fail, not on scores.** Both text
-   items matched their pre-registered VERDICT at a rate the score instability
-   never touched (item6 29/30 first-draft pass; item7 26/30 exact match on
-   first=False final=False redrafts=2), so the verdict layer is certifiable now
-   and the score layer is not. Report `first_text_passed` as the headline:
-   `final_text_passed` is a function of the redraft cap rather than of system
-   quality, which is what the Sep 9 judge-isolation probe established.
-   **Budget note, unchanged:** ~11.6K tokens per item per run agent-side, ~20.8K
-   for an item that exhausts the cap, and both figures exclude the judge and
-   vision calls, which run on separate deployments and never appear in
-   `run.usage`. Any budget quoted from `usage` alone undercounts by something
-   like 40% before vision.
-3. **Decide the orchestrator's model deliberately** -- see the Backlog entry. It
-   runs `gpt-5-4`; every tool-level result beneath it was measured on
-   `gpt-5-4-mini`. Unchanged from Sep 8, and now behind the judge decision.
+1. **Certify — on pass/fail, not on scores.** `probe_orchestrator_stability.py`
+   with a high `--runs`. **Report `first_text_passed` as the headline.**
+   `final_text_passed` is a function of the redraft cap, not of system quality: a
+   fixed failing draft passes 7 of 10 re-reads unchanged, so at a cap of 2 a
+   70%-per-read item reads 97%. Sep 8's `21/21` was that artifact.
+   **What the verdict layer has behind it:** item6 first-draft 29/30, item7
+   matching its pre-registered row 26/30, and `all_passed` identical across three
+   different judge deployments — zero crossings in 60 calls. The verdict is
+   judge-invariant; the scores are not, and scores stay out of any claim.
+   **Budget:** ~11.6K tokens per item per run agent-side, ~20.8K for an item that
+   exhausts the cap, both EXCLUDING judge and vision calls, which run on separate
+   deployments and never appear in `run.usage` — roughly 40% undercount before
+   vision.
+2. **Decide the orchestrator's model deliberately** — the last open Backlog
+   decision of this kind. It runs `gpt-5-4`; every tool-level result beneath it
+   was measured on `gpt-5-4-mini`. Note the judge now also runs `gpt-5-4`, so this
+   decision and the judge decision are coupled: changing the drafter would end the
+   shared-deployment arrangement that the Sep 9 self-grading control was measured
+   against, and that control would need re-running.
+3. **Batch the small instrument fixes** — item6's `expected_text` encoding a ~9.5%
+   event as expected, `run_provenance()` recording agent fields for agent-less
+   probes, and a `--reanalyze` mode for `probe_judge_isolation.py`. None affects a
+   measurement taken so far. Do them together, and not during a session that is
+   measuring with them.
 
 ## Milestones (Phase 1)
 
@@ -449,6 +445,78 @@ Learn is what turned the judge-model backlog entry from a tidiness note into a
 documented dependency. Registry search found no GitHub connector; the dangling-
 commit question needs `git fetch origin <a real pre-purge SHA>` and those SHAs
 are no longer in the local clone.
+
+**AFTERNOON — the judge, settled. Finding 3 above is wrong as written, and the
+correction is the interesting part.**
+
+**What Finding 3 said this morning:** groundedness inconsistently imports
+relevance into its own score, stated as a property of `GroundednessEvaluator` on
+30 observations. **All 30 were on one judge deployment.** Ten calls each on two
+others, same two fixed drafts:
+
+| judge | item7 groundedness | item7 relevance | item6 (both metrics) |
+|---|---|---|---|
+| gpt-5-2 | 1.0 ×8, 4.0 ×2 | 1.0 ×10 | 4.0 / 3.0, ×10, exact |
+| gpt-5-4-mini | 2.0 ×8, 4.0 ×2 | 2.0 ×9, 1.0 ×1 | 4.0 / 3.0, ×10, exact |
+| **gpt-5-4** | **4.0 ×10** | 2.0 ×9, 1.0 ×1 | 4.0 / 3.0, ×10, exact |
+
+**item6 is the control and it is decisive:** all three judges agree exactly on a
+well-posed draft, so the judge is not generally noisy. Microsoft documents
+groundedness as measuring whether claims are SUPPORTED, not whether the response
+ANSWERS — gpt-5-4 applies that on every call; gpt-5-2 usually lets off-topic-ness
+dominate. **So Sep 8's original claim describes the metric's real contract, and
+this morning's correction attributed one model's failure to implement it to the
+SDK.** Corrected in `m7-orientation.md` rather than deleted; the sequence is the
+lesson, and a standing lesson was added for it.
+
+**Claude predicted all three judges would spread on item7. gpt-5-4 did not spread
+at all.** Recorded because the prediction was made in writing beforehand.
+
+**The verdict layer is judge-invariant. This is the certification result.**
+`all_passed` was 0/10 on item7 and 10/10 on item6 for every judge — **zero
+crossings in 60 calls.** Everything certified on pass/fail stands regardless of
+judge. The decision to certify verdicts and not scores was made this morning on
+reasoning; it is now evidenced.
+
+**Judge changed to gpt-5-4, and the self-grading objection is answered with data.**
+gpt-5-4 is also the orchestrator's drafting model, so judge and drafter now share
+a deployment. The same six runs answer the obvious objection: two of the three
+judges are not the drafter, and all three produced identical verdicts. The
+coupling is documented in `judge_deployment()`; it is not buying the drafter a
+favorable outcome.
+
+**Two mechanisms ruled out, cheaply, before the swap.**
+- **`reasoning_effort` is unreachable through the Evaluation SDK.** Accepted by
+  `**kwargs` and retained nowhere on the instance, while `is_reasoning_model=True`
+  lands visibly as `_is_reasoning_model` — so "accepted" was checked against a
+  known-honored parameter rather than assumed. `AzureOpenAIModelConfiguration`
+  accepts six fields and none is it.
+- **No deployment spends hidden reasoning tokens when it grades.**
+  `completion_tokens` matches the visible reason text within a rounding error on
+  all three: 197 against 891 chars, 127 against 568, 202 against 998 — 4.5 to 4.9
+  chars per token, ordinary English prose with no room for hidden deliberation.
+  `prompt_tokens` was 2035 on all three, confirming the same prompt reached each.
+
+**A hypothesis of Claude's was falsified along the way**, recorded so it is not
+re-proposed: Microsoft's reasoning-models page lists `temperature`, `top_p` and
+`seed`-adjacent parameters as unsupported on reasoning models, which suggested the
+CV audit's Sep 1 `temperature=0`/`seed=42` pinning and `AGENT_TEMPERATURE=0.0` had
+always been inert. **All three deployments ACCEPT both parameters.** Nothing on
+record needed correcting. Caveat kept: accepted is not the same as honored, and
+`probe_reasoning_params.py` cannot tell those apart.
+
+**New instruments, both committed:** `probe_reasoning_params.py` (what each
+deployment accepts, and its reasoning-token ladder) and `probe_judge_internals.py`
+(what the Evaluation SDK exposes, plus one raw evaluator call read before
+`_flatten()` drops `_properties`). `probe_judge_isolation.py` and
+`m7_evaluator_tool.py` gained `--judge-deployment` / `JUDGE_DEPLOYMENT`; the probes
+set it before importing the evaluator, because the judge config is built at module
+scope and a flag applied after that import would be silently ignored.
+
+**Tooling note.** The Microsoft Learn connector was activated this session and did
+real work: it supplied the groundedness scale definition, the reasoning-model
+parameter table, and the judge-model guidance that turned the inherited-judge
+backlog entry into a decision. Registry search found no GitHub connector.
 
 ### Session — September 8, 2026
 
