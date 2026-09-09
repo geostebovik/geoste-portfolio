@@ -59,6 +59,7 @@ import os
 import statistics
 import time
 from datetime import datetime
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -207,7 +208,9 @@ def main():
         parser.error("no items selected")
 
     load_dotenv()
-    provenance = run_provenance()
+    # Its own name, not m7_orchestrator.py -- run_provenance lives in that
+    # module, so Path(__file__).name there is the module, not the caller.
+    provenance = run_provenance(script=Path(__file__).name)
     if provenance["git_dirty"]:
         print("WARNING: working tree is dirty. This result is not attributable to "
               "a commit and cannot be re-derived later.")

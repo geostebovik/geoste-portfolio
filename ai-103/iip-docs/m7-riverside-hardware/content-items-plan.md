@@ -220,10 +220,44 @@ pre-emptively hardened that morning, this number would not exist.
   thin first draft. This is what makes the item recoverable, and it is the
   clause under test: *replace* unsupported claims with supported ones, rather
   than only deleting them.
-- **Expected result:** first `evaluate_draft` call fails; the agent redrafts
-  and the run ends passed, within the cap of two. Redraft counts of 1 or 2 are
-  both correct. CV audit passes all three dimensions.
-- **Pre-registered branches, all three, with the direction each implies:**
+- **Expected result — RE-REGISTERED 2026-09-09 (Gerard's call). Branch 2
+  fired, and this item is now a well-posed control rather than a recoverable
+  failure.**
+  **Now:** first `evaluate_draft` call **passes**; run ends passed; CV audit
+  passes all three dimensions. Redraft count is not pinned — item6 drew a
+  groundedness 2.0 once in 30 runs and recovered on one redraft, and a rare dip
+  is measured variance, not an answer-key failure, so 0 and 1 are both the
+  system working.
+  **Previously:** "first `evaluate_draft` call fails; the agent redrafts and the
+  run ends passed, within the cap of two."
+  **Why it changed, and why this is not the goalpost move rejected on item 1.**
+  Two findings retired the original design. (a) The relevance **step function**:
+  a supported spine scores 3.0 and passes however much specificity the topic
+  demands; an absent spine scores 2.0 and cannot recover. The condition that
+  produces a first-draft failure is the same one that prevents recovery, so a
+  recoverable-failure fixture may be **structurally impossible** in this design.
+  (b) Measured at n=30 on 2026-09-09: item6 passes on the first draft **29 times
+  out of 30**. Branch 2 below anticipated exactly this and said the honest
+  conclusion might be that the fixture cannot be made to fail on a well-formed
+  topic — that is the conclusion, reached after two topics rather than assumed.
+  Item 1's rejected move was bending an answer key to excuse a defective
+  fixture. This fixture is not defective; it is doing something real that it was
+  not built for. **It is the well-posed control that made the Sep 9 judge
+  comparison readable** — all three judge deployments returned groundedness
+  4.0 ×10 and relevance 3.0 ×10 on it, which is what established that the judge
+  is exact where the question is well-posed and divergent only where it is not.
+  That is worth more than a recoverable-failure fixture nobody can build.
+  **What is lost, stated plainly:** there is now no fixture that exercises
+  fail-then-recover by design. The remediation clauses are still observed — the
+  cap and keep-the-third on item7, stop-on-pass twice on item6 — but by variance,
+  not by construction. Any future claim about the redraft path rests on those
+  variance-driven observations, and the judge-isolation probe showed a fixed
+  failing draft passes 7 of 10 re-reads unchanged, so a recovery is not by itself
+  evidence a redraft worked.
+- **Pre-registered branches — RESOLVED 2026-09-09: branch 2 fired.** Kept
+  verbatim below because the pre-registration is what makes the outcome
+  attributable: branches 2 and 3 called for opposite corrections, so reading them
+  after the fact is not the same as having written them before.
   1. **Fails, then recovers within the cap.** The intended observation.
   2. **Passes on the first draft.** Fixture still too weak. Correction: harder
      again — and at that point the honest conclusion may be that

@@ -40,11 +40,15 @@ run itself.
    decision and the judge decision are coupled: changing the drafter would end the
    shared-deployment arrangement that the Sep 9 self-grading control was measured
    against, and that control would need re-running.
-3. **Batch the small instrument fixes** — item6's `expected_text` encoding a ~9.5%
-   event as expected, `run_provenance()` recording agent fields for agent-less
-   probes, and a `--reanalyze` mode for `probe_judge_isolation.py`. None affects a
-   measurement taken so far. Do them together, and not during a session that is
-   measuring with them.
+3. ~~**Batch the small instrument fixes.**~~ — **DONE 2026-09-09 PM**, in the gap
+   between measurements, which is where that entry said to do them.
+   `run_provenance()` now takes `script` and `include_agent` (both defaulting to
+   the old behavior), so probes stop recording the orchestrator's name and an
+   agent config they never used; `probe_judge_isolation.py --reanalyze` recomputes
+   a results file's verdict from its stored scores with no judge calls, writing a
+   sibling file rather than editing the original; and item6 was re-registered,
+   which turned out to be an answer-key decision rather than the display wart it
+   was filed as. **The certification pass runs on clean instruments.**
 
 ## Milestones (Phase 1)
 
@@ -410,13 +414,19 @@ Certification of pass/fail is not blocked. Any claim about SCORES is, until the
 judge deployment is decided -- which is why that moved to the top of the next
 action.
 
-**Two instrument notes, neither chased.** (a) item6's `expected_text` encodes
-`first_pass: False`, a ~9.5% event, as the expected value, so
-`text_matches_expected` reads False on 29 of 30 runs for a system working
-correctly, and `text_path_items_matching_expected` reports ~10% for a clean run.
-Cosmetic, but it makes summaries lie. (b) item6's relevance was 3.0 x30 with zero
-variance under V4 against 2/21 dips under V3; that is **not** significant
-(p=0.16) and must not be read as V4 having stabilised anything.
+**Two instrument notes. (a) was chased the same afternoon and turned out not to
+be cosmetic.** item6's `expected_text` encoded `first_pass: False` -- a ~9.5%
+event -- as the expected value, so `text_matches_expected` read False on 29 of 30
+runs for a system working correctly. Filed as a display wart; it was actually a
+small answer-key decision, because item6 was *designed* as the recoverable-failure
+fixture and that design is what the step function retired. **Re-registered as a
+well-posed control** in both `ITEMS` and `content-items-plan.md` -- Gerard's call,
+and it is branch 2 of item6's own pre-registered branches firing, which said in
+advance that this might be the honest conclusion. Full reasoning in the answer
+key; what is lost is stated there too (no fixture now exercises fail-then-recover
+by design). (b) item6's relevance was 3.0 x30 with zero variance under V4 against
+2/21 dips under V3; that is **not** significant (p=0.16) and must not be read as
+V4 having stabilised anything.
 
 **Two process failures worth keeping, both Claude's.**
 - **The instrument overstated its own verdict.** `probe_judge_isolation.py`'s

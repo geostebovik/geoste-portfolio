@@ -826,34 +826,37 @@ session's narrative paragraph in `STATUS.md`.
   authority.** Standing consequence: every commit message Claude prepares now
   names the exact files to stage.
 
-- **item6's `expected_text` encodes a rare event as the expected one (Sep 9).**
-  `expected_text` is `first_pass: False`, but an item6 first-draft dip is roughly
-  a 9.5% event, so `text_matches_expected` reads False on 29 of 30 runs for a
-  system behaving exactly as measured, and `text_path_items_matching_expected`
-  reports ~10% for a clean run. Same class as the crashed-item denominator and
-  the false-dirty provenance: an instrument that reports a number pointing the
-  wrong way. Cosmetic — it touches no measurement taken so far — but it makes
-  summaries lie to anyone reading them cold.
+- ~~**item6's `expected_text` encodes a rare event as the expected one (Sep 9).**~~
+  — **RESOLVED 2026-09-09 PM, and it was not the cosmetic issue it was filed as.**
+  The field read `first_pass: False` because item6 was designed as the
+  recoverable-failure fixture; the relevance step function retired that design and
+  n=30 measured it passing first draft 29 times. Re-registered as a **well-posed
+  control** in both `ITEMS` and `content-items-plan.md` — Gerard's call, and it is
+  item6's own pre-registered branch 2 firing. Not the goalpost move rejected on
+  item1: that was bending a key to excuse a defective fixture, this is a sound
+  fixture doing something other than what it was built for, and doing it well —
+  it is the control that made the Sep 9 judge comparison readable. **What is lost:
+  no fixture now exercises fail-then-recover by design.** The remediation clauses
+  remain observed, but by variance rather than construction.
 
-- **`run_provenance()` records agent fields for runs with no agent (Sep 9).**
-  It stores `agent_name`, `temperature`, `model_deployment` and the full
-  instructions text because it was written for the orchestrator. A judge-only
-  probe has none of those. `probe_judge_isolation.py` strips them locally and
-  substitutes `judge_deployment`; `probe_orchestrator_stability.py` also records
-  `script` as `m7_orchestrator.py` rather than its own name, since the field is
-  `Path(__file__).name` evaluated in the orchestrator's module. Both are small.
-  Fix them together, and not during a session that is measuring with them.
+- ~~**`run_provenance()` records agent fields for runs with no agent (Sep 9).**~~
+  — **FIXED 2026-09-09 PM.** It now takes `script` and `include_agent`, both
+  defaulting to the previous behavior so nothing that called it before changed.
+  `probe_orchestrator_stability.py` passes its own name (it had been recording
+  `m7_orchestrator.py`, since `Path(__file__).name` evaluates in the module that
+  defines the function, not the caller), and `probe_judge_isolation.py` excludes
+  the agent fields at the source instead of stripping them afterwards.
 
-- **A stale verdict string sits inside a committed results file (Sep 9).**
-  `results/20260909-101238_judge_isolation.json` was written by the first version
-  of `probe_judge_isolation.py`, whose `compare()` tested only whether two score
-  RANGES intersect and printed "retry-until-lucky" whenever they did. Its
-  **numbers are correct**; its `comparison` block is superseded by the rewritten
-  logic (two separate questions, Fisher's exact test on pass rates, "CANNOT TELL"
-  as a first-class output). Not re-run: re-running draws new samples rather than
-  re-analysing the old ones, so it would replace the dataset rather than correct
-  the record. A `--reanalyze` mode that re-reads an existing file without calling
-  the judge would fix this properly and is worth about twenty lines.
+- ~~**A stale verdict string sits inside a committed results file (Sep 9).**~~
+  — **RESOLVED 2026-09-09 PM by `probe_judge_isolation.py --reanalyze`.** It
+  recomputes a results file's summary and comparison from the stored per-call
+  scores, makes **no judge calls**, and does not import the evaluator module at
+  all — so it needs no Azure credentials and still works if a deployment is gone.
+  It writes `*_reanalyzed.json` and **never edits the original**: rewriting a
+  committed artifact would make the wrong verdict disappear rather than be
+  superseded, and the `STATUS.md` entry describing it would point at nothing.
+  Corrected reading of `20260909-101238`: Q1 yes (7/10 unchanged passes), Q2
+  cannot tell (Fisher p=0.211).
 
 **Repo / security hygiene:**
 

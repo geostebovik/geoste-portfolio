@@ -326,8 +326,13 @@ AGENT_TEMPERATURE = 0.0
 # printed and persisted. Item 8 is a reproduction control, not a flaw fixture.
 #
 # `expected_text` is pre-registered, before the run, per content-items-plan.md.
-# expected_redrafts is None where more than one count is correct -- item6 may
-# recover on the first or the second redraft, and both are the clause working.
+# expected_redrafts is None where more than one count is correct.
+#
+# UPDATED 2026-09-09: the "zero observations" premise above is spent. Every
+# remediation clause has now been observed -- the two-redraft cap and
+# keep-the-third (item7, Sep 8), and stop-on-pass twice (item6 run 15 Sep 8,
+# item6 run 30 Sep 9). item6 was re-registered from a recoverable-failure
+# fixture to a well-posed control; see its own comment for why.
 ITEMS = [
     {
         "id": "item1",
@@ -365,25 +370,40 @@ ITEMS = [
         "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": 0},
     },
     {
-        # Recoverable text failure, v2. The v1 topic (tool-rental pricing)
-        # scored groundedness 4.0 / relevance 3.0 and passed first draft in
-        # 20260908-115858: the agent never invented a price, so clause 4 held
-        # and there was nothing to remediate. The v1 run established that
-        # INSTRUCTIONS_V3 will not produce an unsupported claim on an
-        # answerable topic, so supportability is not a reachable door --
-        # responsiveness is. fact-sheet.md gives four words on this service
-        # ("Propane tank refill") against a topic demanding three specific
-        # dimensions, so an honest draft is thin ON TOPIC while hours, phone,
-        # address, tagline and four adjacent services sit unused for the
-        # redraft to substitute in. Moved one measured step from relevance 3.0
-        # (the threshold itself), not as far as it would go: branches 2 and 3
-        # in content-items-plan.md call for opposite corrections.
+        # WELL-POSED CONTROL. Re-registered 2026-09-09 (Gerard's call) from
+        # "recoverable text failure" to what 30 runs actually show it is.
+        #
+        # It was designed as the fixture that fails a first draft and recovers,
+        # so expected_text read first_pass: False. Two findings retired that
+        # design. (a) The relevance STEP FUNCTION: a supported spine scores 3.0
+        # and passes however much specificity the topic demands, an absent spine
+        # scores 2.0 and cannot recover -- so the condition producing a
+        # first-draft failure is the same one preventing recovery, and a
+        # recoverable-failure fixture may be structurally impossible here.
+        # (b) Measured: item6 passes on the first draft 29 times in 30.
+        #
+        # Leaving first_pass: False would have made text_matches_expected read
+        # False on 29 of 30 runs for a system behaving correctly. Flipping it to
+        # match the data is the goalpost move rejected on item1 in Sep 3's
+        # Thread 1 -- EXCEPT that here the answer key is not being bent to
+        # excuse a defect: the fixture is doing something real and useful, just
+        # not the thing it was built for. It is the well-posed baseline that
+        # made the Sep 9 judge comparison readable -- all three deployments
+        # returned groundedness 4.0 x10 and relevance 3.0 x10 on it, which is
+        # what proved the judge is exact where the question is well-posed and
+        # divergent only where it is not. That is worth more than a
+        # recoverable-failure fixture nobody can build.
+        #
+        # expected_redrafts stays None: item6 drew a groundedness 2.0 once in 30
+        # and recovered on one redraft (the second stop-on-pass observation on
+        # record). A rare dip is measured variance, not an answer-key failure,
+        # so 0 and 1 are both the system working.
         "id": "item6",
         "topic": "Propane Tank Refill: Sizes, Prices and Turnaround",
         "thumbnail": "item1-paint-mixing-CLEAN.png",
         "text_path": True,
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
-        "expected_text": {"first_pass": False, "final_passed": True, "expected_redrafts": None},
+        "expected_text": {"first_pass": True, "final_passed": True, "expected_redrafts": None},
     },
     {
         # Unrecoverable text failure, v2. The v1 topic (the crew) was declared
@@ -448,8 +468,21 @@ def _git(*args: str) -> str:
         return ""
 
 
-def run_provenance() -> dict:
+def run_provenance(script: str | None = None, include_agent: bool = True) -> dict:
     """What this run was measured against.
+
+    THE TWO PARAMETERS WERE ADDED 2026-09-09 AND BOTH DEFAULT TO THE OLD
+    BEHAVIOR, so nothing that called this before is affected.
+    - `script` -- this function lives in m7_orchestrator, so `Path(__file__).name`
+      evaluates to "m7_orchestrator.py" no matter who calls it. Every probe that
+      imported it recorded the wrong script name in its own results file.
+      Callers now pass their own.
+    - `include_agent` -- the agent fields below (name, temperature, instructions)
+      describe a run that HAS an agent. A judge-only probe does not, and a
+      results file asserting an agent configuration that never ran is the
+      confidently-wrong record this project keeps a standing lesson about.
+      probe_judge_isolation.py was stripping them by hand afterwards; it should
+      not have had to.
 
     `git_dirty` is the field that earns this function. A number measured against
     an undocumented working-tree diff is not attributable to any commit and
@@ -468,19 +501,27 @@ def run_provenance() -> dict:
     tracked = _git("diff", "--name-only", "HEAD")
     untracked = _git("ls-files", "--others", "--exclude-standard")
     status = "\n".join(x for x in (tracked, untracked) if x)
-    return {
+    provenance = {
         "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "script": Path(__file__).name,
+        "script": script or Path(__file__).name,
         "git_head": _git("rev-parse", "HEAD"),
         "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "git_dirty": bool(status),
         "git_dirty_files": status.splitlines(),
-        "model_deployment": os.environ.get("CHAT_DEPLOYMENT_GPT_5_4", ""),
-        "agent_name": AGENT_NAME,
-        "temperature": AGENT_TEMPERATURE,
-        "instructions_label": ACTIVE_INSTRUCTIONS_LABEL,
-        "instructions": ACTIVE_INSTRUCTIONS,
     }
+    if include_agent:
+        provenance.update({
+            "model_deployment": os.environ.get("CHAT_DEPLOYMENT_GPT_5_4", ""),
+            "agent_name": AGENT_NAME,
+            "temperature": AGENT_TEMPERATURE,
+            "instructions_label": ACTIVE_INSTRUCTIONS_LABEL,
+            "instructions": ACTIVE_INSTRUCTIONS,
+        })
+    else:
+        provenance["note"] = ("no agent in this run: the agent name, temperature "
+                              "and instructions fields are omitted because none "
+                              "applied, not because they were unknown.")
+    return provenance
 
 
 # ---------------------------------------------------------------------------

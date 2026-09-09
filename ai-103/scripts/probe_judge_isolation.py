@@ -355,6 +355,75 @@ def compare(summaries: list[dict]) -> dict | None:
     }
 
 
+def reanalyze(path: Path) -> None:
+    """Recompute a past run's summary and comparison from its stored calls.
+
+    WHY THIS EXISTS. `compare()` was rewritten on 2026-09-09 after its first
+    version printed "retry-until-lucky" on ranges that touched at a single point
+    while describing 7/10 against 10/10 -- a verdict stronger than the data under
+    it. `results/20260909-101238_judge_isolation.json` still carries that string.
+    Its NUMBERS are correct; only the derived verdict is stale.
+
+    Re-running the probe would not fix that. It would draw a fresh sample and
+    produce a different dataset, replacing the record rather than correcting the
+    reading of it. Every per-call score is already stored, so the corrected
+    verdict is pure arithmetic over data that exists -- no judge calls, no cost,
+    and nothing that depends on the service still behaving the way it did.
+
+    IT WRITES A NEW FILE AND NEVER EDITS THE ORIGINAL. The original is a
+    committed artifact and part of the record; rewriting it in place would make
+    the wrong verdict disappear rather than be superseded, and someone reading
+    the Sep 9 STATUS entry would find no trace of what it describes. The new
+    file records `reanalyzed_from`, so the pair reads in order.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    summaries = data.get("drafts") or []
+    if not summaries:
+        raise SystemExit(f"{path.name} has no 'drafts' section to reanalyze")
+
+    print(f"\nreanalyzing {path.name} -- no judge calls, arithmetic only")
+    print(f"  originally judged by : {(data.get('run') or {}).get('judge_deployment', 'unrecorded')}")
+    print(f"  drafts in file       : {[d.get('label') for d in summaries]}")
+
+    old = data.get("comparison") or {}
+    if old:
+        print("\n  superseded verdict in the file:")
+        for k in ("verdict", "q1_fixed_failing_draft_can_pass"):
+            if old.get(k):
+                print(f"    {k}: {old[k][:160]}")
+
+    print(f"\n{'=' * 70}\n=== Recomputed ===\n{'=' * 70}")
+    for d in summaries:
+        print(f"\n  {d['label']} -- originally groundedness "
+              f"{d.get('original_groundedness')}, relevance "
+              f"{d.get('original_relevance')}, all_passed {d.get('original_all_passed')}")
+        print(f"    all_passed on re-read : {d.get('all_passed_count')}/{d.get('calls_measured')}")
+        print(f"    THRESHOLD CROSSINGS   : {d.get('threshold_crossings')}/{d.get('calls_measured')}")
+        print(f"    groundedness : {d.get('groundedness')}")
+        print(f"    relevance    : {d.get('relevance')}")
+
+    comparison = compare(summaries) if len(summaries) >= 2 else None
+    if comparison is None:
+        print("\n  (only one draft in this file, so there is no pair to compare)")
+
+    out = path.with_name(path.stem + "_reanalyzed.json")
+    out.write_text(json.dumps({
+        "reanalyzed_from": path.name,
+        "reanalyzed_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "note": ("Recomputed from the stored per-call scores with the corrected "
+                 "compare(). No judge calls were made and no score changed -- only "
+                 "the derived verdict. The original file is unmodified and remains "
+                 "the record of what was run."),
+        "run": data.get("run"),
+        "probe": data.get("probe"),
+        "superseded_comparison": old or None,
+        "comparison": comparison,
+        "drafts": summaries,
+    }, indent=2), encoding="utf-8")
+    print(f"\nwritten: {out}")
+    print("the original is unchanged and still the record of what was run")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     parser.add_argument("--results", default=DEFAULT_RESULTS,
@@ -372,9 +441,28 @@ def main():
                              "Default is JUDGE_DEPLOYMENT or CHAT_DEPLOYMENT_GPT_5_2 "
                              "from .env. Recorded in the results file, so two runs "
                              "on different judges stay distinguishable.")
+    parser.add_argument("--reanalyze", default=None, metavar="FILENAME",
+                        help="recompute an existing results file's summary and "
+                             "comparison from its stored per-call scores and exit. "
+                             "Makes no judge calls, changes no score, and writes a "
+                             "new *_reanalyzed.json rather than editing the original.")
     args = parser.parse_args()
 
     load_dotenv()
+
+    # --reanalyze reads a file and does arithmetic. It must not import the
+    # evaluator module, which builds a judge config at import time and shells out
+    # to Azure CLI for an endpoint and key -- a pure re-read should not need
+    # credentials, and should still work if the deployment is gone.
+    if args.reanalyze:
+        target = Path(args.reanalyze)
+        if not target.exists():
+            target = Path(__file__).parent / "results" / args.reanalyze
+        if not target.exists():
+            raise SystemExit(f"no such results file: {args.reanalyze}")
+        reanalyze(target)
+        return
+
     # Applied BEFORE the imports below -- see the note at the top of this file.
     if args.judge_deployment:
         os.environ["JUDGE_DEPLOYMENT"] = args.judge_deployment
@@ -395,19 +483,10 @@ def main():
                 f"{len(drafts)} evaluate_draft call(s)"
             )
 
-    provenance = run_provenance()
-    # run_provenance() is written for the orchestrator, so it records the agent
-    # name, temperature and instructions text. NO AGENT RUNS HERE. Leaving those
-    # fields in place would put an agent configuration into a results file that
-    # never used one -- exactly the kind of confidently-wrong record the Sep 7
-    # scheduled-task lesson is about. The git fields are what this probe needs
-    # from it, and those are kept verbatim.
-    provenance["script"] = Path(__file__).name
-    provenance["note"] = ("no agent in this run: evaluate_draft() called directly. "
-                          "Agent fields removed because none applied.")
-    for agent_only in ("model_deployment", "agent_name", "temperature",
-                       "instructions_label", "instructions"):
-        provenance.pop(agent_only, None)
+    # No agent runs here, so the agent fields are excluded at the source rather
+    # than stripped afterwards -- run_provenance() grew both parameters on
+    # 2026-09-09 precisely because this probe was doing it by hand.
+    provenance = run_provenance(script=Path(__file__).name, include_agent=False)
     # Read off the module that actually built the config, not off the environment
     # -- the environment says what was REQUESTED, this says what is in use.
     provenance["judge_deployment"] = ACTIVE_JUDGE_DEPLOYMENT
