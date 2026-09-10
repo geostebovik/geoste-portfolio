@@ -15,40 +15,92 @@ were split into `STATUS-archive-phase1.md` in this same folder.
 
 **Two rules that keep it from decaying again.** (1) A session entry gets its
 own `### Session — <date>` heading at the top of the log; it does not get
-appended to `## Current next action
+appended to `## Current next action`, which holds exactly one item — the
+current one — and gets *replaced*, not extended. (2) Cross-references name a
+date, never a direction: "the Aug 14 session notes", not "the notes above".
+Direction words were already wrong in several places before this restructure,
+because the file had drifted into three different orderings at once.
 
-**Next action: run the certification pass on pass/fail.** As of 2026-09-09 PM the
-judge is decided and every prerequisite is closed. Nothing is blocking except the
-run itself.
+**Attribution -- read this before treating anything here as a work claim.**
+This is a joint working log. The work it describes was done by Gerard and by
+Claude (Anthropic's assistant), in proportions that varied task to task.
+Where authorship is known it is named inline -- "Gerard drafted, Claude
+critiqued", "Claude wrote the restructure at Gerard's request". **Where no
+actor is named, that is not an authorship claim by either party.** Most of
+this log is written in passive voice, and passive voice here means
+*unrecorded*, not *Gerard's*. An audit on 2026-09-03 found 82 of 101
+work-product passages in the Aug 28 - Sep 3 span carried no attributor at
+all, including most of the analysis, the root-cause findings and the
+architecture decisions. Those gaps are deliberately left unfilled:
+reconstructing attribution after the fact is guesswork, and guessing in a
+document that feeds a resume is worse than an honest silence.
 
-1. **Certify — on pass/fail, not on scores.** `probe_orchestrator_stability.py`
-   with a high `--runs`. **Report `first_text_passed` as the headline.**
-   `final_text_passed` is a function of the redraft cap, not of system quality: a
-   fixed failing draft passes 7 of 10 re-reads unchanged, so at a cap of 2 a
-   70%-per-read item reads 97%. Sep 8's `21/21` was that artifact.
-   **What the verdict layer has behind it:** item6 first-draft 29/30, item7
-   matching its pre-registered row 26/30, and `all_passed` identical across three
-   different judge deployments — zero crossings in 60 calls. The verdict is
-   judge-invariant; the scores are not, and scores stay out of any claim.
-   **Budget:** ~11.6K tokens per item per run agent-side, ~20.8K for an item that
-   exhausts the cap, both EXCLUDING judge and vision calls, which run on separate
-   deployments and never appear in `run.usage` — roughly 40% undercount before
-   vision.
-2. **Decide the orchestrator's model deliberately** — the last open Backlog
-   decision of this kind. It runs `gpt-5-4`; every tool-level result beneath it
-   was measured on `gpt-5-4-mini`. Note the judge now also runs `gpt-5-4`, so this
-   decision and the judge decision are coupled: changing the drafter would end the
-   shared-deployment arrangement that the Sep 9 self-grading control was measured
-   against, and that control would need re-running.
-3. ~~**Batch the small instrument fixes.**~~ — **DONE 2026-09-09 PM**, in the gap
-   between measurements, which is where that entry said to do them.
-   `run_provenance()` now takes `script` and `include_agent` (both defaulting to
-   the old behavior), so probes stop recording the orchestrator's name and an
-   agent config they never used; `probe_judge_isolation.py --reanalyze` recomputes
-   a results file's verdict from its stored scores with no judge calls, writing a
-   sibling file rather than editing the original; and item6 was re-registered,
-   which turned out to be an answer-key decision rather than the display wart it
-   was filed as. **The certification pass runs on clean instruments.**
+**Going forward, attribution is written inline at the time the work is
+logged, or not at all.** Where it is genuinely unclear, the entry credits
+Claude rather than Gerard -- an under-credit costs nothing real, while an
+over-credit in resume material can cost a great deal.
+
+> **Restored 2026-09-10.** Everything from "which holds exactly one item"
+> down to the end of the attribution rule above, plus the three pointers
+> below and the `## Current next action` heading itself, was deleted by
+> commit `aef3512` on 2026-09-08 — 37 lines, in a change whose purpose was
+> only to replace the next-action content. Rule (1) was left cut off
+> mid-sentence and the heading that marks the section boundary went with it,
+> which is why nothing caught it for two days. Recovered verbatim from
+> `git log -L 16,20:ai-103/STATUS.md`, not reconstructed from memory. The
+> sentence destroyed was the one saying this section "gets *replaced*, not
+> extended" — the replace operation ate the instruction describing itself.
+
+Commands/CLI reference lives separately: `iip-cli-runbook.md` in this same
+`ai-103/` folder — that page already works well as the "code samples"
+reference and didn't need rebuilding.
+
+Current-state map lives separately too: `m7-orientation.md` in this same
+folder (added Aug 28) — a one-page "what does M7 look like right now, what's
+built vs. designed vs. still open" snapshot, kept current on purpose. This
+file stays the chronological log; that one is the "you are here" pointer.
+
+A gotchas/tips-and-tricks page and a master index page (once there's enough
+split across pages to justify one) are deferred until real material
+accumulates for them — no point building empty structure now.
+
+**Status as of:** September 10, 2026. The certification pass has run: 120
+orchestrator runs at `INSTRUCTIONS_V4`, drafter and judge both `gpt-5-4`,
+zero crashes, 117/120 text rows and 117/120 audit rows matching their
+pre-registered answer key. What it exposed is `brand_consistent` — a check
+that has never been sound, only usually-agreeing.
+
+---
+
+## Current next action
+
+**Next action: finish the `brand_consistent` clause rewrite, then re-verify at
+n=15.** The certification pass ran 2026-09-10 and the verdict layer held. The
+open work is the one check it exposed.
+
+1. **`brand_consistent` — finish the clause, Gerard's wording.** It failed on
+   item3 3 times in 15 with `temperature=0`/`seed=42` pinned, and the 12 passes
+   reach the right verdict on a confabulated observation ("orange/cream tones"
+   in an image containing no cream). **Decided 2026-09-10 (option A, Gerard's
+   call): orange-dominant is sufficient.** The fact sheet states exactly one
+   violating condition — a materially different dominant scheme, blue/gray as
+   the example — and never requires both colours to appear, so item3's answer
+   key stands and the fixture is not touched. First edit is saved and removed
+   the contradiction; **two gaps remain**, both flagged 2026-09-10:
+   the clause still opens "orange ... *and* cream", which is the pairing
+   reading the three failing runs applied; and it still has no positive verdict
+   sentence. `info_accurate`, directly beneath it, is the template — "When
+   nothing legible contradicts the fact sheet, record it as True" is the
+   sentence that fixed it and has held since.
+2. **Verify with a FULL 5-fixture run at n=15, not n=7.** The Sep 2 rule already
+   requires all five fixtures for any wording edit to any check. Sep 10 supplies
+   the n: at the observed 20% failure rate a clean sweep of 7 has probability
+   0.8^7 ≈ 21%, so n=7 could not have detected this, and did not.
+3. **Decide the orchestrator's model** — unchanged in substance, but the
+   rate-limit dimension has dropped out of it (see the quota finding in the
+   Sep 10 entry), so it reduces to output quality against cost per token.
+4. **Raise the deployment quota and parallelise the probe loop** — Todoist
+   `6hVCcxW6jWPmrMWq`. Neither is worth much without the other.
 
 ## Milestones (Phase 1)
 
@@ -305,6 +357,306 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 10, 2026
+
+**The certification pass ran. 120 orchestrator runs, zero crashes, and the
+pass/fail layer matched its pre-registered answer key on 117 of 120 text rows
+and 117 of 120 audit rows — but the text deviations and the audit deviations are
+different runs, so it is six deviations across 240 cells, and only one of the six
+is a defect in the thing being certified.**
+
+Results: `results/20260910-104818_orchestrator_stability.json` (smoke, 8x1) and
+`results/20260910-123321_orchestrator_stability.json` (certification, 8x15). Both
+at `git_head 87b37cd`, clean tree, `model_deployment` and `judge_deployment` both
+`gpt-5-4`, `INSTRUCTIONS_V4`, temperature 0.
+
+#### What was certified, and in what words
+
+- **120 item-runs, zero crashes, zero `unmeasured`.** `unmeasured()` therefore
+  STILL has no observation against a real crash — unchanged from Sep 8, still in
+  the Backlog. Fifteen clean runs is not a test of the crash path.
+- **Text verdict layer: 118/120 correct behaviour.** 117 matched the answer key
+  outright; the two item6 "misses" are correct catches (below) and should not be
+  counted against the checker.
+- **Audit verdict layer: 117/120**, with all three failures in a single cell.
+- All eight items clear the 0.8 agreement bar. Note the console's `agreement`
+  figure for item7 reads 7% because it counts passes, not matches against the
+  expected row — the `stable` flag handles the inversion correctly, the printed
+  percentage does not. Backlog.
+- **Scores stayed out of the claim, and Sep 10 supplied the instance that
+  justifies it.** See item7 run 8.
+
+#### item6's two "failures" are the pipeline working
+
+item6's topic is "Propane Tank Refill: Sizes, Prices and Turnaround". The fact
+sheet contains no sizes, no prices and no turnaround. On runs 11 and 15 the agent
+drafted copy promising exactly those ("what sizes they handle, pricing, and how
+turnaround works"), groundedness caught it at 2.0 with correct reasoning, the
+agent redrafted, and the redraft passed at 4.0.
+
+**The two metrics moved in opposite directions, which is the part worth keeping.**
+On both failing drafts relevance was 4.0 — HIGHER than item6's usual 3.0 — while
+groundedness fell to 2.0. A draft that promises the sizes is more responsive to
+the topic and less grounded. The evaluators traded off correctly against each
+other without being told to.
+
+Two consequences:
+
+- **stop-on-pass goes from n=2 to n=4.** Both runs fired clause 7's early exit.
+  `probe_orchestrator_stability.py`'s docstring predicted this event would arrive
+  through variance rather than fixture design, and it did — but it predicted the
+  mechanism would be RELEVANCE, and it was groundedness. Same miss as the one
+  recorded below, from the same source.
+- **item6 is not the well-posed control it was re-registered as on Sep 9.** Its
+  topic string names three facts the fact sheet lacks, so an ungrounded first
+  draft is a legitimate outcome rather than a defect. Recorded, NOT fixed —
+  moving the answer key to match the data is the goalpost move Thread 1 rejected.
+
+#### The one genuine text defect: a score contradicting its own reason
+
+**item7 run 8** scored relevance 3.0 and passed, against a pre-registered
+`first_pass: False`. The judge's reason for that 3.0:
+
+> "it does not focus on the requested price-match guarantee and return policy.
+> Instead, it mostly lists unrelated store services and lacks grounding in those
+> specific policy details."
+
+Run 1, on the same item, scored 1.0:
+
+> "It misses the requested topic and grounding, making it largely irrelevant to
+> the user's specific ask."
+
+**The same judgment in prose; 1.0 against 3.0 in the number, across the
+threshold.** This is cause (c) from the Sep 2 audit analysis — the boolean
+contradicting its own notes — reappearing on the TEXT judge rather than the CV
+audit. It is also the concrete instance behind the Sep 9 decision to certify
+verdicts and keep scores out of any claim: that decision was made on an argument,
+and this is the observation it predicted.
+
+#### `brand_consistent` on item3 — a cell closed as noise, reopened, and its passes are worse than its failures
+
+item3's `brand_consistent` returned False on runs 9, 10 and 15 (expected True),
+with `temperature=0`/`seed=42` pinned on the audit call. `text_legible` and
+`info_accurate` on item3 were 15/15, so it is isolated to that one check.
+
+**The fact sheet's rule is precise:** "Primary colors: orange (#FD5A1E-family) and
+cream (#EFE4B0-family) — these are the only brand colors. Any thumbnail using a
+materially different palette (e.g. blue/gray) as its dominant scheme is a
+brand-consistency violation." The violating condition is a materially different
+DOMINANT SCHEME. item4 is that (blue/gray). item3 is entirely orange. **By the
+fact sheet's own rule item3 passes and the answer key is correct.** Gerard's call
+2026-09-10, taken deliberately as option A against a stated option B.
+
+**But the fixture does not contain what the passing runs say it contains.** item3
+has ZERO cream — a solid orange field, orange-on-orange clutter, an orange title,
+dark brown accents. The cream is absent because the legibility flaw requires it to
+be: a cream panel would introduce exactly the high-contrast region the fixture
+exists to avoid. item2, a CLEAN control, carries a large cream panel across
+roughly 30% of the frame.
+
+So the two populations split like this:
+
+- **The 3 failing runs observed accurately and applied the wrong rule.** "mostly
+  orange with little visible cream" is correct — there is none. But they required
+  the PAIRING, which the fact sheet never does.
+- **The 12 passing runs reached the right verdict on a confabulated
+  observation:** "the thumbnail uses an orange/cream palette", "dominated by
+  orange/cream tones". There is no cream in that image. They described item2 and
+  graded item3.
+
+**That is the finding.** The cell reads 12/15 correct, but the correct answers are
+not coming from correct reasoning. `brand_consistent` has never been shown to be
+SOUND — only to usually agree. A pass rate is not evidence of a working check when
+the reasoning behind the passes is false.
+
+**Root cause is the clause wording, and it is a standing lesson arriving again.**
+`m7_cv_audit_tool.py`, the `brand_consistent` line of the content-call system
+prompt: "is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family)
+-- flag anything materially different. Small color variations that do not impact
+brand consistency are not an issue." Three problems: the slash is ambiguous
+between OR and AND, and the failing runs read it as AND; it never states the
+passing condition, only what to flag, then adds a second negative exemption; and
+it drops the fact sheet's actual operative test. The model holds both the fact
+sheet and this weaker restatement, and on 3 of 15 runs the restatement wins —
+salience competition again, but between an INSTRUCTION AND ITS SOURCE rather than
+between two instructions.
+
+**A decisive internal check.** Run 15 objected that "the dark brown text/icon
+accents are not part of the stated brand colors". item1 and item2 carry the same
+dark wordmark and toolbox outline. Applied consistently that standard fails the
+clean controls, which passed 15/15. So it is not a property of item3; it is a rule
+being applied inconsistently because it is not pinned down.
+
+**Probably not a regression.** Today is the first time this cell has run at n=15,
+and through the orchestrator rather than `probe_fixture_stability.py`. At the
+observed 20% rate, P(clean sweep of 7) = 0.8^7 ≈ 21%. Sep 1's evidence never
+excluded this rate; it simply did not sample it. Same shape as the Sep 9 n=3
+lesson, one size up. (An illustration of what the old evidence could not rule out,
+not a significance claim.)
+
+**Status at end of session: first edit saved, not finished, not verified.** Gerard
+rewrote the clause and removed the contradiction his first draft introduced (a
+"both colours required" sentence that would have failed item3 against its own
+answer key, and would have sat in direct opposition to the blue/gray test two
+sentences earlier). Two gaps remain and are carried into the next action.
+
+#### The pre-registered prediction was falsified, cleanly
+
+Before the run, on the strength of the 8x1 smoke, Claude predicted that item3,
+item5 and item6 — all three sitting at draft-1 relevance exactly 3.0 against a
+threshold of 3 — were where first-draft failures would appear if the judge's ±1
+spread had survived the swap to `gpt-5-4`.
+
+**Relevance never went below 3.0 on any pass-item in 120 draws. The predicted
+mechanism did not occur once.** item3, flagged as most exposed, returned 4.0 on
+all 15 runs; its smoke-run 3.0 was a single draw read as a property. The failures
+came from groundedness (item6) and from relevance crossing UP from below (item7
+run 8).
+
+`m7-orientation.md`'s own lesson covers it: "Do not infer a gradient from a single
+point sitting on a threshold... The right reading of a value sitting exactly on a
+bar is 'this may be where the function lands', not 'one more nudge will tip it'."
+Claude read that the same morning and then built a prediction on three single
+points sitting on a bar.
+
+**The pre-registration still earned its keep.** Because the prediction was written
+down before the run, the miss is legible instead of being quietly reabsorbed into
+a post-hoc story about item6 — which is what would have been written, and it would
+have sounded right.
+
+#### Instrument change: the judge is now recorded in every orchestrator run
+
+`run_provenance()` recorded which model DREW each draft and never which one GRADED
+it. `probe_judge_isolation.py` had been setting `judge_deployment` on its own
+provenance by hand, so judge-only probes were self-describing while the
+orchestrator runs a certification claim rests on were not. Fixed: one import line
+and one field, recorded outside the `include_agent` block because a judge grades
+every run whether or not an agent drafted it. Claude wrote the patch; Gerard
+reviewed, committed and ran everything. Commit `87b37cd`.
+
+Consequence for the record: `results/20260909-122233_orchestrator_stability.json`
+(item6 29/30, item7 26/30) carries NO judge field and is timestamped 11:27, before
+the judge decision was taken that afternoon. Those two figures were measured on
+`gpt-5-2` and are not `gpt-5-4` numbers. They remain valid evidence that the
+verdict layer does not move with the judge; they are not the certification result.
+
+#### The judge question is closed on documentation as well as measurement
+
+`gpt-5-4` is **Generally Available** — Foundry model details page, Quick facts:
+Lifecycle "Generally Available", version 2026-03-05, publisher OpenAI, Direct from
+Azure. Microsoft's documented caveat — "For the best performance and parseable
+responses with our evaluators, we recommend using GPT models that aren't in
+preview" — is therefore satisfied by the current judge rather than violated by it.
+That was the last remaining argument for moving the judge off `gpt-5-4`.
+
+Also verified, and a non-finding recorded so nobody re-derives it: the docs require
+`is_reasoning_model=True` when a reasoning model judges Groundedness or Relevance.
+`m7_evaluator_tool.py` already sets it on both evaluators.
+
+A same-family judge swap (gpt-5.5 / gpt-5.6, both available in the project) was
+considered and rejected — it addresses the weaker half of the self-grading concern
+while leaving family-correlated blind spots untouched, and `all_passed` was already
+identical across three deployments in 60 calls. The cross-vendor INDEPENDENT CHECK
+remains the live idea, and its feasibility is now confirmed: DeepSeek-V4-Pro,
+Kimi-K2.5/K2.6/K2.7-Code and Cohere-command-a-plus-05-2026 all expose Chat
+completion in this project. Full reasoning in Todoist `6hV42V2cq7cJMcwH`.
+
+#### The 30K TPM ceiling is self-imposed — and it is not the bottleneck
+
+Found while checking whether `gpt-5-4` was GA. Foundry > Manage > Quota, gpt-5-4:
+Deployment quota 30K TPM, Total shared quota 1M TPM, Remaining 970K TPM. The Edit
+dialog confirms a 30K–1000K range and carries Microsoft's own hint, "Set quota high
+enough to prevent throttling." The 30K figure this project has designed around is
+an allocation set on Sep 7 to fix a real asymmetry (mini at 3 RPM against
+gpt-5-4's 30); nobody then asked whether 30K was the right absolute number.
+
+On Global Standard, TPM allocation is a rate ceiling, not a spend commitment —
+billing is per token consumed, so raising it costs nothing per token. PTU is the
+opposite arrangement; this project is not on PTU.
+
+**And a correction made the same day, before anything was acted on.** Claude first
+described the 95-minute run as throughput-bound and implied a quota raise would
+make it dramatically faster. The arithmetic says otherwise: the smoke run measured
+8 items in 6m19s = 47s per item-run, and at ~16K tokens per item that is ~20K TPM
+sustained, UNDER the ceiling. The run is serially latency-bound — 120 item-runs
+executed one after another, each waiting on multiple round trips. **The quota raise
+is the precondition for parallelism, not a speedup on its own.** Running the eight
+items concurrently would draw ~160K TPM, which is where 30K actually binds.
+Parallelising across items is safe by construction: `m7_orchestrator.py` already
+runs every item on its own thread. Todoist `6hVCcxW6jWPmrMWq`.
+
+The error is worth naming because it is the same shape as the find that produced
+it: "30K TPM" was questioned as a SETTING and still accepted as a BOTTLENECK. Two
+assumptions riding on one number; only one was tested.
+
+#### This file's own preamble had been silently truncated for two days
+
+`grep "^## Current next action"` returned nothing at session start, which is how it
+was found. Commit `aef3512` (2026-09-08, "Docs: Sep 8 - redraft branch observed")
+deleted 37 lines of standing preamble — hunk header `@@ -16,70 +16,33 @@` — in a
+change whose only purpose was to replace the next-action content. It began the
+replacement INSIDE the preamble, cut rule (1) off mid-sentence at "appended to
+`## Current next action", and took with it:
+
+- rule (1)'s tail, defining that the section holds one item and is *replaced*;
+- rule (2) entirely (cross-references name a date, never a direction);
+- **the whole Attribution block** — including "Where no actor is named, that is not
+  an authorship claim by either party", the 2026-09-03 audit finding that 82 of 101
+  work-product passages carried no attributor, the decision to leave those gaps
+  unfilled rather than guess, and the going-forward rule that unclear authorship
+  credits Claude rather than Gerard;
+- the pointers to `iip-cli-runbook.md` and `m7-orientation.md`, the deferred-pages
+  note, the "Status as of" line, and the `## Current next action` HEADING itself.
+
+**The attribution policy governing a resume-material document was absent for two
+days, and the Sep 9 and Sep 10 sessions were both logged without it visible in the
+file.** Restored 2026-09-10, verbatim from `git log -L 16,20:ai-103/STATUS.md` —
+recovered from the source, not reconstructed from memory, per the Sep 3 lesson
+about citing a document's contents.
+
+The mechanism is worth keeping: the heading is what marks the boundary of the
+region a session is allowed to replace. Deleting the heading removed the marker
+that would have made the over-reach visible, so the next two sessions edited around
+a boundary that no longer existed. And the specific sentence destroyed was the one
+saying the section "gets *replaced*, not extended" — the replace operation ate the
+instruction describing itself.
+
+#### Environment: the desktop shell was unavailable all day
+
+Second consecutive day. `device_list_dir` / `device_stage_files` /
+`device_commit_files` worked throughout; the desktop shell could not mount either
+folder (`no Plan9 drive shares mounted under /mnt/.virtiofs-root/shared`). New
+information against Sep 9: `echo hi` fails identically, so the failure is
+PRE-EXECUTION — the helper refuses to start any shell because the shares are
+absent, and the guest VM is up enough to report it. So the fault is in the
+host-to-VM folder-sharing layer, not the shell.
+
+Leading untested hypothesis: the two connected folders are nested
+(`geoste-portfolio` and `geoste-portfolio\ai-103`, the second inside the first),
+and the error names both as failing, which is what publishing zero shares rather
+than one would look like if the share set were rejected as a whole. **Test
+pre-registered for the next session: attach ONLY the repo root and try the shell.**
+The root already contains `ai-103`, so the second share buys nothing but a shorter
+path. If it still fails with a single folder, nesting is ruled out and the next
+suspect is the desktop build (1.49585.0 / Electron 44.2.0).
+
+Reading the app's own logs is NOT available: `C:\Users\gerar\AppData\Roaming\Claude`
+is a protected location and cannot be granted. Do not spend a permission prompt on
+it again.
+
+Practical consequence, unchanged from Sep 9: Claude reads and writes files but runs
+nothing, including git. Gerard ran every command today. This costs Claude grep and
+git; it does not block measurement, since the Azure scripts have always run in
+Gerard's own PowerShell where `.env`, the CLI login and the Python environment live.
+
+#### Authorship
+
+Gerard ran every command, made every decision, owns the certification framing, and
+made the option-A call on the brand rule and the clause rewrite. Claude wrote the
+`run_provenance()` patch, did the results analysis and the item3 root-cause
+investigation, recovered the deleted preamble from git, made the pre-registered
+prediction that was falsified, and made the throughput error corrected above.
 
 ### Session — September 9, 2026
 
