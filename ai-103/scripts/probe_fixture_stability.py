@@ -44,7 +44,7 @@ FIELDS = ("text_legible", "brand_consistent", "info_accurate")
 # on 2026-09-01 (item2's info_accurate split 4/3 at n=5-ish, close enough to
 # a coin flip that the extra 2 runs are worth it for a real characterization
 # of whichever wording is live when this runs).
-RUNS = 7
+RUNS = 15
 STABLE_THRESHOLD = 0.8
 
 # fixture_name -> list of {run, actual, notes} dicts, one per run

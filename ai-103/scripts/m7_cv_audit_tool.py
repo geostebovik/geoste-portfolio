@@ -168,7 +168,7 @@ def build_content_messages(image_b64: str, mime_type: str = "image/png") -> list
         {fact_sheet}
 
         Checks:
-        - brand_consistent: is the dominant palette orange (#FD5A1E family) / cream (#EFE4B0 family) -- flag anything materially different. Small color variations that do not impact brand consistency are not an issue
+        - brand_consistent: Record as True when the dominant color scheme is orange (#FD5A1E family) or cream (#EFE4B0 family) or both in any proportion. Record as False only when the color scheme is materially different from the brand's palette, blue/gray as the example. Neutral/dark accents are out of scope and should not be considered part of the evaluation.
         - info_accurate: do the visible assertions (hours, services) in the image match the fact sheet content and if not, identify the discrepancy. When nothing legible contradicts the fact sheet, record it as True. Do not allow any single assertion's accuracy, or lack thereof, to affect another. Evaluations are to be independently made and reported. Accuracy is not dependent on legibility and vice versa. When accuracy cannot be determined due to legibility issues, note this explicitly. A headline or title describing the content's topic is not itself a checkable assertion. Do not make assumptions about the business details beyond what is in the fact sheet
         - notes: brief reasoning for whatever it flagged (or "no issues found" if everything passed)
 
