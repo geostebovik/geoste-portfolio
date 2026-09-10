@@ -68,7 +68,7 @@ from azure.ai.agents.models import FunctionTool, ToolSet
 from azure.identity import DefaultAzureCredential
 
 from m7_cv_audit_tool import audit_thumbnail
-from m7_evaluator_tool import evaluate_draft
+from m7_evaluator_tool import ACTIVE_JUDGE_DEPLOYMENT, evaluate_draft
 from m7_fact_sheet_tool import get_fact_sheet
 
 
@@ -508,6 +508,16 @@ def run_provenance(script: str | None = None, include_agent: bool = True) -> dic
         "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "git_dirty": bool(status),
         "git_dirty_files": status.splitlines(),
+        # Added 2026-09-10. Every result before this date recorded WHICH MODEL
+        # DREW the draft and never which one GRADED it -- and on 2026-09-09 the
+        # judge moved from gpt-5-2 to gpt-5-4, which makes results either side
+        # of that date incomparable. probe_judge_isolation.py had been setting
+        # this field on its own provenance by hand, so judge-only probes were
+        # self-describing while the orchestrator runs -- the ones a
+        # certification claim actually rests on -- were not. That asymmetry is
+        # backwards. Recorded unconditionally, outside the include_agent block,
+        # because a judge grades every run whether or not an agent drafted it.
+        "judge_deployment": ACTIVE_JUDGE_DEPLOYMENT,
     }
     if include_agent:
         provenance.update({
