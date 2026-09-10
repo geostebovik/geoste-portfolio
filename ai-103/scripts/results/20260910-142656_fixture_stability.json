@@ -1,0 +1,687 @@
+{
+  "item1-paint-mixing-CLEAN.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') plus the business name, and there are no legible claims about hours or services that contradict the fact sheet."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 8,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') plus the business name; there are no legible hours or service claims that contradict the fact sheet, so nothing checkable is incorrect."
+    },
+    {
+      "run": 9,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 10,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 11,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible claims about hours or services that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 12,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the business name; there are no legible hours or service claims that contradict the fact sheet, so no factual discrepancy is visible."
+    },
+    {
+      "run": 13,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 14,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 15,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the visible text is a topic/title ('How to Mix Exterior Paint Colors at Home') and the store name; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    }
+  ],
+  "item2-seasonal-checklist-CLEAN.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the guide. Info is accurate: the visible text is a generic topic/title ('Seasonal Home Maintenance Checklist') and the business name only; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business-detail assertion."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a generic title ('Seasonal Home Maintenance Checklist') and the business name only; there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business-detail assertion."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon, matching the brand guide. Info is accurate: the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name, and there are no legible hours or service claims that contradict the fact sheet. No issues found."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon matching the logo style. The visible text is a generic title ('Seasonal Home Maintenance Checklist') and the store name; there are no legible hours or service claims that contradict the fact sheet, so no info-accuracy issues are visible."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business-detail assertion."
+    },
+    {
+      "run": 8,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy passes because the image only shows a generic title ('Seasonal Home Maintenance Checklist') and the business name; there are no visible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 9,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is accurate: the image only shows a generic title ('Seasonal Home Maintenance Checklist') and the business name; there are no visible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 10,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox-style icon. Info is accurate: the visible text is a generic title ('Seasonal Home Maintenance Checklist') plus the business name; there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 11,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') plus the business name, and there are no legible hours or service claims that contradict the fact sheet."
+    },
+    {
+      "run": 12,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business assertion."
+    },
+    {
+      "run": 13,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the brand guide. Info is accurate: the visible text is a generic title ('Seasonal Home Maintenance Checklist') and the business name; there are no hours or service claims that contradict the fact sheet, and nothing else legible requires correction."
+    },
+    {
+      "run": 14,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business-detail assertion."
+    },
+    {
+      "run": 15,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[content] Brand colors are consistent with the guide: the thumbnail is dominated by orange and cream, with a simple toolbox icon. No visible hours or service claims appear, so there is nothing legible that contradicts the fact sheet. The title is a generic topic heading and not a checkable business assertion."
+    }
+  ],
+  "item3-tool-rental-FLAW-legibility.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says \"Tool Rental 101: What We Offer,\" which aligns with the fact sheet\u2019s tool rental service. No hours or other conflicting claims are visible, so no issues found."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply brand colors, with a simple toolbox icon. Info is accurate: the visible text says \"Tool Rental 101: What We Offer,\" which matches an allowed service (tool rental) and does not show any conflicting hours or other factual claims. No issues found."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the listed service of tool rental; no hours or other conflicting claims are visible. No issues found."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the fact sheet's listed tool rental service. No hours or other conflicting assertions are visible."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the fact sheet's listed service of tool rental; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply brand colors, with a simple toolbox icon. Info accuracy passes: the visible text is a topic/title ('Tool Rental 101: What We Offer') and the store name; no visible hours or service claims contradict the fact sheet, and nothing else legible requires correction."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware guide, with a toolbox icon motif. Info accuracy passes: the visible text is a topic/title ('Tool Rental 101: What We Offer') and the store name; no visible hours or service claims contradict the fact sheet, and nothing else legible requires correction."
+    },
+    {
+      "run": 8,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply guide, with a simple toolbox icon. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which matches an offered service (tool rental). No hours or other factual claims are visible, so there is no contradiction with the fact sheet."
+    },
+    {
+      "run": 9,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the brand guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with Riverside Hardware & Supply\u2019s listed tool rental service. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 10,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette aligned with the Riverside Hardware & Supply brand colors, with a simple toolbox icon. Info is accurate: the visible text says \"Tool Rental 101: What We Offer,\" which matches an allowed service (tool rental) and does not show any conflicting hours or other factual claims. No issues found."
+    },
+    {
+      "run": 11,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says \"Tool Rental 101: What We Offer,\" which is consistent with the fact sheet\u2019s listed tool rental service. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 12,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with Riverside Hardware & Supply offering tool rental. No hours or other conflicting claims are visible, so no issues found."
+    },
+    {
+      "run": 13,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the fact sheet's listed tool rental service. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 14,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the fact sheet's tool rental service. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 15,
+      "actual": {
+        "text_legible": false,
+        "brand_consistent": true,
+        "info_accurate": true
+      },
+      "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[content] Brand is consistent: the thumbnail uses an orange/cream palette with a simple toolbox icon, matching the guide. Info is accurate: the visible text says 'Tool Rental 101: What We Offer,' which aligns with the fact sheet's listed service of tool rental. No hours or other conflicting claims are visible, so no issues found."
+    }
+  ],
+  "item4-key-cutting-FLAW-brand.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches the fact sheet's listed key cutting service, and no hours or other contradictory assertions are visible."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand is not consistent because the thumbnail is dominated by blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in, no appointment), and no visible hours or other assertions contradict the fact sheet."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from the brand palette of orange and cream. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in, no appointment), and no visible hours or other assertions contradict the fact sheet."
+    },
+    {
+      "run": 8,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in, no appointment), and no visible hours or other assertions contradict the fact sheet."
+    },
+    {
+      "run": 9,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 10,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible claim is 'Key Cutting While You Wait,' and key cutting is listed as a supported service; no hours or other contradictory assertions are visible."
+    },
+    {
+      "run": 11,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (key cutting, walk-in, no appointment), and no visible hours or other assertions contradict the fact sheet."
+    },
+    {
+      "run": 12,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible claim 'Key Cutting While You Wait' matches a listed service (walk-in key cutting), and there are no visible hours or other assertions that contradict the fact sheet."
+    },
+    {
+      "run": 13,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    },
+    {
+      "run": 14,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue/gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is listed in the fact sheet as a walk-in service with no appointment. No hours or other conflicting claims are visible."
+    },
+    {
+      "run": 15,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": false,
+        "info_accurate": true
+      },
+      "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[content] Brand consistency fails because the thumbnail is dominated by blue and gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand palette. Info accuracy passes: the visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible."
+    }
+  ],
+  "item5-propane-refill-FLAW-info-accuracy.png": [
+    {
+      "run": 1,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it states \"OPEN 24/7,\" which contradicts the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The propane tank refill service itself is listed in the fact sheet, but the 24/7 availability claim is incorrect."
+    },
+    {
+      "run": 2,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because the image states 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The title 'Propane Tank Refill Safety Tips' is just a topic heading and not itself a checkable factual claim."
+    },
+    {
+      "run": 3,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is not accurate: it says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The propane tank refill service itself is valid, but the hours claim contradicts the fact sheet."
+    },
+    {
+      "run": 4,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon matching the guide. Info is not accurate: it says 'OPEN 24/7,' but the fact sheet says the store is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The 'Propane Tank Refill Safety Tips' topic is fine as a title, but the 24/7 availability claim directly contradicts the hours."
+    },
+    {
+      "run": 5,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Branding is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because the image states \"OPEN 24/7,\" but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The title \"Propane Tank Refill Safety Tips\" is not itself a factual conflict."
+    },
+    {
+      "run": 6,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it states \"OPEN 24/7,\" which contradicts the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The propane tank refill service itself is listed in the fact sheet, so the service topic is fine; the hours claim is the discrepancy."
+    },
+    {
+      "run": 7,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because the image explicitly says \"OPEN 24/7,\" but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The title about propane tank refill safety tips is not itself a checkable factual claim."
+    },
+    {
+      "run": 8,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is not accurate: it claims 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The propane tank refill service itself is listed in the fact sheet, so the main discrepancy is the hours claim."
+    },
+    {
+      "run": 9,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon that fits the brand guide. Info accuracy fails because the image explicitly says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The propane tank refill topic itself matches a listed service, but the hours claim is a factual contradiction."
+    },
+    {
+      "run": 10,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it states \"OPEN 24/7,\" which contradicts the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The topic text about propane tank refill is a valid service mention, but the hours claim is incorrect."
+    },
+    {
+      "run": 11,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it states \"OPEN 24/7,\" which contradicts the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The topic title about propane tank refill is fine as a topic, but the hours claim is a factual error."
+    },
+    {
+      "run": 12,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info is not accurate: it says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The title 'Propane Tank Refill Safety Tips' is just a topic label and not itself a checkable factual claim."
+    },
+    {
+      "run": 13,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette, with a simple toolbox icon that fits the guide. Info accuracy fails because the image states \"OPEN 24/7,\" which contradicts the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The propane tank refill service itself is valid, but the hours claim is not."
+    },
+    {
+      "run": 14,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it claims \"OPEN 24/7,\" but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed on Sunday. The propane tank refill service itself is valid, but the hours claim is a factual mismatch."
+    },
+    {
+      "run": 15,
+      "actual": {
+        "text_legible": true,
+        "brand_consistent": true,
+        "info_accurate": false
+      },
+      "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[content] Brand is consistent: the thumbnail uses the approved orange and cream palette with a simple toolbox icon. Info accuracy fails because it states \"OPEN 24/7,\" but the fact sheet says the store is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The topic title about propane tank refill is fine as a topic, but the 24/7 availability claim directly contradicts the hours."
+    }
+  ]
+}

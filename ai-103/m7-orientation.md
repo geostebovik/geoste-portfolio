@@ -232,6 +232,68 @@ correct.
   model-judged check can always be probed one run further, and probing is
   more interesting than building, so the drift is toward analysis and away
   from the thing being analysed.
+- **A pass rate is not evidence of a working check. Read the reasoning behind
+  the passes.** Added Sep 10, and it is the day's largest finding. `item3`'s
+  `brand_consistent` read 12/15 correct — and several of those twelve passes
+  asserted "the thumbnail uses an orange/cream palette" about an image
+  containing **no cream at all**. The three failures observed the image
+  correctly and applied the wrong rule; the twelve passes reached the right
+  verdict from a false observation. A cell that agrees with its answer key is
+  not thereby sound, and the agreement figure cannot tell the two apart —
+  only the `notes` can. **Whenever a check is being trusted rather than
+  merely tallied, sample its stated reasons by eye.** The same caveat already
+  stands on `check_meta_commentary.py` for a different reason; this is the
+  general form.
+- **A clause that says what to FLAG without saying what PASSES will be read
+  two ways.** Added Sep 10, and it has now fixed three checks, which makes it
+  the most load-bearing lesson in this file. `info_accurate` was settled by
+  "When nothing legible contradicts the fact sheet, record it as True".
+  `text_legible` was settled by moving the judgment out of the model entirely.
+  `brand_consistent` failed on exactly the same defect: it asked whether the
+  palette *was* orange/cream, listed what to flag, then added exemptions —
+  and never said what passing looked like. The slash between "orange" and
+  "cream" was read as AND on 3 of 15 runs. **Both branches, explicitly:
+  record True when X; record False only when Y.** "Only when" makes the rule
+  total; without it the model fills the gap itself, differently each time.
+- **An instruction can lose to its own source — and can also beat it.** Added
+  Sep 10, extending the Sep 2 salience-competition finding from
+  instruction-versus-instruction to instruction-versus-source. The content
+  call receives `fact-sheet.md`, which states the brand rule precisely ("any
+  thumbnail using a materially different palette (e.g. blue/gray) as its
+  DOMINANT SCHEME is a violation"). The clause restated that rule more weakly
+  and more strictly at once. The model held both, and on 3 of 15 runs the
+  weaker restatement won. **A clause that restates its source must not be
+  stricter than the source, or the two compete and the model arbitrates.**
+- **Do not let one number carry two assumptions.** Added Sep 10, Claude's
+  error. "30K TPM" was questioned as a SETTING — correctly, which is how the
+  970K of unallocated quota was found — and in the same breath accepted as a
+  BOTTLENECK, which it is not: the run is serially latency-bound at ~20K TPM
+  sustained. The arithmetic that settles it (16K tokens ÷ 47 seconds) was
+  available in the smoke-run result already read and quoted. **Questioning a
+  figure's provenance is not the same as questioning its consequence.**
+- **Commit before you measure — especially on an instrument with no
+  provenance.** Added Sep 10, correcting advice Claude gave the same
+  afternoon. Claude first proposed holding a clause change and committing it
+  together with its verification result "as one change", which optimises for
+  tidy history at the cost of attributability. `probe_fixture_stability.py`
+  records **no provenance at all** — no `git_head`, no `git_dirty`, no
+  deployment, no record of the wording that was live — so the commit history
+  plus a filename timestamp is the *only* link between a run and the code
+  that produced it. Dirty-tree measurement is unattributable in general; on an
+  instrument like this one it is unrecoverable.
+- **A total rule can only ever flag one thing — that is the price of making it
+  total.** Added Sep 10, Gerard's observation, and it refines the lesson above
+  rather than qualifying it away. The rewritten `brand_consistent` works
+  because "Record as False ONLY when..." leaves the model no gap to fill with
+  a standard of its own. But "only" also forecloses every other violation
+  type: `fact-sheet.md`'s brand guide names a logo ("a simple toolbox icon, no
+  wordmark flourishes") as well as colours, and under this clause a correct
+  palette with a wrong logo is forced to True. **The check is named
+  `brand_consistent` and now judges the colour scheme alone.** Deliberately
+  accepted Sep 10, because no current fixture isolates a non-palette brand
+  violation — all five carry the same toolbox — so broadening the clause would
+  be a change no run could verify. **The response to an untested gap is a
+  fixture, not a wording change.**
 
 ## Where M7 sits in the whole picture
 
@@ -684,27 +746,41 @@ CV-audit run should score exactly as documented there — that table is what
      number to certify on. Full detail in the Backlog entry and `STATUS.md`'s
      Sep 9 session.
 
-7. **Certify — on pass/fail, not on scores.** — **OPEN, and no longer gated on
-   item 6.** The harness exists and has now done real work twice
-   (`probe_orchestrator_stability.py`, 21 runs Sep 8 and 30 runs Sep 9, both
-   clean, zero crashes). What changed on Sep 9 is what "certify" is allowed to
-   mean:
-   - **Certifiable now: the VERDICT layer.** item6 passed first-draft 29/30;
-     item7 matched its pre-registered `first=False final=False redrafts=2` on
-     26/30. That behavior held steady through score swings of three points, so it
-     is not resting on the judge's numbers.
-   - **Not certifiable yet: anything about SCORES.** `GroundednessEvaluator`
-     returned 1.0 and 4.0 on interchangeable drafts. Settle the judge deployment
-     first — it is now item 1 of `STATUS.md`'s next action.
-   - **Report `first_text_passed`, not `final_text_passed`.** The final figure is
-     a function of the redraft cap; a 70%-per-read item reads 97% after two
-     redrafts. Sep 8's `21/21` was that artifact.
-   - **Budget, re-measured Sep 8 and unchanged:** ~11.6K tokens per item per run
-     agent-side, ~20.8K for an item that exhausts the cap — both excluding the
-     judge and vision calls, which never appear in `run.usage` and push the true
-     figure up by roughly 40% before vision.
-   - Still true from Sep 8: `unmeasured()` remains unit-tested only, never
-     exercised against a real crash.
+7. ~~**Certify — on pass/fail, not on scores.**~~ — **DONE 2026-09-10.** Ran as
+   `probe_orchestrator_stability.py --runs 15` over all eight items:
+   `results/20260910-123321_orchestrator_stability.json`, at `git_head 87b37cd`,
+   clean tree, `model_deployment` and `judge_deployment` both `gpt-5-4`,
+   `INSTRUCTIONS_V4`, temperature 0. An 8x1 smoke ran first
+   (`20260910-104818`) and matched all eight rows.
+   - **120 item-runs, zero crashes, zero `unmeasured`.** So `unmeasured()`
+     STILL has no observation against a real crash — a clean run is not a test
+     of the crash path. Unchanged in the Backlog.
+   - **Text verdict layer: 117/120 matched the pre-registered rows, and 118/120
+     is correct BEHAVIOUR** — item6's two misses are correct catches, not
+     errors. Its topic asks for sizes, prices and turnaround the fact sheet
+     lacks; the agent promised them, groundedness caught it at 2.0, the redraft
+     passed. On those drafts relevance rose to 4.0 while groundedness fell to
+     2.0 — the two evaluators traded off correctly without being told to.
+   - **Audit verdict layer: 117/120**, all three failures in one cell —
+     `brand_consistent` on item3. Root-caused, clause rewritten, re-verified
+     the same day at 225/225 (`results/20260910-142656_fixture_stability.json`,
+     5 fixtures x 3 fields x 15 runs, `RUNS` raised from 7). **But the
+     perception behind those passes was NOT fixed — see the Backlog.**
+   - **The one genuine defect is a SCORE defect.** item7 run 8 scored relevance
+     3.0 and passed, while its own reason text says the draft "does not focus
+     on the requested price-match guarantee and return policy" — the same
+     judgment, in prose, as the run that scored 1.0. This is the observation the
+     Sep 9 certify-verdicts-not-scores decision predicted, and it is why scores
+     stay out of the claim.
+   - **stop-on-pass: n=2 → n=4.** Fired on item6 runs 11 and 15.
+   - **Report `first_text_passed`, not `final_text_passed`** — unchanged. The
+     final figure is a function of the redraft cap.
+   - **Budget, re-measured Sep 10:** 47s per item-run wall clock, ~16K tokens
+     per item all-in (~11.6K agent-side plus the ~40% judge/vision undercount).
+     A full 8x15 pass is ~1h35m — **serially latency-bound at ~20K TPM
+     sustained, NOT throughput-bound.** See the quota entry in the Backlog.
+   - **What certification does NOT cover:** the crash path, anything about
+     scores, and `brand_consistent`'s reasoning as distinct from its verdict.
 
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
@@ -879,6 +955,123 @@ session's narrative paragraph in `STATUS.md`.
   cannot confirm — **verify against the remote, not the local clone.**
 
 **M7 / current build:**
+
+- **`probe_fixture_stability.py` records NO provenance.** Added Sep 10. No
+  `git_head`, no `git_dirty`, no model deployment, no copy of the clause
+  wording that was live — it writes the bare fixture results and nothing
+  else. `m7_orchestrator.py`'s `run_provenance()` exists and takes
+  `script=` / `include_agent=` precisely for this; the audit probe never
+  adopted it. Deliberately NOT fixed on Sep 10: the clause change was already
+  in flight and stacking a second edit before a measurement muddies
+  attribution. **Fix it before the next audit-side measurement, not during
+  one.** Note the JSON shape question that comes with it — the file is
+  currently a bare `fixture -> runs` dict, and adding a `run` key changes the
+  shape the Sep 1–3 baselines were eyeballed in.
+- **`brand_consistent` — design constraint for future fixtures.** Added
+  Sep 10 alongside the clause rewrite. The clause is total over the current
+  five: True when the dominant scheme is orange, cream or both in any
+  proportion; False only when materially different. A scheme that is
+  **neither a brand family nor clearly different** — an off-orange, say —
+  falls between the two branches and returns the model to unaided judgment.
+  No current fixture sits there and `fact-sheet.md` leaves the same gap, so
+  this is not a defect. It is a constraint on any *new* fixture: do not design
+  one into that middle zone without settling the rule first. Same shape as the
+  Sep 1 headline-exemption constraint in `content-items-plan.md`.
+- **item6's topic is not fully well-posed, and its answer key is arguably
+  wrong.** Added Sep 10. item6 was re-registered Sep 9 from a
+  recoverable-failure fixture to a "well-posed control" with
+  `first_pass: True`. Its topic string is "Propane Tank Refill: Sizes, Prices
+  and Turnaround" and `fact-sheet.md` contains none of those three, so a
+  first draft that promises them is ungroundable — which is exactly what
+  happened on runs 11 and 15 of the Sep 10 certification pass. The checker
+  caught it correctly both times. **Recorded, deliberately not fixed:** moving
+  an answer key to match observed data is the goalpost move Sep 3's Thread 1
+  refused, and the same refusal applies here. Decide it as a fixture question
+  or leave it; do not let a green cell decide it.
+- **item6's `expected_redrafts: None` is inert.** Added Sep 10. The match
+  condition is `expected_redrafts is None or redrafts == expected_redrafts`,
+  but item6 also expects `first_pass: True`, and any redraft implies the first
+  draft failed — so the `first_pass` clause fails first and the `None` never
+  distinguishes a case. Harmless; misleading to a future reader who thinks
+  item6's redraft count is deliberately unconstrained.
+- **`probe_orchestrator_stability.py`'s printed `agreement` counts passes,
+  not matches.** Added Sep 10. For item7, whose pre-registered row is
+  `first_pass: False`, the console reads "first draft passed: 1/15 (7%)" for a
+  run that matched its answer key 14 times out of 15. The `stable` flag
+  handles the inversion correctly (`agreement >= 0.8 or (1-agreement) >= 0.8`);
+  the printed percentage does not, and a reader skimming console output would
+  read a correct item as catastrophic. Display only, no effect on the JSON.
+- **The built-in evaluator rubrics are customisable, and Microsoft recommends
+  customising them.** Added Sep 10, new thread, M8-sized. The docs state the
+  quality evaluators' prompts are open-sourced in the Evaluator Library and
+  the Python SDK repo, and "we highly recommend that you customize the
+  definitions and grading rubrics to your scenario specifics". M7 has treated
+  `GroundednessEvaluator` and `RelevanceEvaluator` as fixed black boxes
+  throughout — every finding about relevance's step function at 3.0 and
+  groundedness's definition is a finding about a rubric that could have been
+  edited. Not an M7 item: changing the rubric mid-certification would
+  invalidate everything measured against it.
+- **Quota is elastic and the probe loop is serial — the two go together.**
+  Added Sep 10, tracked in Todoist `6hVCcxW6jWPmrMWq`. `gpt-5-4`'s 30K TPM is
+  a deployment allocation, not a limit; 970K TPM sits unallocated in a 1M pool
+  and the Edit dialog offers the full range. But raising it alone buys almost
+  nothing: at 47s per item-run and ~16K tokens per item the certification pass
+  draws ~20K TPM sustained, under the current ceiling, and is bound by serial
+  latency rather than rate. **The quota raise is the precondition for
+  parallelising the item loop, not a speedup on its own.** Eight items
+  concurrently would draw ~160K TPM, which is where 30K binds. Parallelising
+  across items is safe by construction — `m7_orchestrator.py` already runs
+  every item on its own thread, for the contamination reason. Recommended
+  value 300K, not "use all available": a ceiling is also the brake on a
+  runaway loop, and whether the 1M pool is per-model or shared across the four
+  deployments is unresolved.
+- **The desktop shell has been unavailable two days running, and the cause is
+  not the shell.** Added Sep 10. `device_list_dir` / `device_stage_files` /
+  `device_commit_files` work; the shell cannot mount either folder (`no Plan9
+  drive shares mounted under /mnt/.virtiofs-root/shared`). New on Sep 10:
+  `echo hi` fails identically, so the failure is PRE-EXECUTION — the helper
+  refuses to start any shell because the shares are absent, and the guest VM
+  is up enough to report it. **Pre-registered test for the next session:
+  attach ONLY `C:\Users\gerar\geoste-portfolio` and try the shell.** The
+  leading hypothesis is that the two connected folders being nested causes the
+  share set to be rejected whole (the error names both as failing, which is
+  what publishing zero rather than one looks like). The root already contains
+  `ai-103`, so the second share buys only a shorter path. If it still fails on
+  one folder, nesting is ruled out and the next suspect is the desktop build
+  (1.49585.0 / Electron 44.2.0). **Do not request access to
+  `C:\Users\gerar\AppData\Roaming\Claude` to read the app's logs** — it is a
+  protected location, cannot be granted, and one prompt was already spent on
+  it.
+- **`brand_consistent`'s verdict is fixed; its PERCEPTION is not.** Added
+  Sep 10, found in the verification run that closed the verdict defect —
+  which is why it is here rather than filed as resolved. After the clause
+  rewrite the cell reads 15/15 correct on every fixture, and item3's `notes`
+  still assert "the thumbnail uses an orange/cream palette" on **15 runs out
+  of 15**. item3 contains no cream. The confabulation did not decrease when
+  the verdict was fixed; it went from most-of-12 to all-of-15.
+  **The mechanism is visible in item4.** There the model writes "dominated by
+  blue and gray, which is materially different from the required orange/cream
+  brand palette" — distinguishing the IMAGE's colours from the BRAND's
+  palette exactly right. On item3, where the image is on-brand, it collapses
+  the two and describes the thumbnail by reciting the brand guide. **When the
+  answer is "consistent", the model stops observing and starts quoting.**
+  Why it matters despite the green cell: `notes` is what a human reads when
+  deciding whether to trust a flag, and here it is confidently wrong every
+  time. The verdict is right because the rule is permissive enough that a
+  mis-described image still lands correctly — not because the check sees what
+  it claims to see.
+  **This is a `notes`-instruction problem, not a verdict problem, and needs a
+  different fix from the one that closed the verdict defect.** It is testable
+  with the existing five fixtures on one 15-run pass: does item3 stop saying
+  "cream"? Deferred from Sep 10 deliberately — a sixth wording change at
+  14:35 would have traded the session's written record for it.
+- **`brand_consistent` is palette-only, and nothing says so.** Added Sep 10.
+  See the standing lesson on total rules. The clause's "Record as False only
+  when..." scopes the check to the colour scheme, while `fact-sheet.md`'s
+  brand guide also specifies the logo. No fixture tests a logo violation, so
+  the gap is currently unobservable. **If logo consistency is ever to be
+  checked, it is a `content-items-plan.md` fixture decision first and a clause
+  extension second — in that order.**
 
 - **The redraft path has ZERO observations (Sep 7).** `INSTRUCTIONS_V3`'s
   remediation clauses — cap of two, "replace unsupported claims with supported

@@ -74,28 +74,21 @@ that has never been sound, only usually-agreeing.
 
 ## Current next action
 
-**Next action: finish the `brand_consistent` clause rewrite, then re-verify at
-n=15.** The certification pass ran 2026-09-10 and the verdict layer held. The
-open work is the one check it exposed.
+**Next action: decide whether M7 is finished.** The certification pass ran
+2026-09-10, the verdict layer held, and the one check it exposed was fixed and
+re-verified the same day. Nothing below blocks a "M7 complete" call — they are
+quality items, and the decision about whether they gate completion is Gerard's,
+not something a green board should make by default.
 
-1. **`brand_consistent` — finish the clause, Gerard's wording.** It failed on
-   item3 3 times in 15 with `temperature=0`/`seed=42` pinned, and the 12 passes
-   reach the right verdict on a confabulated observation ("orange/cream tones"
-   in an image containing no cream). **Decided 2026-09-10 (option A, Gerard's
-   call): orange-dominant is sufficient.** The fact sheet states exactly one
-   violating condition — a materially different dominant scheme, blue/gray as
-   the example — and never requires both colours to appear, so item3's answer
-   key stands and the fixture is not touched. First edit is saved and removed
-   the contradiction; **two gaps remain**, both flagged 2026-09-10:
-   the clause still opens "orange ... *and* cream", which is the pairing
-   reading the three failing runs applied; and it still has no positive verdict
-   sentence. `info_accurate`, directly beneath it, is the template — "When
-   nothing legible contradicts the fact sheet, record it as True" is the
-   sentence that fixed it and has held since.
-2. **Verify with a FULL 5-fixture run at n=15, not n=7.** The Sep 2 rule already
-   requires all five fixtures for any wording edit to any check. Sep 10 supplies
-   the n: at the observed 20% failure rate a clean sweep of 7 has probability
-   0.8^7 ≈ 21%, so n=7 could not have detected this, and did not.
+1. **`brand_consistent`'s PERCEPTION, not its verdict.** The verdict is fixed
+   and verified at 225/225. item3's `notes` still assert cream in an image that
+   has none, on 15 of 15 runs. `notes` is what a human reads when deciding
+   whether to trust a flag. A `notes`-instruction change, testable on one
+   15-run 5-fixture pass: does item3 stop saying "cream"?
+2. **Give `probe_fixture_stability.py` provenance before the next audit-side
+   measurement.** It records no `git_head`, no `git_dirty`, no deployment and
+   no copy of the live wording — `run_provenance()` already exists and takes
+   `script=` / `include_agent=` for exactly this. Not during a measurement.
 3. **Decide the orchestrator's model** — unchanged in substance, but the
    rate-limit dimension has dropped out of it (see the quota finding in the
    Sep 10 entry), so it reduces to output quality against cost per token.
@@ -495,11 +488,47 @@ excluded this rate; it simply did not sample it. Same shape as the Sep 9 n=3
 lesson, one size up. (An illustration of what the old evidence could not rule out,
 not a significance claim.)
 
-**Status at end of session: first edit saved, not finished, not verified.** Gerard
-rewrote the clause and removed the contradiction his first draft introduced (a
-"both colours required" sentence that would have failed item3 against its own
-answer key, and would have sat in direct opposition to the blue/gray test two
-sentences earlier). Two gaps remain and are carried into the next action.
+**Fixed and verified the same day, across four wording passes.** The clause now
+states both branches: True when the dominant scheme is orange, cream or both in
+any proportion; False only when materially different, blue/gray as the example;
+neutral/dark accents out of scope. Gerard wrote every pass, Claude critiqued
+each. The three discarded drafts are the useful part of the record: pass 1
+required both colours present, which would have failed item3 against its own
+answer key AND contradicted the blue/gray test two sentences earlier; pass 2
+borrowed "contradict the fact sheet" from `info_accurate`, a relation that does
+not apply to colours and that could have let item4 through by omission; pass 3
+stated the True condition as a declarative assertion about the image rather than
+as a verdict rule. **Every one of those would have looked like progress on a
+green item3.**
+
+Verified at `RUNS = 15` (raised from 7) across all five fixtures per the Sep 2
+rule: `results/20260910-142656_fixture_stability.json`, **225/225 cells
+correct** — 5 fixtures x 3 fields x 15 runs. item3 `brand_consistent` 15/15
+True, item4 15/15 False, and no contamination: `item2 info_accurate` and
+`item3 text_legible` both held at 15/15.
+
+**AND THE REASONING WAS NOT FIXED — which is the finding, not a footnote.**
+item3's `notes` still assert "the thumbnail uses an orange/cream palette" on
+**15 runs out of 15**. There is no cream in that image. The confabulation did
+not decrease when the verdict was corrected; it rose from most-of-12 to
+all-of-15. The mechanism shows in item4, where the model writes "dominated by
+blue and gray, which is materially different from the required orange/cream
+brand palette" — separating the image's colours from the brand's palette
+exactly right. On item3, where the image is on-brand, it collapses the two and
+describes the thumbnail by reciting the brand guide. **When the answer is
+"consistent", the model stops observing and starts quoting.** The verdict is
+right because the rule is permissive enough that a mis-described image still
+lands correctly, not because the check sees what it claims to see. This is a
+`notes`-instruction problem, needs a different fix, and is testable on one
+15-run pass. Backlogged deliberately rather than attempted at 14:35.
+
+**One further consequence, Gerard's observation:** "Record as False ONLY when"
+is what makes the rule total, and totality is what killed the variance — but it
+also scopes `brand_consistent` to the colour scheme alone. `fact-sheet.md`'s
+brand guide also names a logo, so a correct palette with a wrong logo is now
+forced to True. Accepted deliberately: no fixture isolates a non-palette brand
+violation, so broadening the clause would be a change no run could verify. The
+response to an untested gap is a fixture, not a wording change.
 
 #### The pre-registered prediction was falsified, cleanly
 
