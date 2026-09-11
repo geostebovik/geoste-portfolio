@@ -276,7 +276,8 @@ correct.
   afternoon. Claude first proposed holding a clause change and committing it
   together with its verification result "as one change", which optimises for
   tidy history at the cost of attributability. `probe_fixture_stability.py`
-  records **no provenance at all** — no `git_head`, no `git_dirty`, no
+  recorded **no provenance at all** at the time (fixed Sep 11) — no `git_head`,
+  no `git_dirty`, no
   deployment, no record of the wording that was live — so the commit history
   plus a filename timestamp is the *only* link between a run and the code
   that produced it. Dirty-tree measurement is unattributable in general; on an
@@ -907,6 +908,26 @@ CV-audit run should score exactly as documented there — that table is what
    - **What certification does NOT cover:** the crash path, anything about
      scores, and `brand_consistent`'s reasoning as distinct from its verdict.
 
+**THE LIST IS COMPLETE — an empty list here means finished, not unknown.** All
+seven items are done and M7 is built and certified:
+`results/20260911-142437_orchestrator_stability.json` at `git_head 8c57001`,
+clean tree. Nothing ordered is outstanding. Everything still open is quality or
+polish, lives in the Backlog below, and is mirrored in the Todoist punch list.
+**Phase 1 of the IIP lab work ends here**, and `STATUS.md`'s `## Current next
+action` records what follows (a Backlog item, Phase 2, or the portfolio
+write-up) as Gerard's call with nothing blocking it. This paragraph exists
+because a reader who finds every item struck through cannot otherwise tell
+completion from a doc that stopped being maintained — the Sep 7 failure mode,
+arriving from the other direction.
+
+Pace note for sizing the next punch list: build items 6 and 7 both closed
+between Sep 9 and Sep 11, certification included, ahead of the plan that listed
+them. The one `[stretch]` item still open — the orchestrator's model, Todoist
+`6hRX2cC5xcg3M6FH` — is a deliberate deferral, not a slip. The
+`[stretch]`-labelled item that *did* close (Sep 7, orchestrator instructions
+text) was ordered build item 4, so that label records Aug 31 sizing rather than
+extra scope taken on.
+
 ## Backlog — everything deferred, in one place (per Gerard's Aug 28 preference: no digging through STATUS.md scrollback for these)
 
 Nothing here blocks anything else. Pulled together from scattered
@@ -1081,7 +1102,11 @@ session's narrative paragraph in `STATUS.md`.
 
 **M7 / current build:**
 
-- **`probe_fixture_stability.py` records NO provenance.** Added Sep 10. No
+- ~~**`probe_fixture_stability.py` records NO provenance.**~~ — **FIXED
+  2026-09-11**, before the audit-side measurement it was meant to precede, as
+  the entry required. `results/20260911-113242_fixture_stability.json` carries
+  `git_head 59f4ba3` and a clean tree. The original entry follows.
+  Added Sep 10. No
   `git_head`, no `git_dirty`, no model deployment, no copy of the clause
   wording that was live — it writes the bare fixture results and nothing
   else. `m7_orchestrator.py`'s `run_provenance()` exists and takes
@@ -1150,8 +1175,15 @@ session's narrative paragraph in `STATUS.md`.
   value 300K, not "use all available": a ceiling is also the brake on a
   runaway loop, and whether the 1M pool is per-model or shared across the four
   deployments is unresolved.
-- **The desktop shell has been unavailable two days running, and the cause is
-  not the shell.** Added Sep 10. `device_list_dir` / `device_stage_files` /
+- ~~**The desktop shell has been unavailable two days running, and the cause is
+  not the shell.**~~ — **SETTLED 2026-09-11. Both hypotheses in this entry are
+  dead; the cause is a Sep 8 Windows update, host-side and vendor-tracked.** See
+  "The desktop shell failure is a Windows update, not this project's
+  configuration" above for the experiment and the consequence. Confirmed again
+  by the Sep 11 Friday check-in, which hit the identical Plan9 mount error and
+  the same vendor message. **The pre-registered test below has been run — do
+  not run it again.** The original entry follows.
+  Added Sep 10. `device_list_dir` / `device_stage_files` /
   `device_commit_files` work; the shell cannot mount either folder (`no Plan9
   drive shares mounted under /mnt/.virtiofs-root/shared`). New on Sep 10:
   `echo hi` fails identically, so the failure is PRE-EXECUTION — the helper
@@ -1167,8 +1199,16 @@ session's narrative paragraph in `STATUS.md`.
   `C:\Users\gerar\AppData\Roaming\Claude` to read the app's logs** — it is a
   protected location, cannot be granted, and one prompt was already spent on
   it.
-- **`brand_consistent`'s verdict is fixed; its PERCEPTION is not.** Added
-  Sep 10, found in the verification run that closed the verdict defect —
+- **`brand_consistent`'s verdict is fixed; its PERCEPTION is not.** **PARTLY
+  FIXED and fully re-diagnosed 2026-09-11 — read "The remaining
+  `brand_consistent` defect is a NAMING constraint, not a perception one" below
+  before acting on anything in this entry.** The `15 runs out of 15` figure
+  here is superseded: after `observed_colors` the count is 9/15, the perception
+  is identical every run, and the residue is one wrong colour WORD rather than a
+  failure to see the image. The entry is kept because its diagnosis of the
+  mechanism (when the answer is "consistent", the model recites the brand guide)
+  is what the Sep 11 measurement confirmed and narrowed. The original follows.
+  Added Sep 10, found in the verification run that closed the verdict defect —
   which is why it is here rather than filed as resolved. After the clause
   rewrite the cell reads 15/15 correct on every fixture, and item3's `notes`
   still assert "the thumbnail uses an orange/cream palette" on **15 runs out
@@ -1198,7 +1238,11 @@ session's narrative paragraph in `STATUS.md`.
   checked, it is a `content-items-plan.md` fixture decision first and a clause
   extension second — in that order.**
 
-- **The redraft path has ZERO observations (Sep 7).** `INSTRUCTIONS_V3`'s
+- ~~**The redraft path has ZERO observations (Sep 7).**~~ — **CLOSED
+  2026-09-09**, and see build item 6 above for the four clauses' observations.
+  **It is no longer the current next action**, despite what the text below still
+  says; nothing is. The original entry follows.
+  `INSTRUCTIONS_V3`'s
   remediation clauses — cap of two, "replace unsupported claims with supported
   ones", stop-on-pass — have never run: both V3 runs passed every item on the
   first draft. Same gap Sep 4 recorded, from the opposite direction. Forcing a
@@ -1214,6 +1258,12 @@ session's narrative paragraph in `STATUS.md`.
   redrafts per item, so the certification pass can replace the judgement with a
   number: if the second attempt is never used, drop to 1; if items routinely
   exhaust both and still fail, 3 is arguable.
+  **The numbers now exist and the decision is still open.** From the Sep 11
+  pass: item7 exhausted both redrafts and still failed on 15/15 runs, item6
+  stopped on pass, and the Sep 9 re-roll finding says a higher cap buys a higher
+  FALSE-pass rate rather than better copy. So the evidence points at leaving the
+  cap at 2 — but "3 is arguable" was written before the re-roll result, and the
+  two readings need reconciling by a person, not by this entry.
 - **The orchestrator's model was never chosen (Sep 7).** `gpt-5-4` entered in
   `8cb92aa` — the commit where Claude wrote `m7_orchestrator.py` — unremarked
   and undiscussed. Every tool-level result beneath it (`audit_thumbnail`, every
@@ -1246,6 +1296,32 @@ session's narrative paragraph in `STATUS.md`.
   `JUDGE_DEPLOYMENT` and falls back to `CHAT_DEPLOYMENT_GPT_5_4`. Probes take
   `--judge-deployment`, setting it before importing the evaluator module because
   the judge config is built at module scope.
+- **Is a cross-brand judge worth testing, and is it even possible? (Sep 9,
+  Gerard's question.)** Tracked in Todoist `6hV42V2cq7cJMcwH`; added here Sep 11
+  because it had been open in the punch list for two days with no entry in this
+  Backlog — the ordered reader could not find it. **Not an M7 blocker:** the
+  judge is decided and the verdict layer is judge-invariant across three
+  deployments.
+  **The argument for it is family-correlated blind spots.** Judge and drafter are
+  both `gpt-5-4`, and comparing `gpt-5-2` / `gpt-5-4-mini` / `gpt-5-4` cannot
+  detect a failure mode SHARED across the GPT-5 family. Within-family comparison
+  is structurally blind to shared lineage, and self-preference bias in LLM judges
+  is documented.
+  **Feasibility, checked Sep 9 and constrained.** Microsoft's docs list only
+  AzureOpenAI and OpenAI models as judges for the AI-assisted evaluators, and
+  introspection confirms only `AzureOpenAIModelConfiguration` /
+  `OpenAIModelConfiguration` exist. Claude models in the Foundry catalog expose
+  Messages only, not chat completions, so the Evaluation SDK cannot drive them.
+  DeepSeek, Kimi and Cohere entries do show chat completion — untested. So a
+  cross-brand judge means a custom prompt-based evaluator, at which point the
+  prompt changes along with the model and the comparison stops being
+  apples-to-apples.
+  **The feasible version sidesteps that: use a cross-brand model as an
+  INDEPENDENT CHECK rather than a replacement judge.** Ask a Claude model whether
+  each of the 113 drafts references an internal document, over the Messages API,
+  with no Evaluation SDK involvement. That tests the blind-spot concern directly
+  and answers the standing caveat that `check_meta_commentary.py` is a phrase
+  matcher rather than a classifier.
 
 - **The orchestrator's drafting cannot be made repeatable (Sep 7).**
   `temperature=0` is pinned, but the Agents SDK exposes no `seed` at all —
@@ -1253,9 +1329,13 @@ session's narrative paragraph in `STATUS.md`.
   uses, where `seed=42` works. So run-to-run comparison at this layer is
   narrowed but never deterministic, which is why single runs are anecdotes here
   and the multi-run probe is the only instrument.
-- **No multi-run harness exists for the orchestrator (Sep 7).**
-  `probe_fixture_stability.py` covers the CV audit only. The certification pass
-  needs its own, or an extension of that one.
+- ~~**No multi-run harness exists for the orchestrator (Sep 7).**~~ — **BUILT
+  and used.** `probe_orchestrator_stability.py` is the harness, and it produced
+  both certification passes (Sep 10 and Sep 11, 120 item-runs each). Its own
+  known reporting defects are separate entries: `agreement` counts passes rather
+  than matches, and `cells_correct()` mixes deterministic cells with judged
+  ones. Original entry: `probe_fixture_stability.py` covers the CV audit only;
+  the certification pass needs its own, or an extension of that one.
 - **`gpt-5-4-mini` showed 46% rate limiting in the portal (Sep 7), unexplained.**
   Mini is what `audit_thumbnail` runs on. Worth asking whether any of the
   historical CV-audit variance — the 0/7, 6/7, 5/7, 3/7 spread on `text_legible`
