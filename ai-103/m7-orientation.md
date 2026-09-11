@@ -295,6 +295,119 @@ correct.
   be a change no run could verify. **The response to an untested gap is a
   fixture, not a wording change.**
 
+### A stopping rule must be specified in the instrument's own units, above its noise floor
+
+Found 2026-09-11, and it is a lesson about Claude's error, not the project's.
+
+Before the `observed_colors` run, Claude pre-registered an abort: *any verdict
+regression → revert the change.* One cell moved (item2 `info_accurate`, 15/15 →
+14/15) and the rule triggered on a result carrying no information at all. At
+n=15 those two outcomes are indistinguishable, and the probe's own standard —
+`STABLE_THRESHOLD = 0.8` — reports 14/15 as STABLE with the majority matching
+expected.
+
+**An ad-hoc bar stricter than the instrument that prints the result is not
+discipline, it is a trigger that fires on noise.** The error is visible without
+reference to which way the data went, which is the only thing that made amending
+it an amendment rather than a goalpost move.
+
+The rule: state a trigger in the units the instrument reports. "Any regression"
+is not a trigger. "Majority flips, or agreement drops below 0.8" is.
+
+### Schema position is an instruction, and a field description does not compete with prompt prose
+
+Found 2026-09-11 while fixing `brand_consistent`'s confabulation.
+
+Two mechanisms, both structural rather than verbal, and both cheaper than
+another wording pass:
+
+1. **Structured outputs generate in field order.** Declaring `observed_colors`
+   BEFORE `brand_consistent` forces the model to write what it sees before it
+   commits to a verdict. The same field declared after the verdict would be
+   describing a conclusion already reached — which is the failure mode, not a
+   fix for it.
+2. **An instruction in a pydantic `Field(description=...)` has its own slot.**
+   Prose added to the system prompt competes for salience with the verdict
+   clauses beside it — the mechanism that forced the Sep 2 split, twice
+   observed. A schema field cannot be outvoted by a neighbouring sentence, and
+   it leaves the prompt text byte-identical, so verdict movement in the
+   verifying run cannot be blamed on wording.
+
+Generalization of the Sep 2 decision: **when wording tuning has unbounded cost,
+look for the structural version of the same instruction.**
+
+### A tool's "contract" covers its schema, not the content its callers read
+
+Found 2026-09-11. `audit_thumbnail()` returns an unchanged `ThumbnailAudit`, so
+adding `observed_colors` was described as contract-preserving. That is true of
+the shape and false of the content: `notes` is a string the orchestrator agent
+reads AND republishes in its own prose summary, and it now carries an extra
+paragraph on every item.
+
+**Anything a downstream consumer reads is part of the contract, whether or not
+the type signature moved.** The consequence here was benign — the agent
+reproduces it verbatim without confusion — but it is the reason the Sep 11
+orchestrator re-certification was worth running rather than assuming.
+
+### Do not change the machine's power or network state during a long unattended run
+
+Found 2026-09-11, the expensive way. A 15-run orchestrator pass died at minute
+18 of 95 with `ConnectionResetError 10054`, and `Kernel-Power` event 105 four
+seconds earlier named the cause: the laptop was undocked. The dock's ethernet
+adapter disappeared and every socket bound to it died mid-request.
+
+**The change-one-variable rule applies to the physical layer too.** A pass that
+costs ninety minutes should be started docked, on mains power, and then left
+alone — and the machine's state during it belongs in the session notes the same
+way a wording edit does.
+
+Retries now absorb this (see `ITEM_ATTEMPTS` in `m7_orchestrator.py`), which
+makes it survivable rather than fatal. It is still not free: each failure costs
+four attempts and up to 35 seconds of backoff before the row is abandoned.
+
+### An exception is not an `unmeasured` row, and the instrument could not tell
+
+Found 2026-09-11 from the same crash. `unmeasured()` records "the run completed
+but produced no verdict." An SDK exception never reaches the code that writes
+that row — it propagates out of `run_item()`, out of the probe's item loop, and
+ends the process.
+
+So the crash-path gap tracked in the Backlog since Sep 8 was mis-stated. It was
+not "this path has no observations yet." It was **"one whole category of failure
+cannot produce an observation,"** and nobody noticed because nothing had crashed
+that way yet.
+
+**The general form: when an instrument has a hole, check whether the hole is
+missing data or missing reachability.** Those need different fixes, and only the
+second one gets worse the longer it goes unnoticed.
+
+### The desktop shell failure is a Windows update, not this project's configuration
+
+Settled 2026-09-11 by the experiment the Sep 11 session prompt pre-registered.
+
+`no Plan9 drive shares mounted under /mnt/.virtiofs-root/shared`. Both
+hypotheses are dead:
+
+- **Nesting ruled out.** One folder attached (repo root only, no `ai-103`),
+  identical failure.
+- **Desktop build ruled out.** The Sep 10 prompt named 1.49585.0 as the next
+  suspect; Sep 11 ran 1.52386.0 and failed identically.
+
+The error now names its own cause: *"A Windows update released September 8
+prevents Claude's workspace from reaching your files. We're tracking this issue.
+Claude Code is unaffected."* Host-side and vendor-tracked. **Stop spending
+session time on it.**
+
+**Unrelated to the Surface Book DTX fault**, despite both timelines containing
+Sep 8. Two faults, same week, no shared cause — do not let either become
+evidence about the other.
+
+Working consequence: no git, no python, no probe runs from Claude's side; files
+read and written through the bridge only. The standing "Gerard runs the
+commands" arrangement now covers everything, and **his availability at the
+keyboard is the binding constraint on a session, not elapsed time.** Say which
+in the opening prompt.
+
 ## Where M7 sits in the whole picture
 
 IIP (this repo) is the hands-on lab work behind two things at once: the
@@ -761,11 +874,23 @@ CV-audit run should score exactly as documented there — that table is what
      lacks; the agent promised them, groundedness caught it at 2.0, the redraft
      passed. On those drafts relevance rose to 4.0 while groundedness fell to
      2.0 — the two evaluators traded off correctly without being told to.
-   - **Audit verdict layer: 117/120**, all three failures in one cell —
+   - **Audit rows: 117/120**, all three failures in one cell —
      `brand_consistent` on item3. Root-caused, clause rewritten, re-verified
-     the same day at 225/225 (`results/20260910-142656_fixture_stability.json`,
-     5 fixtures x 3 fields x 15 runs, `RUNS` raised from 7). **But the
-     perception behind those passes was NOT fixed — see the Backlog.**
+     the same day (`results/20260910-142656_fixture_stability.json`,
+     5 fixtures x 3 fields x 15 runs, `RUNS` raised from 7). **Reported at the
+     time as 225/225; that figure is retired.** `text_legible` has been
+     deterministic since Sep 3 — Read plus WCAG arithmetic — so 75 of those 225
+     cells cannot vary, and counting them as model answers overstates the
+     result. Restated in corrected units: **150/150 model-judged cells plus 75
+     deterministic.** Sep 11's run reports the two separately by construction.
+     The ROW figure above is unaffected: a row passes only if all three fields
+     match, so an always-true conjunct cannot inflate a conjunction. What the
+     old phrase "audit verdict layer" overstated was the LABEL — each row is
+     two model judgments plus one deterministic measurement, not three
+     verdicts. Reworded, not recounted. Note separately that `cells_correct()`
+     DOES count deterministic cells alongside judged ones — Backlog.
+     **And the perception behind those passes was NOT fixed — see the Sep 11
+     entry, where it was partly fixed and fully diagnosed.**
    - **The one genuine defect is a SCORE defect.** item7 run 8 scored relevance
      3.0 and passed, while its own reason text says the draft "does not focus
      on the requested price-match guarantee and return policy" — the same
@@ -1482,6 +1607,135 @@ for it exists to tune. Kept as the record of what was ruled out and how):**
   evaluator-harness pattern (`Groundedness`/`Relevance`/`F1Score`) is the
   proven template to reuse — not proposed as work to do now, just a known,
   real gap rather than an assumed non-issue.
+
+### `probe_fixture_stability.py` has no `__main__` guard
+
+Its run loop is at module level, so IMPORTING it executes 75 audit calls. Found
+2026-09-11 when a one-line import check was proposed as a smoke test and had to
+be withdrawn. Harmless today because nothing imports it; a real hazard the
+moment anything does — a test collector, an `__init__`, or someone reaching for
+`observed_colors_of()` as a helper. Three lines to fix. Not done on Sep 11
+because it would have been a second change inside a measurement.
+
+### `cells_correct()` counts deterministic cells alongside judged ones
+
+`m7_orchestrator.py`. It iterates all three fields per record, so any `N/225` or
+`N/360` figure it produces credits the model with the deterministic
+`text_legible` cells. Same defect the fixture probe had until Sep 11; same fix —
+tally and report the two populations separately.
+
+**This needs no Azure run.** It is a reporting function and can be verified by
+re-running it against `results/20260910-123321_orchestrator_stability.json`.
+Deferred from Sep 11 only to avoid a third edit to `m7_orchestrator.py` in a
+session that was mid-certification.
+
+Note the row-level figure actually quoted (117/120) is unaffected — see item 7.
+
+### The remaining `brand_consistent` defect is a NAMING constraint, not a perception one
+
+Supersedes the Sep 10 framing. After `observed_colors`, item3's confabulation
+fell to 9/15, and the fifteen descriptions show the perception is IDENTICAL
+every run — translucent lighter shapes over orange, correctly located. The
+model flips between calling them "peach" (correct: `#f28a4f` is peach) and
+"cream" (the brand guide leaking in as a synonym for *lighter*).
+
+So the fix is a vocabulary constraint in the `observed_colors` field
+description: name colours by what they are, never reuse a brand-palette colour
+name for something that merely resembles it in lightness. Testable the same
+way — one 15-run 5-fixture pass, does the count fall below 9/15.
+
+**Do not touch `brand_consistent`'s verdict clause.** Still finished, still
+225-cells-correct-across-two-configurations, still off limits.
+
+Second-order, and worth deciding deliberately: the agent republishes `notes`
+verbatim in its own prose output, so on ~60% of item3 runs the agent's visible
+summary now carries the wrong colour word. The verdict is right; the
+human-facing surface is wrong. That is a stronger argument for fixing the naming
+than the count is.
+
+### ~~A full orchestrator pass at current HEAD is owed~~ — DONE 2026-09-11
+
+`results/20260911-142437_orchestrator_stability.json`, `git_head 8c57001`, clean
+tree. 120 item-runs, zero crashes, zero `unmeasured`, zero transport failures.
+118/120 text rows (120/120 correct behaviour — both misses are item6's documented
+correct catches), 118/120 audit rows, and **148/150 model-judged plus 75/75
+deterministic** cells in the 5x3 matrix. `brand_consistent` 15/15 on every
+fixture, against three failures on Sep 10.
+
+**M7's certification now names a commit the repo contains.** Kept here rather
+than deleted because the *pattern* is the reusable part: a claim that names a
+superseded commit is a claim nobody can check, and any future change to the
+audit tool, the instructions or the judge re-opens this.
+
+### item7 recovers about once in eighteen runs, and the key scores that as a miss
+
+DOWNGRADED 2026-09-11 PM. The original entry was written off n=3 and said the
+answer key "does not allow for the remediation clause succeeding." The full pass
+does not support that: **item7 is 15/15 text rows, every run `first=False` with
+exactly 2 redrafts and a failed final — precisely to key.**
+
+So across 18 observed runs item7 recovered ONCE (the morning partial's run 1,
+which fired stop-on-pass on item7 for the first time). The key is right 17 times
+in 18. **A rare event the key scores as a miss is not a wrong key**, and no
+change is warranted. Revisit only if a future pass shows recovery at a materially
+higher rate, the way item6 was re-registered on Sep 9.
+
+**Keep the methodological half.** Writing this up as a probable key defect off
+three runs, then having fifteen runs contradict it, is the same lesson as the
+stopping-rule entry above, arriving from the other direction: n=3 supports an
+observation, never a finding.
+
+### item1 is not the immovable control it looks like
+
+MEASURED 2026-09-11, and only because a single odd sample was checked instead of
+dismissed. The 1-run smoke before the certified pass drew item1 relevance 3.0,
+where every prior observation had been 4.0.
+
+Full pass: `[4,4,4,4,4,3,4,4,4,4,4,4,4,4,3]`, mean 3.867, **3.0 on 2 of 15
+runs.** It passed all fifteen — the threshold is >= 3 — but it sits exactly one
+variance step above failing, the judge's scores are unpinned (the Agents SDK has
+no `seed`), and the observed spread in this project is +/-1.
+
+item6 and item7 sitting on 3.0 is documented. **item1 doing it was not, because
+item1 is a clean control and nobody was watching it.** Not a defect and not worth
+fixing. Recorded so a future item1 failure is read as judge variance around a
+threshold before it is read as damage from whatever was under test.
+
+### `info_accurate` has TWO distinct rare failure modes, not one
+
+CONSOLIDATED 2026-09-11 from two runs the same day that failed the same cell for
+opposite reasons.
+
+**Cause (b) — headline-as-assertion, from Sep 1, still alive.** Both audit
+misses in the certified pass were `info_accurate`, and both read the same way:
+the model treats a topic headline ("Seasonal Home Maintenance Checklist", "Tool
+Rental 101: What We Offer") as a checkable claim and fails it for not being
+SUPPORTED. The prompt exempts this explicitly. The exemption is present and
+being outvoted — 2 of 150 judged cells.
+
+**Cause (c) — the boolean contradicting its own `notes`**, from Sep 2. Seen the
+same morning in the fixture probe: the prose reasoned all the way to a pass and
+the field said `False`.
+
+**These are opposite.** In (b) the prose reasons wrongly to a fail. In (c) the
+prose reasons correctly to a pass and the boolean disagrees with it. **One
+wording change cannot address both, and treating them as one defect is how this
+cell has stayed noisy since Sep 1.**
+
+Both are rare and neither blocks anything — `info_accurate` is 148/150 in the
+certified pass. Logged so whoever touches this cell next does not fix one and
+measure the other.
+
+### `ABSENT_COLOR_CHECKS` is a regression detector, not a quality measure
+
+Written into the probe already; recorded here so it is not rediscovered. It is a
+substring test and scores a bare brand-guide recitation identically to a
+detailed, correctly-located description containing one wrong word. Read alone it
+would have logged Sep 11's large improvement as no change. Always read the
+`[observed]` prose beside the count.
+
+Same class as the standing caveat on `check_meta_commentary.py` being a phrase
+matcher rather than a classifier.
 
 ## Which doc answers which question
 
