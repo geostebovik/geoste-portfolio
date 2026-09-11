@@ -74,30 +74,28 @@ that has never been sound, only usually-agreeing.
 
 ## Current next action
 
-**Next action: run a full orchestrator pass at current HEAD.**
-`probe_orchestrator_stability.py --runs 15`, docked and on mains power, with
-`--runs 1 --items item1` first as a smoke test. M7 is complete, certified on the
-Sep 10 pass at `87b37cd`; what is owed is a certification naming the commit the
-repo actually contains. The Sep 11 attempt produced 28 of 120 records before an
-undock killed it, clean on the audit side. The transport retry added Sep 11
-means a dropped connection now costs one row instead of the pass — but the retry
-wrapper's own correct behaviour has never been observed against a real failure.
+**Next action: Gerard's call — M7 and Phase 1 are complete and nothing is
+blocking.** Certified 2026-09-11 at `git_head 8c57001`: 120 item-runs, zero
+crashes, zero unmeasured, 118/120 text rows (120/120 correct behaviour),
+118/120 audit rows, and 148/150 model-judged plus 75/75 deterministic cells in
+the 5x3 matrix. The claim names a commit the repo contains.
 
-Everything else is quality and instrumentation, consolidated in
-`m7-orientation.md`'s Backlog rather than listed here. The four worth naming:
+The candidates, none of them blockers, all detailed in `m7-orientation.md`'s
+Backlog and the Todoist punch list:
 
-1. **The `brand_consistent` residue is a NAMING constraint**, not a perception
-   one — superseding the Sep 10 framing. item3's confabulation fell to 9/15 and
-   the perception is identical every run; the model flips between "peach"
-   (correct) and "cream" (the brand guide leaking in). One field-description
-   change, testable on one 15-run pass.
-2. **`cells_correct()` counts deterministic cells alongside judged ones.** Needs
-   no Azure run — verifiable against an existing results file.
-3. **`probe_fixture_stability.py` has no `__main__` guard**, so importing it
-   fires 75 audit calls.
-4. **Raise the deployment quota and parallelise the probe loop** — Todoist
-   `6hVCcxW6jWPmrMWq`. Neither is worth much without the other, and Sep 11
-   re-confirmed the pass is latency-bound, not throughput-bound.
+1. **The `brand_consistent` naming constraint** — item3 says "cream" for a
+   lighter orange on 9/15 audit-probe runs. One field-description change, one
+   15-run pass to verify. The agent republishes `notes` verbatim, so this is a
+   visible surface, not just a count.
+2. **`info_accurate`'s two failure modes** — causes (b) and (c), opposite to
+   each other, ~1.3% of judged cells between them.
+3. **`cells_correct()` and the `__main__` guard** — both small, both safe,
+   neither needs an Azure run.
+4. **Quota plus parallelisation** — Todoist `6hVCcxW6jWPmrMWq`, one piece of
+   work, and the Sep 11 pass re-confirmed the loop is latency-bound.
+
+**Or Phase 2, or the portfolio write-up.** M7's completion is the natural point
+to decide that deliberately rather than by picking up the next Backlog item.
 
 
 ## Milestones (Phase 1)
@@ -681,6 +679,83 @@ to survive it.
 Nothing outstanding blocks the call. The open items are quality and
 instrumentation, all in the Backlog, none of them defects in the thing being
 certified. Phase 1 of the IIP labs is complete.
+
+#### ADDENDUM, 15:05 — the full pass ran, and M7 is certified at current HEAD
+
+`results/20260911-142437_orchestrator_stability.json`, `git_head 8c57001`,
+clean tree, both deployments `gpt-5-4`, `INSTRUCTIONS_V4`, temperature 0.
+**120 item-runs, zero crashes, zero `unmeasured`, zero transport failures.**
+
+**The claim now names a commit the repo actually contains.** That was the whole
+point of running it, and it is the thing the morning's crashed attempt did not
+deliver.
+
+- **Text rows: 118/120, and 120/120 correct BEHAVIOUR.** Both misses are item6's
+  documented correct catches — unchanged from Sep 10, same two-per-fifteen rate.
+- **Audit rows: 118/120.** In the 5x3 matrix: **148/150 model-judged cells plus
+  75/75 deterministic** — stated in the units adopted this morning, not as
+  "223/225".
+- **`brand_consistent` is 15/15 on every fixture.** Sep 10's pass had three
+  failures on item3; today none. The Sep 10 clause rewrite AND `observed_colors`
+  both hold through the agent path, not only in the isolated probe. That is the
+  headline result.
+- **stop-on-pass fired on item6 runs 4 and 12** — n goes from 5 to **7**.
+- **`unmeasured()` still has no observation.** 120 clean runs is not a test of
+  the crash path, and neither is the transport retry added this morning: nothing
+  failed, so the retry wrapper's own correct behaviour remains unobserved. It
+  carries exactly the caveat it was written to remove. Unchanged in the Backlog.
+
+#### Both audit misses are the same bug, and it is NOT this morning's
+
+> *item2:* "Info accuracy fails because the visible headline says 'Seasonal Home
+> Maintenance Checklist,' which is not one of the fact sheet's listed services
+> or hours"
+>
+> *item3:* "...the visible headline says 'Tool Rental 101: What We Offer,' which
+> is not a fact-sheet assertion"
+
+Both treat a topic headline as a checkable claim and fail it for not being
+SUPPORTED. **That is cause (b), the headline-as-assertion bug from Sep 1.** The
+prompt exempts it explicitly — "A headline or title describing the content's
+topic is not itself a checkable assertion" — and the exemption is present and
+being outvoted on 2 of 150 judged cells.
+
+**This morning's fixture-probe miss was cause (c)**, which is the opposite: the
+prose reasoned correctly all the way to a pass and the boolean said `False`.
+
+**So `info_accurate` has at least two distinct rare failure modes, and one
+wording change cannot address both.** Treating them as one defect is how this
+cell has stayed noisy since Sep 1. Consolidated into a single Backlog entry so
+the next person to touch it does not fix one and measure the other.
+
+#### item7: this morning's 1/3 was noise, and the restraint was right
+
+**15/15 text rows. Every run `first=False`, exactly 2 redrafts, final failed —
+precisely to key.** The morning partial's two misses did not recur: run 1's
+recovery is now one event in eighteen runs, and run 3's first-draft pass did not
+happen once in fifteen.
+
+The morning entry recorded that result as "not resolvable at n=3" and declined
+to call it a finding. **That was correct, and it is worth keeping as evidence
+for the stopping-rule lesson recorded above** — the instrument's resolution, not
+the direction of the number, is what decides whether an observation means
+anything. The Todoist task opened off that n=3 is downgraded to p4 accordingly.
+
+#### One thing found by checking a flag rather than dismissing it
+
+The 1-run smoke before the full pass drew item1 relevance 3.0, where every prior
+item1 observation had been 4.0. It was flagged as worth checking rather than
+waved off as a single sample.
+
+Full pass, item1 first-draft relevance: `[4,4,4,4,4,3,4,4,4,4,4,4,4,4,3]` —
+mean 3.867, **3.0 on 2 of 15 runs.** It passed all fifteen, because the
+threshold is >= 3. But **item1 sits exactly one variance step above failing**,
+the judge's scores are unpinned, and the observed spread in this project is +/-1.
+
+item6 and item7 sitting on 3.0 is documented. **item1 doing it is not, because
+item1 is a clean control and nobody was watching it.** A future item1 failure
+should be read as judge variance around a threshold before it is read as damage
+from whatever change was under test. Backlog.
 
 ### Session — September 10, 2026
 
