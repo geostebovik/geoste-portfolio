@@ -57,7 +57,6 @@ import functools
 import inspect
 import json
 import os
-import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
@@ -70,6 +69,7 @@ from azure.identity import DefaultAzureCredential
 from m7_cv_audit_tool import audit_thumbnail
 from m7_evaluator_tool import ACTIVE_JUDGE_DEPLOYMENT, evaluate_draft
 from m7_fact_sheet_tool import get_fact_sheet
+from provenance import core_provenance
 
 
 SCRIPT_DIR = Path(__file__).parent
@@ -447,27 +447,6 @@ ITEMS = [
 # Run provenance
 # ---------------------------------------------------------------------------
 
-def _git(*args: str) -> str:
-    """Read-only git from the script's directory; empty string on any failure.
-
-    Provenance is worth recording and never worth failing a run over, so every
-    error path here returns "" rather than raising. --no-optional-locks matches
-    the standing rule for reading git out of a non-interactive shell.
-    """
-    try:
-        done = subprocess.run(
-            ["git", "--no-optional-locks", *args],
-            cwd=SCRIPT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=15,
-            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
-        )
-        return done.stdout.strip() if done.returncode == 0 else ""
-    except Exception:
-        return ""
-
-
 def run_provenance(script: str | None = None, include_agent: bool = True) -> dict:
     """What this run was measured against.
 
@@ -490,37 +469,36 @@ def run_provenance(script: str | None = None, include_agent: bool = True) -> dic
     point. `instructions` is stored verbatim because item 4 of
     m7-orientation.md's build list iterates exactly that string, and every
     future run has to be readable against the wording it actually ran under.
+
+    THE REPO-LEVEL HALF MOVED TO provenance.py ON 2026-09-11 -- the timestamp,
+    script name, git fields and `_git()` itself. THIS FUNCTION'S SIGNATURE AND
+    OUTPUT ARE UNCHANGED, deliberately and byte-for-byte: the key order below
+    is the same order the old single-function version produced, so results
+    files written before and after the extraction stay directly comparable and
+    probe_orchestrator_stability.py needs no edit. The move happened because
+    probe_fixture_stability.py needs provenance and must not import this module
+    to get it -- see provenance.py's docstring for both reasons.
+
+    What stayed here is what only this module knows: the judge, the agent, the
+    deployment and the instructions. That is the split provenance.py describes.
     """
-    # `git status --porcelain` reports STAT differences, not content ones, and
-    # _git() hard-codes --no-optional-locks so a refreshed index is never
-    # persisted -- which means a file whose mtime moved without its bytes
-    # changing is reported dirty on every run, forever. That fired 2026-09-08:
-    # q_a_pairs_sample.txt was byte-identical to HEAD by every check that reads
-    # bytes, and still flagged the run dirty. A warning that cries wolf is worse
-    # than none, so dirtiness is now measured by content.
-    tracked = _git("diff", "--name-only", "HEAD")
-    untracked = _git("ls-files", "--others", "--exclude-standard")
-    status = "\n".join(x for x in (tracked, untracked) if x)
-    provenance = {
-        "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "script": script or Path(__file__).name,
-        "git_head": _git("rev-parse", "HEAD"),
-        "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
-        "git_dirty": bool(status),
-        "git_dirty_files": status.splitlines(),
-        # Added 2026-09-10. Every result before this date recorded WHICH MODEL
-        # DREW the draft and never which one GRADED it -- and on 2026-09-09 the
-        # judge moved from gpt-5-2 to gpt-5-4, which makes results either side
-        # of that date incomparable. probe_judge_isolation.py had been setting
-        # this field on its own provenance by hand, so judge-only probes were
-        # self-describing while the orchestrator runs -- the ones a
-        # certification claim actually rests on -- were not. That asymmetry is
-        # backwards. Recorded unconditionally, outside the include_agent block,
-        # because a judge grades every run whether or not an agent drafted it.
-        "judge_deployment": ACTIVE_JUDGE_DEPLOYMENT,
-    }
+    # Added 2026-09-10. Every result before this date recorded WHICH MODEL
+    # DREW the draft and never which one GRADED it -- and on 2026-09-09 the
+    # judge moved from gpt-5-2 to gpt-5-4, which makes results either side
+    # of that date incomparable. probe_judge_isolation.py had been setting
+    # this field on its own provenance by hand, so judge-only probes were
+    # self-describing while the orchestrator runs -- the ones a
+    # certification claim actually rests on -- were not. That asymmetry is
+    # backwards. Recorded unconditionally, outside the include_agent block,
+    # because a judge grades every run whether or not an agent drafted it.
+    #
+    # IT IS RECORDED HERE AND NOT IN provenance.py FOR THE SAME REASON: a judge
+    # grades every run THIS module drives, and none that it does not. An
+    # audit-side probe has no judge, and a shared function could only have
+    # asserted one.
+    extra = {"judge_deployment": ACTIVE_JUDGE_DEPLOYMENT}
     if include_agent:
-        provenance.update({
+        extra.update({
             "model_deployment": os.environ.get("CHAT_DEPLOYMENT_GPT_5_4", ""),
             "agent_name": AGENT_NAME,
             "temperature": AGENT_TEMPERATURE,
@@ -528,10 +506,10 @@ def run_provenance(script: str | None = None, include_agent: bool = True) -> dic
             "instructions": ACTIVE_INSTRUCTIONS,
         })
     else:
-        provenance["note"] = ("no agent in this run: the agent name, temperature "
-                              "and instructions fields are omitted because none "
-                              "applied, not because they were unknown.")
-    return provenance
+        extra["note"] = ("no agent in this run: the agent name, temperature "
+                         "and instructions fields are omitted because none "
+                         "applied, not because they were unknown.")
+    return core_provenance(script=script or Path(__file__).name, extra=extra)
 
 
 # ---------------------------------------------------------------------------

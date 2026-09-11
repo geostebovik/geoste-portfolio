@@ -28,7 +28,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from openai import AzureOpenAI
 
 from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
@@ -92,7 +92,43 @@ class ContentAudit(BaseModel):
     info accuracy). These two stay together deliberately: neither was ever
     implicated in the cross-check contamination that forced the split, and
     both need the fact sheet in context.
+
+    `observed_colors` ADDED 2026-09-11, AND ITS POSITION IS THE POINT. The
+    defect it targets: after the Sep 10 clause rewrite `brand_consistent` is
+    225/225 correct, and item3's `notes` still assert "the thumbnail uses an
+    orange/cream palette" on 15 runs of 15. item3 contains no cream. Compare
+    item4, where the model writes "dominated by blue and gray, which is
+    materially different from the required orange/cream brand palette" --
+    separating the image's colours from the brand's exactly right. WHEN THE
+    ANSWER IS "CONSISTENT" THE MODEL STOPS OBSERVING AND STARTS QUOTING: the
+    brand guide sits in the same prompt and is the nearest available text.
+
+    Declared FIRST because structured outputs are generated in field order, so
+    the observation is written BEFORE the verdict is committed to, rather than
+    rationalized after it. A field placed after `brand_consistent` would be
+    describing a conclusion already reached, which is the failure mode itself.
+
+    IT IS A SCHEMA FIELD RATHER THAN A SENTENCE IN THE SYSTEM PROMPT, for the
+    reason the Sep 2 split was bought: prose instructions in that prompt
+    compete for salience with the verdict clauses beside them, and this
+    project has twice watched strengthening one instruction outvote its
+    neighbour. A field has its own slot and cannot be outvoted by one. The
+    trade accepted: nothing in the prompt text mentions it, so if the model
+    under-fills it the fallback is a prompt sentence -- try the structural fix
+    first and only add prose if the run says it was not enough.
+
+    The orchestrator's tool contract does NOT move: audit_thumbnail() still
+    returns a ThumbnailAudit, and this field is folded into its `notes`.
     """
+    observed_colors: str = Field(
+        description=(
+            "The colors actually present in this image, named from looking at "
+            "it: the two or three that occupy the most area, and where each "
+            "appears. Describe what you see before judging it. Never name a "
+            "color because the brand guide lists it -- if a brand color does "
+            "not appear in the image, do not name it."
+        )
+    )
     brand_consistent: bool
     info_accurate: bool
     notes: str
@@ -155,6 +191,14 @@ def build_content_messages(image_b64: str, mime_type: str = "image/png") -> list
       - info_accurate: do the visible assertions match the fact sheet
       - notes: reasoning, required whether it passed or failed
 
+    A FOURTH FIELD, observed_colors, IS REQUESTED BY THE SCHEMA AND IS
+    DELIBERATELY ABSENT FROM THE PROMPT BELOW (added 2026-09-11). Its
+    instruction lives in ContentAudit's Field description so that it cannot
+    compete for salience with the two verdict clauses here -- see that class's
+    docstring. If the prompt text ever grows a sentence about it, that is a
+    change to this prompt and needs its own full 5-fixture run under the Sep 2
+    rule, exactly as any clause edit would.
+
     Both clauses are FROZEN as verified 2026-09-02: info_accurate at 7/7 on
     every fixture in the afternoon run (the wording that finally worked
     defines the passing condition by absence -- "when nothing legible
@@ -211,9 +255,12 @@ def audit_thumbnail(image_path: str) -> str:
     :param image_path (str): Path to the thumbnail image file to audit.
     :return: JSON string with keys text_legible (bool), brand_consistent
         (bool), info_accurate (bool), and notes (str) explaining any flag
-        raised (or confirming a clean pass). Notes from the two calls are
-        concatenated with [legibility] / [content] labels so each verdict's
-        reasoning stays attributable to the call that produced it.
+        raised (or confirming a clean pass). Notes are concatenated with
+        [legibility] / [observed] / [content] labels so each fragment stays
+        attributable to what produced it. [observed] is the content call's
+        description of the colours actually in the image, recorded before its
+        verdicts -- it is the check on whether a brand pass was reasoned or
+        recited, and it is read, not scored.
     :rtype: str
     """
     # Deterministic half: Read locates the text, arithmetic judges it.
@@ -240,11 +287,17 @@ def audit_thumbnail(image_path: str) -> str:
     # Merge back into the original three-boolean shape. Callers
     # (probe_fixture_stability.py, main(), and eventually the orchestrator's
     # FunctionTool) see no difference from the single-call version.
+    # [observed] added 2026-09-11 alongside the ContentAudit.observed_colors
+    # field. Same prefixed-concatenation convention the split adopted on
+    # Sep 2 -- each fragment stays attributable to what produced it, and the
+    # return shape does not move.
     merged = ThumbnailAudit(
         text_legible=text_legible,
         brand_consistent=content.brand_consistent,
         info_accurate=content.info_accurate,
-        notes=f"[legibility] {legibility_notes}\n[content] {content.notes}",
+        notes=(f"[legibility] {legibility_notes}\n"
+               f"[observed] {content.observed_colors}\n"
+               f"[content] {content.notes}"),
     )
     return merged.model_dump_json()
 
