@@ -74,26 +74,31 @@ that has never been sound, only usually-agreeing.
 
 ## Current next action
 
-**Next action: decide whether M7 is finished.** The certification pass ran
-2026-09-10, the verdict layer held, and the one check it exposed was fixed and
-re-verified the same day. Nothing below blocks a "M7 complete" call — they are
-quality items, and the decision about whether they gate completion is Gerard's,
-not something a green board should make by default.
+**Next action: run a full orchestrator pass at current HEAD.**
+`probe_orchestrator_stability.py --runs 15`, docked and on mains power, with
+`--runs 1 --items item1` first as a smoke test. M7 is complete, certified on the
+Sep 10 pass at `87b37cd`; what is owed is a certification naming the commit the
+repo actually contains. The Sep 11 attempt produced 28 of 120 records before an
+undock killed it, clean on the audit side. The transport retry added Sep 11
+means a dropped connection now costs one row instead of the pass — but the retry
+wrapper's own correct behaviour has never been observed against a real failure.
 
-1. **`brand_consistent`'s PERCEPTION, not its verdict.** The verdict is fixed
-   and verified at 225/225. item3's `notes` still assert cream in an image that
-   has none, on 15 of 15 runs. `notes` is what a human reads when deciding
-   whether to trust a flag. A `notes`-instruction change, testable on one
-   15-run 5-fixture pass: does item3 stop saying "cream"?
-2. **Give `probe_fixture_stability.py` provenance before the next audit-side
-   measurement.** It records no `git_head`, no `git_dirty`, no deployment and
-   no copy of the live wording — `run_provenance()` already exists and takes
-   `script=` / `include_agent=` for exactly this. Not during a measurement.
-3. **Decide the orchestrator's model** — unchanged in substance, but the
-   rate-limit dimension has dropped out of it (see the quota finding in the
-   Sep 10 entry), so it reduces to output quality against cost per token.
+Everything else is quality and instrumentation, consolidated in
+`m7-orientation.md`'s Backlog rather than listed here. The four worth naming:
+
+1. **The `brand_consistent` residue is a NAMING constraint**, not a perception
+   one — superseding the Sep 10 framing. item3's confabulation fell to 9/15 and
+   the perception is identical every run; the model flips between "peach"
+   (correct) and "cream" (the brand guide leaking in). One field-description
+   change, testable on one 15-run pass.
+2. **`cells_correct()` counts deterministic cells alongside judged ones.** Needs
+   no Azure run — verifiable against an existing results file.
+3. **`probe_fixture_stability.py` has no `__main__` guard**, so importing it
+   fires 75 audit calls.
 4. **Raise the deployment quota and parallelise the probe loop** — Todoist
-   `6hVCcxW6jWPmrMWq`. Neither is worth much without the other.
+   `6hVCcxW6jWPmrMWq`. Neither is worth much without the other, and Sep 11
+   re-confirmed the pass is latency-bound, not throughput-bound.
+
 
 ## Milestones (Phase 1)
 
@@ -350,6 +355,332 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 11, 2026
+
+**The audit now observes before it judges, and the observation is real.**
+`observed_colors` was added to `ContentAudit` as a schema field declared ahead
+of the verdicts. item3's confabulation fell from 15 runs of 15 to 9 of 15 — and
+the fifteen per-run descriptions show the residue is a NAMING failure, not a
+perception one. The model sees the same thing every run; it flips between
+calling it "peach" and calling it "cream."
+
+Results: `results/20260911-113242_fixture_stability.json`, at
+`git_head 59f4ba3`, clean tree, `audit_deployment gpt-5-4-mini`, RUNS=15.
+**This is the first audit-side measurement in the project's history that can be
+tied to a commit** — see the provenance work below.
+
+#### The headline numbers, stated the way they should have been stated before
+
+- **149/150 model-judged cells correct**, plus **75/75 deterministic cells**.
+- All five fixtures match expected. All cells STABLE at the 0.8 bar.
+- **item3 names "cream" in 9 of 15 runs**, down from 15 of 15 on Sep 10.
+
+**"225/225" was an overstatement and is retired.** `text_legible` stopped being
+a model judgment on Sep 3 — it is Azure AI Vision Read locating each text
+element, then WCAG contrast arithmetic, returning the same value every run by
+construction. A 5-fixture x 3-field x 15-run matrix is therefore 150 judged
+cells and 75 that cannot vary. Counting them together credits the model with 75
+answers it never gave. `probe_fixture_stability.py` now tallies and prints them
+separately, so a figure lifted from its output into a claim is already correct.
+STATUS.md line 505, `m7-orientation.md` item 7 and the Sep 10 commit message all
+carry the old figure and are corrected as of this entry.
+
+**"117/120 audit rows" survives, but its label does not.** That figure is
+row-level, off `audit_matches_expected` — a row counts only if all three fields
+match. Adding an always-true conjunct to a conjunction does not change the
+count, so the number is honest as arithmetic. What overstates is the phrase
+"audit verdict layer," which reads as 120 three-way model judgments when one
+third of every row is arithmetic. Reworded, not recounted. Separately,
+`cells_correct()` in `m7_orchestrator.py` DOES count deterministic cells
+alongside judged ones and should be split the same way the fixture probe now
+is — Backlog, since the row figure is the one actually quoted.
+
+#### The design: a schema field, not a sentence
+
+The Todoist task specified a `notes`-instruction change. Reading the code first
+turned up a better option, and the argument for it is the one that bought the
+Sep 2 split: **prose instructions in that system prompt compete for salience
+with the verdict clauses beside them, and this project has twice watched
+strengthening one instruction outvote its neighbour.** A schema field has its
+own slot and cannot be outvoted by one.
+
+Three decisions inside that, each load-bearing:
+
+- **Declared FIRST.** Structured outputs generate in field order, so the model
+  writes what it sees before committing to `brand_consistent`. A field placed
+  after the verdict would be describing a conclusion already reached, which is
+  the failure mode itself.
+- **Instruction lives in the pydantic `Field(description=...)`**, not the
+  prompt. The system prompt text is byte-identical to Sep 10's, so any verdict
+  movement in this run cannot be attributed to prompt wording.
+- **`brand_consistent`'s clause untouched.** It was finished after four passes;
+  the standing instruction not to touch it again was honoured.
+
+`notes` now reads `[legibility] … / [observed] … / [content] …`, extending the
+Sep 2 prefixed-concatenation convention. `ThumbnailAudit` is unchanged, so the
+orchestrator's tool contract does not move — though see the caveat below about
+what "contract" does and does not cover.
+
+#### What the fifteen runs actually say
+
+The six clean runs are near-verbatim identical to each other:
+
+> "…dominated by bright orange across the full background and large translucent
+> orange/**peach** shapes in the center. There are darker brown/orange accents in
+> the small toolbox icon at top left and the bottom-left store name text."
+
+The nine dirty runs differ in one word:
+
+> "…lighter **cream**/orange-tinted translucent shapes layered over the center…"
+
+**Same perception, different label.** Every run locates the same elements, calls
+the overlay translucent, and puts the dark accents in the right two corners.
+"Peach" is correct — `#f28a4f` is peach. "Cream" is the brand guide leaking in
+as a synonym for *lighter*.
+
+Compare Sep 10's version, which was "the thumbnail uses an orange/cream
+palette" — no spatial detail, nothing that required looking at the image. The
+field did what it was bought for. What remains is a vocabulary constraint, not
+a perception problem, and it is a materially smaller thing than the task
+assumed.
+
+**item3 contains no cream, and that is now measured rather than asserted.**
+Quantizing the PNG puts 100% of its area at hue 15–21°, saturation 0.70–0.89 —
+every colour in it is an orange. Brand cream `#EFE4B0` is hue 50°, saturation
+0.26. Zero pixels fall in the cream region. `build.py` agrees: item3's palette
+is `#FD5A1E / #F2803D / #e8703a / #f28a4f / #e05a2a / #c44415 / #7a3010`, and
+the one near-white it defines (`badge_color #fffaf0`) never renders, because
+item3 sets `badge_html=""`. The claim had been repeated across four documents
+without anyone checking it; it holds. (Claude measured this.)
+
+#### The one miss is nine days old
+
+item2 `info_accurate` came back 14/15. Run 12's own reasoning:
+
+> "…the title is not a checkable fact-sheet claim… The only legible business
+> text is the store name, which matches; no contradictory hours/services are
+> visible."
+
+The prose reasons to a pass. The boolean says `False`. **That is cause (c) —
+"the boolean contradicting its own `notes`" — documented Sep 2 on item3 runs 2
+and 5, recorded then as unaffected by the split, and open in the Backlog
+since.** It is not new behaviour introduced by `observed_colors`.
+
+item2 `info_accurate`'s full history: 4/7, 7/7, 4/7, 7/7, 15/15, 14/15. It has
+never been reliably characterized, and one more run would not settle it.
+
+#### The methodological finding, which is the more useful one
+
+**A stopping rule stricter than the instrument's resolution fires on noise.**
+
+Claude pre-registered an abort before the run: *any verdict regression → revert
+the `observed_colors` change*. One cell moved, and the rule triggered on a
+result that is indistinguishable from no change at all. At n=15, 15/15 versus
+14/15 carries no information; the probe's own standard is
+`STABLE_THRESHOLD = 0.8`, and 14/15 is 93% and reported STABLE with the
+majority matching expected.
+
+So an ad-hoc bar was invented that was stricter than the instrument that prints
+the result, and then offered as discipline. **The error is visible without
+reference to which way the data went**, which is the only thing that makes
+amending it an amendment rather than a goalpost move. Claude wrote the rule,
+argued against it after the fact, and flagged the conflict of interest when
+doing so; Gerard made the call not to abort.
+
+**Standing consequence: a pre-registered trigger has to be specified in the
+units the instrument reports, and above its noise floor.** "Any regression" is
+not a trigger. "Majority flips, or agreement drops below 0.8" is.
+
+#### Provenance: `provenance.py`, extracted
+
+`m7-orientation.md` item 2 asked for `run_provenance()` to be wired into
+`probe_fixture_stability.py`. Reading the code first showed it could not simply
+be imported, for two reasons, both instances of the rule that function exists
+to enforce:
+
+1. **It records `judge_deployment` unconditionally.** The fixture probe has no
+   judge — it makes one chat-completions call against the CV deployment. A
+   results file asserting a deployment that never ran is the same
+   confidently-wrong record `include_agent` was added to prevent.
+2. **Importing it makes Azure calls.** `m7_orchestrator` imports
+   `m7_evaluator_tool`, which calls `build_judge_config()` at module level. An
+   audit-side probe would then fail to start whenever the judge config broke —
+   a probe depending on a service it does not call.
+
+So `_git()` and the repo-level fields moved to a new stdlib-only
+`provenance.py`, with an `extra` dict for caller-specific fields.
+**`m7_orchestrator.run_provenance()` keeps its signature and produces a
+byte-identical dict, key order included** — deliberately, so results either
+side of the extraction stay comparable and `probe_orchestrator_stability.py`
+needed no edit at all. The split rule: repo-level facts in `provenance.py`,
+anything describing a configuration only the caller knows in the caller.
+
+The probe also records what the generic function cannot — the audit deployment,
+`RUNS`, the stability threshold, which fields are judged versus deterministic,
+`ContentAudit`'s field list, and the live system prompt. **The prompt is read
+out of `build_content_messages("")[0]["content"]`, not pasted**, so it cannot
+drift from what actually ran — the same principle as importing
+`EXPECTED_RESULTS` rather than copying it.
+
+(Claude wrote `provenance.py`, the extraction, the probe rewrite and the
+`observed_colors` design. Gerard chose the schema-field option over the
+notes-wording option when both were put to him, and ran every command — see the
+environment note.)
+
+#### A real bug, found by the first run that could expose it
+
+`git_dirty_files` has mixed two path conventions since the day it was written.
+`git diff --name-only` reports from the repo root; `git ls-files --others`
+reports from the CWD, which is `SCRIPT_DIR`. Nobody saw it because the field had
+never yet held an untracked file. The moment `provenance.py` existed, it
+printed:
+
+```
+['ai-103/scripts/m7_cv_audit_tool.py', ..., 'provenance.py']
+```
+
+Three repo-relative paths and one cwd-relative one, for four files in the same
+directory. `--full-name` added. A provenance field whose paths cannot be
+resolved against a single root is not evidence of anything — which is the
+argument the function's own docstring makes.
+
+#### The measurement instrument has the same caveat as the thing it measures
+
+`ABSENT_COLOR_CHECKS` — the new automated confabulation check — is a substring
+test. It scores "the thumbnail uses an orange/cream palette" and "lighter
+cream/orange-tinted translucent shapes layered over the center" identically, as
+CONFABULATED. **Read alone, it would have recorded a large improvement as no
+change.** It is a correct regression detector and a bad quality measure, and
+that is now written into the probe beside the check. Same standing caveat as
+`check_meta_commentary.py` being a phrase matcher rather than a classifier,
+arriving in a new place.
+
+#### Environment: the desktop shell is down, and the experiment has a result
+
+The Sep 11 session prompt pre-registered a test: attach only the repo root, not
+both folders, to determine whether NESTED connected folders caused the
+`no Plan9 drive shares mounted under /mnt/.virtiofs-root/shared` failure.
+
+**Nesting is ruled out.** One folder, identical failure. Two further findings:
+
+- The error now carries a diagnosis it did not carry on Sep 10: *"A Windows
+  update released September 8 prevents Claude's workspace from reaching your
+  files. We're tracking this issue. Claude Code is unaffected."* Host-side,
+  vendor-tracked.
+- **The desktop-build hypothesis is also dead.** The Sep 10 prompt named build
+  1.49585.0 as the next suspect; this session ran on 1.52386.0 and failed
+  identically.
+
+**Unrelated to the Surface Book DTX fault** under separate investigation, despite
+both timelines containing Sep 8. Two faults, same week, no shared cause.
+
+Consequence for the working arrangement: no shell on the Windows machine means
+no git, no python, no probe runs from Claude's side. Files can still be read and
+written through the bridge. **The standing "Gerard runs the commands"
+arrangement now covers everything, not only git**, and his availability at the
+keyboard is the binding constraint on a session, not elapsed time.
+
+**Folder attachment again did not survive into the session** — the third
+occurrence. `connectedFolders` came back empty and access had to be requested
+mid-session. Session-start checklist item 1 remains correct and remains
+necessary.
+
+#### The orchestrator re-certification: attempted, crashed, partially useful
+
+**Why it was run at all.** Claude deferred it in the morning with the reason
+"that would require another orchestrator run" — a cost stated without a number,
+which Gerard pushed back on. The push was right, and it exposed two errors:
+
+1. **`cells_correct()` never needed a run.** It is a reporting function and can
+   be re-verified against an existing results file with no Azure calls at all.
+   "Edits `m7_orchestrator.py`" had been conflated with "requires a pass."
+2. **The audit change was not contract-preserving in the way it was described.**
+   `ThumbnailAudit`'s *shape* did not move, but `notes` is a string the agent
+   reads AND republishes in its own prose summary, and it now carries an extra
+   `[observed]` paragraph on every item. The agent's context changed. That is a
+   thing to measure, not assume — and the first run confirmed the paragraph does
+   reach the agent's visible output.
+
+**What the run produced before it died:**
+`results/20260911-120324_orchestrator_stability.json`, `git_head 59f4ba3`, clean
+tree, both deployments `gpt-5-4`, `INSTRUCTIONS_V4`. **28 of 120 records**,
+crashing during run 4 of 15.
+
+- **Audit rows: 28/28.** No regression signal from `observed_colors`.
+- **item3 `brand_consistent`: 4/4 correct**, against 12/15 in the Sep 10 pass —
+  which ran at `87b37cd`, before the clause rewrite. The fix holds through the
+  agent path, not only in the isolated probe.
+- **item7: 1/3 text rows**, and the two misses are different events:
+  run 1 fired **stop-on-pass on item7 for the first time** (n=4 → 5, and a new
+  item) — the first draft failed, two redrafts ran, and the final passed, which
+  the pre-registered key does not allow for. **Same category as item6's "misses"
+  on Sep 10: the remediation clause working against a key that encodes an
+  expectation the system can beat.** Run 3's first draft passed outright, which
+  is Sep 10 run 8 repeating — item7's relevance sits exactly on the 3.0
+  threshold with an unpinned judge.
+  **At n=3 this is not resolvable**, and it is recorded as an observation, not a
+  finding.
+
+**28 records is not a certification and is not written up as one.** M7's
+certification remains the Sep 10 pass at `87b37cd`.
+
+#### The crash, and the reason it was worth having
+
+`azure.core.exceptions.ServiceResponseError: ('Connection aborted.',
+ConnectionResetError(10054))` — and the machine's own log named the cause four
+seconds earlier: **`Kernel-Power` event 105 at 12:03:20, "the system power
+source has changed."** The laptop was undocked mid-run. The dock's ethernet
+adapter vanished, every socket bound to it died, and the in-flight request had
+no interface left. Not Azure, not the DTX fault, not the hot-plug storm.
+(Gerard volunteered the undock unprompted; without it the next twenty minutes
+would have gone into a theory about transient Azure resets.)
+
+**The defect it exposed is real regardless of the cause, and larger for it.**
+`run_item()` had no exception handling around `create_and_process`, so ANY
+network interruption over a 95-minute unattended pass — a dock change, a wifi
+handover, a VPN reconnect, a sleep — destroys the whole measurement. Over that
+window those are ordinary events, not edge cases.
+
+**And it is a failure class `unmeasured()` was structurally blind to.**
+`unmeasured()` records "the run completed but produced no verdict." An SDK
+exception never reaches the code that writes that row. So the crash-path gap
+tracked in the Backlog since Sep 8 was worse than recorded: it was not that the
+path had no observations, it was that one whole category of failure could not
+produce one.
+
+**Fixed the same day.** `run_item()` now retries transport failures
+(`ServiceRequestError` / `ServiceResponseError`) up to `ITEM_ATTEMPTS = 4` with
+exponential backoff, **each attempt on a fresh thread** — resuming the failed
+thread would re-enter a run whose tool calls are already in `TOOL_CALLS`, and
+the record would then describe two runs stitched together, which is worse than
+a crash because it looks like data. On exhaustion the item is recorded as
+unmeasured, with the exception text and the attempt count, and the pass
+continues. One bad row is the right price for a dropped connection.
+`HttpResponseError` still raises: a rejection the service actually sent is a
+different thing. (Claude wrote this.)
+
+The 28 records survived only because `probe_orchestrator_stability.py` wraps its
+item loop in `try/finally`. That was already there, and it is the difference
+between a partial result and a lost afternoon.
+
+**New standing lesson, of the kind nobody writes down:** do not change the
+machine's power or network state during a long unattended run. The
+change-one-variable rule, applied to the physical layer.
+
+#### M7
+
+**Called complete**, on the Sep 10 certification pass at `87b37cd` — 120
+item-runs, zero crashes, 117/120 text rows and 117/120 audit rows against
+pre-registered keys — plus today's 28-row no-regression check at `59f4ba3`.
+**Stated that way deliberately: the certification names a commit, and today's
+run is corroboration, not a re-certification.** A full pass at current HEAD is
+owed and is now the first item of the next session, with the retry fix in place
+to survive it.
+
+Nothing outstanding blocks the call. The open items are quality and
+instrumentation, all in the Backlog, none of them defects in the thing being
+certified. Phase 1 of the IIP labs is complete.
 
 ### Session — September 10, 2026
 

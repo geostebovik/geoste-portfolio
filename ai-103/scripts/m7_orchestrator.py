@@ -64,6 +64,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import FunctionTool, ToolSet
+from azure.core.exceptions import ServiceRequestError, ServiceResponseError
 from azure.identity import DefaultAzureCredential
 
 from m7_cv_audit_tool import audit_thumbnail
@@ -659,6 +660,67 @@ def actual_audit(calls: list[dict]) -> dict | None:
     return None
 
 
+# Transport-failure retry, added 2026-09-11 after one dropped TCP connection
+# killed a 15-run certification pass at minute 18 of 95.
+#
+# WHAT HAPPENED. The laptop was undocked mid-run. The dock's ethernet adapter
+# disappeared, every socket bound to it died, and the in-flight request raised
+# ServiceResponseError(ConnectionResetError 10054). It propagated out of
+# run_item, out of the probe's item loop, and ended the process. 28 of 120
+# records survived only because probe_orchestrator_stability.py wraps its loop
+# in try/finally.
+#
+# WHY THIS IS NOT AN EDGE CASE. A 95-minute unattended pass will meet ordinary
+# network interruptions -- a dock change, a wifi handover, a VPN reconnect, a
+# sleep. Over that window they are expected events, and none of them should be
+# able to destroy a measurement that costs an hour and a half.
+#
+# AND WHY unmeasured() COULD NOT CATCH IT. unmeasured() records "the run
+# completed but produced no verdict." An exception from the SDK never reaches
+# the code that would write that row, so this entire failure class was
+# invisible to the instrument. Recording the row here is what finally gives
+# unmeasured() the crash-path observation it has never had -- see the Backlog
+# entry that has tracked that gap since Sep 8.
+ITEM_ATTEMPTS = 4
+ITEM_RETRY_BASE_DELAY = 5.0
+
+
+def _unmeasured_record(item: dict, exc: BaseException, attempts: int) -> dict:
+    """A record for an item whose run never produced a verdict, with why.
+
+    Shaped identically to a successful record, with None wherever a value was
+    never observed. `measured()` keys off `actual_audit` being falsy, and
+    summarize() already treats first_text_passed=None as "excluded from the
+    counts" rather than as a failure -- the distinction added 2026-09-08 after
+    a server_error read as three wrong audit cells. A transport failure is not
+    a wrong answer and must not share a denominator with one.
+    """
+    return {
+        "id": item["id"],
+        "topic": item["topic"],
+        "thumbnail": item["thumbnail"],
+        "thread_id": None,
+        "run_id": None,
+        "run_status": "TRANSPORT_FAILURE",
+        "last_error": f"{type(exc).__name__}: {exc}",
+        "transport_attempts": attempts,
+        "text_path": bool(item.get("text_path")),
+        "evaluate_draft_calls": 0,
+        "redrafts": 0,
+        "first_text_passed": None,
+        "final_text_passed": None,
+        "expected_text": item.get("expected_text") or None,
+        "text_matches_expected": None,
+        "expected_audit": item["expected_audit"],
+        "actual_audit": None,
+        "audit_matches_expected": None,
+        "requested_tool_calls": [],
+        "tool_calls": [],
+        "messages": [],
+        "usage": None,
+    }
+
+
 def run_item(client, agent_id: str, item: dict) -> dict:
     """Run one content item on its own thread; print live, return the full record.
 
@@ -666,19 +728,54 @@ def run_item(client, agent_id: str, item: dict) -> dict:
     item's draft and tool results sitting in context while the next is drafted,
     which is the same cross-contamination the CV audit was split in two to
     remove on 2026-09-02.
+
+    TRANSPORT FAILURES ARE RETRIED ON A FRESH THREAD, NOT RESUMED (2026-09-11).
+    Retrying `create_and_process` against the thread that just failed would
+    re-enter a run whose tool calls are already in TOOL_CALLS, and the record
+    would then describe two runs stitched together -- a worse outcome than the
+    crash, because it would look like data. Each attempt therefore starts clean:
+    new thread, new message, TOOL_CALLS cleared. After ITEM_ATTEMPTS the item is
+    recorded as unmeasured and the pass continues; one bad row is the correct
+    cost of a dropped connection, not ninety minutes.
+
+    Only transport errors are retried. `HttpResponseError` -- a rejection the
+    service actually sent, including the 429s azure-core already handles
+    internally -- is a different thing and still raises.
     """
     thumbnail = FIXTURE_DIR / item["thumbnail"]
     print(f"\n{'=' * 70}\n{item['id']} -- {item['topic']}\n{'=' * 70}")
 
-    TOOL_CALLS.clear()
+    def _attempt():
+        TOOL_CALLS.clear()
+        thread = client.threads.create()
+        client.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=f"Topic: {item['topic']}\nThumbnail image path: {thumbnail}",
+        )
+        run = client.runs.create_and_process(thread_id=thread.id, agent_id=agent_id)
+        return thread, run
 
-    thread = client.threads.create()
-    client.messages.create(
-        thread_id=thread.id,
-        role="user",
-        content=f"Topic: {item['topic']}\nThumbnail image path: {thumbnail}",
-    )
-    run = client.runs.create_and_process(thread_id=thread.id, agent_id=agent_id)
+    thread = run = None
+    last_exc = None
+    for attempt in range(1, ITEM_ATTEMPTS + 1):
+        try:
+            thread, run = _attempt()
+            last_exc = None
+            break
+        except (ServiceRequestError, ServiceResponseError) as exc:
+            last_exc = exc
+            print(f"  TRANSPORT FAILURE on attempt {attempt}/{ITEM_ATTEMPTS}: "
+                  f"{type(exc).__name__}: {exc}")
+            if attempt < ITEM_ATTEMPTS:
+                delay = ITEM_RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                print(f"  retrying on a fresh thread in {delay:.0f}s")
+                time.sleep(delay)
+
+    if last_exc is not None:
+        print(f"  NOT MEASURED after {ITEM_ATTEMPTS} attempts -- recording the "
+              f"row and continuing the pass")
+        return _unmeasured_record(item, last_exc, ITEM_ATTEMPTS)
 
     calls = list(TOOL_CALLS)
     actual = actual_audit(calls)
