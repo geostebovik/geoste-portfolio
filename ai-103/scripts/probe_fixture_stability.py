@@ -28,10 +28,17 @@ Azure AI Vision Read locating each text element, then WCAG contrast
 arithmetic against the 3.0:1 large-text minimum -- and returns the same
 value every run by construction. So a 5-fixture x 3-field x RUNS matrix is
 5 x 2 x RUNS model-judged cells plus 5 x 1 x RUNS deterministic ones, and
-the summary below reports those totals separately. At RUNS=15 that is 150
-judged and 75 deterministic, not 225 judged. Rolling them into one figure
+the summary below reports those totals separately. The shape is 5 x 2 x RUNS
+judged and 5 x 1 x RUNS deterministic, stated as a rule rather than for one
+RUNS value because this line went stale once already. At the current RUNS=45
+that is 450 judged and 225 deterministic. Rolling them into one figure
 overstates what the probe measured; the totals are printed apart so a
 number lifted from this output into a claim is already the right one.
+
+MIND THE COLLISION AT RUNS=45: the DETERMINISTIC count is 225, and "225/225"
+is the retired combined figure from RUNS=15 that this project spent Sep 11
+correcting. They are unrelated numbers that happen to share a digit string.
+Always carry the label with the number.
 
 Full per-run results (including notes, not just booleans) get written to a
 timestamped JSON file in scripts/results/, matching the existing naming
@@ -82,11 +89,32 @@ FIELDS = ("text_legible", "brand_consistent", "info_accurate")
 MODEL_JUDGED_FIELDS = ("brand_consistent", "info_accurate")
 DETERMINISTIC_FIELDS = ("text_legible",)
 
-# 7, not the usual 5 -- matches the manual batch Gerard already ran by hand
-# on 2026-09-01 (item2's info_accurate split 4/3 at n=5-ish, close enough to
-# a coin flip that the extra 2 runs are worth it for a real characterization
-# of whichever wording is live when this runs).
-RUNS = 15
+# 45 as of 2026-09-14, and the comment that stood here described 7 while the
+# value read 15 -- so this one states the rule that picks the number instead
+# of the circumstances of one batch.
+#
+# RUNS IS SET BY THE SMALLEST EFFECT THAT MUST NOT BE MISSED, not by taste.
+# Condition A (the hue constraint) fixed what it aimed at -- item3 names
+# "cream" in 1/15 runs, down from 9/15, Fisher p=0.005 -- and moved item3's
+# info_accurate from 0/15 misses to 5/15. Whether that regression is real is
+# now the question, and it is a question about a SMALL rate, tested against a
+# pre-change pooled baseline of 1/30 across the fixture probe and the Sep 11
+# orchestrator pass:
+#
+#   n=15 -> cannot resolve it at all
+#   n=30 -> proves a regression only at >=8/30, i.e. a true rate of 0.27+
+#   n=45 -> proves one at >=9/45, i.e. 0.20+
+#
+# The observed 0.33 clears either. n=45 is chosen for the case that cannot be
+# seen yet: a true rate near 0.20 reads as "indistinguishable" at n=30 and
+# ships a broken verdict. Precision alone would not justify it -- the 95% CI
+# only narrows from 0.32 to 0.27 -- so the argument is the detection floor,
+# not the error bar.
+#
+# Wall clock is NOT the constraint and should not be used as one here: the
+# Sep 14 pass measured 920.5s for 75 calls (12.3 s/call, recorded rather than
+# remembered), so 225 calls is ~46 minutes.
+RUNS = 45
 STABLE_THRESHOLD = 0.8
 
 # The confabulation check, added 2026-09-11 with ContentAudit.observed_colors.
