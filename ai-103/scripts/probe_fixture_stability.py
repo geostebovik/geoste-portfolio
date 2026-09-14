@@ -120,6 +120,13 @@ def observed_colors_of(notes: str) -> str:
     return ""
 
 
+# Captured HERE, not at import and not at write time. core_provenance()'s
+# `timestamp` is built when the record is assembled -- after the loop -- so it
+# has only ever recorded when a results file was WRITTEN. Pairing the two gives
+# the wall clock, which is what "can I fit two passes around an errand" needs
+# and what no results file in this project has ever carried.
+RUN_STARTED_AT = datetime.now().astimezone()
+
 raw_results = {name: [] for name in EXPECTED_RESULTS}
 
 for i in range(RUNS):
@@ -214,6 +221,7 @@ with open(out_path, "w", encoding="utf-8") as f:
     json.dump({
         "run": core_provenance(
             script=Path(__file__).name,
+            started_at=RUN_STARTED_AT,
             extra={
                 # No agent and no judge in this probe -- audit_thumbnail()
                 # makes one chat-completions call against the CV deployment.
@@ -226,6 +234,25 @@ with open(out_path, "w", encoding="utf-8") as f:
                 "model_judged_fields": list(MODEL_JUDGED_FIELDS),
                 "deterministic_fields": list(DETERMINISTIC_FIELDS),
                 "content_schema_fields": list(ContentAudit.model_fields),
+                # ADDED 2026-09-14, and the A/B starting this week is what
+                # exposed the gap. The observed_colors INSTRUCTION lives in a
+                # Field description, deliberately -- that was the whole point
+                # of the Sep 11 design, so it could not be outvoted by the
+                # verdict clauses in the system prompt. But this file records
+                # `content_system_prompt` and only the NAMES of the schema
+                # fields, so the instruction under test appeared in neither.
+                # Two runs differing by one sentence in a Field description
+                # would have produced two results files identical in every
+                # recorded respect. git_head distinguishes them only if each
+                # wording was committed first and the tree was clean -- true
+                # by discipline, not by construction, and the 2026-08-31 data
+                # point was lost to exactly that gap.
+                # Read off the live model, not copied, for the same reason
+                # content_system_prompt is.
+                "content_field_descriptions": {
+                    name: field.description
+                    for name, field in ContentAudit.model_fields.items()
+                },
                 "content_system_prompt": content_system_prompt,
                 "note": ("no agent and no judge in this run: those fields are "
                          "omitted because none applied, not because they were "

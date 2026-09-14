@@ -59,7 +59,8 @@ def _git(*args: str) -> str:
         return ""
 
 
-def core_provenance(script: str | None = None, extra: dict | None = None) -> dict:
+def core_provenance(script: str | None = None, extra: dict | None = None,
+                    started_at: datetime | None = None) -> dict:
     """The repo-level facts about a run, plus whatever the caller adds.
 
     `git_dirty` is the field that earns this function. A number measured
@@ -77,6 +78,28 @@ def core_provenance(script: str | None = None, extra: dict | None = None) -> dic
     `extra` -- caller-specific configuration fields, merged last so they appear
     after the repo-level ones in the recorded dict. Pass only what actually
     applied to the run.
+
+    `started_at` ADDED 2026-09-14, and it closes a gap nobody noticed until
+    someone tried to size a run. `timestamp` is built HERE, at the moment the
+    record is assembled -- which for every existing caller is after the work
+    finished, immediately before the JSON is written. So every results file in
+    scripts/results/ records when it was WRITTEN and nothing about how long it
+    took, and `filename_timestamp - timestamp` computes to under a second on
+    every one of them. The only wall-clock figure anywhere in this project is
+    the "~95 minutes" in m7-orientation.md's Backlog, carried in prose from
+    memory.
+
+    Duration is a repo-level fact about a run -- the same class as when it ran
+    and which commit it ran against -- so it belongs here rather than in each
+    caller's `extra`, where the field names would drift.
+
+    `timestamp` IS DELIBERATELY UNCHANGED. Its meaning stays "when this record
+    was assembled", and callers that pass nothing get a byte-identical dict to
+    the one they got before this parameter existed -- which is what keeps
+    m7_orchestrator.run_provenance()'s frozen output frozen. The new fields are
+    OMITTED, not null, when `started_at` is absent: a run whose start was never
+    recorded must not assert an elapsed time, by the same rule `include_agent`
+    encodes.
     """
     # `git status --porcelain` reports STAT differences, not content ones, and
     # _git() hard-codes --no-optional-locks so a refreshed index is never
@@ -106,6 +129,17 @@ def core_provenance(script: str | None = None, extra: dict | None = None) -> dic
         "git_dirty": bool(status),
         "git_dirty_files": status.splitlines(),
     }
+    if started_at is not None:
+        # A naive datetime is accepted and assumed local rather than rejected:
+        # this function's standing rule is that provenance is never worth
+        # failing a run over, and datetime.now() without .astimezone() is the
+        # easy mistake for a caller to make.
+        started = started_at if started_at.tzinfo else started_at.astimezone()
+        finished = datetime.now().astimezone()
+        provenance["started_at"] = started.isoformat(timespec="seconds")
+        provenance["elapsed_seconds"] = round(
+            (finished - started).total_seconds(), 1)
+
     if extra:
         provenance.update(extra)
     return provenance
