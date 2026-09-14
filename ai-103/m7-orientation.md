@@ -1323,11 +1323,13 @@ session's narrative paragraph in `STATUS.md`.
   protected location, cannot be granted, and one prompt was already spent on
   it.
 - **`brand_consistent`'s verdict is fixed; its PERCEPTION is not.** **PARTLY
-  FIXED and fully re-diagnosed 2026-09-11 — read "The remaining
-  `brand_consistent` defect is a NAMING constraint, not a perception one" below
-  before acting on anything in this entry.** The `15 runs out of 15` figure
-  here is superseded: after `observed_colors` the count is 9/15, the perception
-  is identical every run, and the residue is one wrong colour WORD rather than a
+  FIXED and fully re-diagnosed 2026-09-11, then FIXED AS FAR AS IT GOES
+  2026-09-14 — read the Backlog entry headed "The remaining `brand_consistent`
+  defect is a NAMING constraint" and its 2026-09-14 resolution block before
+  acting on anything in this entry.** The `15 runs out of 15` figure
+  here is superseded twice over: after `observed_colors` the count was 9/15, and
+  after the Sep 14 hue constraint it is 11/45 = 0.244 at n=45. The perception is
+  identical every run, and the residue is one wrong colour WORD rather than a
   failure to see the image. The entry is kept because its diagnosis of the
   mechanism (when the answer is "consistent", the model recites the brand guide)
   is what the Sep 11 measurement confirmed and narrowed. The original follows.
@@ -1834,7 +1836,7 @@ session that was mid-certification.
 
 Note the row-level figure actually quoted (117/120) is unaffected — see item 7.
 
-### The remaining `brand_consistent` defect is a NAMING constraint, not a perception one
+### ~~The remaining `brand_consistent` defect is a NAMING constraint~~ — FIXED AS FAR AS IT GOES, 2026-09-14
 
 Supersedes the Sep 10 framing. After `observed_colors`, item3's confabulation
 fell to 9/15, and the fifteen descriptions show the perception is IDENTICAL
@@ -1855,6 +1857,48 @@ verbatim in its own prose output, so on ~60% of item3 runs the agent's visible
 summary now carries the wrong colour word. The verdict is right; the
 human-facing surface is wrong. That is a stronger argument for fixing the naming
 than the count is.
+
+**RESOLVED AS FAR AS IT SENSIBLY GOES, 2026-09-14. Everything above this
+paragraph is the pre-fix diagnosis and is kept for the reasoning, not the
+numbers.** Two wordings were tested against the 9/15 = 0.600 baseline, both at
+RUNS=45, one variable apart.
+
+| wording | item3 "cream" | judged cells | item2 `info_accurate` |
+|---|---|---|---|
+| baseline (Sep 11) | 9/15 = 0.600 | 149/150 | 1/15 |
+| **A — hue rule only (SHIPPED)** | **11/45 = 0.244** | **448/450** | 1/45 |
+| B — rule plus "say 'pale orange' or 'peach', not 'cream'" | 2/45 = 0.044 | 440/450 | **10/45** |
+
+**Condition A ships.** p=0.024 against baseline, no regression anywhere, and
+448/450 is the best judged result recorded in this project.
+
+**Condition B was rejected by its own pre-registered gate**, and this is the
+part worth not relearning: it WON the primary outcome — 0.044, p=0.014 against
+A, and verified not to be the model reciting the clause back (only 2/45 runs
+echo its words). It lost because judged cells fell below the 448/450 floor,
+and all ten misses landed in **item2's `info_accurate`**, a cell nobody was
+watching, as documented cause (b) verbatim: *"the visible title says 'Seasonal
+Home Maintenance Checklist,' which is not one of the fact sheet's listed
+services or hours."* The prompt exempts exactly that, and the exemption was
+outvoted five times more often than under A. `results/20260914-150649_
+fixture_stability.json`, `git_head dc66d5d`.
+
+**No mechanism is offered for why a colour clause moves item2's
+`info_accurate`, deliberately.** One was constructed for condition A's
+apparent regression the same morning at p=0.001, and n=45 erased the
+regression and the mechanism together. See the standing lesson "A 15-run pass
+cannot characterize a rate".
+
+**The standing cost of shipping A, so no write-up overstates it: about a
+quarter of item3 runs still name an absent colour.** Improvement, not fix.
+The second-order argument above still holds — the agent republishes `notes`
+verbatim, so that quarter reaches the visible surface. Whether to spend more
+on it is a judgement call, not an open defect, and condition B is not the
+answer: **do not re-propose the examples clause without reading why it was
+rejected.**
+
+**The 60% figure in the paragraph above is pre-fix.** The current figure is
+24%.
 
 ### ~~A full orchestrator pass at current HEAD is owed~~ — DONE 2026-09-11
 

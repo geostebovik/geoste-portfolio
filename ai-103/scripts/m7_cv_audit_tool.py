@@ -150,26 +150,48 @@ class ContentAudit(BaseModel):
     at n=15, and the observation-length mechanism constructed to explain it,
     did not survive n=45.
 
-    CONDITION B ADDS THE EXAMPLES, 2026-09-14. The rule alone got to 0.244 and
-    stopped, so the appended clause names the two words outright. It is the
-    ONLY difference from condition A -- one trailing fragment, nothing else in
-    this file or the prompt moves.
+    CONDITION B WAS RUN AND REJECTED, 2026-09-14. Its clause appended
+    "-- say 'pale orange' or 'peach', not 'cream'." and nothing else moved.
+    `results/20260914-150649_fixture_stability.json`, git_head dc66d5d, clean
+    tree, RUNS=45. **Do not re-propose it without reading the rest of this
+    paragraph** -- it won its primary outcome and lost on the gate.
 
-    KNOWN AND ACCEPTED LIMITATION, to be carried into any write-up: naming
-    "peach" and "cream" teaches the answer to THIS fixture. A good result
-    here is evidence that the vocabulary can be constrained, NOT evidence that
-    the model learned a general rule about hue versus lightness. Condition A
-    is the one that tested the general rule, and its answer is 0.244.
+      PRIMARY: item3 names "cream" in 2/45 runs, 0.044, against condition A's
+      11/45 = 0.244, p=0.014. Inside the pre-registered <=3/45 band. Not
+      recitation either: only 2/45 runs echo the clause's own words back, so
+      the improvement is real description, not parroting.
 
-    Pre-registered call, fixed before the number exists. Comparison is against
-    condition A's 11/45 at the same n=45:
-      <=3/45  -- significantly better than condition A (p<0.05). Ship B,
-                 labelled as a fixture-specific vocabulary constraint.
-      4/45    -- marginal (p=0.087). Not a claim. Keep condition A.
-      >=5/45  -- indistinguishable from condition A. The examples add nothing;
-                 keep condition A, which is the wording that tests the rule.
-    Regression gate, unchanged in shape from condition A: item3 info_accurate
-    must stay <=4/45, and judged cells must not fall below 448/450.
+      GATE: FAILED. Judged cells fell 448/450 -> 440/450 against a
+      pre-registered floor of 448. All ten misses are ONE cell, and it is not
+      the one that was being watched: **item2's info_accurate went 1/45 ->
+      10/45**, p=0.0074. item3's info_accurate was fine at 0/45.
+
+      The failing prose is documented cause (b) verbatim -- "Info accuracy
+      fails because the visible title says 'Seasonal Home Maintenance
+      Checklist,' which is not one of the fact sheet's listed services or
+      hours" -- the Sep 1 headline-as-assertion bug, against a prompt that
+      explicitly exempts exactly that. The exemption is present and being
+      outvoted five times more often than under condition A.
+
+    NO MECHANISM IS OFFERED FOR WHY A COLOUR-VOCABULARY CLAUSE MOVES item2's
+    info_accurate, and that omission is deliberate. A mechanism was
+    constructed for condition A's apparent regression the same morning, at
+    exact permutation p=0.001, and n=45 erased the regression and the
+    mechanism together. This one rests on firmer ground -- n=45 on both arms,
+    one cell, consistent prose -- but a solid number and a solid mechanism are
+    different things. See m7-orientation.md's standing lesson "A 15-run pass
+    cannot characterize a rate".
+
+    SO THE SHIPPED WORDING IS CONDITION A, restored here. It trades nothing:
+    0.244 on colour against a 0.600 baseline (p=0.024), 448/450 judged,
+    225/225 deterministic, item3 info_accurate 1/45. Condition B trades a
+    wrong colour word on item3 for a wrong boolean on item2 at roughly five
+    times the rate, which is a worse deal on the exact ground the colour fix
+    was justified: the human-facing surface.
+
+    THE STANDING COST OF SHIPPING A, stated plainly so no write-up overstates
+    it: about a quarter of item3 runs still name an absent colour. This is an
+    improvement, not a fix.
 
     The orchestrator's tool contract does NOT move: audit_thumbnail() still
     returns a ThumbnailAudit, and this field is folded into its `notes`.
@@ -185,8 +207,7 @@ class ContentAudit(BaseModel):
             "by how light, dark or muted it is. A color that resembles a "
             "brand-palette color only in lightness is not that color: "
             "describe its hue and qualify it, rather than reaching for the "
-            "brand's name for it -- say 'pale orange' or 'peach', not "
-            "'cream'."
+            "brand's name for it."
         )
     )
     brand_consistent: bool
