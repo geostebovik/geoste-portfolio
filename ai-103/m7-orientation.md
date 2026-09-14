@@ -460,6 +460,78 @@ designed. It could not prevent the bad read, but it made the bad read visible in
 the same message that acted on it. Cheap instrumentation on an unverifiable
 input, which is the same move as recording provenance in every run.
 
+### A 15-run pass cannot characterize a rate, and it fails in the flattering direction
+
+Found 2026-09-14, from Gerard's question about whether RUNS=45 was overkill.
+Claude ran the analysis, and made both of the errors below before the larger
+sample corrected them.
+
+**The same wording, measured twice.** item3's `observed_colors` naming the
+absent colour "cream":
+
+| pass | result | rate | 95% CI |
+|---|---|---|---|
+| Sep 11 baseline, n=15 | 9/15 | 0.600 | 0.36 - 0.80 |
+| Sep 14 condition A, n=15 | 1/15 | 0.067 | 0.01 - 0.30 |
+| Sep 14 condition A, n=45 | 11/45 | 0.244 | 0.14 - 0.39 |
+
+The two post-change reads are the SAME wording at the same commit, and they
+are not statistically distinguishable from each other (Fisher p=0.26). They
+never conflicted. 0.244 sits inside 1/15's interval, which runs from 0.01 to
+0.30. **The mistake was reading the number and not the interval** -- and then
+reporting "9/15 -> 1/15, essentially fixed" when the truth was 0.60 -> 0.24,
+a real improvement that still leaves a quarter of runs wrong.
+
+**The error was 3.6x, and it flattered the change.** That is the direction
+nobody audits. A measurement that makes your fix look worse gets re-run; one
+that makes it look better gets written up.
+
+**The same pass produced a mirror-image false positive.** item3's
+`info_accurate` showed 5/15 misses where it had been 0/15, p=0.042 against the
+same-harness baseline and 0.012 pooled. A regression was diagnosed. A
+mechanism was then found for it -- the five failing runs had the five shortest
+`observed_colors` strings, mean 200 chars against 272, exact permutation
+p=0.001 -- and that mechanism was one step from being written into this file
+as a lesson partially falsifying the Sep 11 field-placement rationale. At n=45
+the cell came back **1/45**. None of it survived.
+
+**So the second half of that failure is worth naming on its own: a tidy
+mechanism makes a noisy finding more convincing, not more true.** The
+explanation arrived after the number and was fitted to it. It felt like
+corroboration and was actually just a second reading of the same five data
+points.
+
+**THE PRE-REGISTERED BAND IS THE ONLY REASON NEITHER ERROR LANDED.** Both
+calls -- ship/rework/regression on `info_accurate`, and the earlier
+`<=2 / 3-4 / >=5` on the colour count -- were fixed in writing before the
+numbers existed. That is what made "1/45 is inside the band, the regression
+was noise" a reading rather than a negotiation. Keep doing it, and keep
+writing the band into the commit message where it cannot be quietly revised.
+
+**What this changes beyond the one cell.** Every stability claim in this
+project rests on 15-run passes. At n=15, against a 9/15 baseline, only
+`<=2/15` is distinguishable at all and everything from 5/15 to 11/15 is
+indistinguishable -- so a 15-run pass answers "did this essentially stop?"
+and nothing finer. It was never the wrong instrument; it was read as though
+it measured more than it does.
+
+**The rule going forward.** Pick RUNS from the smallest effect that must not
+be missed, not from available time -- and the time argument is now retired
+anyway, because the pace is recorded rather than remembered: 12.3 s/call at
+n=15, 14.4 s/call at n=45, so a 45-run 5-fixture pass is ~54 minutes. Report
+an interval, never a bare point estimate, for any rate that goes into a claim
+or a write-up.
+
+**One thing left unexplained, recorded as unexplained.** In the n=45 pass the
+eleven "cream" hits fall entirely in runs 18-45; runs 1-17 are clean. A
+waiting-time test on the first hit gives p=0.009. But a first-half/second-half
+split gives nothing (4/22 vs 7/23), observation length did not drift
+(261/270/270 chars by third), and the pattern was found by looking rather than
+predicted. Pace did slow 17% between the two passes, which is consistent with
+rate limiting on a longer run. **This is a loose end, not a finding, and it is
+written here so it is not rediscovered as a result.** If it matters, it needs
+its own pre-registered test.
+
 ## Where M7 sits in the whole picture
 
 IIP (this repo) is the hands-on lab work behind two things at once: the
