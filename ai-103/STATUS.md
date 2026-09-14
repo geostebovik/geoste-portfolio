@@ -64,39 +64,58 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 10, 2026. The certification pass has run: 120
-orchestrator runs at `INSTRUCTIONS_V4`, drafter and judge both `gpt-5-4`,
-zero crashes, 117/120 text rows and 117/120 audit rows matching their
-pre-registered answer key. What it exposed is `brand_consistent` — a check
-that has never been sound, only usually-agreeing.
+**Status as of:** September 14, 2026. M7 is certified and Phase 1 of the IIP
+labs is closed. `brand_consistent`'s naming residue — the last thing anyone
+could point at — was measured, fixed as far as it sensibly goes, and the
+residual cost written down: item3 names an absent colour in **11 of 45 runs
+(0.244)**, down from 0.600, with 448/450 judged cells and 225/225
+deterministic. Nothing is blocking. **The one thing still owed is the
+write-up:** none of this work appears on ostebovik.net, whose AI domain still
+reads "in progress, M5".
 
 ---
 
 ## Current next action
 
-**Next action: Gerard's call — M7 and Phase 1 are complete and nothing is
-blocking.** Certified 2026-09-11 at `git_head 8c57001`: 120 item-runs, zero
-crashes, zero unmeasured, 118/120 text rows (120/120 correct behaviour),
-118/120 audit rows, and 148/150 model-judged plus 75/75 deterministic cells in
-the 5x3 matrix. The claim names a commit the repo contains.
+**Next action: the M7 write-up.** Replaced 2026-09-14, and the reason it is now
+a single named item rather than Gerard's pick from a list is that the list
+emptied. M7 is certified, Phase 1 is closed, and `brand_consistent` — the one
+defect with a visible surface, and the honest blocker to writing any of this up
+— was measured to a conclusion on Sep 14. Every remaining Backlog item is
+engineering hygiene no portfolio visitor will ever see.
 
-The candidates, none of them blockers, all detailed in `m7-orientation.md`'s
-Backlog and the Todoist punch list:
+**The gap is not technical.** 120 certified item-runs naming a commit anyone
+can check out is a stronger evidence trail than most portfolio projects carry.
+But ostebovik.net's AI domain still reads "in progress, M5" — two milestones
+stale — and M7's entire evidence surface is a 239 KB markdown log and a folder
+of JSON. No reviewer opens either.
 
-1. **The `brand_consistent` naming constraint** — item3 says "cream" for a
-   lighter orange on 9/15 audit-probe runs. One field-description change, one
-   15-run pass to verify. The agent republishes `notes` verbatim, so this is a
-   visible surface, not just a count.
-2. **`info_accurate`'s two failure modes** — causes (b) and (c), opposite to
-   each other, ~1.3% of judged cells between them.
-3. **`cells_correct()` and the `__main__` guard** — both small, both safe,
-   neither needs an Azure run.
-4. **Quota plus parallelisation** — Todoist `6hVCcxW6jWPmrMWq`, one piece of
-   work, and the Sep 11 pass re-confirmed the loop is latency-bound.
+**Write it while it is recallable.** The reasoning behind the Sep 2 split, the
+retirement of `225/225`, the judge decision on 60 measured calls, the Sep 14
+A/B and why the better-scoring wording was rejected — all of that is
+reconstructable today and will not be in six weeks. This file's own attribution
+rule forbids reconstructing after the fact in resume material. **Drafting is
+not publishing:** the write-up can sit unpublished until Phase 2 gives it
+company, which is the sequence Gerard chose on Sep 14 over posting M7 alone.
 
-**Or Phase 2, or the portfolio write-up.** M7's completion is the natural point
-to decide that deliberately rather than by picking up the next Backlog item.
+Figures the write-up must use, and the ones it must not:
 
+- **`brand_consistent`: 0.600 -> 0.244**, an improvement, NOT a fix. About a
+  quarter of item3 runs still name an absent colour, and the agent republishes
+  `notes` verbatim, so that quarter reaches the visible surface.
+- **Do not quote `1/15`.** It was a real measurement and a misleading one — see
+  the Sep 14 session entry and `m7-orientation.md`'s standing lesson "A 15-run
+  pass cannot characterize a rate".
+- **Never a combined `N/225` or `N/450` figure.** Judged and deterministic
+  cells are reported apart.
+
+**The alternative, if the write-up is not the appetite:** Phase 2 — managed
+identity, the RBAC model, the Conditional Access design spec. It fills the
+Identity & Governance domain, which is blank on the site, and an AI domain full
+beside an Identity domain empty reads as an abandoned portfolio rather than a
+deep one. Phase 2 is the stronger *portfolio* argument; the write-up is the
+stronger *decay* argument. Both were weighed Sep 14 and the write-up won on
+freshness.
 
 ## Milestones (Phase 1)
 
@@ -353,6 +372,188 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 14, 2026
+
+**Two headlines, and the first is a non-event that looked like a catastrophe.**
+The Sunday punch list reported that the pushed `STATUS.md` was a week older
+than findings already in Todoist — read against the previous week's
+overwriting and deletion incidents, that reads as lost work. It was not. The
+repo was fully current and pushed the whole time. What was stale was the
+*read*. Second: `brand_consistent`'s naming residue was taken to a conclusion
+across two measured wordings, and the better-scoring one was rejected.
+
+Gerard flagged the anomaly, made the sizing and sequencing decisions recorded
+below, and ran every command. Claude ran the diagnosis, the analysis and all
+statistics here, wrote the code and doc edits, and made the two analytical
+errors recorded further down.
+
+#### A branch-name raw URL is not a fresh read
+
+`raw.githubusercontent.com/.../main/ai-103/STATUS.md` served the **September 7**
+version. The same path pinned to the commit SHA, and the same `main` URL with a
+cache-buster query appended, both returned the current Sep 11 content. An edge
+cache was holding a week-old blob for the branch-name path.
+
+Verified four ways before concluding, rather than trusting any one signal:
+
+- Working tree matched `.git/index` byte-for-byte — SHA-1 of the blob for both
+  `STATUS.md` and `m7-orientation.md`. Nothing uncommitted.
+- `refs/heads/main`, `refs/remotes/origin/main` and `FETCH_HEAD` all at
+  `ab1e450`.
+- `.../ab1e450/ai-103/STATUS.md` returned the Sep 10 status line and the Sep 11
+  session heading.
+- `.../main/...?cb=<date>` returned that same current content.
+
+**The cost was three wrong tasks, not lost work.** The Sunday run wrote four
+punch-list items from that Sep-7 view; three described work finished between
+Sep 9 and Sep 11 — the redraft-path observation, the high-RUNS certification
+pass, and the judge deployment decision. All three were closed with a comment
+recording the cause. **The guardrail in that task's own prompt — "note the date
+of the newest session entry; if it is more than about a week old, say so" — is
+the only reason this surfaced at all.** The scheduled task now cache-busts both
+URLs with a per-run query string and carries a freshness gate that stops it
+writing anything when the docs read older than the newest Todoist task.
+Promoted to a standing lesson in `m7-orientation.md` the same day, as the
+read-side twin of "a successful write is not a landed write."
+
+#### `brand_consistent`: two wordings, one variable apart, both at RUNS=45
+
+The Sep 11 diagnosis held: identical perception every run, one wrong colour
+WORD. item3 is 100% hue 15-21deg at saturation 0.70-0.89; brand cream is hue
+50deg at 0.26. On hue they are not close; on lightness they are confusable. So
+the constraint was written on hue.
+
+| wording | item3 "cream" | judged | deterministic | item2 `info_accurate` |
+|---|---|---|---|---|
+| baseline, Sep 11, n=15 | 9/15 = 0.600 | 149/150 | 75/75 | 1/15 |
+| **A — hue rule only, SHIPPED** | **11/45 = 0.244** | **448/450** | **225/225** | 1/45 |
+| B — A plus "say 'pale orange' or 'peach', not 'cream'" | 2/45 = 0.044 | 440/450 | 225/225 | **10/45** |
+
+**Condition A ships.** p=0.024 against baseline, no regression anywhere, and
+448/450 is the best judged result recorded in this project.
+`results/20260914-134557_fixture_stability.json`, `git_head 9a3c605`, clean
+tree.
+
+**Condition B won its primary outcome and was rejected by its own
+pre-registered gate.** 0.044 is significantly better than A (p=0.014), and it
+was verified not to be recitation — only 2/45 runs echo the clause's own words
+back, so the improvement was real description. It lost because judged cells
+fell below the 448/450 floor, and all ten misses landed in **item2's
+`info_accurate`**, a cell nobody was watching: 1/45 -> 10/45, p=0.0074. The
+failing prose is documented cause (b) verbatim — *"the visible title says
+'Seasonal Home Maintenance Checklist,' which is not one of the fact sheet's
+listed services or hours"* — against a prompt that explicitly exempts a topic
+headline from being a checkable assertion.
+`results/20260914-150649_fixture_stability.json`, `git_head dc66d5d`, clean
+tree.
+
+**No mechanism is offered for why a colour clause moves item2's
+`info_accurate`, and the omission is deliberate** — see the next section.
+
+**The standing cost of what shipped, stated so no write-up overstates it:
+about a quarter of item3 runs still name an absent colour.** The agent
+republishes `notes` verbatim, so that quarter reaches the visible surface.
+Improvement, not fix.
+
+#### Two analytical errors by Claude, both caught by pre-registration
+
+Recorded because the pattern matters more than either instance, and because a
+log containing only the conclusions that survived is not a log.
+
+**Error 1 — a 3.6x underestimate, in the flattering direction.** Condition A
+measured **1/15** at n=15 and **11/45** at n=45 — same wording, same commit,
+not distinguishable from each other (Fisher p=0.26) because 1/15's interval
+runs 0.01-0.30. It was reported as "9/15 -> 1/15, essentially fixed." The truth
+was 0.600 -> 0.244. The mistake was reading the number instead of the interval,
+and the error flattered the change, which is the direction nobody audits.
+
+**Error 2 — a false regression with a tidy mechanism attached.** The same n=15
+pass showed item3's `info_accurate` at 5/15 misses against 0/15, p=0.042
+same-harness and 0.012 pooled. A regression was diagnosed. A mechanism was then
+found for it — the five failing runs had the five shortest `observed_colors`
+strings, mean 200 chars against 272, exact permutation p=0.001 — and was one
+step from being written into `m7-orientation.md` as partially falsifying the
+Sep 11 field-placement rationale. At n=45 that cell came back **1/45**. None of
+it survived. **A tidy mechanism makes a noisy finding more convincing, not more
+true.**
+
+**Both were caught because the decision bands were fixed in writing, in the
+commit message, before the numbers existed.** The same discipline then caught a
+*true* positive four hours later in condition B's gate — a gate written as
+near-boilerplate. Pre-registration paid for itself twice in one day, in
+opposite directions.
+
+Promoted to a standing lesson in `m7-orientation.md`: "A 15-run pass cannot
+characterize a rate, and it fails in the flattering direction." **This is
+broader than one cell — every stability claim in this project rests on 15-run
+passes**, and at n=15 against a 9/15 baseline only `<=2/15` is distinguishable
+at all. It was never the wrong instrument; it was read as though it measured
+more than it does.
+
+#### A third error, in this file, the same day
+
+Claude's first attempt at writing this entry replaced `## Current next action`
+by locating the string with an unanchored search. The literal
+`## Current next action` appears eight times in this file and only once as a
+heading; the search matched the mention inside the restored 2026-09-10
+blockquote and the replacement ate the preamble from there down. **This is
+precisely the Sep 8 incident recorded in the Sep 10 entry, reproduced on a file
+that documents it.** Caught before anything was written to disk, by diffing the
+heading list against the original. The edit was redone with a line-anchored
+match plus canary assertions on four preamble sentences that the Sep 8 and Sep
+10 incidents destroyed. **If this section is ever edited by string replacement
+again, anchor the match to the start of a line and assert the preamble survived.**
+
+#### Instrumentation added, and it is what made the day's sizing arguments real
+
+- **`provenance.py` records elapsed time.** `core_provenance()` takes an
+  optional `started_at`; callers that pass nothing get a byte-identical dict,
+  so `m7_orchestrator.run_provenance()`'s frozen output stays frozen, and the
+  new fields are omitted rather than null when the start was not recorded.
+  Before this, `timestamp` was built when the record was assembled — after the
+  work — so every results file in the repo recorded when it was WRITTEN and
+  nothing about duration.
+- **`probe_fixture_stability.py` records `content_field_descriptions`**, read
+  off `ContentAudit` rather than copied. The `observed_colors` instruction
+  lives in a `Field` description by design, and the probe recorded only field
+  NAMES — so an A/B varying that description would have produced two results
+  files identical in every recorded respect. Found while wiring the timing
+  change; it is what let the condition-A wording be verified byte-for-byte
+  against the run that measured it when it was restored.
+- **`RUNS` is 45**, and the comment beside it now states the rule that picks
+  the number rather than the circumstances of one batch. It had described "7"
+  while the value read 15.
+
+**First wall-clock figures this project has recorded:** 920.5s for 75 calls
+(12.3 s/call) at n=15; 3237.8s and 3322.3s for 225 calls (14.4 s/call) at n=45.
+A 45-run 5-fixture pass is ~55 minutes. The remembered figure was 45 minutes
+for a 15-run pass; the real one is 15. **The "~95 minutes" in
+`m7-orientation.md`'s Backlog belongs to the orchestrator probe, not this one.**
+
+#### Decisions Gerard made that shaped the day
+
+- **Run condition A clean before condition B**, so the rule-only wording got an
+  unbiased number. Correct: B outscored A on the primary and would never have
+  been run honestly second.
+- **RUNS=45 rather than 30**, after observing that script time spent away from
+  the keyboard is not work time and therefore not a cost. The extra 15 runs
+  moved the detection floor from 0.27 to 0.20, and sharpened the correction to
+  error 1.
+- **Draft the write-up now, publish it later**, over posting M7 alone.
+- **Close the session log before starting the write-up**, when the write-up was
+  the more attractive option.
+- Got the tower PC booting and linked to his account during the long runs —
+  deliberately *not* linking anything else, which kept this session's device
+  link on serenity where the runs were.
+
+#### Repo hygiene
+
+Three punch-list tasks closed with cause comments. The Sunday scheduled task's
+prompt rewritten (cache-buster, freshness gate, traceability of each written
+item back to its doc section). Two stale cross-references in
+`m7-orientation.md` repaired: one named a heading by its old text, and one
+carried the pre-fix "~60% of item3 runs" figure, now 24%.
 
 ### Session — September 11, 2026
 
