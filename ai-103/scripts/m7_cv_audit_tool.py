@@ -117,6 +117,34 @@ class ContentAudit(BaseModel):
     under-fills it the fallback is a prompt sentence -- try the structural fix
     first and only add prose if the run says it was not enough.
 
+    SECOND SENTENCE ADDED TO THE DESCRIPTION 2026-09-14. The first one worked
+    -- item3 went from 15/15 confabulating to 9/15 -- and then stopped working,
+    because the residue is not the failure that sentence describes. The model
+    is not citing the brand guide any more; it is reaching for a LIGHTNESS
+    word, and the brand guide had primed the only one in the room. The six
+    clean runs of Sep 11 say "large translucent orange/PEACH shapes in the
+    center"; the nine dirty ones say "lighter CREAM/orange-tinted translucent
+    shapes layered over the center". Identical perception, same elements, same
+    location, one different word. So "do not name a brand color that is
+    absent" does not bite: from the model's side it is describing a tint, not
+    quoting a palette.
+
+    HUE IS WHAT SEPARATES THEM AND LIGHTNESS IS WHAT CONFUSES THEM. item3 is
+    100% hue 15-21deg at saturation 0.70-0.89; brand cream is hue 50deg at
+    0.26. On hue they are not close. On lightness they are confusable. So the
+    new constraint is written on hue.
+
+    IT IS RULE-ONLY BY DESIGN -- wording Gerard's, approved for this run. A
+    version that names "peach" and "cream" outright is expected to score
+    better AND to teach the answer to this one fixture rather than the rule, so
+    it runs SECOND as condition B, only after this one has an unbiased number.
+    The two conditions differ by one appended clause and nothing else.
+    Baseline to beat: 9/15, results/20260911-113242_fixture_stability.json.
+    Pre-registered call, fixed before either number exists: <=2/15 worked;
+    3-4/15 re-run at RUNS=30 before claiming anything; >=5/15 is not
+    distinguishable from baseline at n=15 and is not an improvement whatever
+    the prose looks like.
+
     The orchestrator's tool contract does NOT move: audit_thumbnail() still
     returns a ThumbnailAudit, and this field is folded into its `notes`.
     """
@@ -126,7 +154,12 @@ class ContentAudit(BaseModel):
             "it: the two or three that occupy the most area, and where each "
             "appears. Describe what you see before judging it. Never name a "
             "color because the brand guide lists it -- if a brand color does "
-            "not appear in the image, do not name it."
+            "not appear in the image, do not name it. "
+            "Name each color by its hue -- what the color actually is -- not "
+            "by how light, dark or muted it is. A color that resembles a "
+            "brand-palette color only in lightness is not that color: "
+            "describe its hue and qualify it, rather than reaching for the "
+            "brand's name for it."
         )
     )
     brand_consistent: bool
