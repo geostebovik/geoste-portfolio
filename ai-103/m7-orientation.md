@@ -409,6 +409,57 @@ commands" arrangement now covers everything, and **his availability at the
 keyboard is the binding constraint on a session, not elapsed time.** Say which
 in the opening prompt.
 
+### A branch-name raw URL is not a fresh read
+
+Found 2026-09-14. Gerard flagged the warning; Claude ran the diagnosis.
+
+The Sunday punch-list task plans the week by fetching this file and `STATUS.md`
+from `raw.githubusercontent.com/.../main/ai-103/...`. On Sep 14 it reported the
+newest `STATUS.md` session entry as **September 7** — seven days stale — and
+wrote a week of tasks from that view. Three of the four described work finished
+between Sep 9 and Sep 11.
+
+**Nothing was wrong in the repo.** Four checks, and they agree:
+
+- Working tree matched `.git/index` byte-for-byte — SHA-1 of the blob for both
+  this file and `STATUS.md`. Nothing uncommitted.
+- `refs/heads/main`, `refs/remotes/origin/main` and `FETCH_HEAD` (fetched that
+  morning) all at `ab1e450`.
+- The same path fetched **pinned to `ab1e450`** returned the Sep 10 status line
+  and the Sep 11 session entry.
+- The same `main` URL with a **`?cb=` query string appended** returned that same
+  current content.
+
+Only the bare branch-name path was stale. An edge cache was holding a week-old
+blob for it.
+
+**This is the read-side twin of "a successful write is not a landed write"**
+(Sep 11). Same shape, opposite direction: there, every local signal agreed with
+itself while the file on disk did not; here, every local signal agreed with
+itself while the copy being served did not. In both cases the disagreement sat
+exactly one layer away from everything being checked, which is why nothing
+downstream flagged it.
+
+**The general form: a read is only as fresh as its weakest cache, and freshness
+is not observable from inside the answer.** A stale document does not announce
+itself — it reads as a confident, complete, internally consistent document that
+happens to describe last week.
+
+**Working consequence.** Never fetch a bare raw branch URL for anything
+freshness-sensitive. Pin the commit SHA, or append a unique query string — a
+*fixed* cache-buster is no better than none, because it becomes the cached key
+itself. And any automation that plans from a remote read needs a freshness gate:
+compare the document's own newest date against something dated independently
+(the punch list now compares it against the newest Todoist task) and stop rather
+than write when the document loses.
+
+**Credit the guardrail.** The instruction that caught this — *"note the date of
+the newest STATUS.md session entry; if it is more than about a week old, say
+so"* — was in the task prompt for exactly this reason and fired exactly as
+designed. It could not prevent the bad read, but it made the bad read visible in
+the same message that acted on it. Cheap instrumentation on an unverifiable
+input, which is the same move as recording provenance in every run.
+
 ## Where M7 sits in the whole picture
 
 IIP (this repo) is the hands-on lab work behind two things at once: the
