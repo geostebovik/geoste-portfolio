@@ -134,16 +134,42 @@ class ContentAudit(BaseModel):
     0.26. On hue they are not close. On lightness they are confusable. So the
     new constraint is written on hue.
 
-    IT IS RULE-ONLY BY DESIGN -- wording Gerard's, approved for this run. A
-    version that names "peach" and "cream" outright is expected to score
-    better AND to teach the answer to this one fixture rather than the rule, so
-    it runs SECOND as condition B, only after this one has an unbiased number.
-    The two conditions differ by one appended clause and nothing else.
-    Baseline to beat: 9/15, results/20260911-113242_fixture_stability.json.
-    Pre-registered call, fixed before either number exists: <=2/15 worked;
-    3-4/15 re-run at RUNS=30 before claiming anything; >=5/15 is not
-    distinguishable from baseline at n=15 and is not an improvement whatever
-    the prose looks like.
+    CONDITION A RESULT, and read the second number before the first: at n=15
+    it scored 1/15, and the SAME wording at the same commit scored 11/45 at
+    n=45. Both are real; they are not distinguishable from each other (Fisher
+    p=0.26) because 1/15's interval runs 0.01-0.30. **The honest figure is
+    11/45 = 0.244, against a 9/15 = 0.600 baseline, p=0.024.** A real
+    improvement that still leaves about a quarter of item3 runs naming an
+    absent colour. Do not quote the 1/15. See m7-orientation.md's standing
+    lesson "A 15-run pass cannot characterize a rate" for why that number
+    existed at all.
+
+    Condition A causes NO regression: item3's info_accurate is 1/45 misses,
+    and the whole matrix scored 448/450 judged plus 225/225 deterministic --
+    the best judged result recorded in this project. The 5/15 regression seen
+    at n=15, and the observation-length mechanism constructed to explain it,
+    did not survive n=45.
+
+    CONDITION B ADDS THE EXAMPLES, 2026-09-14. The rule alone got to 0.244 and
+    stopped, so the appended clause names the two words outright. It is the
+    ONLY difference from condition A -- one trailing fragment, nothing else in
+    this file or the prompt moves.
+
+    KNOWN AND ACCEPTED LIMITATION, to be carried into any write-up: naming
+    "peach" and "cream" teaches the answer to THIS fixture. A good result
+    here is evidence that the vocabulary can be constrained, NOT evidence that
+    the model learned a general rule about hue versus lightness. Condition A
+    is the one that tested the general rule, and its answer is 0.244.
+
+    Pre-registered call, fixed before the number exists. Comparison is against
+    condition A's 11/45 at the same n=45:
+      <=3/45  -- significantly better than condition A (p<0.05). Ship B,
+                 labelled as a fixture-specific vocabulary constraint.
+      4/45    -- marginal (p=0.087). Not a claim. Keep condition A.
+      >=5/45  -- indistinguishable from condition A. The examples add nothing;
+                 keep condition A, which is the wording that tests the rule.
+    Regression gate, unchanged in shape from condition A: item3 info_accurate
+    must stay <=4/45, and judged cells must not fall below 448/450.
 
     The orchestrator's tool contract does NOT move: audit_thumbnail() still
     returns a ThumbnailAudit, and this field is folded into its `notes`.
@@ -159,7 +185,8 @@ class ContentAudit(BaseModel):
             "by how light, dark or muted it is. A color that resembles a "
             "brand-palette color only in lightness is not that color: "
             "describe its hue and qualify it, rather than reaching for the "
-            "brand's name for it."
+            "brand's name for it -- say 'pale orange' or 'peach', not "
+            "'cream'."
         )
     )
     brand_consistent: bool
