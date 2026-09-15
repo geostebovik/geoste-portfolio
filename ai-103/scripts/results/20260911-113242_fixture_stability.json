@@ -1,0 +1,814 @@
+{
+  "run": {
+    "timestamp": "2026-09-11T11:32:42-07:00",
+    "script": "probe_fixture_stability.py",
+    "git_head": "59f4ba396fe857b44983d2c7c824f70e63f2b97c",
+    "git_branch": "main",
+    "git_dirty": false,
+    "git_dirty_files": [],
+    "audit_deployment": "gpt-5-4-mini",
+    "runs": 15,
+    "stable_threshold": 0.8,
+    "model_judged_fields": [
+      "brand_consistent",
+      "info_accurate"
+    ],
+    "deterministic_fields": [
+      "text_legible"
+    ],
+    "content_schema_fields": [
+      "observed_colors",
+      "brand_consistent",
+      "info_accurate",
+      "notes"
+    ],
+    "content_system_prompt": "You are auditing an image from Riverside Hardware against the actual business details and the checks below. Evaluate exactly two things and always explain your findings, regardless of pass or fail.\n\n        Grounded truth:\n        # Fact Sheet \u2014 Riverside Hardware & Supply\n\n**Status:** synthetic grounding data for IIP M7 (single orchestrator agent,\ncomputer-vision audit module). All content below is fictional \u2014 no real business,\naddress, phone number, or person. Written before any drafting/evaluation code runs,\nsame discipline as `loan-agreement-expected-output.md` for M2\u2013M5.\n\nThis document plays the same role for M7 that the loan agreement PDF played for\nM5's RAG pipeline: it's the ground truth that drafted content and thumbnails both\nget checked against. \"Groundedness\" here means \"does this claim match a fact in\nthis document,\" exactly as it did for Q&A grounding in M5/M6.\n\n---\n\n## Business\n\n**Name:** Riverside Hardware & Supply\n**Type:** Independent, single-location hardware store\n**Location:** Riverside (fictional small town, no real-world city intended)\n**Tagline:** \"Everything you need, nothing you don't.\"\n\n## Hours\n\n| Day | Hours |\n|---|---|\n| Monday \u2013 Saturday | 8:00 AM \u2013 6:00 PM |\n| Sunday | Closed |\n\n**Note for the info-accuracy check:** any claim of 24/7 availability, Sunday hours,\nor hours outside 8\u20136 M\u2013Sat is a factual error against this fact sheet.\n\n## Services / Products\n\n- General hardware and tools (retail)\n- Custom paint mixing\n- Key cutting (walk-in, no appointment)\n- Tool rental (daily and weekly rates)\n- Propane tank refill\n\n## Contact\n\n- **Phone:** (555) 014-7742 *(fictional \u2014 not a real number)*\n- **Address:** 118 Mill Street, Riverside *(fictional)*\n\n## Brand Guide\n\n- **Primary colors:** orange (`#FD5A1E`-family) and cream (`#EFE4B0`-family) \u2014\n  these are the only brand colors. Any thumbnail using a materially different\n  palette (e.g. blue/gray) as its dominant scheme is a brand-consistency violation.\n- **Logo:** a simple toolbox icon, no wordmark flourishes.\n- **Voice/tone:** friendly, practical, no-nonsense \u2014 a local business owner talking\n  to a neighbor, not corporate marketing copy. Short sentences, concrete details\n  (prices, hours, what's included), minimal hype language.\n\n## Out of scope for this fact sheet\n\nNo employee names, no ownership history, no financial figures beyond what's listed\nabove \u2014 kept deliberately thin. This is scaffolding for a technical build, not a\nworldbuilding exercise.\n\n\n        Checks:\n        - brand_consistent: Record as True when the dominant color scheme is orange (#FD5A1E family) or cream (#EFE4B0 family) or both in any proportion. Record as False only when the color scheme is materially different from the brand's palette, blue/gray as the example. Neutral/dark accents are out of scope and should not be considered part of the evaluation.\n        - info_accurate: do the visible assertions (hours, services) in the image match the fact sheet content and if not, identify the discrepancy. When nothing legible contradicts the fact sheet, record it as True. Do not allow any single assertion's accuracy, or lack thereof, to affect another. Evaluations are to be independently made and reported. Accuracy is not dependent on legibility and vice versa. When accuracy cannot be determined due to legibility issues, note this explicitly. A headline or title describing the content's topic is not itself a checkable assertion. Do not make assumptions about the business details beyond what is in the fact sheet\n        - notes: brief reasoning for whatever it flagged (or \"no issues found\" if everything passed)\n\n        Explain your findings, regardless of pass or fail, and write your explanations for your findings into 'notes'. Do not leave it empty.",
+    "note": "no agent and no judge in this run: those fields are omitted because none applied, not because they were unknown. temperature=0 and seed=42 are pinned inside audit_thumbnail(); text_legible is not model-judged."
+  },
+  "totals": {
+    "model_judged_correct": 149,
+    "model_judged_total": 150,
+    "deterministic_correct": 75,
+    "deterministic_total": 75
+  },
+  "perception": {
+    "item3-tool-rental-FLAW-legibility.png": {
+      "absent_color": "cream",
+      "runs_naming_it": [
+        1,
+        4,
+        5,
+        7,
+        8,
+        10,
+        12,
+        13,
+        14
+      ],
+      "count": 9,
+      "of": 15
+    }
+  },
+  "fixtures": {
+    "item1-paint-mixing-CLEAN.png": [
+      {
+        "run": 1,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the top left. Black text appears in the title, with a darker brown/gold store name near the bottom.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only neutral/dark text accents. No visible hours, phone, address, or service claims contradict the fact sheet; the title is just a topic heading and not a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the top left. Black text appears in the title, with a darker brown/gold store name near the bottom."
+      },
+      {
+        "run": 2,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand colors match the guide: the thumbnail is primarily cream and orange, with only minor dark accents. No visible hours, phone number, address, or other factual claims contradict the fact sheet; the title is just a topic heading and not a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 3,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. Black text sits over the cream area, and there is a small orange toolbox icon near the upper left.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with a simple toolbox icon. No visible hours, phone number, address, or other factual claims contradict the fact sheet; the title is just a topic heading and not a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. Black text sits over the cream area, and there is a small orange toolbox icon near the upper left."
+      },
+      {
+        "run": 4,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand colors match the guide: the thumbnail is primarily cream and orange, with only minor dark accents. No visible hours, phone number, address, or other factual claims contradict the fact sheet; the title is just a topic heading and not a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 5,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand colors match the guide: the thumbnail is primarily cream and orange, with only minor dark accents. No visible hours, phone number, address, or other factual claims appear that contradict the fact sheet; the title is just a topic heading and is not itself a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 6,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand is consistent because the dominant scheme is cream and orange, matching the brand palette. No visible hours, phone, address, or service claims contradict the fact sheet; the title is topical and not itself a checkable factual assertion. No issues found.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 7,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also dark brown/black text and a small orange toolbox icon near the upper left.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only neutral dark text accents. No visible hours or service claims contradict the fact sheet; the title is about exterior paint mixing, which is consistent with the listed custom paint mixing service, and the business name is shown correctly.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also dark brown/black text and a small orange toolbox icon near the upper left."
+      },
+      {
+        "run": 8,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side and a small orange toolbox icon near the upper left. Black text appears in the title, with a darker brown/gold store name near the bottom.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only neutral dark text accents. No visible hours, phone number, or address appear, and the visible service topic ('How to Mix Exterior Paint Colors at Home') does not contradict the fact sheet; it is consistent with the listed custom paint mixing service. No issues found.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side and a small orange toolbox icon near the upper left. Black text appears in the title, with a darker brown/gold store name near the bottom."
+      },
+      {
+        "run": 9,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange vertical wedge on the right side. There are also small dark brown/black text and icon accents near the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is cream and orange, matching the Riverside Hardware & Supply brand colors. No visible hours, phone number, or address appear, and the visible topic/title about mixing exterior paint colors does not contradict the fact sheet; no issues found.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange vertical wedge on the right side. There are also small dark brown/black text and icon accents near the top-left and bottom-left."
+      },
+      {
+        "run": 10,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side and a small orange toolbox icon near the upper left. Black text sits over the cream area, with a darker brown/gold brand name near the bottom left.\n[content] Brand is consistent: the dominant palette is cream and orange, matching the brand guide. Info is accurate: the thumbnail only shows a topic title about mixing exterior paint colors and the Riverside Hardware & Supply name; it does not display any hours or service claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side and a small orange toolbox icon near the upper left. Black text sits over the cream area, with a darker brown/gold brand name near the bottom left."
+      },
+      {
+        "run": 11,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand is consistent: the dominant palette is cream and orange, matching the Riverside Hardware & Supply brand colors. Info is accurate: the thumbnail only shows a topic/title about mixing exterior paint colors and the store name; it does not display any hours or service claims that contradict the fact sheet. No issues found.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 12,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only minor dark accents. No visible hours, phone number, address, or service claims contradict the fact sheet; the title is about paint mixing, which is a listed service, and the business name appears correctly.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the top left."
+      },
+      {
+        "run": 13,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a large orange vertical wedge on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left.\n[content] Brand is consistent: the dominant palette is cream and orange, matching the Riverside Hardware & Supply brand colors. Info is accurate: the visible text is a topic/title about mixing exterior paint colors and the store name; there are no legible hours, service claims, or other assertions that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a large orange vertical wedge on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left."
+      },
+      {
+        "run": 14,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, but they occupy little area.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only minor dark accents. No visible hours or service claims contradict the fact sheet; the thumbnail title is about exterior paint mixing, which is consistent with the listed custom paint mixing service. No issues found.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, but they occupy little area."
+      },
+      {
+        "run": 15,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left.\n[content] Brand colors match the guide: the thumbnail is primarily cream and orange, with only minor dark accents. No visible hours, phone number, address, or other factual claims contradict the fact sheet; the title is just a topic heading and not a checkable business assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large orange panel on the right side. There are also small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left."
+      }
+    ],
+    "item2-seasonal-checklist-CLEAN.png": [
+      {
+        "run": 1,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the Riverside Hardware & Supply brand guide. No visible hours, services, phone number, or address contradict the fact sheet; the image only shows a generic title and the store name, so there is no checkable factual mismatch.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 2,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the guide. No visible hours, phone number, address, or service claims contradict the fact sheet; the image only shows a generic title and the Riverside Hardware & Supply name, so there are no checkable inaccuracies.",
+        "observed_colors": "The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark."
+      },
+      {
+        "run": 3,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the brand guide. No visible hours or service claims contradict the fact sheet; the image only shows a generic title ('Seasonal Home Maintenance Checklist') and the store name, which are not factual conflicts.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 4,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand colors match the guide: orange and cream are the dominant scheme. The visible text is a generic title ('Seasonal Home Maintenance Checklist') and the store name; there are no legible hours or service claims that contradict the fact sheet, so info accuracy passes.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 5,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the guide. Info accuracy passes because the visible text is only a title/topic and the business name; there are no legible hours or service claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark."
+      },
+      {
+        "run": 6,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by bright orange across most of the background, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the brand guide. No visible hours, phone number, address, or service claims contradict the fact sheet; the image only shows a title and the business name, which are not conflicting assertions.",
+        "observed_colors": "The image is dominated by bright orange across most of the background, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 7,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark text for the business name at the bottom.\n[content] Brand colors match the guide: orange and cream are the dominant scheme. The visible text is a generic title ('Seasonal Home Maintenance Checklist') and the business name; there are no legible hours or service claims that contradict the fact sheet, so no info-accuracy issues are visible.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark text for the business name at the bottom."
+      },
+      {
+        "run": 8,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] Large orange background covering most of the image, a cream panel on the right side, and small dark/black accents in the toolbox icon and bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the guide. Info is accurate because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') and the business name; there are no legible hours or service claims that contradict the fact sheet.",
+        "observed_colors": "Large orange background covering most of the image, a cream panel on the right side, and small dark/black accents in the toolbox icon and bottom text."
+      },
+      {
+        "run": 9,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant scheme is orange and cream, matching the brand palette. Info is accurate because the visible text is only a topic/title and the business name; there are no legible claims about hours or services that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 10,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant scheme is orange and cream, matching the guide. Info is accurate because the visible text is only a title/topic and the business name; there are no legible hours or service claims that contradict the fact sheet. No issues found.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 11,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream-colored vertical wedge on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text, plus white title text.\n[content] Brand colors match the guide: orange and cream are the dominant scheme, with only minor neutral/dark accents. No visible hours, phone, address, or service claims contradict the fact sheet; the thumbnail only shows a generic seasonal maintenance title and the Riverside Hardware & Supply name, so there are no checkable inaccuracies.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream-colored vertical wedge on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text, plus white title text."
+      },
+      {
+        "run": 12,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand colors match the guide: orange and cream are the dominant scheme. Info accuracy fails because the visible title says 'Seasonal Home Maintenance Checklist,' which is not a checkable fact-sheet claim, but the image itself does not show any hours or services that can be verified against the fact sheet. The only legible business text is the store name, which matches; no contradictory hours/services are visible.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 13,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the Riverside Hardware & Supply brand colors. Info is accurate because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') and the business name; there are no legible hours or service claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are small dark brown/black accents in the toolbox icon and the bottom text."
+      },
+      {
+        "run": 14,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark.\n[content] Brand colors match the guide: orange and cream are the dominant scheme, with only neutral dark accents. No visible hours, phone, address, or service claims contradict the fact sheet; the image only shows a generic title and the business name, so there are no legible factual errors to flag.",
+        "observed_colors": "The image is dominated by bright orange across most of the background, with a large cream panel on the right side and cream used in the small toolbox icon near the top left. White text sits over the orange area, with dark brown/black accents in the icon and bottom wordmark."
+      },
+      {
+        "run": 15,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'Seasonal Home Maintenance' 3.03:1 (min OCR confidence 0.99); 'Checklist' 3.03:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.64:1 (min OCR confidence 0.94)\n[observed] The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text.\n[content] Brand is consistent because the dominant palette is orange and cream, matching the brand guide. Info accuracy passes because the visible text is only a topic/title ('Seasonal Home Maintenance Checklist') and the business name; there are no legible hours or service claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a bright orange background across most of the thumbnail, with a large cream panel on the right side. There are also small dark brown/black accents in the toolbox icon and the bottom text."
+      }
+    ],
+    "item3-tool-rental-FLAW-legibility.png": [
+      {
+        "run": 1,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large central graphic. There are lighter cream/orange-tinted translucent shapes layered over the center, plus dark brown text/icon accents in the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange tones, matching the Riverside Hardware & Supply brand colors. No legible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not factual conflicts. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large central graphic. There are lighter cream/orange-tinted translucent shapes layered over the center, plus dark brown text/icon accents in the top-left and bottom-left."
+      },
+      {
+        "run": 2,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than blue/gray. No legible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not conflicting assertions. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      },
+      {
+        "run": 3,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown-orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than a materially different scheme. No visible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not conflicting assertions. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown-orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      },
+      {
+        "run": 4,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over the center, plus dark brown text and icon accents in the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is orange with some lighter cream/orange tones, matching the guide. Info accuracy passes because the visible text is a topic/title ('Tool Rental 101: What We Offer') and the store name; no legible hours, phone, address, or service claim contradicts the fact sheet.",
+        "observed_colors": "The image is dominated by bright orange across the full background and the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over the center, plus dark brown text and icon accents in the top-left and bottom-left."
+      },
+      {
+        "run": 5,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange accents, matching the guide. Info is accurate because the visible text says 'Tool Rental 101: What We Offer,' which is a topic/title rather than a factual claim about hours or services, and the business name shown matches the fact sheet. No contradictory hours or service claims are visible.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left."
+      },
+      {
+        "run": 6,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown-orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than blue/gray. No visible claim contradicts the fact sheet: the thumbnail shows a tool-rental themed headline and the store name, but no legible hours or service details that conflict with Riverside Hardware & Supply's listed offerings.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown-orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      },
+      {
+        "run": 7,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream-like accents, matching the Riverside Hardware guide. Info accuracy passes because the visible text only says 'Tool Rental 101: What We Offer' and 'RIVERSIDE HARDWARE & SUPPLY'; there are no legible hours or service claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left."
+      },
+      {
+        "run": 8,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large tool-rental illustration. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and dark brown text/icon accents in the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange accents, matching the brand guide. Info accuracy passes because the visible text only says 'Tool Rental 101: What We Offer' and 'RIVERSIDE HARDWARE & SUPPLY'; no hours or service claims appear that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large tool-rental illustration. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and dark brown text/icon accents in the top-left and bottom-left."
+      },
+      {
+        "run": 9,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than a materially different scheme. No legible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not conflicting factual assertions. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      },
+      {
+        "run": 10,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large central graphic. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange accents, matching the guide. No legible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not factual conflicts.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large central graphic. There are lighter orange/cream-tinted translucent shapes layered over it, plus dark brown text and a small toolbox icon in the upper left."
+      },
+      {
+        "run": 11,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than a materially different scheme. No legible hours or service claims contradict the fact sheet; the visible text is a title/topic label ('Tool Rental 101: What We Offer') and the store name, which are not conflicting assertions. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      },
+      {
+        "run": 12,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large tool-rental illustration. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and dark brown text/icon accents in the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange accents, matching the Riverside Hardware & Supply brand colors. Info accuracy passes because the visible text only shows a service/topic ('Tool Rental') and the business name; no hours or other factual claims are visible that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large tool-rental illustration. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and dark brown text/icon accents in the top-left and bottom-left."
+      },
+      {
+        "run": 13,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the graphic elements. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and darker orange-brown text/icon accents in the top-left and bottom-left.\n[content] Brand is consistent because the dominant palette is orange with lighter cream/orange accents, matching the Riverside Hardware & Supply brand colors. Info accuracy passes because the visible text only shows a topic/title ('Tool Rental 101: What We Offer') and the store name; there are no legible hours or service claims that contradict the fact sheet, and the title itself is not a checkable assertion.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the graphic elements. There are lighter orange/cream-tinted translucent shapes layered over the center-right, and darker orange-brown text/icon accents in the top-left and bottom-left."
+      },
+      {
+        "run": 14,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter cream/orange translucent bands and shapes over the center, plus darker brown/orange text and a small toolbox icon near the upper left.\n[content] Brand palette is consistent: the thumbnail is dominated by orange with lighter cream/orange accents, matching the Riverside Hardware & Supply guide. No visible assertion contradicts the fact sheet; the visible text is a topic/title ('Tool Rental 101: What We Offer') and the store name, which do not conflict with listed services or hours. No legible hours or other factual claims appear that would be inaccurate.",
+        "observed_colors": "The image is dominated by bright orange across the full background and most of the large central illustration. There are lighter cream/orange translucent bands and shapes over the center, plus darker brown/orange text and a small toolbox icon near the upper left."
+      },
+      {
+        "run": 15,
+        "actual": {
+          "text_legible": false,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "notes": "[legibility] Below the 3.0:1 WCAG large-text minimum: 2 of 2 element(s). Worst: 'Tool Rental 101 what tye Offer' at 1.24:1. Measured: 'Tool Rental 101 what tye Offer' 1.24:1 (min OCR confidence 0.32); 'RIVERSIDE HARDWARE & SUPPLY' 2.97:1 (min OCR confidence 0.96)\n[observed] The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text.\n[content] Brand is consistent because the dominant palette is orange/cream-family rather than blue/gray. No legible claim contradicts the fact sheet: the visible text is a topic/title ('Tool Rental 101: What We Offer') plus the business name, and a title is not a checkable assertion. No issues found.",
+        "observed_colors": "The image is dominated by bright orange across the full background and large translucent orange/peach shapes in the center. There are darker brown/orange accents in the small toolbox icon at top left and the bottom-left store name text."
+      }
+    ],
+    "item4-key-cutting-FLAW-brand.png": [
+      {
+        "run": 1,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right side. White text appears in the headline and footer, and there is a small gray toolbox icon near the top left.\n[content] Brand consistency fails because the dominant palette is blue and gray, which is materially different from Riverside Hardware & Supply\u2019s orange/cream brand colors. Info accuracy passes because the only visible assertion is the service topic 'Key Cutting While You Wait,' which matches the fact sheet\u2019s key cutting service; no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right side. White text appears in the headline and footer, and there is a small gray toolbox icon near the top left."
+      },
+      {
+        "run": 2,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side and white text/icon elements over the blue area.\n[content] Brand consistency fails because the dominant palette is blue and gray, which is materially different from the required orange/cream brand colors. Info accuracy passes because the visible assertion is only about key cutting while you wait, which matches the fact sheet\u2019s walk-in key cutting service; no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side and white text/icon elements over the blue area."
+      },
+      {
+        "run": 3,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right and white text/icon elements over the blue. A small dark gray toolbox icon appears near the top left.\n[content] Brand is not consistent because the dominant palette is blue/gray rather than the required orange/cream family. Info accuracy passes: the visible claim is 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service, and no hours or other contradictory assertions are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right and white text/icon elements over the blue. A small dark gray toolbox icon appears near the top left."
+      },
+      {
+        "run": 4,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon elements overlaid. The small toolbox icon near the top left is gray with white handle/details.\n[content] Brand mismatch: the dominant palette is blue and gray, not the required orange/cream brand colors. Info-wise, the visible claim is 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service; no hours or other contradictory assertions are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon elements overlaid. The small toolbox icon near the top left is gray with white handle/details."
+      },
+      {
+        "run": 5,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side. White text appears in the center-left and at the bottom, and a small gray toolbox icon sits near the top-left.\n[content] Brand consistency fails because the dominant palette is blue and gray, which is materially different from the required orange/cream brand colors. Info accuracy passes because the visible text only says 'Key Cutting While You Wait' and the business name; key cutting is a listed service, and no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side. White text appears in the center-left and at the bottom, and a small gray toolbox icon sits near the top-left."
+      },
+      {
+        "run": 6,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side. White text appears in the center-left and at the bottom, and a small gray toolbox icon sits near the top-left.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes because the visible assertion is only the service/topic text 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service; no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right side. White text appears in the center-left and at the bottom, and a small gray toolbox icon sits near the top-left."
+      },
+      {
+        "run": 7,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details.\n[content] Brand check fails because the dominant palette is blue and gray, which is materially different from the required orange/cream brand colors. Info check passes: the visible assertion is 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service and does not contradict hours or other listed services.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details."
+      },
+      {
+        "run": 8,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon accents. A small dark gray toolbox icon appears near the top left.\n[content] Brand is not consistent because the dominant palette is blue and gray, which is materially different from the required orange/cream brand colors. Info accuracy passes: the visible text says 'Key Cutting While You Wait,' which matches the listed service of walk-in key cutting, and nothing visible contradicts the fact sheet hours or services.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon accents. A small dark gray toolbox icon appears near the top left."
+      },
+      {
+        "run": 9,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes because the visible text only says 'Key Cutting While You Wait' and the business name; key cutting is a listed service, and there are no visible hours or other claims that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details."
+      },
+      {
+        "run": 10,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium/dark blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon accents. The small toolbox icon at top left is gray with white details.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes because the visible text only says \"Key Cutting While You Wait,\" which matches a listed service and does not contradict the fact sheet; no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium/dark blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon accents. The small toolbox icon at top left is gray with white details."
+      },
+      {
+        "run": 11,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes because the only visible assertion is 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service; no hours or other conflicting claims are legible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details."
+      },
+      {
+        "run": 12,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white highlights.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream brand palette. Info accuracy passes because the visible assertion is only 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service; no hours or other conflicting claims are legible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white highlights."
+      },
+      {
+        "run": 13,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white highlights.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream palette. Info accuracy passes: the visible assertion is only the service/topic text 'Key Cutting While You Wait,' which matches the fact sheet's walk-in key cutting service and does not contradict any listed hours or services.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical panel on the right and white text/icon elements overlaid. The small toolbox icon at top left is gray with white highlights."
+      },
+      {
+        "run": 14,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right side and white text/icon elements overlaid. The small toolbox icon near the top left is gray with white details.\n[content] Brand consistency fails because the dominant scheme is blue/gray, which is materially different from the required orange/cream brand palette. Info accuracy passes: the visible text only says 'Key Cutting While You Wait,' which matches a listed service (key cutting) and does not assert any hours or other details that contradict the fact sheet.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray vertical/diagonal panel on the right side and white text/icon elements overlaid. The small toolbox icon near the top left is gray with white details."
+      },
+      {
+        "run": 15,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": false,
+          "info_accurate": true
+        },
+        "notes": "[legibility] All 2 text element(s) meet 3.0:1. Measured: 'Key Cutting While You Wait' 7.01:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 5.56:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right side and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details.\n[content] Brand consistency fails because the dominant scheme is blue and gray, which is materially different from the required orange/cream palette. Info accuracy passes because the only visible assertion is 'Key Cutting While You Wait,' and key cutting is a listed service; no hours or other conflicting claims are visible.",
+        "observed_colors": "The image is dominated by a medium blue background across most of the thumbnail, with a large gray angled panel on the right side and white text/icon elements overlaid. The small toolbox icon at top left is gray with white details."
+      }
+    ],
+    "item5-propane-refill-FLAW-info-accuracy.png": [
+      {
+        "run": 1,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with a darker brown/gold footer wordmark.\n[content] Brand colors fit the guide: the thumbnail is primarily cream and orange, with only neutral/dark text accents. Info is not accurate because it says \"OPEN 24/7,\" which conflicts with the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title about propane tank refill safety tips is not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with a darker brown/gold footer wordmark."
+      },
+      {
+        "run": 2,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text at the bottom.\n[content] Brand colors are consistent: the thumbnail is mainly cream and orange, matching the guide. Info is not accurate because it says 'OPEN 24/7,' but the fact sheet says Monday\u2013Saturday 8:00 AM\u20136:00 PM and Sunday closed. The title 'Propane Tank Refill Safety Tips' is fine as a topic label, but the 24/7 claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text at the bottom."
+      },
+      {
+        "run": 3,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the top left. Black text appears for the headline, with a darker brown/orange footer wordmark near the bottom left.\n[content] Brand colors are consistent: the dominant scheme is cream and orange, matching the guide. Info accuracy fails because the thumbnail says \"OPEN 24/7,\" which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title \"Propane Tank Refill Safety Tips\" is not itself a factual conflict.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the top left. Black text appears for the headline, with a darker brown/orange footer wordmark near the bottom left."
+      },
+      {
+        "run": 4,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text at the bottom.\n[content] Brand is consistent because the dominant scheme is cream and orange, matching the guide. Info is not accurate because the thumbnail says 'OPEN 24/7,' but the fact sheet says Monday\u2013Saturday 8:00 AM\u20136:00 PM and Sunday closed. The propane tank refill service itself is listed in the fact sheet, but the 24/7 hours claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text at the bottom."
+      },
+      {
+        "run": 5,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with some dark brown accents in the logo and footer text.\n[content] Brand colors fit the guide: the thumbnail is dominated by cream and orange, with only neutral dark text accents. Info accuracy fails because the image says 'OPEN 24/7,' but the fact sheet says Riverside Hardware & Supply is open Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The title 'Propane Tank Refill Safety Tips' is a topic header and not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with some dark brown accents in the logo and footer text."
+      },
+      {
+        "run": 6,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the title, with a darker brown/orange footer wordmark near the bottom left.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with a simple toolbox icon. Info accuracy fails because the thumbnail says 'OPEN 24/7,' which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title 'Propane Tank Refill Safety Tips' is a topic heading and not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the title, with a darker brown/orange footer wordmark near the bottom left."
+      },
+      {
+        "run": 7,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the store name at the bottom.\n[content] Brand colors are consistent: the dominant scheme is cream and orange, matching the guide. Info is not accurate because the image says \"OPEN 24/7,\" but the fact sheet says the store is Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The propane tank refill service itself is valid, but the 24/7 claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the store name at the bottom."
+      },
+      {
+        "run": 8,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a large bright orange panel on the right side. There are small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only minor dark accents. Info is not accurate because the thumbnail says \"OPEN 24/7,\" which conflicts with the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title about propane tank refill safety tips is not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a large bright orange panel on the right side. There are small dark brown/black text and icon accents, plus a small orange toolbox icon near the upper left."
+      },
+      {
+        "run": 9,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. There are also small dark brown/black accents in the text and toolbox icon.\n[content] Brand colors match the guide: cream and orange are the dominant scheme, with only minor dark accents. Info accuracy fails because the thumbnail says \"OPEN 24/7,\" but the fact sheet says Monday\u2013Saturday 8:00 AM\u20136:00 PM and Sunday closed. The propane tank refill service itself is listed in the fact sheet, so the service topic is fine; the hours claim is the discrepancy.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a large bright orange panel on the right side. There are also small dark brown/black accents in the text and toolbox icon."
+      },
+      {
+        "run": 10,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the store name at the bottom.\n[content] Brand colors are consistent: the dominant scheme is cream and orange, matching the guide. Info is not accurate because the thumbnail says \"OPEN 24/7,\" which conflicts with the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title about propane tank refill safety tips is not itself a checkable assertion.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the store name at the bottom."
+      },
+      {
+        "run": 11,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears in the title area, with brown/gold text for the business name at the bottom.\n[content] Brand colors fit the guide: cream and orange are the dominant scheme, with only neutral text accents. Info is not accurate because the thumbnail says \"OPEN 24/7,\" but the fact sheet says the store is Monday\u2013Saturday 8:00 AM\u20136:00 PM and closed Sunday. The title about propane tank refill safety tips is not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears in the title area, with brown/gold text for the business name at the bottom."
+      },
+      {
+        "run": 12,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with brown/dark-gold text for the business name at the bottom.\n[content] Brand colors fit the guide: cream and orange are the dominant scheme, with only neutral text accents. Info is not accurate because the thumbnail says 'OPEN 24/7,' but the fact sheet says Monday\u2013Saturday 8:00 AM\u20136:00 PM and Sunday closed. The propane tank refill topic itself is allowed, but the 24/7 claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with brown/dark-gold text for the business name at the bottom."
+      },
+      {
+        "run": 13,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with brown/dark-gold text for the business name at the bottom.\n[content] Brand colors fit the guide: cream and orange are the dominant scheme, with only neutral dark text accents. Info is not accurate because the thumbnail says \"OPEN 24/7,\" which conflicts with the fact sheet (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title about propane tank refill safety tips is not itself a checkable factual claim.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the thumbnail, with a bright orange vertical panel on the right and a small orange toolbox icon near the upper left. Black text appears for the headline, with brown/dark-gold text for the business name at the bottom."
+      },
+      {
+        "run": 14,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the business name at the bottom.\n[content] Brand colors are consistent: the thumbnail uses cream and orange as the dominant palette, with only neutral dark text accents. Info is not accurate because it says 'OPEN 24/7,' which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title 'Propane Tank Refill Safety Tips' is fine as a topic label, but the 24/7 claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical panel on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text for the business name at the bottom."
+      },
+      {
+        "run": 15,
+        "actual": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": false
+        },
+        "notes": "[legibility] All 3 text element(s) meet 3.0:1. Measured: 'OPEN 24/7' 3.03:1 (min OCR confidence 0.98); 'Propane Tank Refill Safety Tips' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text near the bottom.\n[content] Brand colors are consistent: the thumbnail uses the required orange and cream palette as the dominant scheme. Info accuracy fails because the image says \"OPEN 24/7,\" which contradicts the fact sheet hours (Monday\u2013Saturday 8:00 AM\u20136:00 PM, Sunday closed). The title about propane tank refill is fine as a topic, but the 24/7 claim is a factual error.",
+        "observed_colors": "The image is dominated by a pale cream background across most of the canvas, with a bright orange vertical wedge on the right side and a small orange toolbox icon near the upper left. Black text appears for the headline, with dark brown/gold text near the bottom."
+      }
+    ]
+  }
+}

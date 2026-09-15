@@ -39,6 +39,20 @@ ai-103/scripts/results/*
 !ai-103/scripts/results/20260908-143613_orchestrator_stability.json
 !ai-103/scripts/results/20260909-101238_judge_isolation.json
 !ai-103/scripts/results/20260909-122233_orchestrator_stability.json
+# Added 2026-09-15. The list lapsed again after Sep 10 -- the second time.
+# The Sep 10 files were force-added rather than listed; everything from Sep 11
+# on (the certification pass included) was cited and never tracked. Listed
+# here so the tracking is visible, not implied by an earlier `add -f`.
+!ai-103/scripts/results/20260910-104818_orchestrator_stability.json
+!ai-103/scripts/results/20260910-123321_orchestrator_stability.json
+!ai-103/scripts/results/20260910-142656_fixture_stability.json
+!ai-103/scripts/results/20260911-113242_fixture_stability.json
+!ai-103/scripts/results/20260911-120324_orchestrator_stability.json
+!ai-103/scripts/results/20260911-142437_orchestrator_stability.json
+!ai-103/scripts/results/20260914-134557_fixture_stability.json
+!ai-103/scripts/results/20260914-150649_fixture_stability.json
+!ai-103/scripts/results/20260915-111227_orchestrator_stability.json
+!ai-103/scripts/results/20260915-130108_fixture_stability.json
 ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files
