@@ -65,6 +65,7 @@ from dotenv import load_dotenv
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import FunctionTool, ToolSet
 from azure.core.exceptions import ServiceRequestError, ServiceResponseError
+from azure.core.pipeline.policies import SansIOHTTPPolicy
 from azure.identity import DefaultAzureCredential
 
 from m7_cv_audit_tool import audit_thumbnail
@@ -567,6 +568,49 @@ def _definitions(tool: FunctionTool) -> list[dict]:
     )
 
 
+# HANG GUARDS -- ADDED 2026-09-15 (Claude wrote them) after two certification
+# passes in a row stalled with no error and no end:
+#   15:08 MST, run 7 item4 -- Ctrl+C landed in create_and_process's
+#     time.sleep(polling_interval): status polls were being answered, and the
+#     service kept reporting the run as not finished for ~55 minutes.
+#   16:17 MST, run 2 item3 -- Ctrl+C landed in ssl.read inside a status GET:
+#     the socket never answered. azure-core's defaults (read_timeout 300 s,
+#     retry_total 10) turn one dead socket into ~50 minutes of silence.
+# Azure ModelRequests went to 0 both times; Resource Health said Available.
+# The Sep 8 transport retry below could not see either one: neither raised.
+#
+# Two guards, both ending in a ServiceResponseError so run_item()'s EXISTING
+# fresh-thread retry handles them -- no new recovery path:
+#   1. Bounded transport (build_client): a dead socket now fails in about
+#      READ_TIMEOUT x (RETRY_TOTAL + 1) seconds instead of ~50 minutes.
+#   2. A per-item deadline, checked by a pipeline policy before every request
+#      the client sends. Placed as a per-call policy, it runs outside
+#      azure-core's RetryPolicy, so the exception is not retried inside the
+#      pipeline; it surfaces straight to run_item().
+# Neither touches what the model receives: instructions, tools, schemas and
+# messages are unchanged. On the happy path both are no-ops.
+# What the deadline does NOT do: cancel the stalled run server-side (the run id
+# is not in scope). The fresh-thread retry does not depend on it.
+ITEM_DEADLINE_SECONDS = 600     # ~13x the Sep 15 morning mean of 47 s per item-run
+CONNECTION_TIMEOUT_SECONDS = 15
+READ_TIMEOUT_SECONDS = 60
+TRANSPORT_RETRY_TOTAL = 3
+
+_item_deadline: float | None = None
+
+
+class ItemDeadlineExceeded(ServiceResponseError):
+    """An item-run outlived ITEM_DEADLINE_SECONDS without raising on its own."""
+
+
+class _ItemDeadlinePolicy(SansIOHTTPPolicy):
+    def on_request(self, request):
+        if _item_deadline is not None and time.monotonic() > _item_deadline:
+            raise ItemDeadlineExceeded(
+                f"item exceeded ITEM_DEADLINE_SECONDS={ITEM_DEADLINE_SECONDS} "
+                "with the run still unfinished (hang guard, added 2026-09-15)")
+
+
 def build_client() -> AgentsClient:
     """Build the project-scoped AgentsClient.
 
@@ -577,6 +621,11 @@ def build_client() -> AgentsClient:
     return AgentsClient(
         endpoint=os.environ["AIF_PROJECT_ENDPOINT"],
         credential=DefaultAzureCredential(),
+        # Hang guards -- see the block above this function.
+        connection_timeout=CONNECTION_TIMEOUT_SECONDS,
+        read_timeout=READ_TIMEOUT_SECONDS,
+        retry_total=TRANSPORT_RETRY_TOTAL,
+        per_call_policies=[_ItemDeadlinePolicy()],
     )
 
 
@@ -753,7 +802,12 @@ def run_item(client, agent_id: str, item: dict) -> dict:
             role="user",
             content=f"Topic: {item['topic']}\nThumbnail image path: {thumbnail}",
         )
-        run = client.runs.create_and_process(thread_id=thread.id, agent_id=agent_id)
+        global _item_deadline
+        _item_deadline = time.monotonic() + ITEM_DEADLINE_SECONDS
+        try:
+            run = client.runs.create_and_process(thread_id=thread.id, agent_id=agent_id)
+        finally:
+            _item_deadline = None
         return thread, run
 
     thread = run = None
