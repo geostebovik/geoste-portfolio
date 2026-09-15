@@ -88,114 +88,123 @@ class ThumbnailAudit(BaseModel):
 
 
 class ContentAudit(BaseModel):
-    """Structured-output schema for call 2 of the split audit (brand +
-    info accuracy). These two stay together deliberately: neither was ever
-    implicated in the cross-check contamination that forced the split, and
-    both need the fact sheet in context.
-
-    `observed_colors` ADDED 2026-09-11, AND ITS POSITION IS THE POINT. The
-    defect it targets: after the Sep 10 clause rewrite `brand_consistent` is
-    225/225 correct, and item3's `notes` still assert "the thumbnail uses an
-    orange/cream palette" on 15 runs of 15. item3 contains no cream. Compare
-    item4, where the model writes "dominated by blue and gray, which is
-    materially different from the required orange/cream brand palette" --
-    separating the image's colours from the brand's exactly right. WHEN THE
-    ANSWER IS "CONSISTENT" THE MODEL STOPS OBSERVING AND STARTS QUOTING: the
-    brand guide sits in the same prompt and is the nearest available text.
-
-    Declared FIRST because structured outputs are generated in field order, so
-    the observation is written BEFORE the verdict is committed to, rather than
-    rationalized after it. A field placed after `brand_consistent` would be
-    describing a conclusion already reached, which is the failure mode itself.
-
-    IT IS A SCHEMA FIELD RATHER THAN A SENTENCE IN THE SYSTEM PROMPT, for the
-    reason the Sep 2 split was bought: prose instructions in that prompt
-    compete for salience with the verdict clauses beside them, and this
-    project has twice watched strengthening one instruction outvote its
-    neighbour. A field has its own slot and cannot be outvoted by one. The
-    trade accepted: nothing in the prompt text mentions it, so if the model
-    under-fills it the fallback is a prompt sentence -- try the structural fix
-    first and only add prose if the run says it was not enough.
-
-    SECOND SENTENCE ADDED TO THE DESCRIPTION 2026-09-14. The first one worked
-    -- item3 went from 15/15 confabulating to 9/15 -- and then stopped working,
-    because the residue is not the failure that sentence describes. The model
-    is not citing the brand guide any more; it is reaching for a LIGHTNESS
-    word, and the brand guide had primed the only one in the room. The six
-    clean runs of Sep 11 say "large translucent orange/PEACH shapes in the
-    center"; the nine dirty ones say "lighter CREAM/orange-tinted translucent
-    shapes layered over the center". Identical perception, same elements, same
-    location, one different word. So "do not name a brand color that is
-    absent" does not bite: from the model's side it is describing a tint, not
-    quoting a palette.
-
-    HUE IS WHAT SEPARATES THEM AND LIGHTNESS IS WHAT CONFUSES THEM. item3 is
-    100% hue 15-21deg at saturation 0.70-0.89; brand cream is hue 50deg at
-    0.26. On hue they are not close. On lightness they are confusable. So the
-    new constraint is written on hue.
-
-    CONDITION A RESULT, and read the second number before the first: at n=15
-    it scored 1/15, and the SAME wording at the same commit scored 11/45 at
-    n=45. Both are real; they are not distinguishable from each other (Fisher
-    p=0.26) because 1/15's interval runs 0.01-0.30. **The honest figure is
-    11/45 = 0.244, against a 9/15 = 0.600 baseline, p=0.024.** A real
-    improvement that still leaves about a quarter of item3 runs naming an
-    absent colour. Do not quote the 1/15. See m7-orientation.md's standing
-    lesson "A 15-run pass cannot characterize a rate" for why that number
-    existed at all.
-
-    Condition A causes NO regression: item3's info_accurate is 1/45 misses,
-    and the whole matrix scored 448/450 judged plus 225/225 deterministic --
-    the best judged result recorded in this project. The 5/15 regression seen
-    at n=15, and the observation-length mechanism constructed to explain it,
-    did not survive n=45.
-
-    CONDITION B WAS RUN AND REJECTED, 2026-09-14. Its clause appended
-    "-- say 'pale orange' or 'peach', not 'cream'." and nothing else moved.
-    `results/20260914-150649_fixture_stability.json`, git_head dc66d5d, clean
-    tree, RUNS=45. **Do not re-propose it without reading the rest of this
-    paragraph** -- it won its primary outcome and lost on the gate.
-
-      PRIMARY: item3 names "cream" in 2/45 runs, 0.044, against condition A's
-      11/45 = 0.244, p=0.014. Inside the pre-registered <=3/45 band. Not
-      recitation either: only 2/45 runs echo the clause's own words back, so
-      the improvement is real description, not parroting.
-
-      GATE: FAILED. Judged cells fell 448/450 -> 440/450 against a
-      pre-registered floor of 448. All ten misses are ONE cell, and it is not
-      the one that was being watched: **item2's info_accurate went 1/45 ->
-      10/45**, p=0.0074. item3's info_accurate was fine at 0/45.
-
-      The failing prose is documented cause (b) verbatim -- "Info accuracy
-      fails because the visible title says 'Seasonal Home Maintenance
-      Checklist,' which is not one of the fact sheet's listed services or
-      hours" -- the Sep 1 headline-as-assertion bug, against a prompt that
-      explicitly exempts exactly that. The exemption is present and being
-      outvoted five times more often than under condition A.
-
-    NO MECHANISM IS OFFERED FOR WHY A COLOUR-VOCABULARY CLAUSE MOVES item2's
-    info_accurate, and that omission is deliberate. A mechanism was
-    constructed for condition A's apparent regression the same morning, at
-    exact permutation p=0.001, and n=45 erased the regression and the
-    mechanism together. This one rests on firmer ground -- n=45 on both arms,
-    one cell, consistent prose -- but a solid number and a solid mechanism are
-    different things. See m7-orientation.md's standing lesson "A 15-run pass
-    cannot characterize a rate".
-
-    SO THE SHIPPED WORDING IS CONDITION A, restored here. It trades nothing:
-    0.244 on colour against a 0.600 baseline (p=0.024), 448/450 judged,
-    225/225 deterministic, item3 info_accurate 1/45. Condition B trades a
-    wrong colour word on item3 for a wrong boolean on item2 at roughly five
-    times the rate, which is a worse deal on the exact ground the colour fix
-    was justified: the human-facing surface.
-
-    THE STANDING COST OF SHIPPING A, stated plainly so no write-up overstates
-    it: about a quarter of item3 runs still name an absent colour. This is an
-    improvement, not a fix.
-
-    The orchestrator's tool contract does NOT move: audit_thumbnail() still
-    returns a ThumbnailAudit, and this field is folded into its `notes`.
-    """
+    # MOVED OUT OF THE DOCSTRING 2026-09-15, WORDS UNCHANGED. pydantic emits a
+    # model's class docstring as its JSON-schema "description", and the OpenAI
+    # SDK sends that schema with every response_format call -- so these 6,177
+    # characters were reaching the audit model as instructions, including the
+    # cause-(b) failure sentence verbatim and condition B's clause. Confirmed on
+    # Gerard's venv (model_json_schema description length 6177). As comments
+    # they are documentation only. Do NOT add a docstring back to this class:
+    # anything written there is prompt text. Pre-registered test of this change:
+    # Todoist 6hWMVjVpcgf7rGCH, Sep 15.
+    #
+    # Structured-output schema for call 2 of the split audit (brand +
+    # info accuracy). These two stay together deliberately: neither was ever
+    # implicated in the cross-check contamination that forced the split, and
+    # both need the fact sheet in context.
+    #
+    # `observed_colors` ADDED 2026-09-11, AND ITS POSITION IS THE POINT. The
+    # defect it targets: after the Sep 10 clause rewrite `brand_consistent` is
+    # 225/225 correct, and item3's `notes` still assert "the thumbnail uses an
+    # orange/cream palette" on 15 runs of 15. item3 contains no cream. Compare
+    # item4, where the model writes "dominated by blue and gray, which is
+    # materially different from the required orange/cream brand palette" --
+    # separating the image's colours from the brand's exactly right. WHEN THE
+    # ANSWER IS "CONSISTENT" THE MODEL STOPS OBSERVING AND STARTS QUOTING: the
+    # brand guide sits in the same prompt and is the nearest available text.
+    #
+    # Declared FIRST because structured outputs are generated in field order, so
+    # the observation is written BEFORE the verdict is committed to, rather than
+    # rationalized after it. A field placed after `brand_consistent` would be
+    # describing a conclusion already reached, which is the failure mode itself.
+    #
+    # IT IS A SCHEMA FIELD RATHER THAN A SENTENCE IN THE SYSTEM PROMPT, for the
+    # reason the Sep 2 split was bought: prose instructions in that prompt
+    # compete for salience with the verdict clauses beside them, and this
+    # project has twice watched strengthening one instruction outvote its
+    # neighbour. A field has its own slot and cannot be outvoted by one. The
+    # trade accepted: nothing in the prompt text mentions it, so if the model
+    # under-fills it the fallback is a prompt sentence -- try the structural fix
+    # first and only add prose if the run says it was not enough.
+    #
+    # SECOND SENTENCE ADDED TO THE DESCRIPTION 2026-09-14. The first one worked
+    # -- item3 went from 15/15 confabulating to 9/15 -- and then stopped working,
+    # because the residue is not the failure that sentence describes. The model
+    # is not citing the brand guide any more; it is reaching for a LIGHTNESS
+    # word, and the brand guide had primed the only one in the room. The six
+    # clean runs of Sep 11 say "large translucent orange/PEACH shapes in the
+    # center"; the nine dirty ones say "lighter CREAM/orange-tinted translucent
+    # shapes layered over the center". Identical perception, same elements, same
+    # location, one different word. So "do not name a brand color that is
+    # absent" does not bite: from the model's side it is describing a tint, not
+    # quoting a palette.
+    #
+    # HUE IS WHAT SEPARATES THEM AND LIGHTNESS IS WHAT CONFUSES THEM. item3 is
+    # 100% hue 15-21deg at saturation 0.70-0.89; brand cream is hue 50deg at
+    # 0.26. On hue they are not close. On lightness they are confusable. So the
+    # new constraint is written on hue.
+    #
+    # CONDITION A RESULT, and read the second number before the first: at n=15
+    # it scored 1/15, and the SAME wording at the same commit scored 11/45 at
+    # n=45. Both are real; they are not distinguishable from each other (Fisher
+    # p=0.26) because 1/15's interval runs 0.01-0.30. **The honest figure is
+    # 11/45 = 0.244, against a 9/15 = 0.600 baseline, p=0.024.** A real
+    # improvement that still leaves about a quarter of item3 runs naming an
+    # absent colour. Do not quote the 1/15. See m7-orientation.md's standing
+    # lesson "A 15-run pass cannot characterize a rate" for why that number
+    # existed at all.
+    #
+    # Condition A causes NO regression: item3's info_accurate is 1/45 misses,
+    # and the whole matrix scored 448/450 judged plus 225/225 deterministic --
+    # the best judged result recorded in this project. The 5/15 regression seen
+    # at n=15, and the observation-length mechanism constructed to explain it,
+    # did not survive n=45.
+    #
+    # CONDITION B WAS RUN AND REJECTED, 2026-09-14. Its clause appended
+    # "-- say 'pale orange' or 'peach', not 'cream'." and nothing else moved.
+    # `results/20260914-150649_fixture_stability.json`, git_head dc66d5d, clean
+    # tree, RUNS=45. **Do not re-propose it without reading the rest of this
+    # paragraph** -- it won its primary outcome and lost on the gate.
+    #
+    #   PRIMARY: item3 names "cream" in 2/45 runs, 0.044, against condition A's
+    #   11/45 = 0.244, p=0.014. Inside the pre-registered <=3/45 band. Not
+    #   recitation either: only 2/45 runs echo the clause's own words back, so
+    #   the improvement is real description, not parroting.
+    #
+    #   GATE: FAILED. Judged cells fell 448/450 -> 440/450 against a
+    #   pre-registered floor of 448. All ten misses are ONE cell, and it is not
+    #   the one that was being watched: **item2's info_accurate went 1/45 ->
+    #   10/45**, p=0.0074. item3's info_accurate was fine at 0/45.
+    #
+    #   The failing prose is documented cause (b) verbatim -- "Info accuracy
+    #   fails because the visible title says 'Seasonal Home Maintenance
+    #   Checklist,' which is not one of the fact sheet's listed services or
+    #   hours" -- the Sep 1 headline-as-assertion bug, against a prompt that
+    #   explicitly exempts exactly that. The exemption is present and being
+    #   outvoted five times more often than under condition A.
+    #
+    # NO MECHANISM IS OFFERED FOR WHY A COLOUR-VOCABULARY CLAUSE MOVES item2's
+    # info_accurate, and that omission is deliberate. A mechanism was
+    # constructed for condition A's apparent regression the same morning, at
+    # exact permutation p=0.001, and n=45 erased the regression and the
+    # mechanism together. This one rests on firmer ground -- n=45 on both arms,
+    # one cell, consistent prose -- but a solid number and a solid mechanism are
+    # different things. See m7-orientation.md's standing lesson "A 15-run pass
+    # cannot characterize a rate".
+    #
+    # SO THE SHIPPED WORDING IS CONDITION A, restored here. It trades nothing:
+    # 0.244 on colour against a 0.600 baseline (p=0.024), 448/450 judged,
+    # 225/225 deterministic, item3 info_accurate 1/45. Condition B trades a
+    # wrong colour word on item3 for a wrong boolean on item2 at roughly five
+    # times the rate, which is a worse deal on the exact ground the colour fix
+    # was justified: the human-facing surface.
+    #
+    # THE STANDING COST OF SHIPPING A, stated plainly so no write-up overstates
+    # it: about a quarter of item3 runs still name an absent colour. This is an
+    # improvement, not a fix.
+    #
+    # The orchestrator's tool contract does NOT move: audit_thumbnail() still
+    # returns a ThumbnailAudit, and this field is folded into its `notes`.
     observed_colors: str = Field(
         description=(
             "The colors actually present in this image, named from looking at "
