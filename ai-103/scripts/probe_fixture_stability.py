@@ -68,6 +68,7 @@ from m7_cv_audit_tool import (
     build_content_messages,
 )
 from provenance import core_provenance
+from schema_provenance import sent_schema
 
 # Called here explicitly rather than relying on build_audit_client() having
 # already done it by the time provenance is assembled. The deployment name
@@ -282,6 +283,11 @@ with open(out_path, "w", encoding="utf-8") as f:
                     for name, field in ContentAudit.model_fields.items()
                 },
                 "content_system_prompt": content_system_prompt,
+                # ADDED 2026-09-15. The field descriptions above were not the
+                # whole schema: ContentAudit's class docstring travels as its
+                # top-level "description" and was recorded nowhere. This is the
+                # complete object, so no part of it can go unrecorded again.
+                "content_response_format": sent_schema(ContentAudit),
                 "note": ("no agent and no judge in this run: those fields are "
                          "omitted because none applied, not because they were "
                          "unknown. temperature=0 and seed=42 are pinned inside "

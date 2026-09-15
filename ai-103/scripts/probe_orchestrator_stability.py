@@ -63,6 +63,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from m7_cv_audit_tool import ContentAudit
+from schema_provenance import sent_schema
+
 from m7_orchestrator import (
     ACTIVE_INSTRUCTIONS,
     ACTIVE_INSTRUCTIONS_LABEL,
@@ -211,6 +214,10 @@ def main():
     # Its own name, not m7_orchestrator.py -- run_provenance lives in that
     # module, so Path(__file__).name there is the module, not the caller.
     provenance = run_provenance(script=Path(__file__).name)
+    # ADDED 2026-09-15, outside run_provenance() so its frozen output stays
+    # frozen. The audit schema reaches the model on every audit_thumbnail()
+    # call; see schema_provenance.py for why it is recorded whole.
+    provenance["content_response_format"] = sent_schema(ContentAudit)
     if provenance["git_dirty"]:
         print("WARNING: working tree is dirty. This result is not attributable to "
               "a commit and cannot be re-derived later.")

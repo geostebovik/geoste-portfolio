@@ -119,7 +119,15 @@ def core_provenance(script: str | None = None, extra: dict | None = None,
     # sitting in the same directory. A provenance field whose paths cannot be
     # resolved against a single root is not evidence of anything.
     tracked = _git("diff", "--name-only", "HEAD")
-    untracked = _git("ls-files", "--others", "--exclude-standard", "--full-name")
+    # ":/" ADDED 2026-09-15. `ls-files --others` lists only files under the
+    # CWD, which is SCRIPT_DIR -- so an untracked file anywhere else in the
+    # repo was invisible, and the Sep 15 orchestrator pass recorded
+    # git_dirty=false while ai-103/m7-writeup-draft.md sat untracked. The
+    # top-level pathspec makes the listing repo-wide; --full-name already
+    # made the paths repo-relative. `git diff --name-only HEAD` was
+    # repo-wide all along, so only untracked files were affected.
+    untracked = _git("ls-files", "--others", "--exclude-standard", "--full-name",
+                     "--", ":/")
     status = "\n".join(x for x in (tracked, untracked) if x)
     provenance = {
         "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
