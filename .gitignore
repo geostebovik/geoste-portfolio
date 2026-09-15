@@ -53,6 +53,7 @@ ai-103/scripts/results/*
 !ai-103/scripts/results/20260914-150649_fixture_stability.json
 !ai-103/scripts/results/20260915-111227_orchestrator_stability.json
 !ai-103/scripts/results/20260915-130108_fixture_stability.json
+!ai-103/scripts/results/20260915-141917_fixture_stability.json
 ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files
