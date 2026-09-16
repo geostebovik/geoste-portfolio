@@ -95,9 +95,27 @@ What remains, as listed in the draft's header comment:
   table's paths turned into GitHub links.
 - **The group push** with Phase 2 and the two stale site lines.
 
-**Phase 2** (managed identity, the RBAC model, the Conditional Access design
-spec) is the next build work. Candidates noted on Sep 16: bring the Foundry
-deployments under Bicep, and review key-based auth on `aif-dev-wus-01`.
+**Phase 2 is the next build work.** Its entry checklist comes first:
+1. **The RBAC model on paper** (about 60 min).
+2. **The Conditional Access policy spec.**
+
+The Sep 16 plan review is in the Claude project doc
+`claude/2026-09-16-phase2-plan-review.md`, and it records two decisions
+Gerard made:
+- **The app:** Blob upload → Function (Flex Consumption) → M7 agent →
+  results to Blob, with a small results page behind an Entra sign-in.
+- **Conditional Access will be deployed,** using a 30-day Entra ID P2 trial
+  in the real tenant, started only once the app exists. The M365 E5 sandbox
+  was rejected, because it requires removing a spending limit and is a
+  separate tenant.
+
+Findings from the review:
+- Agent network isolation can only be chosen when a Foundry account is
+  created, and it costs extra, so it will be designed, not deployed.
+- 11 scripts still use account keys. Going keyless means re-running the
+  acceptance test, and that run can share revisit trigger (b) for the
+  colour wording.
+- The IIP resources should move into Bicep.
 
 Figure rules (also in the draft's header):
 
@@ -676,6 +694,33 @@ line merged into the Todoist bullet ("- - At the start of each session,
 Before any command…"). Three other lines are stale: the skill-domain line
 says M5, "Key files" names M6 files, and the SVG footer example says M5.
 
+#### Afternoon: the Phase 2 plan review
+
+Claude reviewed the July 15 Phase 2 plan against Microsoft Learn. The full
+review is in the Claude project doc `claude/2026-09-16-phase2-plan-review.md`.
+
+**Gerard's decisions:**
+- **The application** is Blob upload → Function on Flex Consumption → agent
+  → results to Blob, with a signed-in results page.
+- **Conditional Access** will be deployed through a timed 30-day Entra ID P2
+  trial in the real tenant. Gerard pointed Claude to the M365 Developer
+  Program FAQ, which confirms that the E5 sandbox includes Entra ID P1 and P2
+  and that Visual Studio Enterprise subscribers qualify. The sandbox was
+  still rejected:
+  - it is a separate tenant;
+  - it requires a Microsoft Customer Agreement billing account;
+  - any linked Azure subscription must have its spending limit removed;
+  - it is licensed for development only.
+
+**Findings:**
+- **Flex Consumption, not Consumption:** Linux Consumption retires on Sep 30,
+  2028 and has no VNet support.
+- **Agent egress isolation is a create-time choice** that also needs your own
+  Cosmos DB, AI Search and Storage.
+- **Eleven scripts use account keys.**
+- **The IIP resources are not in Bicep.**
+- **Conditional Access for agents needs an Agent 365 license.**
+
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
@@ -688,8 +733,9 @@ it.
   line, and the doc corrections.
 - **`b1293fd`:** the midday commit, adding the colour-flaw decision and the
   quota record.
-- **The afternoon commit:** Gerard's write-up review edits and this log
-  entry.
+- **`3aab9bd`:** Gerard's write-up review edits.
+- **The next commit:** the Phase 2 plan review entry and the next-action
+  update.
 
 ### Session — September 15, 2026
 
