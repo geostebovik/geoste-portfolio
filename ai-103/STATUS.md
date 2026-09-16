@@ -80,16 +80,24 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: Gerard edits the reworked M7 write-up.**
-Replaced 2026-09-16. Claude reworked `ai-103/m7-writeup-draft.md` on Sep 16
-against the Sep 15 certification and the Sep 16 colour replication. Its
-header comment lists what was verified and what is still open. For Gerard:
+**Next action: outside readers for the M7 write-up, then Phase 2.**
+Replaced 2026-09-16 (afternoon). Gerard reviewed the reworked
+`ai-103/m7-writeup-draft.md` the same day:
+- "In short" is approved.
+- The three [CHECK]s are resolved.
+- "Certification" is renamed "acceptance test" on the page.
+- A glossary and an AI-103 skills-mapping table were added.
 
-- **"In short":** bullets 2-4 changed because their figures changed.
-  Bullet 4's "twice" is now "several times".
-- **The three [CHECK] markers:** the AI-103 domain weighting, whether the
-  repo is public, and the "How this was built" framing.
-- **Outside readers** for "In short", as planned.
+What remains, as listed in the draft's header comment:
+
+- **Outside readers** for "In short" (Gerard).
+- **At publish time:** an "On this page" link list, and the evidence
+  table's paths turned into GitHub links.
+- **The group push** with Phase 2 and the two stale site lines.
+
+**Phase 2** (managed identity, the RBAC model, the Conditional Access design
+spec) is the next build work. Candidates noted on Sep 16: bring the Foundry
+deployments under Bicep, and review key-based auth on `aif-dev-wus-01`.
 
 Figure rules (also in the draft's header):
 
@@ -642,6 +650,32 @@ Claude errors in this block:
    300K.** Gerard's question made it a two-step change instead of one.
    The final value is 300K.
 
+#### Afternoon: Gerard's review of the write-up
+
+Gerard reviewed the draft and made these calls. Claude applied the edits.
+- **"Certification" is ambiguous on a page about earning AI-103** (Gerard
+  spotted it). The page now says "acceptance test", defined in a new
+  glossary. The internal docs keep "certification", and the draft's header
+  records the mapping.
+- **A short glossary** (Gerard's choice over a plain-language rewrite).
+- **An AI-103 skills-mapping table** replaces the exam-weighting [CHECK].
+  Claude checked Microsoft's study guide (skills measured as of Apr 16,
+  2026): generative AI and agentic solutions is 30–35%, the largest area.
+  The table maps four study-guide skills to what M7 does. One of them is
+  today's quota work, which also got its own operator note.
+- **The repo is public** (Gerard), which resolves that [CHECK].
+- **"How this was built" is accurate as written** (Gerard, who said his
+  Python is not a claim he could defend in an interview). "Raised the
+  quota in one step" was added to his decisions.
+- **"In short" is approved.**
+- **Deferred to publish time:** section links (Gerard), and GitHub links
+  for the evidence paths.
+
+**Also flagged: the Claude project instructions.** The new read-only git
+line merged into the Todoist bullet ("- - At the start of each session,
+Before any command…"). Three other lines are stale: the skill-domain line
+says M5, "Key files" names M6 files, and the SVG footer example says M5.
+
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
@@ -652,8 +686,10 @@ it.
 - **`ae632e0`:** the late-morning commit, adding the instrument fixes, the
   new check script, `20260907-131248_orchestrator.json` with its allow-list
   line, and the doc corrections.
-- **The midday commit:** the colour-flaw decision and the quota record,
-  across `STATUS.md`, `m7-orientation.md` and `m7-writeup-draft.md`.
+- **`b1293fd`:** the midday commit, adding the colour-flaw decision and the
+  quota record.
+- **The afternoon commit:** Gerard's write-up review edits and this log
+  entry.
 
 ### Session — September 15, 2026
 

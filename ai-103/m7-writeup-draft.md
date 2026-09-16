@@ -45,18 +45,30 @@ DECIDED Sep 16 (Gerard): the item3 [content] colour flaw is published as a
 stated limit, not fixed. The draft stays held for outside readers and the
 Phase 2 group push.
 
+GERARD'S REVIEW, Sep 16 (Claude applied the edits):
+- The three [CHECK]s are resolved. The repo is public (Gerard). The exam
+  weighting matches Microsoft's AI-103 study guide, skills measured as of
+  Apr 16, 2026 (Claude checked it; now a skills-mapping table). "How this
+  was built" is accurate as written (Gerard).
+- TERMINOLOGY: "certification" is renamed "acceptance test" on this page
+  only (Gerard's call), because the page is about earning AI-103 and the
+  word read as Microsoft's certification. The internal docs (STATUS.md,
+  m7-orientation.md, Todoist) keep "certification" for the same thing.
+- A "Terms used on this page" glossary was added (Gerard's call).
+- "In short" bullets 2-4 are approved as written (Gerard). Bullet 2's
+  "certifying pass" became "full acceptance test" under the renaming above.
+
 STILL OPEN BEFORE PUBLISHING:
-- [CHECK] the AI-103 exam domain weighting.
-- [CHECK] whether the repo is public.
-- [CHECK] the "How this was built" framing.
-- Gerard's edit of the Sep 16 rework, and outside readers for "In short".
+- Outside readers for "In short".
+- At publish time: an "On this page" link list at the top, and the evidence
+  table's repo-relative paths turned into GitHub links.
+- The group push with Phase 2 and the two stale site lines.
 
 GERARD'S REVIEW, Sep 15: he read "In short" and kept it as written. He
 judged it longer than ideal, but found that each point says something
 significant and leads into the next section. He plans to ask a few people
-for an outside read before publishing. The Sep 16 rework (Claude) changes
-bullets 2 to 4 because their figures changed. He has not reviewed the new
-wording yet.
+for an outside read before publishing. The Sep 16 rework (Claude) changed
+bullets 2 to 4 because their figures changed; he approved them the same day.
 -->
 
 ## In short
@@ -67,8 +79,8 @@ wording yet.
   and factual accuracy. It is the seventh and final milestone of the IIP lab
   build for AI-103.
 - **What it proves:** the agent does what it was designed to do, measured
-  against a written answer key. In the certifying pass, run on the code as
-  shipped, it completed **120 of 120 runs with zero crashes**, and **all 120
+  against a written answer key. In the full acceptance test, run on the code
+  as shipped, it completed **120 of 120 runs with zero crashes**, and **all 120
   text rows and all 120 audit rows** matched the key. It is the first pass in
   the project with no misses.
 - **What it does not do yet:** one test image is entirely orange, and the
@@ -82,6 +94,24 @@ wording yet.
   this milestone went into finding out when a result could be believed,
   including several times when a good-looking number turned out to be wrong.
 
+## Terms used on this page
+
+- **Acceptance test:** M7's own definition of done. It is 15 runs of each of
+  8 test items, scored against a written **answer key**. It is not a
+  Microsoft certification; the AI-103 exam is separate.
+- **Test item / fixture:** one of the 8 inputs the agent is scored on. The 5
+  **fixtures** are the ones with their own thumbnail image.
+- **Model-judged vs deterministic:** a model-judged check is decided by an AI
+  model and can vary between identical runs. A deterministic check is
+  computed by code and cannot vary. The two are always counted separately.
+- **Pre-registered:** the pass/fail rule for a test, with its thresholds, was
+  written down before any results existed.
+- **95% interval:** the range the true rate very probably falls in, given the
+  number of runs. Fewer runs give a wider range.
+- **p-value:** how likely a difference at least this large would be by
+  chance alone if nothing had really changed. Smaller means chance is a less
+  likely explanation.
+
 ## The scenario
 
 Riverside Hardware & Supply is fictional, and its whole world is defined in
@@ -94,9 +124,16 @@ Eight test items are scored against a written answer key,
 and three with exactly one planted flaw each. The other three reuse a clean
 thumbnail and exist to exercise the draft-checking and redraft path.
 
-M7 was chosen because it covers the largest-weighted part of AI-103 (agentic
-and generative AI) and the one area M1–M6 never touched: computer vision.
-[CHECK: exam domain weighting against the current AI-103 study guide]
+M7 was chosen because it covers the largest-weighted part of AI-103 and the
+one area M1–M6 never touched: computer vision. Mapped against Microsoft's
+AI-103 study guide (skills measured as of April 16, 2026):
+
+| Exam skill area (weight) | Skill named in the study guide | Where M7 does it |
+|---|---|---|
+| Generative AI and agentic solutions (30–35%) | Build agents that integrate function-calling; implement self-critique loops | The orchestrator agent, its three tools, and its check-and-redraft loop (Architecture; decision 5) |
+| Generative AI and agentic solutions (30–35%) | Evaluate models and apps, including detecting fabrications | The groundedness and relevance judge (decisions 4 and 5) |
+| Computer vision (10–15%) | Enforce visual policy rules, such as upholding brand usage requirements | The thumbnail audit's brand check (decisions 1 and 6) |
+| Plan and manage an Azure AI solution (25–30%) | Manage quotas, scaling, rate limits and cost footprints | Model quota sized against measured load, with a spending limit as the cost brake (Operator notes) |
 
 ## Architecture
 
@@ -130,7 +167,7 @@ missing RBAC role on the project would show up there first.
   CLI's `properties.endpoints` only lists account-level endpoints. The
   project endpoint comes from the portal's project Overview.
 - **A hung run raises nothing, so watch the service, not just the
-  script.** Two certification attempts stalled inside the Agent Service. One
+  script.** Two acceptance-test attempts stalled inside the Agent Service. One
   was stuck in the SDK's status-polling loop, which has no deadline. The
   other was stuck on a network read that never returned. The retry logic
   only catches errors, so it saw neither. The fix has two parts:
@@ -142,6 +179,15 @@ missing RBAC role on the project would show up there first.
 
   The first hang went unnoticed for 55 minutes. With the alarm, a hang can
   go unnoticed for 30 minutes at most.
+- **Quota is a speed limit, not a spend commitment.** On Global Standard
+  deployments, the tokens-per-minute (TPM) allocation caps how fast tokens
+  can be used, and billing is per token actually used. Each model has its
+  own pool. The project ran for weeks on a 30K TPM ceiling it had set
+  itself; it is now 300K for the two models M7 uses. That leaves room to
+  run test items in parallel, and it costs nothing extra per token. What a
+  ceiling also does is limit how fast a runaway loop can spend, so the
+  raise was made only because the subscription already has a spending
+  limit and a budget alert.
 
 ## Seven decisions worth showing
 
@@ -210,10 +256,10 @@ kindly? The data answers that. Across those 60 calls, pass/fail was
 identical for all three judges, including the two that don't write the
 drafts.
 
-### 5. Certify on pass/fail, and never count arithmetic as a model answer
+### 5. Judge acceptance on pass/fail, and never count arithmetic as a model answer
 
 Individual judge scores vary by about ±1 between identical runs, so
-certification uses pass/fail against the answer key, never scores.
+the acceptance test uses pass/fail against the answer key, never scores.
 
 An earlier result was reported as "225/225." That figure is **retired**:
 one of the three image checks is arithmetic and can't vary, so counting it
@@ -224,7 +270,7 @@ script prints them that way.
 A related finding came from testing the redraft loop: **a failing draft
 that isn't changed at all passes 7 of 10 times when it is simply judged
 again.** So a pass after a redraft doesn't show that the redraft fixed
-anything. That is why certification uses the first-draft verdict.
+anything. That is why the acceptance test uses the first-draft verdict.
 
 ### 6. Reject the better-scoring wording when it breaks another check
 
@@ -267,7 +313,7 @@ under A and 5 under B, and no count had covered it.
 ### 7. Treat everything the model receives as the prompt, including the schema
 
 **The failure.** The colour fix changed the audit tool, so under this
-project's own rule M7 had to be certified again. The re-certification
+project's own rule M7 had to pass its acceptance test again. The re-run
 failed badly: only 82 of 119 audit rows matched, and one clean image failed
 its accuracy check in all 15 runs. The model's explanations repeated, almost
 word for word, a sentence from this project's own notes about an earlier
@@ -304,10 +350,10 @@ hand-picked list of its parts.
 could read them, *caused* that failure. And "checked byte for byte" only
 covers the channels that were recorded, so the claim should name them.
 
-## Where the certification stands
+## Where M7's acceptance test stands
 
-M7 is certified at commit `a915217`, the code as shipped. The pass ran on
-Sep 15: 15 runs of each of the 8 items, with a clean working tree.
+M7 passed its acceptance test at commit `a915217`, the code as shipped. The
+run was on Sep 15: 15 runs of each of the 8 items, with a clean working tree.
 
 | Measure | Result |
 |---|---|
@@ -319,8 +365,9 @@ Sep 15: 15 runs of each of the 8 items, with a clean working tree.
 
 **It took four attempts.** An earlier pass (Sep 11, `8c57001`) matched 118
 of 120 text rows and 118 of 120 audit rows. The Sep 14 colour fix then
-changed the audit tool, which reopens certification under this project's
-own rule. The first re-certification failed, and decision 7 explains why.
+changed the audit tool, and under this project's own rule that means the
+test must be passed again. The first re-run failed, and decision 7 explains
+why.
 After that fix, the next two attempts hung inside the Agent Service without
 raising an error, which led to the hang guards in the operator notes. The
 fourth attempt passed.
@@ -341,17 +388,17 @@ audit's notes (see "Known limits").
   family." Most describe the image's own tones as cream: 31 of 40 and 20
   of 34, by a rule written after the first run. The verdict is right every
   time. The wording is wrong, and the agent repeats it. Changing that
-  wording would change what the model reads and would reopen
-  certification, so it is logged, not done.
+  wording would change what the model reads, so the acceptance test would
+  have to be re-run. It is logged, not done.
 - **`info_accurate` has two rare failure modes, and they are opposites.**
   In one, the model's explanation reasons wrongly to a fail. In the other,
   the explanation reasons correctly to a pass and the true/false field says
   fail anyway. One wording change can't fix both. Neither appeared in the
-  certifying pass.
+  passing acceptance-test run.
 - **The crash-handling path has run once against a real failure.** During
-  the failed re-certification, an Azure `server_error` was recorded as an
+  the failed acceptance-test re-run, an Azure `server_error` was recorded as an
   unmeasured run, and the pass carried on as designed. The hang guards have
-  only been seen doing nothing: the certifying pass never triggered them,
+  only been seen doing nothing: the passing run never triggered them,
   and their failure paths were tested only in isolation.
 - **Agent runs and direct probe runs of the same audit code disagree on some
   rates.** This has happened twice, and no cause has been found. Each rate on
@@ -406,13 +453,15 @@ test (Sep 9); making the audit's colour description a schema field instead
 of a prompt sentence (Sep 11); overruling an overly strict abort rule
 (Sep 11); running condition A before B and raising runs to 45 (Sep 14).
 He also pushed back when a re-test was deferred without an estimate of its
-cost, and that re-test is how the Sep 11 certification came to be run. On
+cost, and that re-test is how the Sep 11 acceptance test came to be run. On
 Sep 15 and 16 he made these calls:
-- to re-certify (about 95 minutes) rather than write this page around a
-  stale result;
+- to re-run the acceptance test (about 95 minutes) rather than write this
+  page around a stale result;
 - to confirm each decision rule before its results existed;
 - to approve the one-change docstring test and the hang guards;
-- to measure the colour question again before writing about it.
+- to measure the colour question again before writing about it;
+- to raise the model quota in one step rather than two, relying on the
+  subscription's spending limit as the cost brake.
 
 **Claude** wrote the Python: the orchestrator, the tool wrappers, the probe
 scripts, the provenance modules, the hang guards and the analysis scripts.
@@ -426,18 +475,18 @@ these errors:
   audit's notes.
 
 Where the project log doesn't record who did something, this page doesn't
-say. [CHECK: Gerard to confirm this framing before publishing]
+say.
 
 ## Evidence
 
 | What | Where |
 |---|---|
-| Certification pass | `results/20260915-184006_orchestrator_stability.json` · `a915217` |
-| Failed re-certification | `results/20260915-111227_orchestrator_stability.json` · `d46353d` |
+| Acceptance test, passing run | `results/20260915-184006_orchestrator_stability.json` · `a915217` |
+| Acceptance test re-run, failed | `results/20260915-111227_orchestrator_stability.json` · `d46353d` |
 | Docstring test, Run 1 (description sent) | `results/20260915-130108_fixture_stability.json` · `7c9c305` |
 | Docstring test, Run 2 (no description) | `results/20260915-141917_fixture_stability.json` · `0dffc01` |
 | Colour repeat, pre-registered | `results/20260916-102211_fixture_stability.json` · `c5dc05e` |
-| Earlier certification (superseded) | `results/20260911-142437_orchestrator_stability.json` · `8c57001` |
+| Earlier acceptance test (superseded) | `results/20260911-142437_orchestrator_stability.json` · `8c57001` |
 | Condition A (wording shipped) | `results/20260914-134557_fixture_stability.json` · `9a3c605` |
 | Condition B (rejected) | `results/20260914-150649_fixture_stability.json` · `dc66d5d` |
 | Sep 11 baseline | `results/20260911-113242_fixture_stability.json` · `59f4ba3` |
@@ -449,5 +498,5 @@ Each results file listed here records its commit, whether the working tree
 was clean, and the model deployments. The files from Sep 11 onward also
 record the prompt text that actually ran. Those from the Sep 15 docstring
 test onward also record the whole output schema that was sent to the model.
-All of them are committed under `ai-103/scripts/results/`.
-[CHECK: the repo is public, so a reader can open these]
+All of them are committed under `ai-103/scripts/results/` in the public
+repository.
