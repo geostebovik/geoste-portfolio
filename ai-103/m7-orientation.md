@@ -1404,6 +1404,19 @@ session's narrative paragraph in `STATUS.md`.
   edited. Not an M7 item: changing the rubric mid-certification would
   invalidate everything measured against it.
 - **Quota is elastic and the probe loop is serial — the two go together.**
+  **QUOTA RAISED 2026-09-16 (Gerard, in the portal):** `gpt-5-4` and
+  `gpt-5-4-mini` went from 30K to 150K, then to **300K TPM** each the same
+  hour. The CLI shows capacity 300 for both. `gpt-5-2` (30K) and
+  `text-embedding-3-small` (10K) are unchanged. 300K is this entry's own
+  recommended value, set now so parallelising needs no second quota change.
+  **Why the brake can go:** the subscription's spending limit is on, and a
+  $90 budget alert is set (Gerard, Sep 16), so a runaway loop is capped by
+  the credit rather than by TPM. **Resolved:** the 1M pool is per model.
+  Each model's pane showed its own 1M with only its own allocation
+  deducted, which matches Microsoft's per-region, per-model,
+  per-deployment-type quota. **Still true:** the raise alone does not speed
+  up the serial loop. It removes the ceiling for a parallel one, which
+  remains undecided. The original entry follows.
   Added Sep 10, tracked in Todoist `6hVCcxW6jWPmrMWq`. `gpt-5-4`'s 30K TPM is
   a deployment allocation, not a limit; 970K TPM sits unallocated in a 1M pool
   and the Edit dialog offers the full range. But raising it alone buys almost
@@ -2171,7 +2184,14 @@ for the other.
 - **The docs say condition B's item2 misses were "five times" condition
   A's.** The figures are 10/45 against 1/45.
 
-### The colour word moved to `[content]` (added 2026-09-16)
+### The colour word moved to `[content]` (added 2026-09-16) — ACCEPTED AS A STATED LIMIT
+
+> **Gerard's decision, Sep 16:** not fixed. The verdicts are right, the
+> write-up states the flaw with both runs' figures, and chasing each
+> wording quirk is whack-a-mole ("perfect is the enemy of good"). **Revisit
+> only if:** an outside reader of the write-up flags it, or certification
+> reopens for some other reason. In that second case, bundle a wording
+> attempt into that re-certification so it doesn't cost a run of its own.
 
 On item3, the brand-verdict explanation still calls the light orange
 "cream": 40/45 on Run 2 and 34/45 on the repeat. Of those, 31 and 20 runs

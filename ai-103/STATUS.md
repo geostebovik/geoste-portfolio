@@ -108,12 +108,9 @@ out in one group push, together with the two stale site lines.
 
 - **Phase 2:** managed identity, the RBAC model, and the Conditional Access
   design spec. Unchanged since Sep 14.
-- **The `[content]` colour wording** (Backlog, added Sep 16). Any fix
-  changes what the model reads, so it reopens certification. Sizing: one
-  45-run fixture probe (about 57 min) per wording tried, plus one full
-  certification pass (about 95 min), each with the stall watchdog. It would
-  also change the write-up's "What it does not do yet" bullet, so decide it
-  before publishing, if at all.
+- **The `[content]` colour wording is not an alternative any more.**
+  Gerard accepted it as a stated limit on Sep 16 (see the Backlog item for
+  the revisit triggers).
 
 ## Milestones (Phase 1)
 
@@ -178,7 +175,7 @@ out in one group push, together with the two stale site lines.
 | Storage account | `stiipdevwus01` |
 | Sample doc location | container `docs`, blob `loan-agreement-promissory-note.pdf` |
 | Key Vault | `kv-iip-dev-wus-01` |
-| Chat deployments | `gpt-5-2` (Content Understanding analyzer) · **`gpt-5-4-mini` — decided M5 RAG/Q&A model** (Aug 6: quality parity + ~3x cost advantage over `gpt-5-4`, full evidence in the Aug 6 session notes, `STATUS-archive-phase1.md`) · `gpt-5-4` — evaluated, not chosen, kept deployed in case a future comparison run wants it |
+| Chat deployments | `gpt-5-2` (Content Understanding analyzer; 30K TPM) · **`gpt-5-4-mini` — decided M5 RAG/Q&A model** (Aug 6: quality parity + ~3x cost advantage over `gpt-5-4`, full evidence in the Aug 6 session notes, `STATUS-archive-phase1.md`); M7's CV audit model; 300K TPM · `gpt-5-4` — not chosen for M5, but M7's orchestrator and judge (Sep 9); 300K TPM. All GlobalStandard. TPM raised from 30K on 2026-09-16 |
 | Embedding deployment | `text-embedding-3-small` |
 | Analyzer | `iip_loan_agreement_analyzer` (`ai-103/infrastructure/content-understanding/loan-agreement-analyzer.json`) |
 | AI Search service | `srch-iip-dev-wus-01` (Free tier, West US) — `https://srch-iip-dev-wus-01.search.windows.net`, provisioned Aug 7 for M5 |
@@ -543,6 +540,16 @@ Gerard.
 - **Committed the analysis script before the run**, so the tree was clean.
 - **Chose the instrument fixes** for the late morning over editing the
   write-up, fixing the `[content]` wording, or starting Phase 2.
+- **Raised `gpt-5-4` and `gpt-5-4-mini` to 300K TPM** in the portal. He
+  checked the dialog's range first and verified each step with the CLI. He
+  also challenged the two-step plan ("why set a task to do this a second
+  time?"), after confirming that the spending limit and a $90 budget alert
+  are in place.
+- **Accepted the `[content]` colour flaw as a stated limit** rather than
+  fixing it ("perfect is the enemy of good"). Revisit only if an outside
+  reader flags it, or if certification reopens for another reason. This
+  state is recorded as the end of this leg. The publishing plan is
+  unchanged: outside readers first, then one group push with Phase 2.
 - **Set the session-prompt naming back to `<date>-m7-session-prompt.md`.**
   He is also adding the read-only git rule to the Claude project
   instructions.
@@ -592,6 +599,49 @@ is to a measuring instrument, not to anything the model receives.
 **Not yet exercised against Azure.** The next real probe run is the first
 live test.
 
+#### Midday: quota raised, and the colour flaw accepted
+
+- **Gerard accepted the `[content]` colour flaw as a stated limit** (see
+  "Decisions Gerard made"). The Backlog item, the Todoist task and the
+  draft's header comment now record this, along with the revisit triggers.
+- **Gerard raised the TPM quota in the Foundry portal** (Manage → Quota →
+  Token per minute → pencil, Foundry "new"). `gpt-5-4` and `gpt-5-4-mini`
+  went from 30K to 150K each, then to **300K** each.
+  - **Before**, from the CLI: capacity 30 / 30 (with `gpt-5-2` at 30 and
+    embeddings at 10).
+  - **After the first raise**, from the CLI: 150 / 150, with the other two
+    unchanged.
+  - **After the second raise**, from the CLI: 300 / 300, with the other two
+    unchanged.
+  - **Why the second raise.** Gerard asked why the quota should be set twice
+    when parallel runs would need about 300K anyway. The only thing given
+    up is the TPM ceiling as a brake on a runaway loop. The subscription
+    already has a hard brake: its spending limit is on (Gerard confirmed
+    this), and a $90 budget alert is set. The credit resets on the 17th of
+    each month, and subscription-wide spend stood at $63.64 on Sep 16.
+  - **Activity log:** the `gpt-5-4` write succeeded at 18:19:31 UTC, made by
+    Gerard's account.
+  - **Dialog range:** it offered up to 1000K.
+  - **Pool:** after the first raise, each model's pane showed its own 1M
+    pool (150K allocated, 850K remaining), so the pool is per model. That settles the question left
+    open on Sep 10.
+- **Not in IaC.** These deployments are not defined in Bicep, so the
+  activity log and this entry are the only record of the change. Bringing
+  them under Bicep is a candidate Phase 2 item.
+- **Also noted from the activity log:** about ten `listKeys` calls, made by
+  Gerard's account, while the portal was open. That is expected Foundry
+  portal behaviour, but it confirms key-based auth is still enabled on the
+  account. Phase 2 should review it alongside managed identity.
+
+Claude errors in this block:
+1. **Told Gerard the raise would make future runs finish faster.** The
+   project's own Sep 10 finding says otherwise: a certification pass draws
+   about 20K TPM sustained and is limited by serial latency. The raise only
+   matters once the item loop runs in parallel.
+2. **Suggested 150K without checking the Sep 10 recommendation of about
+   300K.** Gerard's question made it a two-step change instead of one.
+   The final value is 300K.
+
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
@@ -599,9 +649,11 @@ it.
 - **`c5dc05e`:** the analysis script.
 - **`76f283f`:** the morning wrap-up, adding this entry, the write-up rework,
   the orientation edits, `20260916-102211` and its allow-list line.
-- **The late-morning commit:** the instrument fixes, the new check script,
-  `20260907-131248_orchestrator.json` with its allow-list line, and the doc
-  corrections.
+- **`ae632e0`:** the late-morning commit, adding the instrument fixes, the
+  new check script, `20260907-131248_orchestrator.json` with its allow-list
+  line, and the doc corrections.
+- **The midday commit:** the colour-flaw decision and the quota record,
+  across `STATUS.md`, `m7-orientation.md` and `m7-writeup-draft.md`.
 
 ### Session — September 15, 2026
 

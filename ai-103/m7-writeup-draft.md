@@ -41,6 +41,10 @@ VERIFIED Sep 16 (Claude) against the results JSON:
   95% interval for 34/45: 0.61-0.86.
 - Wilson intervals and Fisher p-values recomputed with scipy.
 
+DECIDED Sep 16 (Gerard): the item3 [content] colour flaw is published as a
+stated limit, not fixed. The draft stays held for outside readers and the
+Phase 2 group push.
+
 STILL OPEN BEFORE PUBLISHING:
 - [CHECK] the AI-103 exam domain weighting.
 - [CHECK] whether the repo is public.
