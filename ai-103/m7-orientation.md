@@ -44,6 +44,12 @@ hygiene for its own sake. Counterpart to the end-of-session reconcile above.
    --no-optional-locks <cmd>`. Writes through that shell strand `.git` locks
    and temp files (see Backlog). Standing arrangement: Claude prepares the
    commit message, Gerard commits on Windows.
+   **Repeated on Sep 16:** a plain `git status` was the session's first
+   command, run before the session prompt was read, and it stranded
+   `index.lock` for the second day running. A rule that lives in a file read
+   *after* the first command cannot stop the first command. It belongs in the
+   Claude project instructions, which load first. That is Gerard's edit to
+   make.
 
 5. **Confirm the working tree matches `HEAD` before taking any
    measurement.** An unexplained delta between the two is how the Aug 31
@@ -590,6 +596,31 @@ lapsed after Sep 7 and again after Sep 10. The second lapse left **the Sep 11
 certification pass itself** out of the public repo, so "M7 certified" cited a
 file no reader could open. Fixed on Sep 15 (`6d53717`). A reminder has now
 failed twice; the fix is a check that fails loudly (see the Backlog).
+
+### A fix measured on one output field can move the failure to another (added 2026-09-16)
+
+The Sep 14 hue wording was scored on the audit's `[observed]` line, where
+item3's "cream" went to 0/45 on the shipped code. The `[content]` line,
+which explains the brand verdict and is where the defect was first found on
+Sep 10-11, was not counted by anything. It names "cream" in 40/45 (Run 2)
+and 34/45 (the pre-registered repeat, `20260916-102211`). The verdicts
+stayed right, so the verdict tally could not see it either.
+
+**Rules going forward:**
+- **Count the mistake everywhere the model can write it,** not only in the
+  field that was changed. `scripts/analyze_absent_color_fragments.py`
+  counts per line.
+- **Read the agent's final message too.** The agent repeats the notes: 9 of
+  the 15 cert-pass final messages contain "cream", all of them quoted from
+  `[content]` (a count, not a rate).
+
+### Provenance recorded at write time describes the end of a run (added 2026-09-16)
+
+`core_provenance()` reads `git_head` and `git_dirty` when the results file
+is written, after the loop has finished. So any save or commit made during a
+run is attributed to the run, and a run with a mid-run commit would record
+the wrong commit. **Until that is fixed, nothing in the repo is saved or
+committed while a probe runs.** Drafts go outside the repo. See the Backlog.
 
 ## Where M7 sits in the whole picture
 
@@ -1901,7 +1932,7 @@ session that was mid-certification.
 
 Note the row-level figure actually quoted (117/120) is unaffected — see item 7.
 
-### ~~The remaining `brand_consistent` defect is a NAMING constraint~~ — FIXED AS FAR AS IT GOES, 2026-09-14
+### The remaining `brand_consistent` defect is a NAMING constraint — fixed in `[observed]` only (Sep 14), still open in `[content]` (Sep 16)
 
 > **Superseded figures, 2026-09-15.** The 0.244 and 448/450 below were
 > measured with a 3,549-character `ContentAudit` docstring that was being sent
@@ -1910,6 +1941,13 @@ Note the row-level figure actually quoted (117/120) is unaffected — see item 7
 > docstring):** item3 "cream" **0/45** (95% CI 0-0.079), model-judged
 > 449/450. See the standing lesson "Everything the model receives is the
 > prompt". Kept below for the reasoning, not the numbers.
+>
+> **Reopened as a wording flaw, 2026-09-16.** The 0/45 above counts only
+> the `[observed]` line. The `[content]` line names "cream" in 40/45 on
+> Run 2 and in 34/45 on the pre-registered repeat (`20260916-102211`,
+> `c5dc05e`), where `[observed]` was 1/45. The verdicts are unaffected. See
+> the Backlog item "The colour word moved to `[content]`" and `STATUS.md`
+> Sep 16.
 
 Supersedes the Sep 10 framing. After `observed_colors`, item3's confabulation
 fell to 9/15, and the fifteen descriptions show the perception is IDENTICAL
@@ -2099,6 +2137,54 @@ for the other.
   needs the same no-docstring warning before anything live does.
 - **The docs say condition B's item2 misses were "five times" condition
   A's.** The figures are 10/45 against 1/45.
+
+### The colour word moved to `[content]` (added 2026-09-16)
+
+On item3, the brand-verdict explanation still calls the light orange
+"cream": 40/45 on Run 2 and 34/45 on the repeat. Of those, 31 and 20 runs
+describe the image's own tones as cream. The rest only name the palette.
+`[observed]` is 0/45 and 1/45. The verdicts are right every time. The agent
+quotes the line in its final message.
+
+- **Any fix reopens certification,** because it changes what the model
+  reads.
+- **Sizing:** one 45-run fixture probe (about 57 min) per wording tried,
+  plus one full certification pass (about 95 min), each with the stall
+  watchdog.
+- **A lead, not a mechanism:** the two runs whose model input contained
+  "say 'peach', not 'cream'" (condition B in the prompt, Run 1 in the
+  docstring) had the two lowest `[content]` counts (5/45 and 3/45). B's
+  clause also cost `info_accurate` 10/45 on item2. That was measured while
+  the docstring confound was present, so it would need re-measuring before
+  it rules the clause out.
+- **Deciding it before publishing matters,** because the write-up's "What
+  it does not do yet" bullet describes this flaw.
+
+### Provenance is captured when the results file is written (added 2026-09-16)
+
+Both probes call `core_provenance()` after the loop. Capture `git_head` and
+`git_dirty` at start as well, and record both snapshots, or fail loudly if
+they differ. No model-facing change, so it needs no re-certification. Until
+then, follow the standing lesson: no repo saves during a run.
+
+### `ABSENT_COLOR_CHECKS` counts `[observed]` only (added 2026-09-16)
+
+The probe's printed colour count covers one line, so its console summary
+cannot show the `[content]` flaw. Either print the per-line counts from
+`analyze_absent_color_fragments.py`'s logic, or say "[observed] only" in
+the banner. Changing the instrument's output is not a model-facing change.
+While editing that file, the `__main__` guard (above) is the natural
+companion.
+
+### `.gitattributes` does not cover `.gitignore` (added 2026-09-16)
+
+Git for Windows here converts line endings to CRLF on checkout.
+`.gitattributes` pins LF for `.md/.py/.json` and others, but not for
+`.gitignore`. A bridge rewrite on Sep 15 left it with LF endings and no
+content change, and Windows `git status` flagged it as modified for a day.
+Adding `.gitignore text eol=lf` (or `* text=auto`) would stop it recurring.
+This is a repo-wide normalization change, so do it deliberately, in its own
+commit.
 
 ## Which doc answers which question
 

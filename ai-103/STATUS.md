@@ -64,57 +64,56 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 15, 2026. **M7 is certified at `a915217`, the
+**Status as of:** September 16, 2026. **M7 is certified at `a915217`, the
 code as it stands, with zero misses**: 120/120 text rows and 120/120 audit
-rows (`results/20260915-184006`). The Sep 11 certification had been reopened
-by the Sep 14 audit change, and a re-certification failed. The cause was the
-`ContentAudit` class docstring, which is sent to the model as schema text;
-it was removed and confirmed by a pre-registered test. The colour-naming
-residue for the shipped code is **0/45** (fixture probe), not the 0.244 that
-belonged to a docstring that no longer exists. Phase 1 of the IIP labs is
-closed. **The one thing still owed is the write-up:** a draft exists and
-needs the Sep 15 results worked in. ostebovik.net's AI domain still reads
-"M7 not started" / "M7 in progress", held for a group push.
+rows (`results/20260915-184006`). The Sep 14 audit change had reopened the
+Sep 11 certification, and the re-certification that followed failed. The
+cause was the `ContentAudit` class docstring, which is sent to the model as
+schema text. **The item3 colour flaw is not fixed. It moved.** The audit's
+`[observed]` line no longer names "cream" (0/45, then 1/45). Its `[content]`
+line, which explains the brand verdict, still does: 40/45, then 34/45 on a
+pre-registered repeat on Sep 16. Verdicts are unaffected. Phase 1 of the IIP
+labs is closed. **The write-up draft has been reworked against all of this
+and waits for Gerard's edit.** ostebovik.net's AI domain still reads "M7 not
+started" / "M7 in progress", held for a group push.
 ---
 
 ## Current next action
 
-**Next action: finish the M7 write-up against the Sep 15 results.**
-Replaced 2026-09-15. M7 is certified at `a915217` with zero misses, so the
-write-up can now claim certification for the shipped code.
-`ai-103/m7-writeup-draft.md` (Claude-drafted, Gerard editing) needs:
+**Next action: Gerard edits the reworked M7 write-up.**
+Replaced 2026-09-16. Claude reworked `ai-103/m7-writeup-draft.md` on Sep 16
+against the Sep 15 certification and the Sep 16 colour replication. Its
+header comment lists what was verified and what is still open. For Gerard:
 
-- **"Where the certification stands":** the `20260915-184006` pass (120/120
-  text, 120/120 audit; five fixtures 150/150 judged + 75/75 deterministic),
-  replacing the `8c57001` figures.
-- **"In short":** the colour residue is **0/45** for the shipped code (Run 2,
-  95% CI 0-0.079). "About a quarter", "60% to 24%" and "0.244" all describe a
-  docstring that no longer exists.
-- **Decision 6 rewritten:** the Sep 14 A/B was confounded, because the
-  docstring changed between A and B. B's rejection stands as recorded but
-  cannot be read as clean.
-- **A new decision:** the docstring channel, found by a failed
-  re-certification and confirmed by a pre-registered one-change test (45/45
-  to 0/45).
-- **Operator notes:** the hang guards, and why a long unattended run needs a
-  stall alarm.
+- **"In short":** bullets 2-4 changed because their figures changed.
+  Bullet 4's "twice" is now "several times".
+- **The three [CHECK] markers:** the AI-103 domain weighting, whether the
+  repo is public, and the "How this was built" framing.
+- **Outside readers** for "In short", as planned.
 
-Figures the write-up must NOT use:
+Figure rules (also in the draft's header):
 
-- **Never `1/15` for colour naming.** That is Sep 14's condition-A n=15
-  figure, and Sep 15's agent pass also produced a 1-of-15 on the same cell.
-  Neither is a rate.
-- **Never a combined `N/225`, `N/360` or `N/450`.** Judged and deterministic
-  cells are reported apart.
-- **Never `0.244` as the current figure.**
+- **Never give a colour figure for the shipped code without naming the
+  line it counts.** `[observed]`: 0/45 and 1/45. `[content]`: 40/45 and
+  34/45. "0/45" on its own was the Sep 15 error.
+- **Never use `1/15` for colour naming,** and never use `0.244` as a current
+  figure.
+- **Never give a combined `N/225`, `N/360` or `N/450`.** Model-judged and
+  deterministic counts are reported apart.
 
 **Drafting is still not publishing.** The draft waits for Phase 2 and goes
-out in one group push with the two stale site lines. Gerard also plans
-outside readers for "In short" first.
+out in one group push, together with the two stale site lines.
 
-**The alternative, if the write-up is not the appetite:** Phase 2 (managed
-identity, RBAC model, Conditional Access design spec). That is unchanged from
-Sep 14.
+**Alternatives, if editing the write-up is not the appetite:**
+
+- **Phase 2:** managed identity, the RBAC model, and the Conditional Access
+  design spec. Unchanged since Sep 14.
+- **The `[content]` colour wording** (Backlog, added Sep 16). Any fix
+  changes what the model reads, so it reopens certification. Sizing: one
+  45-run fixture probe (about 57 min) per wording tried, plus one full
+  certification pass (about 95 min), each with the stall watchdog. It would
+  also change the write-up's "What it does not do yet" bullet, so decide it
+  before publishing, if at all.
 
 ## Milestones (Phase 1)
 
@@ -371,6 +370,184 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 16, 2026
+
+**The write-up rework found that the shipped code's colour figure counted
+one line of the audit's notes and missed the other.** Yesterday's "0/45"
+counts only the `[observed]` line. The `[content]` line, which explains the
+brand verdict and is where this defect was first found on Sep 10-11, names
+"cream" for item3 in **40/45** runs of Run 2, the shipped audit wording.
+**A pre-registered 45-run repeat on the same code replicated it: 34/45 on
+`[content]`, 1/45 on `[observed]`**, with model-judged 449/450 and a clean
+tree. The write-up was reworked on that basis. M7's certification is
+unaffected, because nothing the model receives changed.
+
+Gerard ran every command, removed the stranded lock, and made the calls
+recorded under "Decisions Gerard made". Claude read and checked the results,
+found the uncounted line, wrote `analyze_absent_color_fragments.py`,
+proposed the decision rule, reworked the write-up draft, wrote the doc
+edits, and made the errors recorded below.
+
+#### How the day went, in order
+
+1. **Session start.** The desktop shell worked. **Claude ran a plain `git
+   status` through the bridge before reading the session prompt, and stranded
+   `.git/index.lock` again, repeating Sep 15's error #1 word for word.**
+   Gerard removed it. The index was checked read-only and found intact
+   (172 entries, the same as `HEAD`). HEAD was `3c581e7`, as the handoff
+   said.
+2. **`.gitignore` showed as modified on Windows. Its content matches HEAD:**
+   blob `c8a0b71` on both sides, and `git diff` is empty. It was rewritten
+   through the bridge at 18:54 MST on Sep 15 with LF line endings, 2½ minutes
+   after `3e5bc00`. Git for Windows here expects CRLF (Windows reports "LF
+   will be replaced by CRLF"), and `.gitattributes` pins LF for
+   `.md/.py/.json` and others but not for `.gitignore`. So the flag is about
+   line endings, not content. The Sep 15 session had told Gerard only that
+   "read-only checks can't refresh git's cached file info", which was true
+   but incomplete, and the Sep 15 log did not record the flag at all. It
+   does not affect `git_dirty`, which compares content (`provenance.py`,
+   Sep 8). Cleared by staging it in the wrap-up commit, which also adds the Sep 16
+   results file to its allow-list. (A `git checkout -- .gitignore` was
+   suggested first and then withdrawn, because it would have discarded that
+   line.)
+3. **Figure check before rewriting.** `20260915-184006` re-verified from
+   the JSON: text 120/120, audit 120/120, five fixtures 150/150 judged and
+   75/75 deterministic, all eight 240/240 and 120/120, 0 errors. Everything
+   matched the Sep 15 entry.
+4. **The uncounted line.** While checking what the agent's final message
+   says about item3, Claude found "cream" in 9 of the 15 cert-pass messages
+   (a count, not a rate). All of them were quoted from the `[content]` line.
+   Recounted across the existing files by line:
+
+   | Run | `[observed]` | `[content]` | `[content]` describing the image* |
+   |---|---|---|---|
+   | Sep 11 baseline `59f4ba3` (15 runs) | 9/15 | 15/15 | 9/15 |
+   | Condition A `9a3c605` | 11/45 | 26/45 | 19/45 |
+   | Condition B `dc66d5d` | 2/45 | 5/45 | 1/45 |
+   | Run 1 `7c9c305` (docstring in) | 0/45 | 3/45 | 0/45 |
+   | **Run 2 `0dffc01` (shipped, no docstring)** | **0/45** | **40/45** | 31/45 |
+
+   *The rule was written after reading Run 2's sentences, so this column is
+   calibration, not a blind result.
+
+   The image has no cream in it. Claude checked the pixels: the lightest
+   common tone is (240,134,76), a light orange, while brand cream is #EFE4B0.
+   **Observation, no mechanism offered:** the two runs whose model input
+   contained "say 'peach', not 'cream'" (B in the prompt, Run 1 in the
+   docstring) have the two lowest `[content]` counts.
+5. **Gerard chose to measure before writing** over two alternatives: writing
+   both lines up as they stood, or holding the colour claim.
+6. **Pre-registered replication** (Todoist `6hWcvG85MfcHj38q`, 09:15 MST).
+   Claude proposed it and Gerard confirmed it as written before the run
+   started. The details are in the table below.
+7. **`analyze_absent_color_fragments.py` was committed before the run**
+   (`c5dc05e`, Claude wrote it, offline). The probe ran from 09:25 MST at
+   that commit. Its audit code is identical to `0dffc01`. The watchdog
+   checked `ModelRequests` at 09:56, and the run had finished by the
+   10:26 check.
+8. **The write-up was reworked** outside the repo during the run and applied
+   afterwards. The details are under "The write-up".
+
+#### The replication: REPLICATED
+
+`results/20260916-102211_fixture_stability.json`, `git_head c5dc05e`, git_dirty
+false, RUNS=45, 09:25:09 to 10:22:11 MST (3,422.5 s, about 57 min).
+
+| | Result | Rule |
+|---|---|---|
+| **item3 `[content]` names cream** | **34/45** | REPLICATED >= 32; NOT <= 26 |
+| item3 `[observed]` names cream | 1/45 | REPLICATED <= 4; NOT >= 6 |
+| Model-judged (guard) | 449/450 | >= 445 |
+| Deterministic (guard) | 225/225 | 225 |
+| `[content]` describing the image (info only) | 20/45 | none |
+
+- **REPLICATED.** Both conditions were met and both guards held. 34/45
+  against Run 2's 40/45 gives Fisher p = 0.17. The 95% Wilson interval for
+  34/45 is 0.61-0.86.
+- **Provenance matches Run 2 on every recorded key** except time and commit:
+  the system prompt, the `response_format` schema, the field descriptions,
+  the schema fields, and the deployment (`gpt-5-4-mini`).
+- **The one model-judged miss:** item2 run 5, `info_accurate`: *"the
+  thumbnail says 'Seasonal Home Maintenance Checklist,' which is not a
+  checkable business fact from the sheet and does not show any visible hours
+  or services that can be verified."* It belongs to the headline family, and
+  it fails the image for having nothing to verify.
+- **The `[observed]` 1/45 is run 2:** *"cream/light peach highlights in the
+  shelving graphic and text."*
+- **Info only:** 20/45 runs describe the image as cream and 14/45 only name
+  the palette, against Run 2's 31 and 9 (Fisher p = 0.033 on the image
+  count). The phrasing varies between identical runs, but the word stays.
+  The rule was calibrated on Run 2, so this is not a clean comparison.
+- **Watchdog:** the 09:56 check showed steady traffic (about 4-5 requests
+  per minute, no gaps). The run finished before the 10:26 check.
+
+Claude's prediction, recorded in advance and not used to decide:
+REPLICATED, with `[content]` 35-44 and `[observed]` 0-2. **`[content]` missed the predicted range by one (34), and `[observed]`
+fell inside it (1).**
+
+#### The write-up
+
+`m7-writeup-draft.md` was reworked by Claude and has not yet been reviewed by
+Gerard.
+- **"Where the certification stands"** now cites `a915217` / `184006`, and
+  says it took four attempts.
+- **New decision 7:** the docstring channel.
+- **Decision 6** says the comparison was confounded and gives the `[content]`
+  recount for A and B. It gives counts without decimals and drops the p-value
+  against the baseline, which was measured under a different docstring.
+- **"Operator notes"** covers the hang guards and the stall alarm.
+- **"Known limits":**
+  - The crash path has now run once, against a real `server_error`.
+  - The guards have been observed only as no-ops.
+  - Agent runs and probe runs disagree on some rates.
+- **The colour sentences** follow the verdict above.
+- **The evidence table** is rebuilt.
+- **"How this was built"** adds the Sep 15-16 decisions, and Claude's errors
+  from those days.
+- **"In short"** bullets 2-4 were rewritten because their figures changed.
+  Bullet 4's "twice" became "several times". **Gerard to review.**
+
+#### Errors by Claude
+
+1. **Stranded `index.lock` for the second day running.** The first command
+   was a plain `git status`, run before reading the prompt that forbids it.
+   The rule lives in a file that is read after the first command, so it
+   cannot prevent this. Proposed fix: put the read-only git rule in the
+   Claude project instructions, which load before any command.
+2. **Sep 15's figure guidance ("In short: 0/45") counted one line of the
+   notes.** `m7-orientation.md` already warned that the count is a substring
+   test to be read beside the prose. The prose that mattered was on the
+   other line.
+3. **Sep 15 gave Gerard half the `.gitignore` reason,** and the Sep 15 log
+   did not record the flag at all.
+4. **The first draft of the certification section said "three attempts".**
+   There were four: the failed re-certification, two hangs, and the pass.
+   Caught before it was applied.
+
+#### Decisions Gerard made
+
+- **Measure the colour question before writing it** (a ~55-minute run),
+  rather than write it up as it stood or hold the claim.
+- **Confirmed the pre-registered rule** as written, before the run.
+- **Committed the analysis script before the run**, so the tree was clean.
+
+#### Standing lessons, promoted to `m7-orientation.md` the same day
+
+- **A fix measured on one output field can move the failure to another.**
+  Count every place the model can write the mistake, not only the field that
+  was changed.
+- **Provenance recorded at write time describes the end of the run, not the
+  start.** Any edit or commit during a run changes it. Until that is fixed,
+  nothing in the repo is saved while a probe runs.
+
+#### Git state
+
+Written after the day's last commit. Verify with `git status` before trusting
+it. `c5dc05e` (the analysis script) was the day's only earlier commit. The
+wrap-up commit adds this entry, the write-up rework, the `m7-orientation.md`
+edits, the results file `20260916-102211` and its `.gitignore` allow-list
+line. Staging `.gitignore` also clears its line-ending flag.
 
 ### Session — September 15, 2026
 
