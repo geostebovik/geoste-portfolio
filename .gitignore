@@ -105,3 +105,5 @@ resources/qr_codes/
 # out of git. No such file was ever tracked, so this takes effect
 # immediately -- no `git rm --cached` needed.
 *session-prompt*.md
+!ai-103/scripts/results/20260915-170329_orchestrator_stability.json
+!ai-103/scripts/results/20260915-184006_orchestrator_stability.json
