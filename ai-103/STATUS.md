@@ -64,58 +64,57 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 14, 2026. M7 is certified and Phase 1 of the IIP
-labs is closed. `brand_consistent`'s naming residue — the last thing anyone
-could point at — was measured, fixed as far as it sensibly goes, and the
-residual cost written down: item3 names an absent colour in **11 of 45 runs
-(0.244)**, down from 0.600, with 448/450 judged cells and 225/225
-deterministic. Nothing is blocking. **The one thing still owed is the
-write-up:** none of this work appears on ostebovik.net, whose AI domain still
-reads "in progress, M5".
-
+**Status as of:** September 15, 2026. **M7 is certified at `a915217`, the
+code as it stands, with zero misses**: 120/120 text rows and 120/120 audit
+rows (`results/20260915-184006`). The Sep 11 certification had been reopened
+by the Sep 14 audit change, and a re-certification failed. The cause was the
+`ContentAudit` class docstring, which is sent to the model as schema text;
+it was removed and confirmed by a pre-registered test. The colour-naming
+residue for the shipped code is **0/45** (fixture probe), not the 0.244 that
+belonged to a docstring that no longer exists. Phase 1 of the IIP labs is
+closed. **The one thing still owed is the write-up:** a draft exists and
+needs the Sep 15 results worked in. ostebovik.net's AI domain still reads
+"M7 not started" / "M7 in progress", held for a group push.
 ---
 
 ## Current next action
 
-**Next action: the M7 write-up.** Replaced 2026-09-14, and the reason it is now
-a single named item rather than Gerard's pick from a list is that the list
-emptied. M7 is certified, Phase 1 is closed, and `brand_consistent` — the one
-defect with a visible surface, and the honest blocker to writing any of this up
-— was measured to a conclusion on Sep 14. Every remaining Backlog item is
-engineering hygiene no portfolio visitor will ever see.
+**Next action: finish the M7 write-up against the Sep 15 results.**
+Replaced 2026-09-15. M7 is certified at `a915217` with zero misses, so the
+write-up can now claim certification for the shipped code.
+`ai-103/m7-writeup-draft.md` (Claude-drafted, Gerard editing) needs:
 
-**The gap is not technical.** 120 certified item-runs naming a commit anyone
-can check out is a stronger evidence trail than most portfolio projects carry.
-But ostebovik.net's AI domain still reads "in progress, M5" — two milestones
-stale — and M7's entire evidence surface is a 239 KB markdown log and a folder
-of JSON. No reviewer opens either.
+- **"Where the certification stands":** the `20260915-184006` pass (120/120
+  text, 120/120 audit; five fixtures 150/150 judged + 75/75 deterministic),
+  replacing the `8c57001` figures.
+- **"In short":** the colour residue is **0/45** for the shipped code (Run 2,
+  95% CI 0-0.079). "About a quarter", "60% to 24%" and "0.244" all describe a
+  docstring that no longer exists.
+- **Decision 6 rewritten:** the Sep 14 A/B was confounded, because the
+  docstring changed between A and B. B's rejection stands as recorded but
+  cannot be read as clean.
+- **A new decision:** the docstring channel, found by a failed
+  re-certification and confirmed by a pre-registered one-change test (45/45
+  to 0/45).
+- **Operator notes:** the hang guards, and why a long unattended run needs a
+  stall alarm.
 
-**Write it while it is recallable.** The reasoning behind the Sep 2 split, the
-retirement of `225/225`, the judge decision on 60 measured calls, the Sep 14
-A/B and why the better-scoring wording was rejected — all of that is
-reconstructable today and will not be in six weeks. This file's own attribution
-rule forbids reconstructing after the fact in resume material. **Drafting is
-not publishing:** the write-up can sit unpublished until Phase 2 gives it
-company, which is the sequence Gerard chose on Sep 14 over posting M7 alone.
+Figures the write-up must NOT use:
 
-Figures the write-up must use, and the ones it must not:
-
-- **`brand_consistent`: 0.600 -> 0.244**, an improvement, NOT a fix. About a
-  quarter of item3 runs still name an absent colour, and the agent republishes
-  `notes` verbatim, so that quarter reaches the visible surface.
-- **Do not quote `1/15`.** It was a real measurement and a misleading one — see
-  the Sep 14 session entry and `m7-orientation.md`'s standing lesson "A 15-run
-  pass cannot characterize a rate".
-- **Never a combined `N/225` or `N/450` figure.** Judged and deterministic
+- **Never `1/15` for colour naming.** That is Sep 14's condition-A n=15
+  figure, and Sep 15's agent pass also produced a 1-of-15 on the same cell.
+  Neither is a rate.
+- **Never a combined `N/225`, `N/360` or `N/450`.** Judged and deterministic
   cells are reported apart.
+- **Never `0.244` as the current figure.**
 
-**The alternative, if the write-up is not the appetite:** Phase 2 — managed
-identity, the RBAC model, the Conditional Access design spec. It fills the
-Identity & Governance domain, which is blank on the site, and an AI domain full
-beside an Identity domain empty reads as an abandoned portfolio rather than a
-deep one. Phase 2 is the stronger *portfolio* argument; the write-up is the
-stronger *decay* argument. Both were weighed Sep 14 and the write-up won on
-freshness.
+**Drafting is still not publishing.** The draft waits for Phase 2 and goes
+out in one group push with the two stale site lines. Gerard also plans
+outside readers for "In short" first.
+
+**The alternative, if the write-up is not the appetite:** Phase 2 (managed
+identity, RBAC model, Conditional Access design spec). That is unchanged from
+Sep 14.
 
 ## Milestones (Phase 1)
 
@@ -372,6 +371,284 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 15, 2026
+
+**The write-up prompted a re-certification, the re-certification failed,
+and the failure traced to a prompt channel this project had never recorded:
+the `ContentAudit` class docstring, which is sent to the model as part of
+the output schema.** On Sep 14, 6,177 characters of documentation went into
+that docstring, including the cause-(b) failure sentence word for word and
+condition B's rejected clause, and the model had been reading all of it on
+every audit call since. **A pre-registered one-change test confirmed it**
+(item2 `info_accurate` 45/45 misses with the docstring, 0/45 without). **Two
+certification attempts then hung in the Agent Service with no error**, so
+hang guards were added. **The third attempt certified M7 at `a915217` with
+zero misses: 120/120 text rows, 120/120 audit rows**, the first miss-free
+pass in the project's history.
+
+Gerard ran every command, made the calls recorded under "Decisions Gerard
+made", and confirmed each decision rule before its results existed. Claude
+drafted the write-up, wrote all code and doc edits, ran the analysis, and made
+the errors recorded below.
+
+#### How the day went, in order
+
+1. **Session start.** The desktop shell *worked*, despite the session prompt's
+   "do not test it, it fails." Claude read everything directly. Claude also
+   ran `git status` through the bridge *before* reading checklist item 4
+   (`GIT_OPTIONAL_LOCKS=0`) and left behind an `index.lock` the bridge could
+   not delete. Gerard removed it. Git was clean at `d46353d`, as the handoff
+   said.
+2. **The write-up was drafted** as `ai-103/m7-writeup-draft.md`: Markdown, M7
+   only, aimed at a hiring manager, Claude drafting and Gerard editing (all
+   four were Gerard's choices). Every figure was checked against the results
+   JSON. Four drafting errors were caught and fixed before delivery.
+3. **Drafting surfaced a gap.** The certification pass was at `8c57001`
+   (Sep 11), but the colour fix that shipped on Sep 14 changed
+   `m7_cv_audit_tool.py` after that commit. By the Backlog's own rule ("any
+   future change to the audit tool ... re-opens this"), M7 was not certified
+   at HEAD. Sized at about 95 minutes unattended; Gerard ran it.
+4. **The re-certification failed its pre-registered rule.**
+5. **The cause was traced to the docstring**, confirmed as a live channel on
+   Gerard's venv, and put to a two-run test with a pre-registered rule.
+6. **Two record-keeping failures were found and fixed along the way:**
+   the probe's untracked-file check only covered `scripts/`, and the
+   `.gitignore` allow-list for cited results had lapsed.
+7. **Two certification attempts hung** and were stopped by hand. Hang guards
+   were added, smoke-tested, and the third attempt certified M7 overnight
+   under an automated watchdog.
+
+#### The re-certification: INVESTIGATE
+
+`results/20260915-111227_orchestrator_stability.json`, `git_head d46353d`,
+RUNS=15. The decision rule was proposed by Claude, recorded in Todoist at
+09:45 and confirmed by Gerard at 09:52, before any result was read.
+
+| | Result | Rule |
+|---|---|---|
+| Measured runs | 119/120 (item5 run 14: Azure `server_error`) | 0 crashes |
+| Text rows | 112/119 | >= 117 |
+| **Audit rows** | **82/119** | >= 117 |
+| Five fixtures | model-judged 125/148, deterministic 74/74 | |
+
+Almost every audit miss is `info_accurate` cause (b), a topic headline read
+as a factual claim. **item2 failed 15 of 15.** Under condition A on Sep 14,
+it failed 1 of 45.
+
+#### The cause: the class docstring is part of the prompt
+
+pydantic emits a model's class docstring as its JSON-schema `description`,
+and the OpenAI SDK sends that schema with every `response_format` call.
+Claude verified this in its own workspace (openai 3.14, pydantic 2.13).
+Gerard confirmed it on his venv: `model_json_schema()` description length
+**6177**.
+
+**How the docstring grew:**
+
+| Commit | Docstring | Contents that matter |
+|---|---|---|
+| `8c57001` (certified) | 1,885 chars | design notes |
+| `9a3c605` (condition A run) | 3,549 | + hue rationale, the "peach"/"cream" observation, and A's pre-registration |
+| `dc66d5d` (condition B run) | 4,995 | A's pre-registration swapped for A's *results* and B's pre-registration |
+| `343d92d` / `d46353d` (shipped) | 6,177 | + B's clause verbatim, and **the cause-(b) failure sentence verbatim** |
+
+The failing runs repeat the docstring's sentence almost word for word: *"the
+visible title says 'Seasonal Home Maintenance Checklist,' which is not one of
+the fact sheet's listed services or hours."*
+
+**What this means for the record:**
+
+- **The Sep 14 A/B was not "one variable apart."** The docstring changed
+  between A and B as well, so B's rejection is confounded. Its commit
+  message said "nothing else in this file or the prompt moves." That was
+  false, and nobody could have known.
+- **The shipped code had never been measured.** Condition A's number
+  (0.244, 448/450) belongs to `9a3c605`'s docstring, which no longer exists.
+- **Why "verified byte-for-byte" missed it:** the probes recorded the system
+  prompt and each `Field` description, and never the class docstring. The
+  check was sound for the channels it covered.
+
+#### The one-change test
+
+The plan and the rule were proposed by Claude, and Gerard gave the go-ahead
+before any code changed (Todoist, Sep 15). The primary measure is item2
+`info_accurate` misses out of 45, from the fixture probe at RUNS=45.
+
+| Run | Commit | What the model receives | item2 misses | Model-judged | Deterministic | item3 "cream" (info only) |
+|---|---|---|---|---|---|---|
+| Run 1 | `7c9c305` | 6,177-char docstring | **45/45** | 357/450 | 225/225 | 0/45 |
+| Run 2 | `0dffc01` | no description | **0/45** | **449/450** | 225/225 | 0/45 |
+
+- **Run 1 reproduced the collapse through the probe alone, and worse than the
+  agent run.** item1 also failed 34/45 and item3 14/45. **No explanation is
+  offered for why the probe is worse than the agent pass** (item2 45/45 vs
+  15/15).
+- **Run 2 is `0dffc01`:** the docstring's words moved into `#` comments, and
+  nothing else changed (checked by comparing the parsed code).
+- **The reading:** the "confirmed" row fired: Run 1 >= 10, Run 2 <= 4 with
+  judged >= 445/450. Fisher p = 1.9e-26 on the primary. **449/450 is the best
+  model-judged result this project has recorded**; the one miss is item1
+  `info_accurate`, 1/45.
+- **A prediction recorded in advance and not used to decide FAILED.** It said
+  that if the docstring's peach/cream text drove the 0/45 "cream" count, Run 2
+  would move back toward 11/45. Run 2 stayed at **0/45** (95% CI 0-0.079).
+  **No mechanism is offered.** What it changes: condition A's 0.244 belongs to
+  `9a3c605`'s docstring, which no longer exists; the colour result for the
+  code that ships is 0/45.
+
+**What Run 2 does NOT establish:** it is not one variable away from condition
+A, whose run had its own 3,549-char docstring. It answers the narrower
+question that matters for shipping: does the shipped wording work without the
+docstring channel?
+
+#### Step 5: two hangs, hang guards, then certification
+
+The rule was set before any step-5 data (Todoist, Sep 15 14:30), Claude
+proposed it, and Gerard confirmed it and chose to keep a one-`server_error`
+allowance. **Floors:** text and audit rows >= 117 over measured runs.
+**Documented causes:** item6 correct catch, item7 rare recovery (Claude had
+left this off the morning rule), `info_accurate` cause (b)/(c), and
+`brand_consistent` on item3. **Also:** nothing dirty; any item7 first-draft
+pass means investigate.
+
+**Attempt 1 hung** at 15:08 MST on run 7, item4. Azure `ModelRequests` for
+`aif-dev-wus-01` went to zero, with no 429s and no 5xx. Ctrl+C at 16:04 landed
+in `create_and_process`'s `time.sleep(polling_interval)`: the status polls
+were being answered, and the service kept reporting the run as unfinished.
+Partial file: `20260915-160426`, 51 rows (audit 51/51).
+
+**Attempt 2 hung** after about 9 minutes, on run 2, item3. Ctrl+C landed in
+`ssl.read` inside the status GET: the socket never answered. With
+azure-core's defaults (read timeout 300 s, 10 retries), one dead socket can
+block for about 50 minutes. Resource Health said Available, with no service
+events. Partial file: `20260915-164602`, 10 rows.
+
+**Neither hang raised an exception, so the Sep 8 transport retry could not
+see them.** Claude read the installed `azure-ai-agents` 1.1.0 source:
+`create_and_process` loops with no deadline.
+
+**Hang guards (`a915217`, Claude wrote them):**
+- `build_client` now bounds the transport: `connection_timeout=15`,
+  `read_timeout=60`, `retry_total=3`.
+- A per-call pipeline policy enforces `ITEM_DEADLINE_SECONDS=600` per item.
+
+Both raise a `ServiceResponseError`, so `run_item()`'s existing fresh-thread
+retry handles them. They were tested in isolation first: the timeouts are
+applied, a dead socket fails in (retries+1) × read timeout, and the deadline
+raises outside the retry policy. **Nothing the model receives changed.** A
+1-run smoke (`20260915-170329`) was clean.
+
+**Attempt 3: RECERTIFIED.** `results/20260915-184006_orchestrator_stability.json`,
+`git_head a915217`, clean tree, no schema description sent. It ran
+17:05:38 to 18:40:06, about 94.5 minutes, normal pace. The guards never
+tripped. A watchdog checked Azure `ModelRequests` every 30 minutes and
+posted the verdict.
+
+| | Result |
+|---|---|
+| Measured runs | 120/120: 0 crashes, 0 unmeasured |
+| Text rows | **120/120** |
+| Audit rows | **120/120** |
+| Five fixtures | model-judged 150/150, deterministic 75/75 |
+| All items | model-judged 240/240, deterministic 120/120 |
+| item7 first-draft passes | 0/15 (all fail, 2 redrafts, fail) |
+
+- **Not observed this pass:** stop-on-pass. item6 passed its first draft
+  15/15, so the redraft path had nothing to recover from.
+- **Info only:** item3 named "cream" in 1 of 15 agent runs (run 4). **Do not
+  quote that as a rate.** It is a 15-run pass, and its digits collide with the
+  banned condition-A figure. The rate for this code is Run 2's 0/45.
+
+#### Record-keeping failures found and fixed
+
+- **`git_dirty` could not see untracked files outside `scripts/`.**
+  `ls-files --others` lists only paths under the working directory. The
+  orchestrator run recorded `git_dirty=false` while the untracked write-up
+  draft sat in `ai-103/`. Fixed in `7c9c305` with a `":/"` pathspec.
+  Harmless this time (the file is prose), but every earlier "clean tree"
+  claim covered `scripts/` only.
+- **The results allow-list lapsed for the second time.** `.gitignore`
+  excludes `results/*` except named files. Nothing after Sep 10 was listed,
+  including **the Sep 11 certification pass**, so the evidence behind "M7
+  certified" was never in the public repo. Fixed in `6d53717`.
+- **Instrumentation added (`7c9c305`):** `schema_provenance.py` records the
+  whole `response_format` schema the model receives. Both probes save it.
+  Run 1 is the first results file that shows what the model was actually
+  sent.
+
+#### Other observations, recorded but not acted on
+
+- **First real crash-path observation.** item5 run 14 of the failed
+  morning pass hit an Azure `server_error`. It was recorded as unmeasured, and
+  the pass continued, exactly as designed.
+- **item7 moved in the failed pass:** 4/15 first-draft passes at relevance
+  3.0, and 2/15 recoveries (1 in 18 before). These are outside the rule's
+  documented list, which was Claude's omission. The run is not attributable
+  anyway, because the audit side was broken.
+- **Agent vs probe on identical audit code (Sep 11):** item3 named "cream"
+  in 15/15 agent runs and 9/15 probe runs (p=0.017). Found by looking, not
+  predicted. No mechanism offered.
+- **An arithmetic error in the docs:** condition B's item2 figure is
+  described as "five times" A's. It is 10/45 against 1/45.
+
+#### Errors by Claude
+
+1. **Stranded `index.lock`.** Ran `git status` over the bridge before reading
+   the checklist item that forbids it.
+2. **Told Gerard to expect a clean `git status` before the re-certification**
+   while its own draft sat untracked in `ai-103/`.
+3. **Described the Sep 14 diff as "Field description + comments"** during
+   the morning check. It saw the docstring text and did not register that a
+   class docstring is prompt text. The re-certification caught what that
+   reading missed.
+4. **Left item7's documented rare recovery off the decision rule's list of
+   documented causes.** It did not change the verdict, and it was added to
+   the step-5 rule before any step-5 data existed.
+5. **Did not consider hangs when sizing the step-5 run,** and checked on it
+   only at the end. The first hang went unseen for about 55 minutes. The
+   watchdog that later caught the second one should have been in place from
+   the start.
+6. **Predicted that Run 2's "cream" count would drift back toward 11/45.** It
+   stayed at 0/45.
+
+#### Decisions Gerard made that shaped the day
+
+- **Format, scope, audience and authorship of the write-up**, and keeping
+  the "In short" section at its length pending outside readers.
+- **Run the ~95-minute re-certification** instead of writing the write-up
+  around a stale certification.
+- **Confirmed both decision rules before any results were read.**
+- **Let the re-certification continue** after the untracked-draft issue was
+  raised.
+- **Held the two stale site lines** (`index.html` "M7 not started",
+  `ai-foundry/index.html` "M7 in progress") for a group push.
+- **Approved the two-run test** and the `.gitignore` fix.
+- **Kept the one-`server_error` allowance** in the step-5 rule.
+- **Approved the hang guards and ran everything the same evening**, reading
+  the verdict the next day instead of stopping after the second hang.
+
+#### Standing lessons, promoted to `m7-orientation.md` the same day
+
+- **Everything the model receives is the prompt, including the output
+  schema's class docstring.** Documentation written *about* a failure,
+  placed where the model can read it, can *cause* that failure. Record the
+  whole `response_format` schema, not a hand-picked list of its parts.
+- **A convention kept up by memory lapses on schedule.** The results
+  allow-list has now lapsed twice. The fix is a check that fails loudly:
+  every results file cited in the docs must be tracked.
+- **"Verified byte-for-byte" only covers the channels you recorded.** Name
+  them when making the claim.
+- **A long unattended run needs a stall alarm, not just an end check.** Two
+  hangs raised nothing. Azure `ModelRequests` going to zero was the only
+  signal, and a 30-minute watchdog on it turned a 55-minute blind spot into a
+  30-minute one.
+
+#### Git state
+
+Written after the day's last code commit. `3e5bc00` was HEAD before this
+wrap-up; the wrap-up commit adds this entry and the orientation edits.
+Verify with `git status` before trusting it.
 
 ### Session — September 14, 2026
 

@@ -17,10 +17,21 @@ FIGURE RULES (from STATUS.md "Current next action"):
 - Never quote 1/15.
 - Never combine judged and deterministic counts into one figure.
 
-OPEN BEFORE PUBLISHING: the 120-run certification is at 8c57001. The
-condition-A wording that shipped Sep 14 changed m7_cv_audit_tool.py after
-that commit. Update "Where the certification stands" once a full
-orchestrator pass has run at current HEAD, or keep that section as written.
+OPEN BEFORE PUBLISHING -- UPDATED 2026-09-15 (Claude), after the body below
+was written:
+- M7 is RE-CERTIFIED at a915217 with zero misses
+  (results/20260915-184006: text 120/120, audit 120/120). The body still
+  cites 8c57001; rework "Where the certification stands".
+- The Sep 14 colour figures (0.600 -> 0.244, 448/450) were measured with a
+  ContentAudit docstring that was being sent to the model. The shipped code
+  has no docstring: item3 "cream" 0/45 (fixture probe, 95% CI 0-0.079),
+  model-judged 449/450. "In short", decision 6 and "Known limits" all need
+  reworking.
+- Decision 6's A/B was confounded (the docstring changed between A and B).
+- Add a decision about the docstring channel (45/45 -> 0/45 one-change test)
+  and an operator note on the hang guards and stall watchdog.
+The FIGURE RULES below were written before this; the 0.244 rule is now
+superseded (see STATUS.md "Current next action").
 
 VERIFIED Sep 15 against the results JSON: 120 rows, 0 errors, 0 unmeasured;
 text 118/120 (both item6); audit 118/120 (item2 run 8 and item3 run 1, both

@@ -384,6 +384,14 @@ second one gets worse the longer it goes unnoticed.
 
 ### The desktop shell failure is a Windows update, not this project's configuration
 
+> **Update 2026-09-15: the shell WORKED all day.** `device_bash` read files,
+> ran read-only git and ran Python on the laptop. Whether the vendor fix has
+> landed for good is unknown, so check with one read-only call at session
+> start rather than assuming either way. **Session-start item 4 still
+> applies:** git through the bridge only with `GIT_OPTIONAL_LOCKS=0
+> --no-optional-locks`. A plain `git status` stranded `.git/index.lock` on
+> Sep 15, because the bridge cannot delete files.
+
 Settled 2026-09-11 by the experiment the Sep 11 session prompt pre-registered.
 
 `no Plan9 drive shares mounted under /mnt/.virtiofs-root/shared`. Both
@@ -531,6 +539,57 @@ predicted. Pace did slow 17% between the two passes, which is consistent with
 rate limiting on a longer run. **This is a loose end, not a finding, and it is
 written here so it is not rediscovered as a result.** If it matters, it needs
 its own pre-registered test.
+
+### Everything the model receives is the prompt, including the schema's class docstring
+
+Found 2026-09-15, when a re-certification failed at 82/119 audit rows.
+pydantic emits a model's class docstring as its JSON-schema `description`, and
+the OpenAI SDK sends that schema with every `response_format` call.
+`ContentAudit`'s docstring had grown to 6,177 characters of project history,
+including the cause-(b) failure sentence word for word and condition B's
+rejected clause. The model read it on every audit call and reproduced the
+failure it described. **Documentation written *about* a failure, placed where
+the model can read it, can *cause* that failure.**
+
+Confirmed by a pre-registered one-change test: item2 `info_accurate` failed
+45/45 with the docstring and 0/45 without it (`7c9c305` vs `0dffc01`).
+
+**Rules going forward:**
+- **No docstring on any class passed as `response_format`.** Write the
+  history as `#` comments.
+- **Probes record the whole schema object sent** (`schema_provenance.py`),
+  not a hand-picked list of its parts.
+- **"Verified byte-for-byte" covers only the channels recorded.** Name them
+  when making the claim. The Sep 14 A/B was verified on the system prompt
+  and field descriptions and still differed in the docstring, so it was
+  never one variable apart.
+
+### A long unattended run needs a stall alarm, not just an end check
+
+Found 2026-09-15. Two certification attempts hung in the Agent Service with
+no exception:
+- **Attempt 1** hung in `create_and_process`'s poll loop: the service kept
+  answering "not finished."
+- **Attempt 2** hung in `ssl.read`: the socket never answered.
+
+The fresh-thread retry only catches exceptions, so it saw neither. The only
+signal was Azure `ModelRequests` for `aif-dev-wus-01` dropping to zero. The
+first hang went unnoticed for 55 minutes because the only planned check was
+at the end.
+
+**The fixes:**
+- **Hang guards in `m7_orchestrator.py` (`a915217`):** bounded transport, plus
+  a 600-second deadline per item.
+- **A watchdog on any run of an hour or more:** check `ModelRequests` every
+  30 minutes, and treat 25+ minutes of zeros as a stall.
+
+### A convention kept up by memory lapses on schedule
+
+The results allow-list in `.gitignore` (Sep 7 rule: one line per cited run)
+lapsed after Sep 7 and again after Sep 10. The second lapse left **the Sep 11
+certification pass itself** out of the public repo, so "M7 certified" cited a
+file no reader could open. Fixed on Sep 15 (`6d53717`). A reminder has now
+failed twice; the fix is a check that fails loudly (see the Backlog).
 
 ## Where M7 sits in the whole picture
 
@@ -1034,7 +1093,10 @@ CV-audit run should score exactly as documented there — that table is what
 **THE LIST IS COMPLETE — an empty list here means finished, not unknown.** All
 seven items are done and M7 is built and certified:
 `results/20260911-142437_orchestrator_stability.json` at `git_head 8c57001`,
-clean tree. Nothing ordered is outstanding. Everything still open is quality or
+clean tree. **Re-certified 2026-09-15 at `a915217`, with zero misses:**
+`results/20260915-184006_orchestrator_stability.json`, text 120/120, audit
+120/120. The Sep 14 audit change had reopened the `8c57001` certification;
+see `STATUS.md`'s Sep 15 entry. Nothing ordered is outstanding. Everything still open is quality or
 polish, lives in the Backlog below, and is mirrored in the Todoist punch list.
 **Phase 1 of the IIP lab work ends here**, and `STATUS.md`'s `## Current next
 action` records what follows (a Backlog item, Phase 2, or the portfolio
@@ -1144,7 +1206,10 @@ session's narrative paragraph in `STATUS.md`.
   is meaningful only for the phrasings in its `PATTERNS` list. After any future
   wording change, sample the drafts by eye and confirm the copy is clean for the
   right reason rather than trusting the count.
-- **`unmeasured()` is verified logic on an unexercised path (Sep 8).** Written
+- ~~**`unmeasured()` is verified logic on an unexercised path (Sep 8).**~~ —
+  **OBSERVED 2026-09-15.** In `20260915-111227`, item5 run 14 hit an Azure
+  `server_error`; it was recorded as unmeasured and the pass continued. The
+  original entry follows. Written
   after item1's `server_error`, unit-tested against a synthetic crashed record,
   and never run against a real crash because the next run completed cleanly.
   Same class of claim as any clause with zero observations — do not describe it
@@ -1838,6 +1903,14 @@ Note the row-level figure actually quoted (117/120) is unaffected — see item 7
 
 ### ~~The remaining `brand_consistent` defect is a NAMING constraint~~ — FIXED AS FAR AS IT GOES, 2026-09-14
 
+> **Superseded figures, 2026-09-15.** The 0.244 and 448/450 below were
+> measured with a 3,549-character `ContentAudit` docstring that was being sent
+> to the model, and the A/B was confounded by further docstring changes
+> between A and B. **For the code that ships (`0dffc01` onward, no
+> docstring):** item3 "cream" **0/45** (95% CI 0-0.079), model-judged
+> 449/450. See the standing lesson "Everything the model receives is the
+> prompt". Kept below for the reasoning, not the numbers.
+
 Supersedes the Sep 10 framing. After `observed_colors`, item3's confabulation
 fell to 9/15, and the fifteen descriptions show the perception is IDENTICAL
 every run — translucent lighter shapes over orange, correctly located. The
@@ -1983,6 +2056,49 @@ would have logged Sep 11's large improvement as no change. Always read the
 
 Same class as the standing caveat on `check_meta_commentary.py` being a phrase
 matcher rather than a classifier.
+
+### Hang-guard follow-ups (added 2026-09-15)
+
+- **A stalled run is not cancelled server-side.** The deadline abandons it
+  and retries on a fresh thread, because the run id is not in scope inside
+  the pipeline policy. Harmless so far. If orphaned runs ever accumulate,
+  pass the run id out and call `runs.cancel`.
+- **A deadline-caused unmeasured row counts as INVESTIGATE** under the Sep 15
+  rule, which only allows a single `server_error`. That is conservative on
+  purpose; revisit only if deadlines start firing.
+- **The guards were only observed as no-ops.** The certifying pass tripped
+  neither. Their failure paths were tested in isolation, not against a real
+  hang.
+
+### The results allow-list needs a check, not a reminder (added 2026-09-15)
+
+Lapsed twice. A small script, run as part of the end-of-session checklist,
+should list every `results/*.json` named in `STATUS.md`,
+`m7-orientation.md`, the write-up draft and the code, and fail if any is
+untracked. Needs no Azure call.
+
+### Agent pass vs fixture probe differ on identical audit code (added 2026-09-15)
+
+Twice now:
+- **Sep 11:** item3 "cream" was 15/15 in the agent pass and 9/15 in the
+  probe (p=0.017).
+- **Sep 15:** with the docstring still in, item2 `info_accurate` failed
+  15/15 in the agent pass and 45/45 in the probe, and item1 failed 4/15
+  against 34/45.
+
+Found by looking, not predicted. **No mechanism is offered.** It matters
+because colour and accuracy rates measured in one context are being quoted
+for the other.
+
+### Small doc and code nits (added 2026-09-15)
+
+- **The probe's stop-on-pass banner** says "executed for the first time"
+  every time it fires. It has fired since Sep 8.
+- **`ThumbnailAudit` also has a class docstring.** Only the retired
+  `probe_legibility_detail_level.py` sends it as `response_format`, but it
+  needs the same no-docstring warning before anything live does.
+- **The docs say condition B's item2 misses were "five times" condition
+  A's.** The figures are 10/45 against 1/45.
 
 ## Which doc answers which question
 
