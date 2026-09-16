@@ -43,8 +43,10 @@ import sys
 from pathlib import Path
 
 # Same pairs as probe_fixture_stability.ABSENT_COLOR_CHECKS. Copied, not
-# imported, because importing that module runs a full 225-call pass (it has no
-# __main__ guard -- Backlog item).
+# imported. That module has had a __main__ guard since 2026-09-16, but it
+# imports the audit tool (pydantic, openai, dotenv), and this script is meant
+# to run offline on any Python with nothing installed. The dependency runs the
+# other way: the probe imports fragment() from here.
 ABSENT_COLOR_CHECKS = {
     "item3-tool-rental-FLAW-legibility.png": "cream",
 }

@@ -524,6 +524,16 @@ Gerard.
 4. **The first draft of the certification section said "three attempts".**
    There were four: the failed re-certification, two hangs, and the pass.
    Caught before it was applied.
+5. **The morning's provenance lesson was half wrong.** It said both probes
+   read git state at the end of a run. The orchestrator probe reads it at the
+   start. This was found while reading the code before the fix, and
+   corrected in the late-morning commit.
+6. **Told Gerard to run `git checkout -- .gitignore` after the run,** then
+   withdrew it before he ran it, because it would have discarded the new
+   allow-list line.
+7. **The first version of `check_cited_results_tracked.py` reported all 20
+   cited files as untracked.** git reads pathspecs relative to the working
+   directory. It was caught on its first run, before delivery.
 
 #### Decisions Gerard made
 
@@ -531,23 +541,67 @@ Gerard.
   rather than write it up as it stood or hold the claim.
 - **Confirmed the pre-registered rule** as written, before the run.
 - **Committed the analysis script before the run**, so the tree was clean.
+- **Chose the instrument fixes** for the late morning over editing the
+  write-up, fixing the `[content]` wording, or starting Phase 2.
+- **Set the session-prompt naming back to `<date>-m7-session-prompt.md`.**
+  He is also adding the read-only git rule to the Claude project
+  instructions.
 
 #### Standing lessons, promoted to `m7-orientation.md` the same day
 
 - **A fix measured on one output field can move the failure to another.**
   Count every place the model can write the mistake, not only the field that
   was changed.
-- **Provenance recorded at write time describes the end of the run, not the
-  start.** Any edit or commit during a run changes it. Until that is fixed,
-  nothing in the repo is saved while a probe runs.
+- **Record git state when a run starts, and check it again when it ends.**
+  The morning version of this bullet was wrong for the orchestrator probe;
+  it is corrected, and the fix is recorded below.
+
+#### Late morning: instrument fixes (no Azure, nothing model-facing)
+
+Gerard chose this block. Claude wrote all the code and the offline tests,
+and `m7_orchestrator.py` (the certified code) was not touched. Every change
+is to a measuring instrument, not to anything the model receives.
+
+- **`provenance.py`:** new `git_snapshot()` and `end_check()`.
+  `core_provenance(git_at_start=...)` records the start snapshot plus
+  `git_changed_during_run`, and adds `git_at_end` when they differ. Without
+  that argument the output is unchanged. This was checked against the
+  committed version for all three existing call shapes.
+- **`probe_fixture_stability.py`:**
+  - The run is wrapped in `main()` behind a `__main__` guard.
+  - Git state is recorded at start, with a dirty-tree warning.
+  - The results record is assembled before the output file is opened.
+  - The colour check prints a count for each line and records `by_line`.
+    The top-level `count` still means `[observed]`.
+- **`probe_orchestrator_stability.py`:** the end-of-run check, plus
+  `started_at` and `elapsed_seconds`, added outside `run_provenance()`.
+- **`check_cited_results_tracked.py` (new):** fails when a cited results
+  file is not in git. It is now on the end-of-session checklist. **Its first
+  run found `20260907-131248_orchestrator.json`,** which
+  `m7_fact_sheet_tool.py` has cited since Sep 7 and which was never
+  committed. That file is now allow-listed and committed. It contains no
+  endpoints or keys.
+- **Offline verification.** The audit tool and the orchestrator were
+  stubbed, so these checks made no Azure calls and wrote nothing to the repo:
+  - Importing the fixture probe made 0 calls; `main()` made 225.
+  - The per-line counts matched a planted pattern (`[content]` 15/45).
+  - A simulated mid-run head change was recorded, and a warning was printed,
+    in both probes.
+  - A clean run recorded `git_changed_during_run: false` and no `git_at_end`.
+
+**Not yet exercised against Azure.** The next real probe run is the first
+live test.
 
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
-it. `c5dc05e` (the analysis script) was the day's only earlier commit. The
-wrap-up commit adds this entry, the write-up rework, the `m7-orientation.md`
-edits, the results file `20260916-102211` and its `.gitignore` allow-list
-line. Staging `.gitignore` also clears its line-ending flag.
+it.
+- **`c5dc05e`:** the analysis script.
+- **`76f283f`:** the morning wrap-up, adding this entry, the write-up rework,
+  the orientation edits, `20260916-102211` and its allow-list line.
+- **The late-morning commit:** the instrument fixes, the new check script,
+  `20260907-131248_orchestrator.json` with its allow-list line, and the doc
+  corrections.
 
 ### Session — September 15, 2026
 

@@ -67,7 +67,8 @@ from m7_cv_audit_tool import (
     audit_thumbnail,
     build_content_messages,
 )
-from provenance import core_provenance
+from analyze_absent_color_fragments import FRAGMENTS, fragment
+from provenance import core_provenance, git_snapshot
 from schema_provenance import sent_schema
 
 # Called here explicitly rather than relying on build_audit_client() having
@@ -149,108 +150,144 @@ def observed_colors_of(notes: str) -> str:
     return ""
 
 
-# Captured HERE, not at import and not at write time. core_provenance()'s
-# `timestamp` is built when the record is assembled -- after the loop -- so it
-# has only ever recorded when a results file was WRITTEN. Pairing the two gives
-# the wall clock, which is what "can I fit two passes around an errand" needs
-# and what no results file in this project has ever carried.
-RUN_STARTED_AT = datetime.now().astimezone()
+def main() -> None:
+    """Run the pass, print the summary, write the results file.
 
-raw_results = {name: [] for name in EXPECTED_RESULTS}
+    WRAPPED 2026-09-16. This was module-level code, so IMPORTING this file ran
+    a full 225-call pass (Backlog item, found Sep 11 when an import check was
+    proposed as a smoke test). Nothing inside changed except what the dated
+    comments below say.
+    """
+    # Captured HERE, not at import and not at write time. core_provenance()'s
+    # `timestamp` is built when the record is assembled -- after the loop -- so it
+    # has only ever recorded when a results file was WRITTEN. Pairing the two gives
+    # the wall clock, which is what "can I fit two passes around an errand" needs
+    # and what no results file in this project has ever carried.
+    run_started_at = datetime.now().astimezone()
+    # Git state at START, ADDED 2026-09-16. The code is loaded by now, so this is
+    # the snapshot that describes what ran; core_provenance() compares it with the
+    # repo at the end. Before this, git was read only when the record was
+    # assembled, after a ~57-minute loop, so a save made mid-run marked the run
+    # dirty and a commit made mid-run changed its recorded head.
+    git_at_start_snapshot = git_snapshot()
+    if git_at_start_snapshot["git_dirty"]:
+        print("WARNING: working tree is dirty. This result is not attributable to "
+              "a commit and cannot be re-derived later.")
+        for line in git_at_start_snapshot["git_dirty_files"]:
+            print(f"  {line}")
 
-for i in range(RUNS):
-    print(f"=== Run {i + 1}/{RUNS} ===")
-    for fixture_name in EXPECTED_RESULTS:
-        image_path = FIXTURES_DIR / fixture_name
-        actual = json.loads(audit_thumbnail(str(image_path)))
-        raw_results[fixture_name].append({
-            "run": i + 1,
-            "actual": {field: actual[field] for field in FIELDS},
-            "notes": actual["notes"],
-            "observed_colors": observed_colors_of(actual["notes"]),
-        })
-        print(f"  {fixture_name}: "
-              f"{ {field: actual[field] for field in FIELDS} }")
+    raw_results = {name: [] for name in EXPECTED_RESULTS}
 
-print("\n=== Stability summary ===")
+    for i in range(RUNS):
+        print(f"=== Run {i + 1}/{RUNS} ===")
+        for fixture_name in EXPECTED_RESULTS:
+            image_path = FIXTURES_DIR / fixture_name
+            actual = json.loads(audit_thumbnail(str(image_path)))
+            raw_results[fixture_name].append({
+                "run": i + 1,
+                "actual": {field: actual[field] for field in FIELDS},
+                "notes": actual["notes"],
+                "observed_colors": observed_colors_of(actual["notes"]),
+            })
+            print(f"  {fixture_name}: "
+                  f"{ {field: actual[field] for field in FIELDS} }")
 
-judged_correct = judged_total = 0
-deterministic_correct = deterministic_total = 0
+    print("\n=== Stability summary ===")
 
-for fixture_name, runs in raw_results.items():
-    expected = EXPECTED_RESULTS[fixture_name]
-    print(f"\n{fixture_name} (expected {expected}):")
-    for field in FIELDS:
-        values = [r["actual"][field] for r in runs]
-        true_count = sum(values)
-        agreement = true_count / RUNS
-        stable = agreement >= STABLE_THRESHOLD or (1 - agreement) >= STABLE_THRESHOLD
-        majority = true_count >= RUNS / 2
-        matches_expected = majority == expected[field]
-        status = "STABLE" if stable else "NOT STABLE"
-        match_note = "matches expected" if matches_expected else "MISMATCHES expected"
+    judged_correct = judged_total = 0
+    deterministic_correct = deterministic_total = 0
 
-        # Per-cell, not per-majority: the cell total is what "225/225" style
-        # figures have always counted, and a majority-only tally would hide a
-        # 14/15 the way a 15/15 does not.
-        correct_cells = sum(1 for v in values if v == expected[field])
-        if field in MODEL_JUDGED_FIELDS:
-            judged_correct += correct_cells
-            judged_total += RUNS
-        else:
-            deterministic_correct += correct_cells
-            deterministic_total += RUNS
+    for fixture_name, runs in raw_results.items():
+        expected = EXPECTED_RESULTS[fixture_name]
+        print(f"\n{fixture_name} (expected {expected}):")
+        for field in FIELDS:
+            values = [r["actual"][field] for r in runs]
+            true_count = sum(values)
+            agreement = true_count / RUNS
+            stable = agreement >= STABLE_THRESHOLD or (1 - agreement) >= STABLE_THRESHOLD
+            majority = true_count >= RUNS / 2
+            matches_expected = majority == expected[field]
+            status = "STABLE" if stable else "NOT STABLE"
+            match_note = "matches expected" if matches_expected else "MISMATCHES expected"
 
-        print(f"  {field}: {true_count}/{RUNS} True ({agreement:.0%}) -- "
-              f"{status}, majority={majority} ({match_note})")
+            # Per-cell, not per-majority: the cell total is what "225/225" style
+            # figures have always counted, and a majority-only tally would hide a
+            # 14/15 the way a 15/15 does not.
+            correct_cells = sum(1 for v in values if v == expected[field])
+            if field in MODEL_JUDGED_FIELDS:
+                judged_correct += correct_cells
+                judged_total += RUNS
+            else:
+                deterministic_correct += correct_cells
+                deterministic_total += RUNS
 
-print("\n=== Verdict cells ===")
-print(f"  model-judged:  {judged_correct}/{judged_total} correct "
-      f"({', '.join(MODEL_JUDGED_FIELDS)})")
-print(f"  deterministic: {deterministic_correct}/{deterministic_total} correct "
-      f"({', '.join(DETERMINISTIC_FIELDS)} -- Read + WCAG arithmetic, "
-      f"invariant by construction)")
-print("  Report these separately. A combined figure counts the deterministic "
-      "cells as if a model had gotten them right.")
+            print(f"  {field}: {true_count}/{RUNS} True ({agreement:.0%}) -- "
+                  f"{status}, majority={majority} ({match_note})")
 
-print("\n=== Perception check (absent colors) ===")
-perception = {}
-for fixture_name, absent_color in ABSENT_COLOR_CHECKS.items():
-    runs = raw_results.get(fixture_name, [])
-    hits = [r["run"] for r in runs
-            if absent_color.lower() in r["observed_colors"].lower()]
-    perception[fixture_name] = {
-        "absent_color": absent_color,
-        "runs_naming_it": hits,
-        "count": len(hits),
-        "of": len(runs),
-    }
-    verdict = "CLEAN" if not hits else "CONFABULATED"
-    print(f"  {fixture_name}: names '{absent_color}' in {len(hits)}/{len(runs)} "
-          f"runs -- {verdict}")
-    if hits:
-        print(f"    runs: {hits}")
-print("  This is independent of the verdict tally above. A fixture can be "
-      "15/15 correct there and still be described wrongly, which is the whole "
-      "reason this section exists.")
+    print("\n=== Verdict cells ===")
+    print(f"  model-judged:  {judged_correct}/{judged_total} correct "
+          f"({', '.join(MODEL_JUDGED_FIELDS)})")
+    print(f"  deterministic: {deterministic_correct}/{deterministic_total} correct "
+          f"({', '.join(DETERMINISTIC_FIELDS)} -- Read + WCAG arithmetic, "
+          f"invariant by construction)")
+    print("  Report these separately. A combined figure counts the deterministic "
+          "cells as if a model had gotten them right.")
 
-RESULTS_DIR.mkdir(exist_ok=True)
-timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-out_path = RESULTS_DIR / f"{timestamp}_fixture_stability.json"
+    print("\n=== Perception check (absent colors) ===")
+    perception = {}
+    for fixture_name, absent_color in ABSENT_COLOR_CHECKS.items():
+        runs = raw_results.get(fixture_name, [])
+        hits = [r["run"] for r in runs
+                if absent_color.lower() in r["observed_colors"].lower()]
+        # PER LINE, ADDED 2026-09-16. `count` above stays the [observed] figure so
+        # every earlier results file still compares. But [observed] is one of
+        # three labelled lines in `notes`, and on Sep 16 the [content] line -- the
+        # brand verdict's explanation -- turned out to name "cream" in 40/45 runs
+        # while [observed] named it in 0/45. A count of one line printed as if it
+        # were the whole output is how that went unseen. Same substring test,
+        # same fragment() as analyze_absent_color_fragments.py.
+        by_line = {
+            tag: [r["run"] for r in runs
+                  if absent_color.lower() in fragment(r["notes"], tag).lower()]
+            for tag in FRAGMENTS
+        }
+        perception[fixture_name] = {
+            "absent_color": absent_color,
+            "runs_naming_it": hits,
+            "count": len(hits),
+            "of": len(runs),
+            "by_line": {tag: {"runs": v, "count": len(v)}
+                        for tag, v in by_line.items()},
+        }
+        print(f"  {fixture_name}: names '{absent_color}' by line, of {len(runs)} runs:")
+        for tag, v in by_line.items():
+            verdict = "clean" if not v else "NAMES IT"
+            print(f"    [{tag}] {len(v)}/{len(runs)} -- {verdict}"
+                  + (f"  runs: {v}" if v else ""))
+    print("  This is independent of the verdict tally above. A fixture can be "
+          "15/15 correct there and still be described wrongly, which is the whole "
+          "reason this section exists. It is a substring test: read the notes "
+          "before quoting a count (analyze_absent_color_fragments.py prints them).")
 
-# The live prompt is READ OUT OF THE FUNCTION THAT BUILDS IT, not copied.
-# m7-orientation.md's item 2 named "no copy of the clause wording that was
-# live" as part of this probe's provenance gap, and a pasted copy closes that
-# gap only until someone edits the prompt and not the copy. build_content_
-# messages() takes an image_b64 it embeds in the user turn; "" is passed
-# because only the system turn is wanted and no call is made.
-content_system_prompt = build_content_messages("")[0]["content"]
+    RESULTS_DIR.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    out_path = RESULTS_DIR / f"{timestamp}_fixture_stability.json"
 
-with open(out_path, "w", encoding="utf-8") as f:
-    json.dump({
+    # The live prompt is READ OUT OF THE FUNCTION THAT BUILDS IT, not copied.
+    # m7-orientation.md's item 2 named "no copy of the clause wording that was
+    # live" as part of this probe's provenance gap, and a pasted copy closes that
+    # gap only until someone edits the prompt and not the copy. build_content_
+    # messages() takes an image_b64 it embeds in the user turn; "" is passed
+    # because only the system turn is wanted and no call is made.
+    content_system_prompt = build_content_messages("")[0]["content"]
+
+    # The record is assembled BEFORE the output file is opened (changed
+    # 2026-09-16): the end-of-run git check must not see the results file itself.
+    record = {
         "run": core_provenance(
             script=Path(__file__).name,
-            started_at=RUN_STARTED_AT,
+            started_at=run_started_at,
+            git_at_start=git_at_start_snapshot,
             extra={
                 # No agent and no judge in this probe -- audit_thumbnail()
                 # makes one chat-completions call against the CV deployment.
@@ -302,6 +339,15 @@ with open(out_path, "w", encoding="utf-8") as f:
         },
         "perception": perception,
         "fixtures": raw_results,
-    }, f, indent=2)
+    }
+    if record["run"]["git_changed_during_run"]:
+        print("WARNING: the repo changed during this run. The recorded git fields "
+              "describe the start; see git_at_end.")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2)
 
-print(f"\nSaved: {out_path}")
+    print(f"\nSaved: {out_path}")
+
+
+if __name__ == "__main__":
+    main()

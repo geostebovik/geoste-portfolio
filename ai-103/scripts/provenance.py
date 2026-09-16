@@ -59,8 +59,78 @@ def _git(*args: str) -> str:
         return ""
 
 
+def git_snapshot() -> dict:
+    """The repo's git state right now: head, branch, and dirtiness by CONTENT.
+
+    SPLIT OUT OF core_provenance() 2026-09-16, unchanged in what it reads, so a
+    probe can take the snapshot when its run STARTS. Python has already loaded
+    the code by then, so the start snapshot is the one that describes what
+    ran. core_provenance() had only ever read git when the record was
+    assembled -- after the loop, for the fixture probe -- which attributed any
+    mid-run save or commit to the run.
+    """
+    # `git status --porcelain` reports STAT differences, not content ones, and
+    # _git() hard-codes --no-optional-locks so a refreshed index is never
+    # persisted -- which means a file whose mtime moved without its bytes
+    # changing is reported dirty on every run, forever. That fired 2026-09-08:
+    # q_a_pairs_sample.txt was byte-identical to HEAD by every check that reads
+    # bytes, and still flagged the run dirty. A warning that cries wolf is worse
+    # than none, so dirtiness is now measured by content.
+    # --full-name ADDED 2026-09-11, and it is a correctness fix, not a tidy-up.
+    # `git diff --name-only` reports paths from the REPO ROOT; `git ls-files
+    # --others` reports them from the CWD, which is SCRIPT_DIR. So before this,
+    # git_dirty_files mixed two path conventions in one list, and nobody saw it
+    # because the field had never yet held an untracked file. The first run
+    # after provenance.py was created printed exactly that:
+    #     ['ai-103/scripts/m7_cv_audit_tool.py', ..., 'provenance.py']
+    # -- three repo-relative paths and one cwd-relative one, for four files
+    # sitting in the same directory. A provenance field whose paths cannot be
+    # resolved against a single root is not evidence of anything.
+    tracked = _git("diff", "--name-only", "HEAD")
+    # ":/" ADDED 2026-09-15. `ls-files --others` lists only files under the
+    # CWD, which is SCRIPT_DIR -- so an untracked file anywhere else in the
+    # repo was invisible, and the Sep 15 orchestrator pass recorded
+    # git_dirty=false while ai-103/m7-writeup-draft.md sat untracked. The
+    # top-level pathspec makes the listing repo-wide; --full-name already
+    # made the paths repo-relative. `git diff --name-only HEAD` was
+    # repo-wide all along, so only untracked files were affected.
+    untracked = _git("ls-files", "--others", "--exclude-standard", "--full-name",
+                     "--", ":/")
+    status = "\n".join(x for x in (tracked, untracked) if x)
+    return {
+        "git_head": _git("rev-parse", "HEAD"),
+        "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
+        "git_dirty": bool(status),
+        "git_dirty_files": status.splitlines(),
+    }
+
+
+def end_check(git_at_start: dict) -> dict:
+    """Compare the repo now against the start snapshot. ADDED 2026-09-16.
+
+    Some inputs are read DURING a run, not at import -- the fixture images and
+    the fact sheet among them -- so a change made mid-run can reach the model
+    even though the code was loaded at start. A start snapshot alone cannot
+    see that; an end snapshot alone misattributes it. Recording both is the
+    only version that says what happened.
+
+    Returns `git_changed_during_run`, plus the full end snapshot under
+    `git_at_end` only when something differs, so a clean run's record stays
+    short. Branch is not compared: a checkout mid-run would already move the
+    head or the dirty set, and a branch rename alone changes nothing that ran.
+    """
+    end = git_snapshot()
+    changed = any(git_at_start.get(k) != end[k]
+                  for k in ("git_head", "git_dirty", "git_dirty_files"))
+    out = {"git_changed_during_run": changed}
+    if changed:
+        out["git_at_end"] = end
+    return out
+
+
 def core_provenance(script: str | None = None, extra: dict | None = None,
-                    started_at: datetime | None = None) -> dict:
+                    started_at: datetime | None = None,
+                    git_at_start: dict | None = None) -> dict:
     """The repo-level facts about a run, plus whatever the caller adds.
 
     `git_dirty` is the field that earns this function. A number measured
@@ -100,43 +170,32 @@ def core_provenance(script: str | None = None, extra: dict | None = None,
     OMITTED, not null, when `started_at` is absent: a run whose start was never
     recorded must not assert an elapsed time, by the same rule `include_agent`
     encodes.
+
+    `git_at_start` ADDED 2026-09-16 -- a git_snapshot() taken when the run
+    began. Pass it and the recorded git fields describe the START of the run,
+    with `git_changed_during_run` (and `git_at_end` when true) added from
+    end_check(). Omit it and nothing changes. Found because the fixture probe
+    assembled its record after the loop, so a save made during a 57-minute
+    run would have marked that run dirty and a commit would have changed its
+    recorded head.
     """
-    # `git status --porcelain` reports STAT differences, not content ones, and
-    # _git() hard-codes --no-optional-locks so a refreshed index is never
-    # persisted -- which means a file whose mtime moved without its bytes
-    # changing is reported dirty on every run, forever. That fired 2026-09-08:
-    # q_a_pairs_sample.txt was byte-identical to HEAD by every check that reads
-    # bytes, and still flagged the run dirty. A warning that cries wolf is worse
-    # than none, so dirtiness is now measured by content.
-    # --full-name ADDED 2026-09-11, and it is a correctness fix, not a tidy-up.
-    # `git diff --name-only` reports paths from the REPO ROOT; `git ls-files
-    # --others` reports them from the CWD, which is SCRIPT_DIR. So before this,
-    # git_dirty_files mixed two path conventions in one list, and nobody saw it
-    # because the field had never yet held an untracked file. The first run
-    # after provenance.py was created printed exactly that:
-    #     ['ai-103/scripts/m7_cv_audit_tool.py', ..., 'provenance.py']
-    # -- three repo-relative paths and one cwd-relative one, for four files
-    # sitting in the same directory. A provenance field whose paths cannot be
-    # resolved against a single root is not evidence of anything.
-    tracked = _git("diff", "--name-only", "HEAD")
-    # ":/" ADDED 2026-09-15. `ls-files --others` lists only files under the
-    # CWD, which is SCRIPT_DIR -- so an untracked file anywhere else in the
-    # repo was invisible, and the Sep 15 orchestrator pass recorded
-    # git_dirty=false while ai-103/m7-writeup-draft.md sat untracked. The
-    # top-level pathspec makes the listing repo-wide; --full-name already
-    # made the paths repo-relative. `git diff --name-only HEAD` was
-    # repo-wide all along, so only untracked files were affected.
-    untracked = _git("ls-files", "--others", "--exclude-standard", "--full-name",
-                     "--", ":/")
-    status = "\n".join(x for x in (tracked, untracked) if x)
+    # WHEN THE GIT FIELDS ARE READ -- ADDED 2026-09-16. With `git_at_start`
+    # absent, they are read here, when the record is assembled, and the dict
+    # is byte-identical to what it was before this parameter existed (that is
+    # what keeps m7_orchestrator.run_provenance()'s frozen output frozen).
+    # With it present, the recorded git fields are the START snapshot and an
+    # end-of-run comparison is added -- see end_check().
+    git = git_at_start if git_at_start is not None else git_snapshot()
     provenance = {
         "timestamp": datetime.now().astimezone().isoformat(timespec="seconds"),
         "script": script or Path(__file__).name,
-        "git_head": _git("rev-parse", "HEAD"),
-        "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
-        "git_dirty": bool(status),
-        "git_dirty_files": status.splitlines(),
+        "git_head": git["git_head"],
+        "git_branch": git["git_branch"],
+        "git_dirty": git["git_dirty"],
+        "git_dirty_files": git["git_dirty_files"],
     }
+    if git_at_start is not None:
+        provenance.update(end_check(git_at_start))
     if started_at is not None:
         # A naive datetime is accepted and assumed local rather than rejected:
         # this function's standing rule is that provenance is never worth

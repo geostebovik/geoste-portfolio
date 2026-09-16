@@ -64,6 +64,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from m7_cv_audit_tool import ContentAudit
+from provenance import end_check
 from schema_provenance import sent_schema
 
 from m7_orchestrator import (
@@ -214,6 +215,15 @@ def main():
     # Its own name, not m7_orchestrator.py -- run_provenance lives in that
     # module, so Path(__file__).name there is the module, not the caller.
     provenance = run_provenance(script=Path(__file__).name)
+    # ADDED 2026-09-16. run_provenance() is called here, before any Azure call,
+    # so its git fields already describe the START of the run -- the right
+    # moment, because the code is loaded by now. What this probe never had is
+    # the other half: a save or commit made DURING a run went unrecorded, and
+    # some inputs (the fact sheet, the thumbnails) are read per call. Kept
+    # outside run_provenance() so its frozen output stays frozen.
+    git_at_start = {k: provenance[k] for k in
+                    ("git_head", "git_branch", "git_dirty", "git_dirty_files")}
+    run_started_at = datetime.now().astimezone()
     # ADDED 2026-09-15, outside run_provenance() so its frozen output stays
     # frozen. The audit schema reaches the model on every audit_thumbnail()
     # call; see schema_provenance.py for why it is recorded whole.
@@ -266,6 +276,17 @@ def main():
         else:
             print("stop-on-pass: NOT observed in this batch. Clause 7's early exit "
                   "still has zero observations.")
+        # End-of-run half of the provenance, ADDED 2026-09-16. Same field names
+        # core_provenance() uses, so the two probes' results files read alike.
+        # Taken before the results file exists, so the file cannot count
+        # itself as a change.
+        provenance.update(end_check(git_at_start))
+        provenance["started_at"] = run_started_at.isoformat(timespec="seconds")
+        provenance["elapsed_seconds"] = round(
+            (datetime.now().astimezone() - run_started_at).total_seconds(), 1)
+        if provenance["git_changed_during_run"]:
+            print("WARNING: the repo changed during this run. The recorded git "
+                  "fields describe the start; see git_at_end.")
         path = RESULTS_DIR / (datetime.now().strftime("%Y%m%d-%H%M%S")
                               + "_orchestrator_stability.json")
         path.write_text(json.dumps({

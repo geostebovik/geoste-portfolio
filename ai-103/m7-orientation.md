@@ -78,6 +78,13 @@ here already documents as done. Added after the `brand_consistent` regression
 task sat open in Todoist a full day past `m7-orientation.md` already recording
 it as resolved (Sep 1 resolution, caught and fixed Sep 2).
 
+**Run `python ai-103/scripts/check_cited_results_tracked.py` before the last
+commit** (added Sep 16). It fails if any results file cited in the docs or
+code is not in git, and prints the `.gitignore` line and `git add` to run. It
+replaces the Sep 7 "one allow-list line per cited run" reminder, which lapsed
+twice. Its first run found a third lapse, a file cited in
+`m7_fact_sheet_tool.py` since Sep 7.
+
 **Log the session under its own `### Session — <date>` heading in `STATUS.md`,
 and *replace* `## Current next action` rather than appending to it** (added Sep
 6). This is the rule the Sep 6 restructure exists to enforce: `## Next action`
@@ -614,13 +621,29 @@ stayed right, so the verdict tally could not see it either.
   the 15 cert-pass final messages contain "cream", all of them quoted from
   `[content]` (a count, not a rate).
 
-### Provenance recorded at write time describes the end of a run (added 2026-09-16)
+### Record git state when a run starts, and check it again when it ends (added 2026-09-16)
 
-`core_provenance()` reads `git_head` and `git_dirty` when the results file
-is written, after the loop has finished. So any save or commit made during a
-run is attributed to the run, and a run with a mid-run commit would record
-the wrong commit. **Until that is fixed, nothing in the repo is saved or
-committed while a probe runs.** Drafts go outside the repo. See the Backlog.
+The two probes read git state at different moments, and each missed half of
+what happened:
+- **The fixture probe read it at the end**, when the record was assembled.
+  A save made during a run marked the run dirty, and a commit made during a
+  run changed its recorded head.
+- **The orchestrator probe read it at the start** (`run_provenance()` runs
+  before the loop). A save or commit made during a run went unrecorded.
+
+The start is the right moment to identify the code, because Python has
+already loaded it. It is not enough on its own, though: the fact sheet and
+the thumbnails are read on every call. (The first version of this lesson,
+written in the morning, said both probes read at the end. That was wrong for
+the orchestrator probe.)
+
+**Fixed the same day (Claude wrote it):** `provenance.git_snapshot()` and
+`end_check()`. Both probes now record the start snapshot, plus
+`git_changed_during_run`, plus `git_at_end` when something changed, and they
+print a warning in that case. The orchestrator probe also gained
+`started_at` / `elapsed_seconds`. The rule still stands: **don't save or
+commit in the repo during a run.** The probes now *record* a violation; they
+don't prevent one.
 
 ## Where M7 sits in the whole picture
 
@@ -1909,7 +1932,10 @@ for it exists to tune. Kept as the record of what was ruled out and how):**
   proven template to reuse — not proposed as work to do now, just a known,
   real gap rather than an assumed non-issue.
 
-### `probe_fixture_stability.py` has no `__main__` guard
+### ~~`probe_fixture_stability.py` has no `__main__` guard~~ — FIXED 2026-09-16
+
+Claude wrapped the run in `main()`. Verified offline with a stubbed audit
+tool: the import makes 0 calls, and `main()` makes 225.
 
 Its run loop is at module level, so IMPORTING it executes 75 audit calls. Found
 2026-09-11 when a one-line import check was proposed as a smoke test and had to
@@ -2108,7 +2134,14 @@ matcher rather than a classifier.
   neither. Their failure paths were tested in isolation, not against a real
   hang.
 
-### The results allow-list needs a check, not a reminder (added 2026-09-15)
+### ~~The results allow-list needs a check, not a reminder~~ — FIXED 2026-09-16 (added 2026-09-15)
+
+`scripts/check_cited_results_tracked.py` (Claude wrote it) is now on the
+end-of-session checklist. Its first run found `20260907-131248_orchestrator.json`,
+cited in `m7_fact_sheet_tool.py` but never tracked. That file is allow-listed
+and committed now. `--all` also scans `STATUS-archive-phase1.md` and reports
+three Aug 6 files that predate the allow-list. Those are left alone on
+purpose.
 
 Lapsed twice. A small script, run as part of the end-of-session checklist,
 should list every `results/*.json` named in `STATUS.md`,
@@ -2160,14 +2193,21 @@ quotes the line in its final message.
 - **Deciding it before publishing matters,** because the write-up's "What
   it does not do yet" bullet describes this flaw.
 
-### Provenance is captured when the results file is written (added 2026-09-16)
+### ~~Provenance is captured when the results file is written~~ — FIXED 2026-09-16
 
-Both probes call `core_provenance()` after the loop. Capture `git_head` and
-`git_dirty` at start as well, and record both snapshots, or fail loudly if
-they differ. No model-facing change, so it needs no re-certification. Until
-then, follow the standing lesson: no repo saves during a run.
+See the standing lesson "Record git state when a run starts, and check it
+again when it ends". The heading's original claim was half right: it was
+true of the fixture probe only. Verified offline: a simulated mid-run head
+change was recorded as `git_changed_during_run: true`, with `git_at_end`, in
+both probes.
 
-### `ABSENT_COLOR_CHECKS` counts `[observed]` only (added 2026-09-16)
+### ~~`ABSENT_COLOR_CHECKS` counts `[observed]` only~~ — FIXED 2026-09-16
+
+The probe now prints the count for each line and records
+`perception.<fixture>.by_line`, using `fragment()` from
+`analyze_absent_color_fragments.py`. The top-level `count` is still the
+`[observed]` figure, so older files compare. The text below is the original
+entry.
 
 The probe's printed colour count covers one line, so its console summary
 cannot show the `[content]` flaw. Either print the per-line counts from
