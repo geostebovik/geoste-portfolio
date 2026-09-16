@@ -101,8 +101,10 @@ What remains, as listed in the draft's header comment:
 2. ~~**The Conditional Access policy spec**~~: agreed on Sep 16, in
    `phase2-conditional-access-spec-draft.md`.
 
-**Next:** number the Phase 2 build steps, create the Phase 2 orientation doc
-(Todoist), then begin the build with Bicep for the existing IIP resources.
+**Next: M8, the IaC baseline.** Write Bicep for the existing IIP resources
+until `what-if` shows no changes. **`ai-103/phase2-orientation.md` is now
+the plan for Phase 2**, and `m7-orientation.md` still holds the session
+checklists and the M7 backlog.
 
 The Sep 16 plan review is in the Claude project doc
 `claude/2026-09-16-phase2-plan-review.md`, and it records two decisions
@@ -784,9 +786,23 @@ becomes the app policy plus Microsoft-managed baseline policies. The order
 is baseline on first, then security defaults off. Policies keep being
 enforced, but can't be edited, after the trial ends.
 
-**Not yet checked:** whether security defaults are on in `letter7` today
-(Entra admin center → Entra ID → Overview → Properties → Manage security
-defaults).
+**Checked:** security defaults are **ON** in `letter7` (Gerard's
+screenshot, Entra ID → Properties).
+
+**Phase 2 orientation doc created:** `ai-103/phase2-orientation.md` (Claude
+drafted it). It proposes milestones **M8–M14**, continuing the M-series:
+- M8: IaC baseline;
+- M9: identity;
+- M10: keyless migration plus the acceptance-test re-run;
+- M11: the app;
+- M12: networking;
+- M13: Conditional Access, inside the P2 trial;
+- M14: operate (tracing, alerts, CI/CD).
+
+The keyless migration comes **before** the app, because the Function must
+not use keys. **Gerard confirmed the numbering and the order.** He asked
+whether M10 and M11 should be swapped. They were already in build order;
+Claude's note that "M10 comes before M11" had read as if they weren't.
 
 **The Phase 2 entry checklist is complete on paper.** Next comes the build,
 starting with numbering the Phase 2 steps, then Bicep for the existing
@@ -807,7 +823,37 @@ it.
 - **`3aab9bd`:** Gerard's write-up review edits.
 - **`9cbf556`:** the Phase 2 plan review entry and the RBAC draft.
 - **`9862b67`:** the RBAC decisions and the CAF names.
-- **The next commit:** the Conditional Access spec and the evening entry.
+- **`5ffe878`:** the Conditional Access spec and the evening entry.
+- **The wrap-up commit:** the Phase 2 orientation doc, the milestone
+  numbering, the security-defaults check, and this wrap-up.
+
+**At wrap-up:** `check_cited_results_tracked.py` reported 0 problems. The
+next session prompt is `2026-09-17-m7-session-prompt.md` (gitignored). It
+was rewritten for M8, replacing the version drafted in the morning.
+
+#### Afternoon and evening: additional errors by Claude
+
+8. **Used `evgt` for the Event Grid system topic.** CAF's abbreviation is
+   `egst`; `evgt` is for domain topics. Caught by checking CAF before
+   Gerard's naming ruling was recorded.
+9. **Drafted the orientation doc to say "Gerard chose this numbering"**
+   before he had seen it. A correction made in the cloud workspace never
+   reached the file in the repo, because the file was copied over before
+   the correction was made. Fixed at wrap-up, once he had confirmed the
+   numbering.
+10. **"M10 comes before M11" was worded as if the order were unusual.**
+    The table was already in order, and Gerard asked whether to swap them.
+11. **Stopped mid-turn once** after sending the Phase 2 review, without
+    asking the follow-up question. Gerard had to ask what happened.
+
+#### Also noted
+
+- **Approval prompts disappearing (Gerard).** Twice, a pending tool-approval
+  prompt in this conversation (the latest was a Todoist call) vanished as
+  soon as he switched to it from another conversation. The most recent one
+  came when the Todoist and computer connections dropped briefly. Whether
+  the two are related is not established. Report it with the thumbs-down
+  feedback if it recurs.
 
 ### Session — September 15, 2026
 

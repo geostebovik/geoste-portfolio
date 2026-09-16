@@ -11,6 +11,8 @@ signup).
 ## Read this first: this touches the whole tenant, not only the app
 
 1. **Conditional Access and security defaults cannot be on together.**
+   **Security defaults are ON in `letter7`, confirmed from Gerard's
+   screenshot of Entra ID → Properties on Sep 16.**
    Before the first policy can be created, security defaults must be
    *disabled* for the whole `letter7` tenant. That is the tenant that holds
    the Azure subscription and the ostebovik.net production stack.
