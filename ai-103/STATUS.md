@@ -98,7 +98,11 @@ What remains, as listed in the draft's header comment:
 **Phase 2 is the next build work.** Its entry checklist comes first:
 1. ~~**The RBAC model on paper**~~: agreed on Sep 16, in
    `phase2-rbac-model-draft.md`.
-2. **The Conditional Access policy spec.** This is next.
+2. ~~**The Conditional Access policy spec**~~: agreed on Sep 16, in
+   `phase2-conditional-access-spec-draft.md`.
+
+**Next:** number the Phase 2 build steps, create the Phase 2 orientation doc
+(Todoist), then begin the build with Bicep for the existing IIP resources.
 
 The Sep 16 plan review is in the Claude project doc
 `claude/2026-09-16-phase2-plan-review.md`, and it records two decisions
@@ -756,6 +760,38 @@ entry-checklist item.
 - **Todoist:** four Phase 2 tasks added. Next up is the Conditional Access
   policy spec.
 
+#### Evening: the Conditional Access spec
+
+`ai-103/phase2-conditional-access-spec-draft.md` (Claude drafted the
+outline from Microsoft Learn) is the second Phase 2 entry-checklist item.
+Gerard chose option (a) for all nine decisions (C1–C9):
+- a numbered naming standard for policies;
+- **one** break-glass account, a deliberate choice for a single-admin lab
+  (Gerard);
+- no conditions: the policy applies to every sign-in to the app;
+- **phishing-resistant MFA (a passkey).** Gerard accepts that some users
+  will push back, as "the cost of accessing the work";
+- an 8-hour sign-in frequency, and browser sessions never persist;
+- report-only mode until the test plan passes;
+- Microsoft-managed baseline policies;
+- the policies exported as JSON as evidence;
+- when the trial ends: export, delete, and turn security defaults back on.
+
+**Key finding: this changes the whole tenant.** Conditional Access requires
+turning security defaults **off** for all of `letter7`, the tenant that also
+holds the Azure subscription and the production site. So the "one policy"
+becomes the app policy plus Microsoft-managed baseline policies. The order
+is baseline on first, then security defaults off. Policies keep being
+enforced, but can't be edited, after the trial ends.
+
+**Not yet checked:** whether security defaults are on in `letter7` today
+(Entra admin center → Entra ID → Overview → Properties → Manage security
+defaults).
+
+**The Phase 2 entry checklist is complete on paper.** Next comes the build,
+starting with numbering the Phase 2 steps, then Bicep for the existing
+resources.
+
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
@@ -770,7 +806,8 @@ it.
   quota record.
 - **`3aab9bd`:** Gerard's write-up review edits.
 - **`9cbf556`:** the Phase 2 plan review entry and the RBAC draft.
-- **The next commit:** the RBAC decisions, the CAF names, and this entry.
+- **`9862b67`:** the RBAC decisions and the CAF names.
+- **The next commit:** the Conditional Access spec and the evening entry.
 
 ### Session — September 15, 2026
 
