@@ -96,8 +96,9 @@ What remains, as listed in the draft's header comment:
 - **The group push** with Phase 2 and the two stale site lines.
 
 **Phase 2 is the next build work.** Its entry checklist comes first:
-1. **The RBAC model on paper** (about 60 min).
-2. **The Conditional Access policy spec.**
+1. ~~**The RBAC model on paper**~~: agreed on Sep 16, in
+   `phase2-rbac-model-draft.md`.
+2. **The Conditional Access policy spec.** This is next.
 
 The Sep 16 plan review is in the Claude project doc
 `claude/2026-09-16-phase2-plan-review.md`, and it records two decisions
@@ -721,6 +722,40 @@ review is in the Claude project doc `claude/2026-09-16-phase2-plan-review.md`.
 - **The IIP resources are not in Bicep.**
 - **Conditional Access for agents needs an Agent 365 license.**
 
+#### Late afternoon: the RBAC model on paper
+
+`ai-103/phase2-rbac-model-draft.md` (Claude drafted) is the first Phase 2
+entry-checklist item.
+- **Gerard's calls:**
+  - option (a) on all seven decisions:
+    - D1: keep Owner as a documented single-admin exception;
+    - D2: a user-assigned identity for the Function;
+    - D3: a separate storage account for the Function host;
+    - D4: the results page runs on the same Function app, with built-in
+      sign-in;
+    - D5: Foundry User scoped to the account;
+    - D6: CI/CD over GitHub OIDC is in scope;
+    - D7: Key Vault is kept, empty on purpose;
+  - **new resources follow CAF naming,** even where existing names don't.
+- **Names were checked against CAF's abbreviation page.** One correction:
+  an Event Grid system topic is `egst`, not `evgt`, which is CAF's
+  abbreviation for domain topics.
+- **The two open questions are not waiting on Gerard.**
+  - Event Grid delivery vs. inbound restrictions is decided at the
+    networking design step.
+  - Migration order is a build-time rule.
+- **P2 trial caution, from Gerard's screenshot of the signup page:**
+  - the 30-day clock starts at signup;
+  - it auto-converts to a paid one-year subscription ($10.50 per user per
+    month);
+  - the charge is billed through Microsoft 365, so the Azure spending limit
+    won't stop it.
+
+  Turn recurring billing off immediately after signup. There is a Todoist
+  task for this.
+- **Todoist:** four Phase 2 tasks added. Next up is the Conditional Access
+  policy spec.
+
 #### Git state
 
 Written after the day's last commit. Verify with `git status` before trusting
@@ -734,8 +769,8 @@ it.
 - **`b1293fd`:** the midday commit, adding the colour-flaw decision and the
   quota record.
 - **`3aab9bd`:** Gerard's write-up review edits.
-- **The next commit:** the Phase 2 plan review entry and the next-action
-  update.
+- **`9cbf556`:** the Phase 2 plan review entry and the RBAC draft.
+- **The next commit:** the RBAC decisions, the CAF names, and this entry.
 
 ### Session — September 15, 2026
 

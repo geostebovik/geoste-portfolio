@@ -1,10 +1,12 @@
 # Phase 2 — RBAC model (on paper)
 
-**Status: DRAFT, 2026-09-16.** This is the first item on the Phase 2 entry
-checklist. Claude drafted it from the app design Gerard chose on Sep 16 and
-from Microsoft Learn. Gerard owns the design decisions, which are marked
-**DECIDE**. Rows marked **VERIFY** are what the docs say and must be
-confirmed with a real call at build time. Nothing here is deployed.
+**Status: DESIGN AGREED ON PAPER, 2026-09-16.** This is the first item on
+the Phase 2 entry checklist. Claude drafted it from the app design Gerard
+chose on Sep 16 and from Microsoft Learn. **Gerard took option (a) on all
+seven decisions (D1–D7) and ruled that new resources follow CAF naming,
+even where existing names do not.** Rows marked **VERIFY** are what the docs
+say and must be confirmed with a real call at build time. Nothing here is
+deployed.
 
 ## The app this model is for
 
@@ -33,19 +35,41 @@ Entra ID P2 trial.
 
 ## Resources
 
-| Resource | Status | Name |
-|---|---|---|
-| Resource group | exists | `rg-iip-dev-wus-01` |
-| Foundry account / project | exists | `aif-dev-wus-01` / `proj-iip-dev-wus-01` |
-| App data storage (containers `uploads`, `results`) | exists (new containers) | `stiipdevwus01` |
-| Key Vault | exists | `kv-iip-dev-wus-01` |
-| Function app + Flex Consumption plan | planned | `func-iip-dev-wus-01` / `asp-iip-dev-wus-01` (**DECIDE** names) |
-| Function host storage | planned | `stiipfuncdevwus01` (**DECIDE** D3) |
-| User-assigned managed identity for the Function | planned | `id-iip-dev-wus-01` (**DECIDE** D2) |
-| Application Insights + Log Analytics | planned | `appi-iip-dev-wus-01` / `log-iip-dev-wus-01` |
-| Event Grid system topic (blob events) | planned | `evgt-iip-dev-wus-01` |
-| Entra app registration for the results page | planned | `app-iip-results-dev` (not an ARM resource) |
-| Entra group for viewers | planned | `grp-iip-results-viewers` |
+**Naming rule (Gerard, Sep 16): new resources follow CAF**, using
+`{abbreviation}-{workload}-{env}-{region}-{instance}`. Storage accounts use
+the same parts without hyphens. The abbreviations come from CAF's "Abbreviation
+recommendations for Azure resources" page, checked on Sep 16. Existing
+names that don't fit (`aif-dev-wus-01` has no workload token) are not
+renamed; renaming would mean recreating the resources. Where two resources
+of the same type differ only in purpose, the instance number tells them
+apart and a `purpose` tag says what each is for. The tags on every new
+resource are `owner`, `env`, `region`, `managed-by:bicep`, `project:iip` and
+`purpose`.
+
+| Resource | Status | Name | CAF abbreviation |
+|---|---|---|---|
+| Resource group | exists | `rg-iip-dev-wus-01` | `rg` |
+| Foundry account / project | exists | `aif-dev-wus-01` / `proj-iip-dev-wus-01` | `aif` / `proj` |
+| App data storage (containers `uploads`, `results`) | exists (new containers) | `stiipdevwus01` | `st` |
+| Key Vault | exists | `kv-iip-dev-wus-01` | `kv` |
+| Function app | planned | `func-iip-dev-wus-01` | `func` |
+| Flex Consumption plan | planned | `asp-iip-dev-wus-01` | `asp` |
+| Function host storage (D3) | planned | `stiipdevwus02` (purpose: function-host) | `st` |
+| Function managed identity (D2) | planned | `id-iip-dev-wus-01` (purpose: function-runtime) | `id` |
+| CI/CD managed identity (D6) | planned | `id-iip-dev-wus-02` (purpose: github-deploy) | `id` |
+| Application Insights | planned | `appi-iip-dev-wus-01` | `appi` |
+| Log Analytics workspace | planned | `log-iip-dev-wus-01` | `log` |
+| Event Grid system topic (blob events) | planned | `egst-iip-dev-wus-01` | `egst` |
+
+**Entra ID objects are outside CAF,** which only covers Azure resources.
+Their proposed names are:
+- the app registration for the results page: **IIP Results (dev)**;
+- the viewers group: **IIP Results Viewers (dev)**.
+
+These are display names, not resource names. An earlier draft of this page
+used an `app-` prefix for the app registration. It was dropped, because
+`app` is CAF's abbreviation for a web app and would have implied a resource
+that doesn't exist.
 
 ## Role assignments
 
@@ -54,28 +78,28 @@ Entra ID P2 trial.
 | 1 | Gerard (admin user) | Subscription | Owner *(existing)* | Single-admin lab: creates resources and assigns roles. **A documented exception, see D1.** |
 | 2 | Gerard | `aif-dev-wus-01` | Foundry User | Keyless local development runs (`DefaultAzureCredential`). Probably assigned automatically when the project was created; check before adding. |
 | 3 | Gerard | `stiipdevwus01` | Storage Blob Data Contributor | Upload test inputs and read results once shared-key access is off. Owner is a control-plane role only and does **not** grant blob data access. |
-| 4 | Function identity | `aif-dev-wus-01` | Foundry User | Runs the agent. The tools also make direct model calls: the judge (gpt-5-4), the image audit (gpt-5-4-mini) and Vision Read. Foundry Agent Consumer alone would cover calling the agent but not those model calls. **VERIFY** that Foundry User covers Vision Read and the Evaluation SDK. **DECIDE** D5 (account or project scope). |
+| 4 | Function identity `id-iip-dev-wus-01` | `aif-dev-wus-01` | Foundry User | Runs the agent. The tools also make direct model calls: the judge (gpt-5-4), the image audit (gpt-5-4-mini) and Vision Read. Foundry Agent Consumer alone would cover calling the agent but not those model calls. **VERIFY** that Foundry User covers Vision Read and the Evaluation SDK. D5: scoped to the account. |
 | 5 | Function identity | `stiipdevwus01` / `uploads` | Storage Blob Data Reader | Reads the blob that triggered the run. **VERIFY:** the identity-based blob-trigger docs list Blob Data Owner + Queue Data Contributor on the trigger's connection account. Try container-scoped Reader first, and widen only if the trigger fails. Record what was actually required. |
 | 6 | Function identity | `stiipdevwus01` / `results` | Storage Blob Data Contributor | Writes results; the results page lists and reads them. |
-| 7 | Function identity | Host storage | Storage Blob Data Owner, Storage Queue Data Contributor | Needed by the Functions host (`AzureWebJobsStorage`) and for the deployment package. Microsoft Learn also lists Storage Account Contributor when blob triggers are used. That is a broad control-plane role, so **VERIFY** it is really needed before assigning it. |
+| 7 | Function identity | Host storage `stiipdevwus02` | Storage Blob Data Owner, Storage Queue Data Contributor | Needed by the Functions host (`AzureWebJobsStorage`) and for the deployment package. Microsoft Learn also lists Storage Account Contributor when blob triggers are used. That is a broad control-plane role, so **VERIFY** it is really needed before assigning it. |
 | 8 | Function identity | `appi-iip-dev-wus-01` | Monitoring Metrics Publisher | Telemetry authenticated with Entra ID, so Application Insights can also disable local auth. |
 | 9 | Foundry project identity | `aif-dev-wus-01` | Foundry User *(automatic)* | Microsoft's minimum assignment. M7's tools run client-side, in the Function, so the project identity needs **nothing** on storage. |
-| 10 | `grp-iip-results-viewers` | Enterprise app `app-iip-results-dev` | App assignment, with "Assignment required" = Yes | Only group members can sign in. **No Azure RBAC.** |
+| 10 | Group **IIP Results Viewers (dev)** | Enterprise app **IIP Results (dev)** | App assignment, with "Assignment required" = Yes | Only group members can sign in. **No Azure RBAC.** |
 | 11 | CA test user | Member of row 10's group | — | The subject for Conditional Access in report-only mode, then enforced. |
-| 12 | CI/CD identity *(if in scope, D6)* | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
+| 12 | CI/CD identity `id-iip-dev-wus-02` (D6: in scope) | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
 
 ## Deliberately given nothing
 
 - **Key Vault:** no data-plane assignments are planned, because nothing
-  keyless needs a secret. **DECIDE** D7: what, if anything, stays in it.
+  keyless needs a secret. D7: Key Vault is kept, empty on purpose, and still uses RBAC authorization.
 - **No workload identity** holds Contributor or Owner anywhere.
 - **Viewers** hold no Azure roles (principle 3).
 - **AI Search** (`srch-iip-dev-wus-01`, from M5) is not used by the Phase 2
   app, so no assignments are made there.
 
-## Decisions for Gerard
+## Decisions (Gerard chose option (a) on all seven, Sep 16)
 
-| ID | Question | Options (Claude's lean first) |
+| ID | Question | Options; **(a) was chosen for every one** |
 |---|---|---|
 | D1 | Your admin posture | (a) Keep subscription Owner and document it as a single-admin exception. PIM is the enterprise answer and is out of scope. (b) Day to day: Contributor plus **Role Based Access Control Administrator**, restricted to the roles in this table, at resource-group scope. Owner is kept only as break-glass. |
 | D2 | Function identity type | (a) **User-assigned.** Bicep can create it and assign roles before the app exists, and it survives the app being recreated. (b) System-assigned: simpler, but tied to the app's lifetime. |
@@ -87,12 +111,18 @@ Entra ID P2 trial.
 
 ## Open questions that affect this model
 
-- **Event Grid–based blob trigger and inbound restrictions.** Microsoft
+These are not waiting on Gerard today. They are recorded here so they are
+not lost, and each one says when it gets acted on.
+
+- **Event Grid–based blob trigger and inbound restrictions. This needs
+  Gerard's decision at the networking design step, which comes before any
+  private endpoint is built.** Microsoft
   Learn says this trigger does not work with inbound access restrictions on
   the Function, unless events are delivered using a managed identity. That
   choice changes the networking design (private endpoints), so it has to be
   settled before the Function's inbound access is locked down.
-- **Migration order.** Assign every role in this table first, migrate the
+- **Migration order. This is a build-time rule, and no decision is
+  needed.** Assign every role in this table first, migrate the
   scripts to keyless, and re-run the acceptance test. Only then set
   `disableLocalAuth` on the Foundry account and turn off shared-key access
   on storage. Doing it in any other order breaks the key-based scripts
