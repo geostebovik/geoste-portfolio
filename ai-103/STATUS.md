@@ -132,7 +132,10 @@ Figure rules (also in the draft's header):
 - **Never use `1/15` for colour naming,** and never use `0.244` as a current
   figure.
 - **Never give a combined `N/225`, `N/360` or `N/450`.** Model-judged and
-  deterministic counts are reported apart.
+  deterministic counts are reported apart. **As of 2026-09-18 the orchestrator
+  cannot produce one:** `cell_counts()` returns the two populations separately
+  and carries no combined total, and its results JSON writes `model_judged_*`
+  and `deterministic_*` rather than `cells_correct`/`cells_total`.
 
 **Drafting is still not publishing.** The draft waits for Phase 2 and goes
 out in one group push, together with the two stale site lines.
@@ -453,6 +456,16 @@ handle both shapes. No script reads them today — checked.
 Linux VM behind the folder bridge, which has no azure SDK, so the azure
 imports were stubbed. Gerard ran `python -c "import m7_orchestrator"` in the
 Windows venv, which closes that gap.
+
+**The rest of this file was swept for the old name, and annotated rather than
+rewritten.** Three past entries referenced `cells_correct()`, which no longer
+exists in the code: the Sep 11 open-defect pointer, the Sep 11 "never needed a
+run" lesson, and the Sep 8 unmeasured-items note. Each now carries a dated
+bracket saying what changed on Sep 18; none of the original sentences were
+altered, because each was true on the date it was written. **The standing figure
+rule in Key Lessons was updated in place**, since that section is live guidance
+rather than history: a combined `N/225` or `N/360` is no longer merely
+forbidden, it is now unobtainable from the orchestrator.
 
 **Not touched, deliberately.** `probe_orchestrator_stability.py`'s `agreement`
 counter still counts passes rather than matches. Separate backlog entry,
@@ -1410,7 +1423,9 @@ count, so the number is honest as arithmetic. What overstates is the phrase
 third of every row is arithmetic. Reworded, not recounted. Separately,
 `cells_correct()` in `m7_orchestrator.py` DOES count deterministic cells
 alongside judged ones and should be split the same way the fixture probe now
-is — Backlog, since the row figure is the one actually quoted.
+is — Backlog, since the row figure is the one actually quoted. **[Closed
+2026-09-18: split into `cell_counts()`, verified against the Sep 10 results
+file with no Azure calls. See the Sep 18 entry.]**
 
 #### The design: a schema field, not a sentence
 
@@ -1611,6 +1626,8 @@ which Gerard pushed back on. The push was right, and it exposed two errors:
 1. **`cells_correct()` never needed a run.** It is a reporting function and can
    be re-verified against an existing results file with no Azure calls at all.
    "Edits `m7_orchestrator.py`" had been conflated with "requires a pass."
+   **[Borne out 2026-09-18: fixed and verified against
+   `results/20260910-123321_orchestrator_stability.json`, zero Azure calls.]**
 2. **The audit change was not contract-preserving in the way it was described.**
    `ThumbnailAudit`'s *shape* did not move, but `notes` is a string the agent
    reads AND republishes in its own prose summary, and it now carries an extra
@@ -2399,6 +2416,8 @@ when nothing valid fits.
   fixture it reached. In a seven-run certification pass one transient error
   would have read as instability. `cells_correct()` now excludes unmeasured
   items and `unmeasured()` reports them with the error and the tools that ran.
+  **[`cells_correct()` was renamed `cell_counts()` on 2026-09-18; the
+  unmeasured-item exclusion described here is unchanged.]**
   Unit-tested against a synthetic crash; **never exercised against a real one**,
   since run 2 completed cleanly.
 - **`run_provenance()` reported a false dirty tree.** It used
