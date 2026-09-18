@@ -60,6 +60,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import NamedTuple
 
 from dotenv import load_dotenv
 from azure.ai.agents import AgentsClient
@@ -79,6 +80,16 @@ FIXTURE_DIR = (SCRIPT_DIR / ".." / "iip-docs" / "m7-riverside-hardware").resolve
 RESULTS_DIR = SCRIPT_DIR / "results"
 
 AGENT_NAME = "riverside-content-agent"
+
+# Which audit fields the model decides and which audit_thumbnail decides
+# deterministically. probe_fixture_stability.py was given the same split on
+# 2026-09-11; this file kept mixing them until 2026-09-18.
+#
+# Kept as explicit tuples rather than derived by subtraction so that adding a
+# fourth field to the rubric forces a deliberate decision about which side it
+# lands on instead of silently defaulting to "judged".
+MODEL_JUDGED_FIELDS = ("brand_consistent", "info_accurate")
+DETERMINISTIC_FIELDS = ("text_legible",)
 
 # V1 is retained, unused, because every result before 2026-09-07 was measured
 # against it -- keeping it here makes a comparison run a one-line change rather
@@ -930,17 +941,42 @@ def measured(record: dict) -> bool:
     return bool(record.get("actual_audit"))
 
 
-def cells_correct(records: list[dict], matrix_only: bool = False) -> tuple[int, int]:
+class CellCounts(NamedTuple):
+    """Audit cells split by who decided them.
+
+    Deliberately carries NO combined total, not even as a convenience property.
+    A single N/225 figure credits the model with the deterministic text_legible
+    cells, which is the defect this type exists to remove -- and a combined
+    number that can be reached for is a combined number that gets quoted.
+    """
+
+    judged_correct: int
+    judged_total: int
+    deterministic_correct: int
+    deterministic_total: int
+
+
+def cell_counts(records: list[dict], matrix_only: bool = False) -> CellCounts:
     """Correct audit cells, counted against content-items-plan.md's answer key.
+
+    Model-judged and deterministic cells are tallied separately -- see
+    MODEL_JUDGED_FIELDS. Until 2026-09-18 this function iterated all three
+    fields into one total, so every N/225 and N/360 figure it produced credited
+    the model with the deterministic text_legible cells.
+
+    Row-level figures are unaffected by that defect and were not changed: a row
+    matches only if all three fields match, so an always-true conjunct cannot
+    inflate a conjunction.
 
     `matrix_only` restricts the count to items 1-5 -- the 5x3 = 15-cell matrix
     every run before 2026-09-08 was reported against. Items 6 and 7 carry audit
     cells too (they reuse item1's clean thumbnail), but folding them in would
-    silently change the headline from 15 to 21 and make no prior run comparable
-    without arithmetic. Both totals are printed and persisted; which one becomes
-    the headline is a decision to make against a real run, not in advance.
+    silently change the headline and make no prior run comparable without
+    arithmetic. Both are printed and persisted; which one becomes the headline
+    is a decision to make against a real run, not in advance.
     """
-    correct = total = 0
+    judged_correct = judged_total = 0
+    deterministic_correct = deterministic_total = 0
     for record in records:
         if matrix_only and record.get("text_path"):
             continue
@@ -948,10 +984,23 @@ def cells_correct(records: list[dict], matrix_only: bool = False) -> tuple[int, 
             continue
         actual = record.get("actual_audit") or {}
         for key, expected in record["expected_audit"].items():
-            total += 1
-            if actual.get(key) == expected:
-                correct += 1
-    return correct, total
+            hit = 1 if actual.get(key) == expected else 0
+            if key in MODEL_JUDGED_FIELDS:
+                judged_total += 1
+                judged_correct += hit
+            elif key in DETERMINISTIC_FIELDS:
+                deterministic_total += 1
+                deterministic_correct += hit
+            else:
+                raise ValueError(
+                    f"audit field {key!r} is in neither MODEL_JUDGED_FIELDS nor "
+                    f"DETERMINISTIC_FIELDS. Add it to one deliberately -- "
+                    f"defaulting it to either side is how the two populations "
+                    f"got mixed in the first place."
+                )
+    return CellCounts(
+        judged_correct, judged_total, deterministic_correct, deterministic_total
+    )
 
 
 def unmeasured(records: list[dict], matrix_only: bool = False) -> list[dict]:
@@ -989,8 +1038,8 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
     sort alongside the fixture-stability runs they will be read against.
     """
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    correct, total = cells_correct(records)
-    m_correct, m_total = cells_correct(records, matrix_only=True)
+    counts = cell_counts(records)
+    m_counts = cell_counts(records, matrix_only=True)
     not_measured = unmeasured(records)
     path = RESULTS_DIR / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_orchestrator.json"
     payload = {
@@ -998,10 +1047,16 @@ def write_results(provenance: dict, records: list[dict]) -> Path:
         "summary": {
             "items_run": len(records),
             "items_matching_expected": sum(1 for r in records if r.get("audit_matches_expected")),
-            "cells_correct": correct,
-            "cells_total": total,
-            "matrix_cells_correct": m_correct,
-            "matrix_cells_total": m_total,
+            "model_judged_fields": list(MODEL_JUDGED_FIELDS),
+            "deterministic_fields": list(DETERMINISTIC_FIELDS),
+            "model_judged_correct": counts.judged_correct,
+            "model_judged_total": counts.judged_total,
+            "deterministic_correct": counts.deterministic_correct,
+            "deterministic_total": counts.deterministic_total,
+            "matrix_model_judged_correct": m_counts.judged_correct,
+            "matrix_model_judged_total": m_counts.judged_total,
+            "matrix_deterministic_correct": m_counts.deterministic_correct,
+            "matrix_deterministic_total": m_counts.deterministic_total,
             "unmeasured_items": not_measured,
             "unmeasured_cells": sum(u["cells"] for u in not_measured),
             "text_path_items_matching_expected": sum(
@@ -1056,12 +1111,23 @@ def main():
         # Written even on a crash: a partial run is still evidence, and losing
         # it is the exact failure this file was changed to stop.
         path = write_results(provenance, records)
-        correct, total = cells_correct(records)
-        m_correct, m_total = cells_correct(records, matrix_only=True)
-        print(f"\n{m_correct}/{m_total} MEASURED audit cells match content-items-plan.md "
-              f"(items 1-5, the matrix prior runs are reported against)")
-        if total != m_total:
-            print(f"{correct}/{total} measured audit cells including the text-path items")
+        counts = cell_counts(records)
+        m_counts = cell_counts(records, matrix_only=True)
+        print("\nMEASURED audit cells vs content-items-plan.md "
+              "(items 1-5, the matrix prior runs are reported against):")
+        print(f"  model-judged:  {m_counts.judged_correct}/{m_counts.judged_total} "
+              f"({', '.join(MODEL_JUDGED_FIELDS)})")
+        print(f"  deterministic: {m_counts.deterministic_correct}/"
+              f"{m_counts.deterministic_total} "
+              f"({', '.join(DETERMINISTIC_FIELDS)} -- decided by audit_thumbnail, "
+              f"not by the model)")
+        print("  Report these separately. A combined figure credits the model "
+              "with cells it did not decide.")
+        if counts.judged_total != m_counts.judged_total:
+            print(f"  including the text-path items: "
+                  f"{counts.judged_correct}/{counts.judged_total} judged, "
+                  f"{counts.deterministic_correct}/{counts.deterministic_total} "
+                  f"deterministic")
         for u in unmeasured(records):
             print(f"NOT MEASURED: {u['id']} -- {u['cells']} cells have no verdict. "
                   f"run_status={u['run_status']} error={u['last_error']} "

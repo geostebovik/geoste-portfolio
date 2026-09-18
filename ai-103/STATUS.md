@@ -401,6 +401,63 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
+### Session — September 18, 2026 — short session, one backlog item
+
+**Scope was chosen deliberately small.** One self-contained backlog item with
+no Azure calls and no acceptance-test exposure, rather than starting M8.
+Gerard chose the item and ran the import check in the Windows venv; Claude
+wrote the change, the verification and this entry.
+
+**`cells_correct()` is fixed — judged and deterministic audit cells are now
+counted separately.** It iterated all three fields per record, so every
+`N/225` and `N/360` figure it produced credited the model with the
+deterministic `text_legible` cells. Same defect `probe_fixture_stability.py`
+carried until Sep 11, and it got the same fix.
+
+- `cells_correct()` is replaced by `cell_counts()`, returning a `CellCounts`
+  NamedTuple: `judged_correct`, `judged_total`, `deterministic_correct`,
+  `deterministic_total`. **It carries no combined total, deliberately** — not
+  even as a convenience property. A combined number that can be reached for is
+  a combined number that gets quoted.
+- `MODEL_JUDGED_FIELDS` and `DETERMINISTIC_FIELDS` are now explicit module
+  constants, matching `probe_fixture_stability.py`. An audit field in neither
+  raises `ValueError` rather than defaulting to judged.
+
+**Verified with no Azure calls**, against
+`results/20260910-123321_orchestrator_stability.json` — which is what the
+Sep 11 entry predicted, and why the deferral "that would require another
+orchestrator run" was wrong when it was made:
+
+| population | all 8 items | matrix (items 1-5) |
+| --- | --- | --- |
+| old combined | 357/360 | 222/225 |
+| model-judged | 237/240 | 147/150 |
+| deterministic | 120/120 | 75/75 |
+
+The two populations partition the old total exactly, in both slices. **The
+deterministic cells were 120/120**, so the old combined figure was padded by a
+population that cannot vary: 357/360 reads as 99.2% where the model's own
+score is 98.75%.
+
+**The row figure is untouched: 117/120, as the Sep 11 entry predicted.** A row
+matches only if all three fields match, so an always-true conjunct cannot
+inflate a conjunction.
+
+**Results JSON keys changed.** `cells_correct`, `cells_total`,
+`matrix_cells_correct` and `matrix_cells_total` are replaced by
+`model_judged_*`, `deterministic_*` and the two field lists. Runs written
+before today keep the old keys, so anything that later reads across runs must
+handle both shapes. No script reads them today — checked.
+
+**One verification caveat.** The check that loaded the whole module ran on the
+Linux VM behind the folder bridge, which has no azure SDK, so the azure
+imports were stubbed. Gerard ran `python -c "import m7_orchestrator"` in the
+Windows venv, which closes that gap.
+
+**Not touched, deliberately.** `probe_orchestrator_stability.py`'s `agreement`
+counter still counts passes rather than matches. Separate backlog entry,
+separate session.
+
 ### Session — September 16, 2026
 
 **The write-up rework found that the shipped code's colour figure counted

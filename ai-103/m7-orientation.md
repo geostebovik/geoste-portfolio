@@ -1125,7 +1125,8 @@ CV-audit run should score exactly as documented there — that table is what
      old phrase "audit verdict layer" overstated was the LABEL — each row is
      two model judgments plus one deterministic measurement, not three
      verdicts. Reworded, not recounted. Note separately that `cells_correct()`
-     DOES count deterministic cells alongside judged ones — Backlog.
+     DID count deterministic cells alongside judged ones until 2026-09-18,
+     when it was replaced by `cell_counts()` — see that Backlog entry.
      **And the perception behind those passes was NOT fixed — see the Sep 11
      entry, where it was partly fixed and fully diagnosed.**
    - **The one genuine defect is a SCORE defect.** item7 run 8 scored relevance
@@ -1590,8 +1591,8 @@ session's narrative paragraph in `STATUS.md`.
   and used.** `probe_orchestrator_stability.py` is the harness, and it produced
   both certification passes (Sep 10 and Sep 11, 120 item-runs each). Its own
   known reporting defects are separate entries: `agreement` counts passes rather
-  than matches, and `cells_correct()` mixes deterministic cells with judged
-  ones. Original entry: `probe_fixture_stability.py` covers the CV audit only;
+  than matches (still open), and `cells_correct()` mixed deterministic cells
+  with judged ones (fixed 2026-09-18). Original entry: `probe_fixture_stability.py` covers the CV audit only;
   the certification pass needs its own, or an extension of that one.
 - **`gpt-5-4-mini` showed 46% rate limiting in the portal (Sep 7), unexplained.**
   Mini is what `audit_thumbnail` runs on. Worth asking whether any of the
@@ -1957,19 +1958,47 @@ moment anything does — a test collector, an `__init__`, or someone reaching fo
 `observed_colors_of()` as a helper. Three lines to fix. Not done on Sep 11
 because it would have been a second change inside a measurement.
 
-### `cells_correct()` counts deterministic cells alongside judged ones
+### ~~`cells_correct()` counts deterministic cells alongside judged ones~~ — FIXED 2026-09-18
 
-`m7_orchestrator.py`. It iterates all three fields per record, so any `N/225` or
-`N/360` figure it produces credits the model with the deterministic
-`text_legible` cells. Same defect the fixture probe had until Sep 11; same fix —
-tally and report the two populations separately.
-
-**This needs no Azure run.** It is a reporting function and can be verified by
+Original entry: `m7_orchestrator.py` iterates all three fields per record, so
+any `N/225` or `N/360` figure it produces credits the model with the
+deterministic `text_legible` cells. Same defect the fixture probe had until
+Sep 11; same fix — tally and report the two populations separately. **This
+needs no Azure run.** It is a reporting function and can be verified by
 re-running it against `results/20260910-123321_orchestrator_stability.json`.
 Deferred from Sep 11 only to avoid a third edit to `m7_orchestrator.py` in a
 session that was mid-certification.
 
-Note the row-level figure actually quoted (117/120) is unaffected — see item 7.
+**Fixed 2026-09-18.** `cells_correct()` is replaced by `cell_counts()`,
+returning a `CellCounts` NamedTuple of judged and deterministic
+correct/total. It carries no combined figure by design, and an audit field in
+neither `MODEL_JUDGED_FIELDS` nor `DETERMINISTIC_FIELDS` now raises rather
+than defaulting to judged. Claude wrote the change and the verification;
+Gerard chose the item and ran the import check in the Windows venv.
+
+**Verified with no Azure calls**, against
+`results/20260910-123321_orchestrator_stability.json`, exactly as this entry
+said was possible:
+
+| population | all 8 items | matrix (items 1-5) |
+| --- | --- | --- |
+| old combined | 357/360 | 222/225 |
+| model-judged | 237/240 | 147/150 |
+| deterministic | 120/120 | 75/75 |
+
+The two populations partition the old total exactly, in both slices. The
+deterministic cells were 120/120, so the old combined figure was padded by a
+population that cannot vary: 357/360 reads as 99.2% where the model's own
+score is 98.75%.
+
+The row-level figure actually quoted (117/120) is unaffected, as this entry
+predicted — see item 7.
+
+Results JSON keys changed with it: `cells_correct`, `cells_total`,
+`matrix_cells_correct` and `matrix_cells_total` are replaced by
+`model_judged_*`, `deterministic_*` and the two field lists. Results files
+written before 2026-09-18 keep the old keys, so anything that later reads
+across runs must handle both shapes. No script reads them today — checked.
 
 ### The remaining `brand_consistent` defect is a NAMING constraint — fixed in `[observed]` only (Sep 14), still open in `[content]` (Sep 16)
 
