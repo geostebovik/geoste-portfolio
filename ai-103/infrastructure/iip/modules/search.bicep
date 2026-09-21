@@ -2,9 +2,11 @@
 // IIP — AI Search (srch-iip-dev-wus-01)
 // Baselined from the live resource on 2026-09-21.
 //
-// SKU is 'free' and that is a one-way door: a free search service cannot be
-// scaled up in place. Changing this value means delete and recreate, which
-// destroys the indexes M5 built. Treat this line as load-bearing.
+// SKU is 'free' and the tier cannot be changed after creation: moving to
+// basic or standard means delete and recreate the service. That is recoverable
+// -- scripts/m5_index.py rebuilds the index from a tracked source document --
+// but the free tier CANNOT take a private endpoint at all, which is the
+// constraint that would actually bite if M12 ever wants Search behind one.
 //
 // NOT declared: properties.endpoint. The 2025-05-01 schema does not flag it
 // ReadOnly, but a search endpoint is not choosable — it is always

@@ -70,10 +70,18 @@ calls is built from the subdomain, not the resource name. Left to default, ARM
 derives it from the account name, the endpoint host changes, and every script
 fails at once with errors that point nowhere near the cause.
 
-**`sku.name = 'free'`** (`modules/search.bicep`). A free search service cannot
-be scaled in place. Changing this means delete and recreate, which destroys the
-M5 indexes. It also means the service can never take a private endpoint —
-relevant to M12.
+**`sku.name = 'free'`** (`modules/search.bicep`). An Azure AI Search tier
+cannot be changed after creation — free to basic or standard means delete and
+recreate the service.
+
+*Corrected 2026-09-21, same day: an earlier draft of this file said that would
+"destroy the indexes M5 built". That overstated it.* `scripts/m5_index.py`
+creates the index and uploads from a tracked source document
+(`iip-docs/Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json`), so a
+recreate is a script re-run costing embedding calls, not lost work. The real
+constraints of the free tier are: **no private endpoint support** (so Search
+can never sit behind one while it stays free — M12 does not currently ask it
+to), 3 indexes, 50 MB, fixed at 1 replica and 1 partition, and no SLA.
 
 **`@batchSize(1)`** on the model deployment loop (`modules/foundry.bicep`).
 Cognitive Services rejects concurrent writes to deployments on one account.

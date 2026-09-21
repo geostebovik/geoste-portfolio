@@ -80,7 +80,7 @@ Function must not use keys.
 
 | # | Milestone | Done when | Rough size | Depends on |
 |---|---|---|---|---|
-| **M8** | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` shows **no changes** against the live resources, and the Bicep is committed. | 1–2 sessions | — |
+| **M8** | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
 | **M10** | **Keyless migration.** The 11 key-based scripts move to Entra ID, M7's tools first. M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no script reads a key. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
@@ -88,20 +88,19 @@ Function must not use keys.
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
 | **M14** | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
 
-**M8's done-when — open.** The table says "`az deployment group what-if`
-shows **no changes**". Azure will not produce that against this resource
-group: `properties.armFeatures` on the Foundry account, and `kind`,
+**M8's done-when — amended Sep 21, by Gerard.** It originally read
+"`what-if` shows **no changes**". Azure will not produce that against this
+resource group: `properties.armFeatures` on the Foundry account, and `kind`,
 `agentIdentity`, `internalId`, `isDefault` and `endpoints` on the project, are
 either flagged `ReadOnly` or absent from the `2025-06-01` schema, so no
 template can declare them and `what-if` reports them as deletions forever.
 
-Claude proposed (Sep 21) amending the condition to: *`what-if` reports no
-changes other than the documented provider-owned properties listed in
-`infrastructure/iip/README.md`.* **Gerard has not decided.** It matters beyond
-M8 — it is the standard M9-M14 inherit, and the alternative to amending it is
-either leaving M8 permanently open on a condition Azure will not meet, or
-deleting properties from the template to force a clean run, which would make
-the Bicep a worse description of the infrastructure rather than a better one.
+Gerard chose to amend the condition rather than either leave M8 permanently
+open or delete the stubborn properties to force a clean run — on the grounds
+that the amended version is more accurate and does not hide the warts. **It is
+a stricter standard than it sounds:** every accepted diff must be individually
+justified in writing in the register, and any line not in the register is a
+real change. **This wording is inherited by M9-M14.**
 
 **After M14:** write up Phase 2, then make **one joint push** with the M7
 write-up and the two out-of-date site lines.
