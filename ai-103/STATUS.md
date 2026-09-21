@@ -80,12 +80,19 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: decide M8's done-when, then M9.**
-Updated 2026-09-21. M8's Bicep is written, builds warning-clean, and `what-if`
-is at 3 modify / 6 no change with every remaining diff registered in
-`infrastructure/iip/README.md`. The one thing standing between M8 and signed
-off is the done-when wording — see the note under the Milestones table in
-`phase2-orientation.md`. That decision sets the standard M9-M14 inherit.
+**Next action: M10, the keyless migration.**
+Updated 2026-09-21 (afternoon). M8 and M9 are both complete and deployed. The
+roles the keyless scripts will need now exist — that was M9's whole point — but
+**nothing is keyless yet**: the key-based scripts still read keys.
+
+Two things M10 should know before it starts. The eleven-script count in the
+plan includes `tester3.py`, which `.gitignore` excludes as scratch, so the
+tracked scope is ten. And the Foundry project identity only got its Foundry User
+role on Sep 21 — the keys were concealing its absence, so do not assume any
+prior successful run proves the keyless path works.
+
+Row 4's **VERIFY** is M10's to close: whether Foundry User covers Vision Read
+and the Evaluation SDK. That needs a real keyless call.
 
 The M7 write-up still waits on outside readers (Gerard's step), and still goes
 out in one group push with Phase 2. The prose below is the Sep 16 statement,
@@ -501,6 +508,77 @@ the reasons in the register. Claude proposed amending it to "no changes other
 than the documented provider-owned properties listed in
 `infrastructure/iip/README.md`". Not yet decided — it is the standard M9-M14
 inherit.
+
+### Session — September 21, 2026 (afternoon) — M9: identities and RBAC, first real deployment
+
+**M9 is complete, and it was the first time any of this left the template.**
+Deployment `m9-identity-rbac` succeeded in 39 seconds. Gerard ran every Azure
+CLI call; Claude wrote the Bicep, the verification queries and this entry.
+
+**Created:** `id-iip-dev-wus-01` (purpose `function-runtime`) and
+`id-iip-dev-wus-02` (`github-deploy`), the `uploads` and `results` containers,
+and RBAC rows 2, 4, 5, 6 and 9. All five verified afterwards with
+`az role assignment list` — rows 5 and 6 at **container** scope, not account
+scope, as the model's principle 2 requires.
+
+**M9's done-when was wrong as written, and was amended before any code.** It
+said "the assignments exist and match the RBAC table." Eight of the table's
+twelve rows cannot be assigned until M11 creates their scope resources. Gerard
+chose to scope M9 to the identities plus every row whose scope exists — the same
+correction made to M8's done-when earlier the same day.
+
+**Four corrections to the RBAC model, found by checking before writing.** Full
+detail is in `phase2-rbac-model-draft.md`'s new build-time findings section. The
+one that matters:
+
+- **Row 9 was marked "(automatic)" and is not.** The Foundry account had zero
+  direct role assignments. Microsoft Learn: the automatic Foundry User
+  assignment happens only via the portal or Foundry UI, and "doesn't apply when
+  deploying Foundry from SDK or CLI". So the project managed identity had been
+  running since July without one of the two assignments Microsoft documents as
+  the minimum. **M10 would have hit this**, because the keyless migration removes
+  the account keys that were concealing it.
+- **Row 3 already existed** and is deliberately not in the template: Azure
+  enforces uniqueness on the (principal, role, scope) triple, so declaring it
+  would have failed the deployment with `RoleAssignmentExists` partway through.
+- **Row 2 is redundant today** — Gerard holds Foundry User at subscription
+  scope, which is how `m7_orchestrator.py` authenticates. Declared anyway, so
+  the narrow grant is in IaC; removing the broad one is backlogged until after
+  M10.
+
+**M8 is now tested, not predicted.** The deployment applied the baseline without
+recreating anything — the Foundry account and project principal IDs are
+unchanged from the morning's dump — and the pinned `customSubDomainName` held,
+so `https://aif-iip-dev-wus-01...` is intact. The `managed-by` tag applied to
+`srch-iip-dev-wus-01`, which was M8's one intended diff.
+
+**The `properties.endpoint` question is settled empirically.** It was left
+undeclared on Search on the reasoning that a search endpoint is derived rather
+than settable. The deployment left it unchanged, so the missing `ReadOnly` flag
+is a schema inaccuracy. Recorded in the register with the reasoning, because the
+method generalises: when a property's writability is ambiguous, prefer the error
+that self-corrects.
+
+**One more instance of the same mistake, caught by what-if.** `blobServices/default`
+was declared with no properties, purely as a parent for the containers, and
+`deleteRetentionPolicy` is writable — the third time in one day that a writable
+property left undeclared produced a real diff. Now declared as found. The
+standing rule: **declare every writable property you found a value for, or
+expect what-if to report it every run.**
+
+**`Unsupported` is not `-`.** what-if reported rows 4, 5, 6 and 9 as
+`Unsupported`, naming the cause: the resource ID "cannot be calculated until the
+deployment is under way", because each contains `reference(...).principalId` for
+an identity the same template creates. Row 2 analysed cleanly — its principal ID
+is a literal parameter. Same type, same file, same run: the only difference is
+literal versus reference. **`Unsupported` means what-if declined to predict;
+`-` means it predicted a removal.** Only the predictions needed checking against
+the provider schema.
+
+**Blob soft delete is OFF on `stiipdevwus01`** (`deleteRetentionPolicy.enabled:
+false`). Declared as found, not changed. Backlogged against M11, when the
+Function starts writing results there and an accidental delete stops being
+theoretical.
 
 ### Session — September 18, 2026 — short session, one backlog item
 

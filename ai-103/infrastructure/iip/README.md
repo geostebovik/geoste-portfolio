@@ -1,11 +1,12 @@
-# IIP dev — Bicep baseline (M8)
+# IIP dev — Bicep (M8 baseline, M9 identity and RBAC)
 
 Bicep describing `rg-iip-dev-wus-01` **as it already exists**. This is not a
 greenfield deployment and not a disaster-recovery template (see the caveat at
 the bottom). Its job is to make `az deployment group what-if` boring, so that
 a real change stands out against a known-quiet background.
 
-Baselined from the live resources on **2026-09-21**.
+Baselined from the live resources on **2026-09-21**. **First deployed the same
+day** by M9, which is what moved this from a prediction to a tested description.
 
 ```powershell
 cd C:\Users\gerar\geoste-portfolio\ai-103\infrastructure\iip
@@ -27,8 +28,9 @@ appearing in a future run is a real change and should be treated as one.
 | `aif-dev-wus-01` | `- properties.armFeatures` | The RAI legal-terms acceptance record. Appears nowhere in `AccountProperties` in the `2025-06-01` schema, so no template can declare it. |
 | `.../projects/proj-iip-dev-wus-01` | `- kind: "AIServices"` | `kind` does not exist on `accounts/projects` in the `2025-06-01` schema, although ARM populates it. Unsettable. |
 | `.../projects/proj-iip-dev-wus-01` | `- properties.agentIdentity`, `.endpoints`, `.internalId`, `.isDefault` | All flagged `ReadOnly`, or absent from the schema entirely (`agentIdentity`). |
-| `srch-iip-dev-wus-01` | `- properties.endpoint` | Not flagged `ReadOnly`, but a search endpoint is not choosable — it is always `https://{serviceName}.search.windows.net`. Treated as a schema inaccuracy. See "Open question" below. |
-| `srch-iip-dev-wus-01` | `+ tags.managed-by: "bicep"` | **Intended.** Real drift: the other four resources carry this tag and Search did not. Disappears after the first deployment. |
+| `srch-iip-dev-wus-01` | `- properties.endpoint` | Not flagged `ReadOnly`, but a search endpoint is not choosable. **Settled empirically 2026-09-21:** the M9 deployment left it as `https://srch-iip-dev-wus-01.search.windows.net`. Confirmed a schema inaccuracy, not a real setting. |
+| `srch-iip-dev-wus-01` | ~~`+ tags.managed-by`~~ | **Applied 2026-09-21** by the M9 deployment. No longer expected; if it reappears, something removed the tag. |
+| `stiipdevwus01/blobServices/default` | `- properties.deleteRetentionPolicy` | **Fixed, not accepted.** M9 declared `blobServices/default` with no properties, and `deleteRetentionPolicy` is writable — the same class of real diff as `defaultProject` in M8. Now declared as found (`enabled: false`). Should not reappear. |
 
 Storage also shows `x properties.encryption.services` (Noeffect). That symbol
 means ARM accepts the property and it changes nothing. The resource itself
@@ -98,19 +100,23 @@ rather than a documented constraint.
 | `storage/networkAcls.resourceAccessRules` | Defender for Storage injects its own `storageDataScanner` rule; a template that owns this array fights the security provider on every deploy | not ours |
 | `storage/allowCrossTenantDelegationSas` | `false`, which is the default, and absent from the `2023-05-01` schema | — |
 
-## Open question
+## Settled question — `searchServices/properties.endpoint`
 
-`searchServices/properties.endpoint` is not flagged `ReadOnly` in the
-`2025-05-01` schema, so by the rule used everywhere else in this register it
-should be declared. It is not, on the reasoning that the endpoint is derived
-from the service name and cannot be chosen.
+`properties.endpoint` is not flagged `ReadOnly` in the `2025-05-01` schema, so
+by the rule used everywhere else in this register it should have been declared.
+It was not, on the reasoning that a search endpoint is derived from the service
+name and cannot be chosen.
 
-That is reasoning, not a verified read. The asymmetry is what decided it: if
-the reasoning is wrong, a derived URL is regenerated to an identical value; if
-the property were declared and the reasoning were wrong in the other direction,
-the template would carry a hardcoded literal that goes stale silently. The
-first real deployment settles it, and the current value is recorded above so a
-change would be visible.
+**The M9 deployment settled it on 2026-09-21: the endpoint is unchanged.** The
+reasoning held, the missing `ReadOnly` flag is a schema inaccuracy, and this is
+now a verified fact rather than an argument.
+
+Recording how the call was made, because the method generalises better than the
+answer: the decision rested on asymmetry, not confidence. If the reasoning were
+wrong, a derived URL is regenerated to an identical value. If the property had
+been declared and the reasoning were wrong the other way, the template would
+carry a hardcoded literal that goes stale silently after any rename. When a
+property's writability is genuinely ambiguous, prefer the error that self-corrects.
 
 ## Caveat — this is not a recovery template
 

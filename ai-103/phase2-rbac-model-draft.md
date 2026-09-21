@@ -88,6 +88,50 @@ that doesn't exist.
 | 11 | CA test user | Member of row 10's group | — | The subject for Conditional Access in report-only mode, then enforced. |
 | 12 | CI/CD identity `id-iip-dev-wus-02` (D6: in scope) | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
 
+## Build-time findings (M9, 2026-09-21)
+
+This page promised that **VERIFY** rows and guesses would be confirmed with a
+real call at build time. They were. Four corrections:
+
+- **Row 9 is NOT automatic.** This page said "Foundry User *(automatic)* —
+  Microsoft's minimum assignment." `az role assignment list` on
+  `aif-dev-wus-01` returned **nothing** before M9. Microsoft Learn explains it:
+  the automatic assignment happens only when the resource is created through the
+  portal or Foundry UI, and "doesn't apply when deploying Foundry from SDK or
+  CLI" — which is how this account was built. So the project managed identity
+  had been running since July without one of the two assignments Microsoft calls
+  the minimum. M7 never noticed, because its tools authenticate with account keys
+  and the orchestrator runs as Gerard. **M10 would have walked into this**: the
+  keyless migration removes the keys that were hiding it. Assigned by M9.
+- **Row 3 already existed.** Gerard held Storage Blob Data Contributor at
+  account scope on `stiipdevwus01` before M9. It is therefore NOT declared in
+  `infrastructure/iip/modules/rbac.bicep` — Azure enforces uniqueness on the
+  (principal, role, scope) triple, so declaring it under a generated name would
+  have failed the deployment with `RoleAssignmentExists`. Row 3 is satisfied,
+  just not by the template.
+- **Row 2 is redundant today, and declared anyway.** Gerard holds Foundry User
+  at **subscription** scope, which inherits to the account and is how
+  `m7_orchestrator.py` authenticates keylessly. The account-scope grant adds
+  nothing right now. Declared deliberately (Gerard, Sep 21) so the narrow grant
+  lives in IaC and tightening the subscription later cannot silently break local
+  development. Removing the subscription-scope grant is tracked in
+  `phase2-orientation.md`'s Phase 2 Backlog, **after M10** — until then the broad
+  grant is the load-bearing one.
+- **Gerard also holds Storage Blob Delegator** on `stiipdevwus01`, which is not
+  in the table above. It grants user-delegation SAS keys. Harmless, left alone,
+  recorded so the next audit does not treat it as a surprise.
+
+**Verified after deployment.** All five declared rows (2, 4, 5, 6, 9) exist at
+the intended scope with the intended role and principal. Rows 5 and 6 are at
+**container** scope, not account scope, as principle 2 requires. Rows 7, 8 and 12
+are deferred to M11, which creates the resources they point at; `id-iip-dev-wus-02`
+exists already, so row 12 is a one-line addition then.
+
+**Still VERIFY, and still open:** whether Foundry User covers Vision Read and the
+Evaluation SDK (row 4) — that needs a real keyless call, which is M10; and
+whether container-scoped Blob Data Reader is enough for the event-based blob
+trigger (row 5), which needs the trigger, so M11.
+
 ## Deliberately given nothing
 
 - **Key Vault:** no data-plane assignments are planned, because nothing

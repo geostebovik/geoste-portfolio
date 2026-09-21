@@ -2,7 +2,7 @@
 
 ---
 
-> ## CURRENT MILESTONE: **M9** — Identity foundation
+> ## CURRENT MILESTONE: **M10** — Keyless migration
 >
 > **This line is the single source of truth for "where are we".** Nothing else
 > — not the project instructions, not a scheduled task, not the portfolio site
@@ -10,7 +10,7 @@
 > moves, change this line and the table's checkmark. That is the whole
 > update.**
 >
-> Last moved: 2026-09-21, M8 → M9.
+> Last moved: 2026-09-21, M9 → M10. (M8 → M9 also 2026-09-21.)
 >
 > **The rule that keeps this true:** a *dated* statement may name a milestone,
 > because it was correct on its date and reads as history — STATUS.md session
@@ -42,7 +42,17 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
-- **M8 is COMPLETE** (signed off 2026-09-21, at `86c53bb`).
+- **M9 is COMPLETE** (deployed and verified 2026-09-21). The first real
+  deployment: `id-iip-dev-wus-01` and `-02`, the `uploads` and `results`
+  containers, and RBAC rows 2, 4, 5, 6 and 9 — all verified at the intended
+  scope with `az role assignment list`. Rows 7, 8 and 12 are deferred to M11,
+  which creates the resources they point at. Build-time corrections to the RBAC
+  model are recorded in `phase2-rbac-model-draft.md`.
+- **M8 is COMPLETE** (signed off 2026-09-21, at `86c53bb`), and **now tested
+  rather than predicted**: M9's deployment applied the M8 baseline against the
+  live resource group without recreating anything — the Foundry account and
+  project principal IDs are unchanged — and the pinned `customSubDomainName`
+  held, so the endpoint every script calls is intact.
   `infrastructure/iip/` holds `main.bicep`, `dev.bicepparam` and four modules.
   `what-if` reports **3 resources to modify, 6 no change**; all three are
   registered in `infrastructure/iip/README.md`, which is the complete expected
@@ -51,6 +61,8 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   and the one intended diff (`+ tags.managed-by` on Search) applies on the
   first real deployment, which M9 will be.
 - **Current milestone: see the marker at the top of this file.**
+- **Nothing is keyless yet.** M9 granted the roles; the eleven key-based
+  scripts are M10's job and still read keys today.
 
 ## What Phase 2 builds
 
@@ -101,7 +113,7 @@ Function must not use keys.
 | # | Milestone | Done when | Rough size | Depends on |
 |---|---|---|---|---|
 | **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
-| **M9** | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
+| **M9** ✅ | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
 | **M10** | **Keyless migration.** The 11 key-based scripts move to Entra ID, M7's tools first. M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no script reads a key. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. Decides Event Grid delivery vs. inbound restrictions (Todoist task), and the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
@@ -128,6 +140,29 @@ write-up and the two out-of-date site lines.
 ## Phase 2 Backlog
 
 Deferred items go here, not in `STATUS.md`.
+- **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
+  what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
+  blob service. M9 declares it as found rather than changing it. Worth revisiting
+  at **M11**, when the Function starts writing results there — an accidental
+  delete of a results blob is currently unrecoverable, and turning soft delete on
+  is a one-line change with a small storage cost. A deliberate decision, not a
+  default.
+- **Remove the subscription-scope `Foundry User` grant.** Found 2026-09-21:
+  Gerard holds Foundry User at subscription scope, which inherits to
+  `aif-dev-wus-01` and is how `m7_orchestrator.py` authenticates keylessly
+  today. M9 declares the narrow account-scope grant the RBAC model specifies
+  (row 2), so the broad one is redundant. Principle 2 (narrowest role at the
+  narrowest scope) says remove it — but only **after** M10's acceptance test
+  has passed on the account-scope grant, since until then the subscription
+  grant is what is actually load-bearing. Not before M10.
+- **Make D1 accurate.** D1 documents the admin posture as "keep subscription
+  Owner and document it as a single-admin exception." The real posture, read on
+  2026-09-21, is broader: **Owner on the `Non-Prod` management group** and
+  **Contributor on the tenant root management group**, both wider than
+  subscription Owner and neither mentioned. This is a documentation fix, not a
+  permissions change — the access is reasonable for a single-admin lab, but the
+  RBAC model is resume material and currently understates the privilege it is
+  meant to disclose.
 - **Two emergency-access accounts,** as Microsoft recommends, instead of
   one. One is a deliberate choice for a lab with a single admin (C2).
 - **Guest access to the results page.** Authentication strength for guests

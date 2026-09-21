@@ -26,6 +26,13 @@ param foundryCustomSubDomainName string
 
 param modelDeployments array
 
+// --- M9 ----------------------------------------------------------------------
+param functionIdentityName string
+param cicdIdentityName string
+
+@description('Gerard\'s Entra object ID, from `az ad signed-in-user show --query id`.')
+param adminPrincipalId string
+
 // =============================================================================
 // MODULE: Storage
 // =============================================================================
@@ -79,6 +86,38 @@ module foundry 'modules/foundry.bicep' = {
 }
 
 // =============================================================================
+// MODULE: Managed identities (M9)
+// Created before the Function app exists, deliberately -- see D2.
+// =============================================================================
+module identity 'modules/identity.bicep' = {
+  name: 'deploy-iip-identity'
+  params: {
+    location: location
+    tags: tags
+    functionIdentityName: functionIdentityName
+    cicdIdentityName: cicdIdentityName
+  }
+}
+
+// =============================================================================
+// MODULE: Role assignments (M9)
+// Mirrors the RBAC model's table in row order. Depends on every scope it
+// assigns at, so it runs last.
+// =============================================================================
+module rbac 'modules/rbac.bicep' = {
+  name: 'deploy-iip-rbac'
+  params: {
+    foundryAccountName: foundryAccountName
+    storageAccountName: storageAccountName
+    uploadsContainerName: storage.outputs.uploadsContainerName
+    resultsContainerName: storage.outputs.resultsContainerName
+    adminPrincipalId: adminPrincipalId
+    functionIdentityPrincipalId: identity.outputs.functionIdentityPrincipalId
+    foundryProjectPrincipalId: foundry.outputs.projectPrincipalId
+  }
+}
+
+// =============================================================================
 // OUTPUTS
 // M9 consumes the two principal IDs when it writes the role assignments.
 // =============================================================================
@@ -89,3 +128,9 @@ output foundryAccountId string = foundry.outputs.foundryAccountId
 output foundryEndpoint string = foundry.outputs.foundryEndpoint
 output foundryPrincipalId string = foundry.outputs.foundryPrincipalId
 output projectPrincipalId string = foundry.outputs.projectPrincipalId
+
+// M9 — M11 consumes these when it builds the Function app and the OIDC federation
+output functionIdentityId string = identity.outputs.functionIdentityId
+output functionIdentityClientId string = identity.outputs.functionIdentityClientId
+output cicdIdentityId string = identity.outputs.cicdIdentityId
+output cicdIdentityClientId string = identity.outputs.cicdIdentityClientId
