@@ -351,13 +351,14 @@
     <p class="hero-description">
       A Document Intelligence System built on Azure AI Foundry — OCR and structured
       extraction via Content Understanding, RAG-grounded summarization and Q&amp;A over a
-      real vector index, responsible-AI evaluation, and a multi-agent orchestration
-      pattern. Built while studying for AI-103 (Developing AI Apps and Agents on
+      real vector index, responsible-AI evaluation, and a single orchestrator agent
+      that checks its own drafts with an evaluator tool and a computer-vision audit
+      tool. Built while studying for AI-103 (Developing AI Apps and Agents on
       Azure), the associate-level follow-on to AZ-900 and AZ-104, both already earned.
     </p>
     <div class="hero-stats">
-      <div class="stat"><span class="stat-value">6 / 7</span><span class="stat-label">Milestones complete</span></div>
-      <div class="stat"><span class="stat-value">M7</span><span class="stat-label">Currently in progress</span></div>
+      <div class="stat"><span class="stat-value">8</span><span class="stat-label">Phase 1 milestones complete</span></div>
+      <div class="stat"><span class="stat-value">Phase 2</span><span class="stat-label">Currently building</span></div>
       <div class="stat"><span class="stat-value">2</span><span class="stat-label">Certs already earned</span></div>
     </div>
   </section>
@@ -368,9 +369,9 @@
       <p>
         <strong>This is an honest, in-progress snapshot</strong> — not a finished
         project writeup. The full treatment (architecture diagrams, expandable project
-        detail, security write-up) matches the rest of this site once the whole IIP
-        arc is complete through M7. Until then, this page tracks real milestone
-        status, updated as work happens.
+        detail, security write-up) is drafted and in review, and publishes once Phase 2
+        is far enough along to go out with it. Until then, this page tracks real
+        milestone status, updated as work happens.
       </p>
     </div>
   </div>
@@ -390,7 +391,7 @@
       <li><span class="tag">Extraction</span> Azure Content Understanding — structured JSON with confidence scores and source grounding, validated against clean PDF, flatbed scan, and angled-photo conditions of the same document.</li>
       <li><span class="tag">RAG / Q&amp;A</span> Chunked, embedded, and indexed into Azure AI Search; queries retrieve and join multiple ranked chunks (not just the top hit) before grounding a chat completion — a design choice a live test proved actually matters.</li>
       <li><span class="tag">Evaluation</span> A custom evaluator harness (Groundedness / Relevance / F1) used to pick the production model on evidence, not assumption — confirmed a real ~3x cost advantage at equal quality.</li>
-      <li><span class="tag">Agents</span> <em>(M7, not yet built)</em> A single orchestrator agent drafting content against a template, reusing the M6 evaluator pattern for QA, plus a computer-vision audit module.</li>
+      <li><span class="tag">Agents</span> A single orchestrator agent drafting content against a template, reusing the M6 evaluator pattern for QA, plus a computer-vision audit tool. Acceptance-tested against a fixed answer key before being called done.</li>
     </ul>
     <p class="out-of-scope">
       Deliberately out of scope: image/video generation and speech modalities — poor
@@ -448,17 +449,29 @@
         <div class="milestone-text">Evaluator harness built and run twice against independent question sets; selected the production model on confirmed quality parity plus a real ~3x per-token cost advantage, not on assumption.</div>
       </div>
 
-      <div class="milestone not-started">
+      <div class="milestone complete">
         <div class="milestone-id">M7</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Single orchestrator agent over a synthetic content-review scenario — drafts against a template, reuses the M6 evaluator pattern for QA, and adds a computer-vision audit tool covering the one AI-103 exam domain not otherwise touched. Acceptance-tested against a fixed answer key, with its known limits written down rather than smoothed over. Closes out Phase 1 of the IIP build.</div>
+      </div>
+
+      <div class="milestone complete">
+        <div class="milestone-id">M8</div>
+        <div class="milestone-status"><span class="milestone-status-dot"></span>Complete</div>
+        <div class="milestone-text">Infrastructure-as-Code baseline opening Phase 2 — Bicep describing the live Foundry account and project, the model deployments at their real capacity, storage, Key Vault and AI Search. Verified with <code>what-if</code> until every remaining difference was a provider-owned property that no template can declare, each one justified in writing rather than deleted to force a clean result.</div>
+      </div>
+
+      <div class="milestone not-started">
+        <div class="milestone-id">M9</div>
         <div class="milestone-status"><span class="milestone-status-dot"></span>Not started</div>
-        <div class="milestone-text">Single orchestrator agent over a synthetic content-review scenario — drafts against a template, reuses the M6 evaluator pattern for QA, and adds a computer-vision audit module covering the one AI-103 exam domain not otherwise touched. Closes out Phase 1 of the IIP build.</div>
+        <div class="milestone-text">Identity foundation — user-assigned managed identities and the role assignments from the access model, in Bicep. The step that makes the keyless migration possible.</div>
       </div>
 
     </div>
   </section>
 
   <footer>
-    <div class="footer-brand">oste<span>bovik</span>.net · AI-103 · M0–M6 complete, M7 in progress</div>
+    <div class="footer-brand">oste<span>bovik</span>.net · AI-103 · Phase 1 complete · Phase 2 in progress</div>
   </footer>
 
 </body>
