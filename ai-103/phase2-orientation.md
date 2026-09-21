@@ -1,5 +1,25 @@
 # Phase 2 Orientation — Where Things Stand (start here each Phase 2 session)
 
+---
+
+> ## CURRENT MILESTONE: **M9** — Identity foundation
+>
+> **This line is the single source of truth for "where are we".** Nothing else
+> — not the project instructions, not a scheduled task, not the portfolio site
+> — states the milestone number. They all point here. **When a milestone
+> moves, change this line and the table's checkmark. That is the whole
+> update.**
+>
+> Last moved: 2026-09-21, M8 → M9.
+>
+> **The rule that keeps this true:** a *dated* statement may name a milestone,
+> because it was correct on its date and reads as history — STATUS.md session
+> entries, Todoist task descriptions, commit messages. *Undated standing
+> instructions* must never name one; they point here instead. A milestone
+> number in undated guidance is a stale fact waiting to happen.
+
+---
+
 **What this page is:** a snapshot of where things stand now. It isn't a log
 (that's `STATUS.md`). It answers two questions: what Phase 2 is building,
 and which step comes next. Update it whenever a milestone moves from
@@ -30,7 +50,7 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   **Nothing has been deployed yet** — M8 was a describe-what-exists milestone,
   and the one intended diff (`+ tags.managed-by` on Search) applies on the
   first real deployment, which M9 will be.
-- **Current milestone: M9 — identity foundation.**
+- **Current milestone: see the marker at the top of this file.**
 
 ## What Phase 2 builds
 
