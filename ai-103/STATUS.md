@@ -80,7 +80,20 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: outside readers for the M7 write-up, then Phase 2.**
+**Next action: decide M8's done-when, then M9.**
+Updated 2026-09-21. M8's Bicep is written, builds warning-clean, and `what-if`
+is at 3 modify / 6 no change with every remaining diff registered in
+`infrastructure/iip/README.md`. The one thing standing between M8 and signed
+off is the done-when wording — see the note under the Milestones table in
+`phase2-orientation.md`. That decision sets the standard M9-M14 inherit.
+
+The M7 write-up still waits on outside readers (Gerard's step), and still goes
+out in one group push with Phase 2. The prose below is the Sep 16 statement,
+kept because its figure rules and its Phase 2 framing are still live.
+
+---
+
+**Superseded 2026-09-21: outside readers for the M7 write-up, then Phase 2.**
 Replaced 2026-09-16 (afternoon). Gerard reviewed the reworked
 `ai-103/m7-writeup-draft.md` the same day:
 - "In short" is approved.
@@ -403,6 +416,91 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 21, 2026 — M8: the IaC baseline, written and what-if'd
+
+**M8's Bicep is written and builds warning-clean.** `what-if` reports 3
+resources to modify and 6 no change, and every remaining diff is either
+intended or a property no template can assert. The register of accepted diffs
+is `infrastructure/iip/README.md`; it is the complete expected output, so
+anything else in a future run is a real change.
+
+Gerard ran every Azure CLI call — the property dump, three build/what-if
+cycles. Claude wrote the Bicep, the README and this entry.
+
+**Structure.** `infrastructure/iip/` — `main.bicep` (orchestrates only),
+`dev.bicepparam`, and `modules/{storage,keyvault,search,foundry}.bicep`,
+matching the portfolio prod stack's shape rather than inventing a second one.
+
+**The finding worth keeping: `what-if`'s noise disclaimer hides real
+changes.** The first run showed 7 resources to modify. Five of those diffs
+looked exactly like provider noise — a `-` on a property reading like a status
+field, on a resource nobody meant to touch — and were writable properties the
+template had silently dropped:
+
+| Property | Consequence had it deployed |
+| --- | --- |
+| `accounts/properties.defaultProject` | data-plane calls without an explicit project name break |
+| `accounts/properties.associatedProjects` | `proj-iip-dev-wus-01` detached from the account |
+| `deployments/properties.currentCapacity` (x4) | the 300K/30K/10K TPM settings cleared |
+| `searchServices/properties.computeType` | the Default vs confidential-compute choice cleared |
+
+**Nothing in the `what-if` output separated those from the two that really
+were noise.** The only reliable test is the resource provider's schema: a
+property with no `ReadOnly` flag is a property a deployment can clear. Read
+`what-if`'s "may contain false positive predictions" banner as a reason to
+check each line, not as a licence to dismiss them.
+
+**A related error, made and corrected the same session.** `networkRuleSet.bypass`
+on Search was dropped on the stated grounds that it existed only in preview API
+versions. It does not — it is absent from `2023-11-01` and present and writable
+in `2025-05-01`, which is GA. The module had been pinned to a stale API version
+and the missing property was then rationalised as unsupported. Bumping the API
+version was the fix. **A "the schema does not support it" conclusion should be
+checked against the current API version before it is written down.**
+
+**Three findings about the live resources the docs did not have:**
+
+- **The Foundry subdomain inverts the documented naming exception.** The
+  account resource is `aif-dev-wus-01`, without the `iip` token, which is the
+  known exception. Its `customSubDomainName` is `aif-iip-dev-wus-01` — *with*
+  the token — and that is what every endpoint in `scripts/` is built from. It
+  is pinned in `dev.bicepparam`. Left to default it would change the endpoint
+  host and break every script at once.
+- **`srch-iip-dev-wus-01` was missing the `managed-by` tag** that the other
+  four resources carry. The baseline applies the full tag set, so the one
+  intended `what-if` change is `+ tags.managed-by`.
+- **The `managed-by: bicep` tag has been asserting something untrue since
+  July.** Four resources carried it while nothing in the resource group was in
+  Bicep. M8 is what makes it true. Recorded rather than quietly fixed.
+
+**Also this session, outside M8:**
+
+- **The stale Claude project doc `claude/2026-09-10-m7-session-prompt.md` was
+  deleted**, at Gerard's instruction. Its own rule — promote anything durable
+  before replacing — was checked first: `first_text_passed` vs
+  `final_text_passed`, judge-invariance, the Plan9 mount failure mode, the
+  item6 answer-key trap, the four probe scripts and the redraft cap are all
+  already in `m7-orientation.md` or this file. `ACTIVE_JUDGE_DEPLOYMENT` is
+  documented at the constant in `m7_evaluator_tool.py`. Nothing lost.
+- **The Sunday punch-list scheduled task was rewritten.** It still named
+  `m7-orientation.md` as the source of truth and carried a standing assumption
+  "He is on M7", so the Sep 20 run seeded all three tasks from the M7 backlog
+  and M8 got no slot in the week it was the working milestone. It now reads
+  `phase2-orientation.md` for core items and takes its single `[stretch]` item
+  from the M7 backlog. Gerard decided the MS Learn video series stays paused
+  through all of Phase 2, not merely until M7 was stable. The cache-buster
+  warning, freshness gate, no-questions rule and attribution rule were kept
+  verbatim.
+- **There is no Friday check-in scheduled task.** Only the Sunday punch list
+  and the mid-October job-search checkpoint exist. Noted, not acted on.
+
+**Open, and it is a real decision:** M8's done-when in `phase2-orientation.md`
+reads "`what-if` shows **no changes**". Azure will not produce that here, for
+the reasons in the register. Claude proposed amending it to "no changes other
+than the documented provider-owned properties listed in
+`infrastructure/iip/README.md`". Not yet decided — it is the standard M9-M14
+inherit.
 
 ### Session — September 18, 2026 — short session, one backlog item
 

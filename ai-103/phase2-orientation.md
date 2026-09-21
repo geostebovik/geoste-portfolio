@@ -18,12 +18,19 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 
 ## Status
 
-**Status as of:** September 16, 2026.
+**Status as of:** September 21, 2026.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
-- **Nothing is built yet.**
-- **Current milestone: M8.**
+- **Current milestone: M8 — built, not yet signed off.**
+  The Bicep is written and builds warning-clean:
+  `infrastructure/iip/` (`main.bicep`, `dev.bicepparam`, four modules).
+  `what-if` reports **3 resources to modify, 6 no change**. Of the three, one
+  is the intended `managed-by` tag fix on Search and the rest are properties
+  no template can assert. The complete expected output is registered in
+  `infrastructure/iip/README.md`, so anything else in a future run is a real
+  change.
+- **M8's done-when is an open decision** — see the note under the table.
 
 ## What Phase 2 builds
 
@@ -80,6 +87,21 @@ Function must not use keys.
 | **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. Decides Event Grid delivery vs. inbound restrictions (Todoist task), and the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
 | **M14** | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
+
+**M8's done-when — open.** The table says "`az deployment group what-if`
+shows **no changes**". Azure will not produce that against this resource
+group: `properties.armFeatures` on the Foundry account, and `kind`,
+`agentIdentity`, `internalId`, `isDefault` and `endpoints` on the project, are
+either flagged `ReadOnly` or absent from the `2025-06-01` schema, so no
+template can declare them and `what-if` reports them as deletions forever.
+
+Claude proposed (Sep 21) amending the condition to: *`what-if` reports no
+changes other than the documented provider-owned properties listed in
+`infrastructure/iip/README.md`.* **Gerard has not decided.** It matters beyond
+M8 — it is the standard M9-M14 inherit, and the alternative to amending it is
+either leaving M8 permanently open on a condition Azure will not meet, or
+deleting properties from the template to force a clean run, which would make
+the Bicep a worse description of the infrastructure rather than a better one.
 
 **After M14:** write up Phase 2, then make **one joint push** with the M7
 write-up and the two out-of-date site lines.
