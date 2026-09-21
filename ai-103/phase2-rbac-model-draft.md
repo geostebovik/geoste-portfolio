@@ -75,7 +75,7 @@ that doesn't exist.
 
 | # | Identity | Scope | Role | Why |
 |---|---|---|---|---|
-| 1 | Gerard (admin user) | Subscription | Owner *(existing)* | Single-admin lab: creates resources and assigns roles. **A documented exception, see D1.** |
+| 1 | Gerard (admin user) | Subscription **and two management groups** | Owner, plus Contributor at the tenant root *(all existing)* | Single-admin lab: creates resources and assigns roles. **A documented exception — see D1, which was corrected on 2026-09-21 because it understated this.** |
 | 2 | Gerard | `aif-dev-wus-01` | Foundry User | Keyless local development runs (`DefaultAzureCredential`). Probably assigned automatically when the project was created; check before adding. |
 | 3 | Gerard | `stiipdevwus01` | Storage Blob Data Contributor | Upload test inputs and read results once shared-key access is off. Owner is a control-plane role only and does **not** grant blob data access. |
 | 4 | Function identity `id-iip-dev-wus-01` | `aif-dev-wus-01` | Foundry User | Runs the agent. The tools also make direct model calls: the judge (gpt-5-4), the image audit (gpt-5-4-mini) and Vision Read. Foundry Agent Consumer alone would cover calling the agent but not those model calls. **VERIFY** that Foundry User covers Vision Read and the Evaluation SDK. D5: scoped to the account. |
@@ -145,13 +145,47 @@ trigger (row 5), which needs the trigger, so M11.
 
 | ID | Question | Options; **(a) was chosen for every one** |
 |---|---|---|
-| D1 | Your admin posture | (a) Keep subscription Owner and document it as a single-admin exception. PIM is the enterprise answer and is out of scope. (b) Day to day: Contributor plus **Role Based Access Control Administrator**, restricted to the roles in this table, at resource-group scope. Owner is kept only as break-glass. |
+| D1 | Your admin posture | (a) **Chosen.** Keep the existing standing access and document it as a single-admin exception. PIM is the enterprise answer and is out of scope. **See the correction below — what (a) actually keeps is broader than this row originally said.** (b) Day to day: Contributor plus **Role Based Access Control Administrator**, restricted to the roles in this table, at resource-group scope. Owner is kept only as break-glass. |
 | D2 | Function identity type | (a) **User-assigned.** Bicep can create it and assign roles before the app exists, and it survives the app being recreated. (b) System-assigned: simpler, but tied to the app's lifetime. |
 | D3 | Function host storage | (a) **Separate account.** It keeps the broad host roles (row 7) off the app data account. (b) Reuse `stiipdevwus01`: one less resource, but row 7's roles would land on the data account. |
 | D4 | Where the results page runs | (a) An HTTP-triggered function on the same Function app, with built-in App Service Authentication: one compute resource. **VERIFY** that Flex Consumption supports it. (b) A separate App Service (Basic tier or higher), billed hourly. |
 | D5 | Foundry role scope | (a) The account, which is what Microsoft Learn's minimum assignments use. (b) The project, which is narrower; confirm that model and Vision calls still work. |
 | D6 | CI/CD in Phase 2? | (a) Yes: row 12, with GitHub OIDC. AI-103 names CI/CD integration. (b) Later: deploy from your account for now. |
 | D7 | Key Vault after the keyless migration | (a) Keep it, still using RBAC authorization, for any third-party secret that comes up later, and document that it is empty on purpose. (b) Retire it. |
+
+## D1 correction — the actual admin posture (2026-09-21)
+
+**D1 originally described the exception as "keep subscription Owner."** Read from
+`az role assignment list --assignee <gerard> --all` on 2026-09-21, the standing
+access is broader:
+
+| Role | Scope | Note |
+|---|---|---|
+| Owner | subscription `343a8a7e-…` | what D1 described |
+| **Owner** | **management group `Non-Prod`** | not previously documented |
+| **Contributor** | **management group `e0249b00-…`** — the tenant root | not previously documented |
+| Foundry User | subscription | inherits to `aif-dev-wus-01`; how `m7_orchestrator.py` authenticates keylessly today |
+| Storage Blob Data Contributor | `stgeostewus301` (portfolio prod) | outside this model's scope |
+| Key Vault Secrets Officer | `kv-geoste-prod-wus3-01` (portfolio prod) | outside this model's scope |
+| Storage Blob Data Contributor + Storage Blob Delegator | `stiipdevwus01` | row 3, plus the Delegator grant |
+
+**Two of those are wider than subscription Owner.** Management-group Owner covers
+every subscription under `Non-Prod`, and root-level Contributor reaches the whole
+tenant.
+
+**Nothing was changed.** For a lab with one administrator this access is
+reasonable and the alternative — PIM, or day-to-day Contributor with a break-glass
+Owner — is explicitly out of scope per D1(b). **The correction is to the
+documentation, not the permissions.** The reason it matters: this page is resume
+material, and a governance document that understates the privilege it exists to
+disclose is worse than one that does not mention privilege at all. The point of
+writing D1 down was to show the exception was deliberate; that only holds if the
+exception described is the one actually held.
+
+**Not on the Phase 2 Backlog as work.** There is nothing to do beyond this
+section. The one related backlog item — removing the subscription-scope
+`Foundry User` grant after M10 — is a narrowing that principle 2 calls for, and is
+tracked separately in `phase2-orientation.md`.
 
 ## Open questions that affect this model
 

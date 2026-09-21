@@ -140,6 +140,24 @@ write-up and the two out-of-date site lines.
 ## Phase 2 Backlog
 
 Deferred items go here, not in `STATUS.md`.
+
+*`m10-prep.md` holds the surveyed plan for M10 — read it before starting that
+milestone; it records a probable blocker on the free-tier Search service.*
+- **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
+  what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
+  blob service. M9 declares it as found rather than changing it. Worth revisiting
+  at **M11**, when the Function starts writing results there — an accidental
+  delete of a results blob is currently unrecoverable, and turning soft delete on
+  is a one-line change with a small storage cost. A deliberate decision, not a
+  default.
+- **Remove the subscription-scope `Foundry User` grant.** Found 2026-09-21:
+  Gerard holds Foundry User at subscription scope, which inherits to
+  `aif-dev-wus-01` and is how `m7_orchestrator.py` authenticates keylessly
+  today. M9 declares the narrow account-scope grant the RBAC model specifies
+  (row 2), so the broad one is redundant. Principle 2 (narrowest role at the
+  narrowest scope) says remove it — but only **after** M10's acceptance test
+  has passed on the account-scope grant, since until then the subscription
+  grant is what is actually load-bearing. Not before M10.
 - **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
   what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
   blob service. M9 declares it as found rather than changing it. Worth revisiting
