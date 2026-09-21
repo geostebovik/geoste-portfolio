@@ -22,15 +22,15 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
-- **Current milestone: M8 — built, not yet signed off.**
-  The Bicep is written and builds warning-clean:
-  `infrastructure/iip/` (`main.bicep`, `dev.bicepparam`, four modules).
-  `what-if` reports **3 resources to modify, 6 no change**. Of the three, one
-  is the intended `managed-by` tag fix on Search and the rest are properties
-  no template can assert. The complete expected output is registered in
-  `infrastructure/iip/README.md`, so anything else in a future run is a real
-  change.
-- **M8's done-when is an open decision** — see the note under the table.
+- **M8 is COMPLETE** (signed off 2026-09-21, at `86c53bb`).
+  `infrastructure/iip/` holds `main.bicep`, `dev.bicepparam` and four modules.
+  `what-if` reports **3 resources to modify, 6 no change**; all three are
+  registered in `infrastructure/iip/README.md`, which is the complete expected
+  output. Anything else in a future run is a real change.
+  **Nothing has been deployed yet** — M8 was a describe-what-exists milestone,
+  and the one intended diff (`+ tags.managed-by` on Search) applies on the
+  first real deployment, which M9 will be.
+- **Current milestone: M9 — identity foundation.**
 
 ## What Phase 2 builds
 
@@ -80,7 +80,7 @@ Function must not use keys.
 
 | # | Milestone | Done when | Rough size | Depends on |
 |---|---|---|---|---|
-| **M8** | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
+| **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
 | **M10** | **Keyless migration.** The 11 key-based scripts move to Entra ID, M7's tools first. M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no script reads a key. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
