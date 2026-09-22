@@ -127,10 +127,51 @@ the intended scope with the intended role and principal. Rows 5 and 6 are at
 are deferred to M11, which creates the resources they point at; `id-iip-dev-wus-02`
 exists already, so row 12 is a one-line addition then.
 
-**Still VERIFY, and still open:** whether Foundry User covers Vision Read and the
-Evaluation SDK (row 4) — that needs a real keyless call, which is M10; and
-whether container-scoped Blob Data Reader is enough for the event-based blob
-trigger (row 5), which needs the trigger, so M11.
+**Row 4's VERIFY is CLOSED — 2026-09-22.** Foundry User covers both Vision Read
+and the Evaluation SDK, each confirmed by a real keyless call
+(`probe_keyless_vision.py`, `probe_keyless_eval.py`) against the account-scope
+grant, with the subscription-scope grant removed first so nothing broader could
+carry it.
+
+**But read *why* it covers them, because the reason is not the reassuring one.**
+Foundry User's `dataActions` are the single wildcard
+`Microsoft.CognitiveServices/*` (role definition
+`53ca6127-db72-4b80-b1b0-d745d6d5456d`, read 2026-09-22). It covers Vision Read
+because it covers everything on the account — not because Vision was granted
+deliberately. Two consequences this page should not bury:
+
+- **Principle 2 is not currently satisfied for row 4, and cannot be.** There is
+  no narrower built-in role covering both OpenAI inference and Vision Read,
+  because `aif-dev-wus-01` is one shared AIServices account serving both. That
+  is a real cost of the shared-account decision, and it is stated here as an
+  accepted trade-off rather than left implicit. **Foundry Agent Consumer** is
+  worth evaluating at M11 for principals that only call agents.
+- **Foundry User can read the account keys.** Its `actions` include
+  `Microsoft.CognitiveServices/accounts/listkeys/action` and
+  `.../projects/connections/listsecrets/action`. Keyless *code* does not remove
+  the *permission* to retrieve a key. `disableLocalAuth` does. Tracked in the
+  Phase 2 backlog.
+
+**A doc correction that came out of the same work.** The Image Analysis SDK
+documentation names **Cognitive Services User** as the Entra prerequisite for
+Vision. That page is stale: Microsoft Learn's current Foundry RBAC guidance
+lists Cognitive Services User as a **legacy Azure AI Services role** and
+Foundry User as its Foundry-native successor. Anything in this project that
+reaches for Cognitive Services User is reaching for a deprecated role. *(Caught
+by Gerard, 2026-09-22, against Claude's incorrect recommendation to assign it
+as a remediation.)*
+
+**Role NAMES are mid-rename; key on the GUID.** Foundry User, Foundry Owner,
+Foundry Account Owner and Foundry Project Manager were previously Azure AI
+User/Owner/Account Owner/Project Manager, and Microsoft's own guidance is to
+use the role definition ID in code rather than the name while the rename rolls
+out. Role IDs and permissions are unchanged. Any `--role "Foundry User"` in a
+script or runbook is fragile; `--role 53ca6127-db72-4b80-b1b0-d745d6d5456d` is
+not.
+
+**Still VERIFY, and still open:** whether container-scoped Blob Data Reader is
+enough for the event-based blob trigger (row 5), which needs the trigger, so
+M11.
 
 ## Deliberately given nothing
 
@@ -139,7 +180,33 @@ trigger (row 5), which needs the trigger, so M11.
 - **No workload identity** holds Contributor or Owner anywhere.
 - **Viewers** hold no Azure roles (principle 3).
 - **AI Search** (`srch-iip-dev-wus-01`, from M5) is not used by the Phase 2
-  app, so no assignments are made there.
+  app, so no assignments are made there **for the app**.
+  **Amended 2026-09-22 (M10).** M10's scope includes the M5 scripts, which are
+  clients of this service, so two assignments now exist on it — to Gerard's
+  user principal only, never to a workload identity:
+
+  | Principal | Scope | Role | Why |
+  |---|---|---|---|
+  | Gerard (`fdc0b6bb-…`) | `srch-iip-dev-wus-01` | Search Index Data Reader | `m5_retrieve.py` queries the index. A **dataAction**. |
+  | Gerard (`fdc0b6bb-…`) | `srch-iip-dev-wus-01` | Search Index Data Contributor | `m5_index.py` uploads documents. A **dataAction**. |
+
+  `m5_index.py` also creates the index, which is a **control-plane** action
+  normally needing Search Service Contributor. Gerard's Owner inheritance on the
+  `Non-Prod` management group covers it today. **That inheritance is why
+  `probe_keyless_search.py` step [3/3] succeeded, and that success is not
+  evidence any workload identity could do the same.** If index creation ever
+  moves to an automated identity, Search Service Contributor must be granted
+  explicitly.
+
+  **Free tier, settled empirically 2026-09-22.** Microsoft Learn contradicts
+  itself: three pages say RBAC and keyless work on any tier including free, one
+  says keyless clients need a billable tier, and a fifth says free "doesn't
+  support managed identities for Entra ID authentication". The reading that
+  reconciles them — and that the probe confirms — is that free supports
+  **inbound** Entra auth (a client authenticating *to* the service) but not
+  **outbound** managed identity (the service authenticating to storage, for
+  indexers). The M5 scripts are clients. **No service recreate, no paid tier, no
+  recurring bill.**
 
 ## Decisions (Gerard chose option (a) on all seven, Sep 16)
 

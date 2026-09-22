@@ -80,93 +80,25 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: M10, the keyless migration.**
-Updated 2026-09-21 (afternoon). M8 and M9 are both complete and deployed. The
-roles the keyless scripts will need now exist — that was M9's whole point — but
-**nothing is keyless yet**: the key-based scripts still read keys.
+**Next action: read the M10 acceptance run, then remove the key helpers.**
+Updated 2026-09-22. The keyless migration is written, smoke-tested and
+committed at `aa96bea`; the 15-run acceptance pass was launched the same day.
+M10 is **not done until that pass comes back matching the answer key** —
+everything so far is "migrated and smoke-tested", which is real but is not the
+milestone.
 
-Two things M10 should know before it starts. The eleven-script count in the
-plan includes `tester3.py`, which `.gitignore` excludes as scratch, so the
-tracked scope is ten. And the Foundry project identity only got its Foundry User
-role on Sep 21 — the keys were concealing its absence, so do not assume any
-prior successful run proves the keyless path works.
+When the pass lands:
+1. Check it against the key the same way the 8x1 was checked
+   (`20260922-114320_orchestrator_stability.json`, `git_head aa96bea`,
+   `git_dirty false`, 8/8 deterministic and 8/8 judged).
+2. If green, remove `get_subscription_key()` and `get_search_admin_key()` **in
+   their own commit** — they are deliberately kept and unused until then.
+3. Then, and only then, consider `disableLocalAuth` on the Foundry account.
+   See the Phase 2 backlog: Foundry User grants `listkeys`, so keyless code
+   alone does not make keys unavailable.
 
-Row 4's **VERIFY** is M10's to close: whether Foundry User covers Vision Read
-and the Evaluation SDK. That needs a real keyless call.
-
-The M7 write-up still waits on outside readers (Gerard's step), and still goes
-out in one group push with Phase 2. The prose below is the Sep 16 statement,
-kept because its figure rules and its Phase 2 framing are still live.
-
----
-
-**Superseded 2026-09-21: outside readers for the M7 write-up, then Phase 2.**
-Replaced 2026-09-16 (afternoon). Gerard reviewed the reworked
-`ai-103/m7-writeup-draft.md` the same day:
-- "In short" is approved.
-- The three [CHECK]s are resolved.
-- "Certification" is renamed "acceptance test" on the page.
-- A glossary and an AI-103 skills-mapping table were added.
-
-What remains, as listed in the draft's header comment:
-
-- **Outside readers** for "In short" (Gerard).
-- **At publish time:** an "On this page" link list, and the evidence
-  table's paths turned into GitHub links.
-- **The group push** with Phase 2 and the two stale site lines.
-
-**Phase 2 is the next build work.** Its entry checklist comes first:
-1. ~~**The RBAC model on paper**~~: agreed on Sep 16, in
-   `phase2-rbac-model-draft.md`.
-2. ~~**The Conditional Access policy spec**~~: agreed on Sep 16, in
-   `phase2-conditional-access-spec-draft.md`.
-
-**Next: M8, the IaC baseline.** Write Bicep for the existing IIP resources
-until `what-if` shows no changes. **`ai-103/phase2-orientation.md` is now
-the plan for Phase 2**, and `m7-orientation.md` still holds the session
-checklists and the M7 backlog.
-
-The Sep 16 plan review is in the Claude project doc
-`claude/2026-09-16-phase2-plan-review.md`, and it records two decisions
-Gerard made:
-- **The app:** Blob upload → Function (Flex Consumption) → M7 agent →
-  results to Blob, with a small results page behind an Entra sign-in.
-- **Conditional Access will be deployed,** using a 30-day Entra ID P2 trial
-  in the real tenant, started only once the app exists. The M365 E5 sandbox
-  was rejected, because it requires removing a spending limit and is a
-  separate tenant.
-
-Findings from the review:
-- Agent network isolation can only be chosen when a Foundry account is
-  created, and it costs extra, so it will be designed, not deployed.
-- 11 scripts still use account keys. Going keyless means re-running the
-  acceptance test, and that run can share revisit trigger (b) for the
-  colour wording.
-- The IIP resources should move into Bicep.
-
-Figure rules (also in the draft's header):
-
-- **Never give a colour figure for the shipped code without naming the
-  line it counts.** `[observed]`: 0/45 and 1/45. `[content]`: 40/45 and
-  34/45. "0/45" on its own was the Sep 15 error.
-- **Never use `1/15` for colour naming,** and never use `0.244` as a current
-  figure.
-- **Never give a combined `N/225`, `N/360` or `N/450`.** Model-judged and
-  deterministic counts are reported apart. **As of 2026-09-18 the orchestrator
-  cannot produce one:** `cell_counts()` returns the two populations separately
-  and carries no combined total, and its results JSON writes `model_judged_*`
-  and `deterministic_*` rather than `cells_correct`/`cells_total`.
-
-**Drafting is still not publishing.** The draft waits for Phase 2 and goes
-out in one group push, together with the two stale site lines.
-
-**Alternatives, if editing the write-up is not the appetite:**
-
-- **Phase 2:** managed identity, the RBAC model, and the Conditional Access
-  design spec. Unchanged since Sep 14.
-- **The `[content]` colour wording is not an alternative any more.**
-  Gerard accepted it as a stated limit on Sep 16 (see the Backlog item for
-  the revisit triggers).
+Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
+step) and goes out in one group push with Phase 2 and the two stale site lines.
 
 ## Milestones (Phase 1)
 
@@ -239,6 +171,60 @@ out in one group push, together with the two stale site lines.
 ---
 
 ## Key Lessons
+
+**`az role assignment list -o table`'s Principal column is NOT the principal
+ID** (added 2026-09-22). For a *user* it prints the UPN — obviously not an ID,
+so nobody transcribes it. For a **managed identity** it prints the **appId**, a
+bare GUID that looks exactly like a principal ID and is not one. The one case
+where the value is wrong is the one case where it is plausible. Query
+`principalId` explicitly:
+`--query "[].{principalId:principalId, role:roleDefinitionName}"`.
+Verified on `aif-dev-wus-01`: `id-iip-dev-wus-01` is principal
+`3b6695b3-f1d7-40f9-b21a-5158e6f71739` (shown as `efc6dd4a-…`);
+`proj-iip-dev-wus-01` is `39bed562-c0ca-4acb-9d18-8400e806b824` (shown as
+`98ee20de-…`).
+
+**Cognitive Services User is a LEGACY role; Foundry User supersedes it** (added
+2026-09-22). The Image Analysis / Vision docs still name Cognitive Services
+User as the Entra prerequisite. Microsoft Learn's current Foundry RBAC page
+lists it as "legacy Azure AI Services role" and Foundry User as the
+Foundry-native replacement. Reaching for it assigns a deprecated role.
+
+**Foundry RBAC role NAMES are mid-rename — key on the GUID** (added
+2026-09-22). Foundry User / Owner / Account Owner / Project Manager were
+previously Azure AI User / Owner / Account Owner / Project Manager. Microsoft's
+own guidance is to use the role definition ID in code while the rename rolls
+out. Foundry User = `53ca6127-db72-4b80-b1b0-d745d6d5456d`. Role IDs and
+permissions are unchanged by the rename; only the display name moves.
+
+**Keyless code is not the same as keys being unavailable** (added 2026-09-22).
+Foundry User's `actions` include
+`Microsoft.CognitiveServices/accounts/listkeys/action`, and its `dataActions`
+are the wildcard `Microsoft.CognitiveServices/*`. An identity granted Foundry
+User *in order to stop using keys* can still retrieve them. `disableLocalAuth`
+is the control that closes it.
+
+**Azure AI Search free tier: inbound Entra auth works, outbound managed
+identity does not** (added 2026-09-22). Learn contradicts itself across five
+pages. Measured: a `SearchClient` query with `DefaultAzureCredential` succeeds
+on the free tier with Search Index Data Reader assigned. The "billable tier"
+prerequisite applies to the *service* holding a managed identity (for indexers
+reaching storage), not to clients authenticating to it.
+
+**An RBAC test with no role assigned is not a test of anything else** (added
+2026-09-22). 403 means "identity lacks the role" (up to 10 min to propagate);
+401 means "RBAC not enabled on the service". A probe designed to answer "does
+this tier support keyless?" returns 403 when the answer is really "you have no
+role", and that misreading pointed at a paid-tier service recreate. Assign the
+role, wait, then measure.
+
+**`AzureOpenAIModelConfiguration` accepts keys its validator rejects** (added
+2026-09-22). Introspection shows `credential` among its accepted fields;
+passing it fails with `Model config validation failed` (MISSING_FIELD /
+USER_ERROR). The working keyless form is to **omit `api_key`**. Accepting a
+field and validating it are not the same thing, and introspection cannot tell
+you which you have.
+
 
 **This is a lookup, not a manual.** Azure/infra/git-specific gotchas live
 here; general Python language patterns (control flow, data structures,
@@ -423,6 +409,151 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 22, 2026 — M10: the keyless migration, and four probes that reshaped it
+
+**Claude wrote every probe, the migration script and all code changes in this
+session. Gerard directed the work, ran every Azure CLI and Python command, made
+the scope decisions, and caught the Cognitive Services User deprecation that
+Claude had wrong.**
+
+**Plan on entry:** housekeeping, then the two tests at the top of `m10-prep.md`
+— Vision Read, then the Search token. Both ran, plus two more that the first
+pass of review showed were needed.
+
+**Before anything ran, five contradictions surfaced in the docs** — the M8
+bullet contradicting the M9 bullet four lines above it, two verbatim duplicate
+backlog entries, the M10 script count, an unsatisfiable backlog precondition,
+and a test design that could not distinguish its own outcomes. All fixed the
+same day; see `phase2-orientation.md`, `phase2-rbac-model-draft.md` and
+`m10-prep.md`.
+
+**The test-design problem was the important one.** `m10-prep.md`'s Group C test
+said a 401/403 meant the free tier does not support keyless. But the RBAC model
+deliberately assigns nothing on Search, so the run would have 403'd for a
+missing role and been read as a tier limit — pointing M10 at a service recreate
+on a paid tier, a one-way door with a recurring bill. Search Index Data Reader
+was assigned first. That single change is what made the result mean anything.
+
+**The subscription-scope Foundry User grant was removed BEFORE the probes, not
+after.** The backlog said to remove it only after M10's acceptance test passed
+"on the account-scope grant" — but the broad grant silently carries that test,
+so the condition could never be met. Removing first (one reversible command)
+put Gerard and `id-iip-dev-wus-01` on the same grant at the same scope, which
+is what makes the results transfer to the Function.
+
+**Results — four probes, all green:**
+- **Vision Read:** Foundry User covers it. Row 4's first half closed.
+- **AI Search, free tier:** keyless query works. `m10-prep.md`'s "PROBABLE
+  BLOCKER" retired. The query was carried by Search Index Data Reader, a
+  dataAction; Owner inheritance cannot have masked it because Owner has no
+  dataActions. Step [3/3] (`get_index`) *did* ride Owner — Claude predicted it
+  would fail, it passed, and the reason means it proves nothing about what a
+  workload identity could do.
+- **Evaluation SDK:** works with `api_key` omitted. Row 4's second half closed.
+- **`/openai/v1/` audience:** both `cognitiveservices.azure.com` and
+  `ai.azure.com` accepted; a callable works as `api_key`, so no expiry ceiling.
+
+**Migration:** all 12 call sites keyless, committed at `aa96bea`.
+`get_subscription_key()` and `get_search_admin_key()` deliberately kept and
+unused until the acceptance test passes.
+
+**Scope correction, twice over.** The plan said eleven scripts. `m10-prep.md`
+corrected that to ten because `tester3.py` is gitignored. `m6_probe.py` is
+gitignored on the same `.gitignore` line and was missed. **Nine tracked.**
+It was migrated anyway.
+
+**Two mistakes Claude made and corrected in-session, recorded because the
+corrections are the useful part:**
+1. Recommended assigning **Cognitive Services User** as the remedy if Vision
+   Read 403'd. Gerard remembered it was deprecated. It is: Learn lists it as a
+   legacy role superseded by Foundry User. Had the 403 happened, the RBAC model
+   would now carry a deprecated role as a documented decision, in resume
+   material.
+2. Wrote `credential=DefaultAzureCredential()` into the two Evaluation SDK
+   sites on an argument about explicitness, overriding the probe's own finding
+   that `api_key` should simply be omitted. The SDK's validator rejected it and
+   the smoke test caught it. The empirical result was right; the aesthetic
+   argument was not.
+   A third, smaller one: the first smoke test imported `m6_generate`, which
+   runs a full generate loop at module scope. Caught before it ran.
+
+**8x1 smoke before the long pass** (`20260922-114320`, `git_head aa96bea`,
+`git_dirty false`): 8/8 deterministic audit rows and 8/8 judged text rows match
+the answer key. 366 seconds for 8 item-runs — ~46s each, so the 15-run pass is
+~92 min. That is **latency-bound, not TPM-bound**: the 300K TPM quota increase
+does not shorten it, and the old ~95 min figure stands.
+
+**THE ACCEPTANCE PASS — `20260922-131551_orchestrator_stability.json`.** 15 runs,
+all eight items, 89.5 minutes, `git_head aa96bea`, INSTRUCTIONS_V4, temp 0.0,
+judge and model both `gpt-5-4`.
+
+- **Deterministic layer: 240/240.** Every audit row on every item on every run
+  matches the key, including the three carrying the deliberate flaws (item3
+  `text_legible`, item4 `brand_consistent`, item5 `info_accurate`). This is the
+  layer that evidences the migration: it runs at temperature 0 / seed 42 through
+  `m7_legibility_check.py` and `m7_cv_audit_tool.py`, the two files whose auth
+  changed most.
+- **Judged layer: 7 of 8 items at 15/15.** item7 came in at 12/15.
+- **M10's acceptance test is CERTIFIED on this basis** (Gerard's call). The
+  migration changed how calls authenticate and nothing about what they return.
+
+**item7 at 12/15 is NOT a migration regression, and the Sep 11 punch list said
+so in advance.** First-draft relevance across 15 runs:
+`[3,2,1,2,3,2,1,2,1,1,2,3,2,2,3]` — four draws at 3.0, three of which passed
+(run 15 drew relevance 3.0 and still failed on groundedness 2.0). The Sep 11
+task recorded item7 recovering **once in 18 runs** and said explicitly: *"if a
+future pass shows item7 recovering at a materially higher rate, revisit whether
+it should be re-registered the way item6 was on Sep 9."* **1-in-18 then, 3-in-15
+now. That trigger has fired.** The key was NOT changed on the strength of this
+run — certifying a migration and rewriting the answer key it was judged against,
+using the same run, is circular. Re-registration needs its own evidence and its
+own decision. Logged in Todoist.
+
+**A SECOND shift that nobody pre-registered: item7's groundedness moved.**
+Values `[4,4,4,4,4,4,4,4,4,4,4,4,2,4,2]` — two 2.0 draws. The Sep 9
+judge-isolation probe recorded item7 on gpt-5-4 as groundedness 4.0 x10, *"no
+variance"*, and that was the evidence for choosing gpt-5-4 as judge at all.
+Three candidates, cheapest first: (1) the judge deployment's model build changed
+under us — check `versionUpgradeOption`, because if it is
+`OnceNewDefaultVersionAvailable` the judge moves without anyone deciding, and
+every longitudinal comparison in the M7 write-up is then comparing two judges;
+(2) the 500s (below) injected retried samples; (3) real variance that n=10 on
+one item never surfaced.
+
+**Transient judge 500s, invisible to the results file.** At least one
+`InternalServerError: The model produced invalid content` fired from
+`azure.ai.evaluation._legacy.prompty` during run 2 and was retried internally by
+the Evaluation SDK ([0/10], 3s backoff); the run completed with all three tools
+called. **The probe cannot see these** — the retry happens below `unmeasured()`,
+which only catches runs that complete without a verdict. The only trace is
+terminal scrollback. A retried call is a fresh sample, so this is a plausible
+contributor to the variance above and there is currently no way to count it.
+
+**`stop_on_pass` STILL has zero observations** after another 120 item-runs. The
+three item7 first-draft passes are not stop-on-pass — that needs a pass *after*
+a failure. Unobserved now across 33+ runs.
+
+**PROCESS FAILURE, Claude's: `git_changed_during_run: True`.** Claude proposed
+doing the documentation pass while the 15-run measurement was in flight, and
+that tripped the provenance guard built to prevent exactly this. `git_at_end`
+records `.gitignore`, `STATUS.md`, `m10-prep.md`, `phase2-orientation.md`,
+`phase2-rbac-model-draft.md` and the 8x1 results file as dirty at the end.
+**The measurement stands, for a specific and checkable reason: not one `.py`
+file is in that list** — nothing under `ai-103/scripts/` changed, and `git_head`
+is identical at start and end, so the code that ran is byte-identical to
+`aa96bea` throughout. Recorded rather than waved off, because the flag is
+permanently in the results file and a reader deserves the reason. **Lesson: do
+not touch the repo while a measured run is in flight, even documentation. The
+guard cannot tell docs from code and should not have to.**
+
+**Governance findings, both new and both in the Phase 2 backlog:** Foundry
+User's dataAction is the wildcard `Microsoft.CognitiveServices/*`, and its
+actions include `listkeys`. Keyless code does not remove the permission to
+retrieve a key — `disableLocalAuth` does. And Principle 2 cannot be satisfied
+for row 4 while one shared AIServices account serves both OpenAI and Vision;
+that is now stated as an accepted trade-off rather than left implicit.
+
 
 ### Session — September 21, 2026 — M8: the IaC baseline, written and what-if'd
 

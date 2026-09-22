@@ -38,7 +38,7 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 
 ## Status
 
-**Status as of:** September 21, 2026.
+**Status as of:** September 22, 2026.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
@@ -57,12 +57,32 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   `what-if` reports **3 resources to modify, 6 no change**; all three are
   registered in `infrastructure/iip/README.md`, which is the complete expected
   output. Anything else in a future run is a real change.
-  **Nothing has been deployed yet** — M8 was a describe-what-exists milestone,
-  and the one intended diff (`+ tags.managed-by` on Search) applies on the
-  first real deployment, which M9 will be.
+  The one intended diff (`+ tags.managed-by` on Search) applied on M9's
+  deployment, which was the first real one. *(Corrected 2026-09-22: this
+  bullet previously ended "Nothing has been deployed yet … which M9 will be",
+  contradicting the M9 bullet four lines above it. Written before M9 ran and
+  never updated when it did.)*
+- **M10's acceptance test is CERTIFIED (2026-09-22),** on
+  `20260922-131551_orchestrator_stability.json`: 15 runs, `git_head aa96bea`,
+  **240/240 deterministic audit rows** and 7 of 8 items at 15/15 on the judged
+  rows. item7 came in at 12/15 — a pre-registered known variance whose Sep 11
+  revisit trigger has now fired, **not** a migration regression, and the answer
+  key was deliberately left unchanged. See STATUS.md's Sep 22 entry.
+  The run carries `git_changed_during_run: true`; no `.py` file is in the
+  changed set, so the measured code is byte-identical to `aa96bea`.
+- **M10 IS NOT FINISHED.** Two clauses of its done-when remain:
+  1. **Remove `get_subscription_key()` and `get_search_admin_key()`** — kept
+     deliberately unused until the acceptance test passed, and removed in their
+     own commit, not bundled with anything.
+  2. **Hand-run `m6_generate.py` and `m6_probe.py`** — the "M3-M6 scripts are
+     smoke-tested" clause. Neither can be imported for automated checking
+     (module-scope side effects, see the backlog), so
+     `probe_keyless_smoke.py` verifies them statically only.
 - **Current milestone: see the marker at the top of this file.**
-- **Nothing is keyless yet.** M9 granted the roles; the eleven key-based
-  scripts are M10's job and still read keys today.
+- ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
+  sites across the nine tracked scripts now authenticate with Entra ID
+  (committed `aa96bea`). The key helpers remain in the source, unused, pending
+  removal — see the M10 clauses above.
 
 ## What Phase 2 builds
 
@@ -114,7 +134,7 @@ Function must not use keys.
 |---|---|---|---|---|
 | **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** ✅ | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
-| **M10** | **Keyless migration.** The 11 key-based scripts move to Entra ID, M7's tools first. M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no script reads a key. | 1–2 sessions (includes the ~95 min run) | M9 |
+| **M10** | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no script reads a key. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. Decides Event Grid delivery vs. inbound restrictions (Todoist task), and the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
@@ -150,30 +170,26 @@ milestone; it records a probable blocker on the free-tier Search service.*
   delete of a results blob is currently unrecoverable, and turning soft delete on
   is a one-line change with a small storage cost. A deliberate decision, not a
   default.
-- **Remove the subscription-scope `Foundry User` grant.** Found 2026-09-21:
-  Gerard holds Foundry User at subscription scope, which inherits to
-  `aif-dev-wus-01` and is how `m7_orchestrator.py` authenticates keylessly
-  today. M9 declares the narrow account-scope grant the RBAC model specifies
-  (row 2), so the broad one is redundant. Principle 2 (narrowest role at the
-  narrowest scope) says remove it — but only **after** M10's acceptance test
-  has passed on the account-scope grant, since until then the subscription
-  grant is what is actually load-bearing. Not before M10.
-- **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
-  what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
-  blob service. M9 declares it as found rather than changing it. Worth revisiting
-  at **M11**, when the Function starts writing results there — an accidental
-  delete of a results blob is currently unrecoverable, and turning soft delete on
-  is a one-line change with a small storage cost. A deliberate decision, not a
-  default.
-- **Remove the subscription-scope `Foundry User` grant.** Found 2026-09-21:
-  Gerard holds Foundry User at subscription scope, which inherits to
-  `aif-dev-wus-01` and is how `m7_orchestrator.py` authenticates keylessly
-  today. M9 declares the narrow account-scope grant the RBAC model specifies
-  (row 2), so the broad one is redundant. Principle 2 (narrowest role at the
-  narrowest scope) says remove it — but only **after** M10's acceptance test
-  has passed on the account-scope grant, since until then the subscription
-  grant is what is actually load-bearing. Not before M10.
-- **Make D1 accurate.** D1 documents the admin posture as "keep subscription
+- ~~**Remove the subscription-scope `Foundry User` grant.**~~ **DONE
+  2026-09-22.** Removed before M10's probes, not after.
+  **Its stated precondition was unsatisfiable and that is worth recording.**
+  The item said to remove the grant "only after M10's acceptance test has
+  passed on the account-scope grant" — but while the subscription grant
+  exists it silently carries that test, so the test can never run *on the
+  account-scope grant* and the condition can never be met. The item would
+  have sat open forever, and the eventual removal would have broken M11's
+  Function with no diagnosis, because `id-iip-dev-wus-01` has no subscription
+  grant to fall back on.
+  The safe order was the reverse: remove first (one reversible command), then
+  measure. Gerard and `id-iip-dev-wus-01` now hold the same grant at the same
+  scope, which is what makes M10's results transfer to the Function.
+  **Lesson:** a precondition that the thing being gated would itself defeat is
+  not a safety check.
+- **Make D1 accurate.** *(Re-confirmed live 2026-09-22 from
+  `az role assignment list --include-inherited`: Owner on the `Non-Prod`
+  management group, Contributor on management group `e0249b00-…`. Still open;
+  this is now a read-twice fact, not a single observation.)*
+  D1 documents the admin posture as "keep subscription
   Owner and document it as a single-admin exception." The real posture, read on
   2026-09-21, is broader: **Owner on the `Non-Prod` management group** and
   **Contributor on the tenant root management group**, both wider than
@@ -181,6 +197,35 @@ milestone; it records a probable blocker on the free-tier Search service.*
   permissions change — the access is reasonable for a single-admin lab, but the
   RBAC model is resume material and currently understates the privilege it is
   meant to disclose.
+- **`disableLocalAuth` on the Foundry account — this is what makes M10 mean
+  something.** Found 2026-09-22 while reading the Foundry User role definition
+  (`53ca6127-db72-4b80-b1b0-d745d6d5456d`). Its `actions` include
+  `Microsoft.CognitiveServices/accounts/listkeys/action`, so an identity
+  granted Foundry User *for keyless operation* can still retrieve the account
+  keys. M10 stops the code reading keys; it does not remove the permission to
+  read them, on the Function identity, in production. `m10-prep.md` lists
+  `disableLocalAuth` as optional step 6 tidy-up. It is not tidy-up — it is the
+  step that renders a retrieved key useless. Decide it deliberately at **M11**,
+  once nothing key-based remains.
+- **Foundry User is a wildcard role, and Principle 2 cannot currently be met.**
+  Its `dataActions` are `Microsoft.CognitiveServices/*` — everything on the
+  account, not "Vision Read and chat". There is no narrower built-in role
+  covering *both* OpenAI inference and Vision Read, because `aif-dev-wus-01`
+  is one shared AIServices account serving both (the decision
+  `m7_legibility_check.py` records as "no second Azure resource"). So the
+  shared-account choice has a governance cost, and the RBAC model should state
+  it as an accepted trade-off rather than leave Principle 2 reading as though
+  it were satisfied. Also worth evaluating at M11: **Foundry Agent Consumer**,
+  which Microsoft documents as least-privilege for principals that only call
+  agents — neither the RBAC model nor `m10-prep.md` considered it.
+- **`m6_generate.py` and `m6_probe.py` run real work at module scope.**
+  Importing either one executes it — `m6_generate` runs a full generate loop
+  across two deployments and writes a results file. They therefore cannot be
+  imported for testing, only executed, which is why `probe_keyless_smoke.py`
+  verifies them by reading their source instead. `m5_retrieve.py`'s docstring
+  flagged this about `m6_generate` on 2026-08-20; it is now also the reason
+  two scripts sit outside every automated check. Small refactor: move the
+  module-scope work under `if __name__ == "__main__":`.
 - **Two emergency-access accounts,** as Microsoft recommends, instead of
   one. One is a deliberate choice for a lab with a single admin (C2).
 - **Guest access to the results page.** Authentication strength for guests

@@ -1,5 +1,30 @@
 # M10 prep — the keyless migration, surveyed before starting
 
+> ## SURVEYED 2026-09-21 · TESTED 2026-09-22 — read this box before the page
+>
+> The survey below was written before anything was run. Four probes then tested
+> its assumptions. **It was right about the shape of the work and wrong about
+> three specific things**, and it is kept unedited beneath this box so the
+> difference between a survey and a measurement stays visible.
+>
+> | Survey said | Measured |
+> |---|---|
+> | Group C is a **PROBABLE BLOCKER**; free tier may force a paid recreate | **Wrong.** Keyless works on free. Inbound Entra auth is fine; the "billable tier" line is about *outbound* managed identity. No recreate, no bill. |
+> | The tracked scope is **ten** scripts, not eleven | **Still short by one.** `m6_probe.py` is gitignored on the same `.gitignore` line as `tester*.py`. **Nine.** |
+> | Group A is nine uniform `azure_ad_token_provider=` edits | **Seven.** `m6_evaluate.py` and `m7_evaluator_tool.py` build an `AzureOpenAIModelConfiguration` — a TypedDict, not a client. It has no such parameter. The fix is to **omit `api_key`**. Passing `credential=` is accepted by the TypedDict and then rejected by the SDK's validator. |
+> | Group B (Vision Read) is the real unknown | **Right to test it first, wrong about the stakes.** Foundry User covers it — because its dataAction is the wildcard `Microsoft.CognitiveServices/*`. And the "expected fix" this page implies, Cognitive Services User, is a **legacy** role superseded by Foundry User. |
+>
+> **The decisive-test design also had a flaw.** The Group C test as written
+> ("if it 401s or 403s, the free tier does not support keyless") could not
+> distinguish a tier limit from a missing role — and no Search role was
+> assigned at the time, so it would have returned 403 and pointed M10 at a
+> one-way door. Search Index Data Reader was assigned first, which is what made
+> the result mean anything.
+>
+> Probes: `probe_keyless_vision.py`, `probe_keyless_search.py`,
+> `probe_keyless_eval.py`, `probe_keyless_v1_scope.py`,
+> `probe_keyless_smoke.py`. Migration committed at `aa96bea`.
+
 **Written 2026-09-21** at the end of the M8/M9 session, so M10 opens with the
 migration rather than the survey. Claude surveyed the scripts and the docs;
 nothing here has been changed or run.
