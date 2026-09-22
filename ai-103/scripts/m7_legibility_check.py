@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 from dotenv import load_dotenv
-from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 
@@ -233,8 +233,13 @@ def build_vision_client() -> ImageAnalysisClient:
     load_dotenv()
     account, resource_group = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
     endpoint = get_endpoint(account, resource_group)
-    key = get_subscription_key(account, resource_group)
-    return ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+    # M10 (2026-09-22): keyless. Verified by probe_keyless_vision.py --
+    # Foundry User DOES cover Vision Read, despite the Image Analysis
+    # docs naming Cognitive Services User as the prerequisite. It covers
+    # it because its dataAction is the wildcard
+    # Microsoft.CognitiveServices/*, not because Vision was granted
+    # specifically. If that role definition ever narrows, this breaks.
+    return ImageAnalysisClient(endpoint=endpoint, credential=DefaultAzureCredential())
 
 
 def audit_legibility(image_path, client: ImageAnalysisClient = None):

@@ -13,11 +13,21 @@ def model_config():
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
 
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-    
+    # M10 (2026-09-22): keyless. AzureOpenAIModelConfiguration is a TypedDict,
+    # NOT an OpenAI client -- it has no azure_ad_token_provider parameter, so
+    # this is a different fix from every other call site.
+    #
+    # DO NOT 'improve' this by passing credential=DefaultAzureCredential().
+    # `credential` IS an accepted key on the TypedDict -- introspection shows
+    # it -- but the SDK's own validator then rejects the config with
+    # 'Model config validation failed' (MISSING_FIELD / USER_ERROR). Tried
+    # 2026-09-22 and reverted. Accepting a key and validating it are not the
+    # same thing, and introspection cannot tell you the difference.
+    #
+    # OMITTING api_key is the working form: the SDK falls back to a credential
+    # chain. Verified by probe_keyless_eval.py before this edit.
     judge = AzureOpenAIModelConfiguration(
         azure_endpoint=endpoint,
-        api_key=key,
         api_version=os.environ["CHAT_API_VERSION"],   # "2024-06-01"
         azure_deployment="gpt-5-2",  # this is the judge model deployment name
     )

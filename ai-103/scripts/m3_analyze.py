@@ -44,6 +44,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 
 def run_az(args: list[str]) -> str:
@@ -86,6 +87,37 @@ def get_subscription_key(account: str, resource_group: str) -> str:
         "--resource-group", resource_group,
         "--query", "key1",
     ])
+
+
+def build_token_provider(scope: str = "https://cognitiveservices.azure.com/.default"):
+    """Entra ID bearer-token provider -- the keyless replacement for
+    get_subscription_key(), added for M10 (2026-09-22).
+
+    Returns a CALLABLE, not a token. The OpenAI SDK invokes it before each
+    request, so expiry and refresh are handled for us. That matters here: a
+    token lives ~60-90 minutes and the M7 acceptance test runs ~95, so a
+    fetched-once token string would expire mid-run.
+
+    SCOPE. cognitiveservices.azure.com is the classic Azure OpenAI /
+    AI Services audience, verified working 2026-09-22 against Vision Read
+    and the Evaluation SDK (probe_keyless_vision.py, probe_keyless_eval.py).
+    Microsoft's newer Foundry docs name a DIFFERENT audience,
+    ai.azure.com/.default, for the /openai/v1/ route -- which is the route
+    m5_index.build_embedding_client() uses. Parameterised rather than
+    hardcoded for exactly that reason; do not assume one covers the other.
+
+    ROLE. Foundry User carries this. Its dataActions are the wildcard
+    Microsoft.CognitiveServices/* (role definition
+    53ca6127-db72-4b80-b1b0-d745d6d5456d, read 2026-09-22), which is why it
+    covers Vision and the Evaluation SDK as well as chat. Note the same role
+    also grants accounts/listkeys/action -- keyless code does not by itself
+    make keys unavailable; disableLocalAuth does.
+
+    get_subscription_key() is deliberately KEPT until the acceptance test
+    passes on this path. Removing the fallback at the moment it is most
+    likely to be needed is how a migration becomes an outage.
+    """
+    return get_bearer_token_provider(DefaultAzureCredential(), scope)
 
 
 def get_storage_key(storage_account: str, resource_group: str) -> str:

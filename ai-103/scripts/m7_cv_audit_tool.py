@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from openai import AzureOpenAI
 
-from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
+from m3_analyze import get_endpoint, get_subscription_key, build_token_provider  # reuse, don't rewrite
 from m7_vision_test import encode_image  # reuse, don't rewrite -- no api_version dependency
 from m7_legibility_check import audit_legibility
 
@@ -233,11 +233,9 @@ def build_audit_client() -> AzureOpenAI:
 
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-
     return AzureOpenAI(
         azure_endpoint=endpoint,
-        api_key=key,
+        azure_ad_token_provider=build_token_provider(),
         api_version=STRUCTURED_OUTPUT_API_VERSION,
     )
 

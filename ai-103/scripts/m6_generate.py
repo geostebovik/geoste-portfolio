@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from openai import AzureOpenAI
 from pathlib import Path
 from datetime import datetime
-from m3_analyze import get_endpoint, get_subscription_key   # reuse, don't rewrite
+from m3_analyze import get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
 
 # This script reads a text file containing question and answer pairs separated by "|"
 # Splits each line into question and answer parts and removes any leading or trailing whitespace
@@ -30,11 +30,9 @@ def build_client():
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
 
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-    
     client = AzureOpenAI(
         azure_endpoint=endpoint,
-        api_key=key,
+        azure_ad_token_provider=build_token_provider(),
         api_version=os.environ["CHAT_API_VERSION"],   # "2024-06-01"
     )
     return client

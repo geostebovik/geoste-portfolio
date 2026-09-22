@@ -3,11 +3,11 @@
 import os
 from dotenv import load_dotenv
 from openai import AzureOpenAI, OpenAI
-from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 
-from m3_analyze import get_endpoint, get_subscription_key   # reuse, don't rewrite
+from m3_analyze import get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
 from m5_index import get_search_admin_key, build_embedding_client   # reuse, don't rewrite
 
 
@@ -27,9 +27,11 @@ def build_chat_client() -> AzureOpenAI:
     load_dotenv()
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-
-    return AzureOpenAI(azure_endpoint=endpoint, api_key=key, api_version=os.environ["CHAT_API_VERSION"])
+    return AzureOpenAI(
+        azure_endpoint=endpoint,
+        azure_ad_token_provider=build_token_provider(),
+        api_version=os.environ["CHAT_API_VERSION"],
+    )
 
 
 def embed_query(client: OpenAI, deployment: str, question: str) -> list[float]:
@@ -140,8 +142,11 @@ def main():
     search_service, index_name = os.environ["SEARCH_SERVICE"], os.environ["SEARCH_INDEX_NAME"]
     chat_deployment = os.environ["CHAT_DEPLOYMENT_GPT_5_4_MINI"]   # same as m6_generate.py's second model -- need to compare answers
                    
-    search_key = get_search_admin_key(search_service, rg)
-    credential = AzureKeyCredential(search_key)
+    # M10 (2026-09-22): keyless. Proven on the FREE tier by
+    # probe_keyless_search.py -- Search Index Data Reader, a dataAction,
+    # carried the query. Owner inheritance cannot have masked this: Owner
+    # has no dataActions at all.
+    credential = DefaultAzureCredential()
 
     search_client = SearchClient(endpoint=f"https://{search_service}.search.windows.net", index_name=index_name, credential=credential)
 

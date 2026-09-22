@@ -58,7 +58,7 @@ from openai import AzureOpenAI
 # Same helpers m7_evaluator_tool.py uses to reach the account -- reused rather
 # than reimplemented, so this probe authenticates exactly the way the judge does.
 # If these ever diverge, the probe stops describing the thing under test.
-from m3_analyze import get_endpoint, get_subscription_key
+from m3_analyze import get_endpoint, get_subscription_key, build_token_provider
 
 PROMPT = "Reply with exactly: ok"
 DEPLOYMENT_VARS = [
@@ -73,7 +73,7 @@ def build_client(api_version: str) -> AzureOpenAI:
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
     return AzureOpenAI(
         azure_endpoint=get_endpoint(account, rg),
-        api_key=get_subscription_key(account, rg),
+        azure_ad_token_provider=build_token_provider(),
         api_version=api_version,
     )
 

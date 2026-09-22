@@ -24,7 +24,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 
-from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
+from m3_analyze import get_endpoint, get_subscription_key, build_token_provider  # reuse, don't rewrite
 
 
 # One of the five M7 thumbnails -- start with the clean one, per the
@@ -48,11 +48,9 @@ def build_client() -> AzureOpenAI:
 
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-
     client = AzureOpenAI(
         azure_endpoint=endpoint,
-        api_key=key,
+        azure_ad_token_provider=build_token_provider(),
         api_version=os.environ["CHAT_API_VERSION"],  # "2024-06-01" 
     )
     

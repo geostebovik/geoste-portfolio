@@ -6,7 +6,7 @@ from pathlib import Path
 from azure.core.exceptions import ResourceNotFoundError
 from dotenv import load_dotenv
 from openai import OpenAI
-from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
@@ -20,7 +20,7 @@ from azure.search.documents.indexes.models import (
     VectorSearchProfile,
 )
 
-from m3_analyze import run_az, get_endpoint, get_subscription_key   # reuse, don't rewrite
+from m3_analyze import run_az, get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
 
 BASE_DIR = Path(__file__).parent
 DOCUMENT_PATH = BASE_DIR / ".." / "iip-docs" / "Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json"
@@ -105,10 +105,25 @@ def build_embedding_client() -> OpenAI:
     account, rg = os.environ["AIF_ACCOUNT"], os.environ["AIF_RESOURCE_GROUP"]
 
     endpoint = get_endpoint(account, rg)
-    key = get_subscription_key(account, rg)
-    
+    # M10 (2026-09-22): keyless. This is the ONLY site using a plain OpenAI
+    # client (the v1 GA shape, kept deliberately -- see this function's
+    # docstring and the Aug 11/12 embeddings 404 in STATUS.md's Key Lessons).
+    # The plain class has no azure_ad_token_provider, so the token provider
+    # goes in as api_key: openai-python resolves api_key into an
+    # 'Authorization: Bearer <...>' header, which is what this route wants.
+    #
+    # AUDIENCE: probe_keyless_v1_scope.py tested BOTH candidates against this
+    # deployment on 2026-09-22 -- cognitiveservices.azure.com AND
+    # ai.azure.com both returned a 1536-dim vector. The docs disagree about
+    # which the /openai/v1/ route requires; empirically it takes either.
+    # Using the classic audience for consistency with every other call site.
+    #
+    # A CALLABLE was accepted as api_key (also probed), so the SDK can
+    # refresh and there is no token-expiry ceiling on a long indexing run.
+    # Refresh-on-expiry is the documented SDK contract, not something the
+    # probe observed directly -- it ran for seconds, not 90 minutes.
     client = OpenAI(
-        api_key=key,
+        api_key=build_token_provider(),
         base_url=f"{endpoint}/openai/v1/",
     )
     return client
@@ -201,8 +216,14 @@ def main():
     search_rg = aif_rg   # same resource group -- no separate var needed
     index_name = os.environ["SEARCH_INDEX_NAME"]
     search_endpoint = f"https://{search_service}.search.windows.net"
-    search_key = get_search_admin_key(search_service, search_rg)
-    credential = AzureKeyCredential(search_key)
+    # M10 (2026-09-22): keyless. NOTE this path needs MORE than the query
+    # path in m5_retrieve.py: ensure_index_exists() is a control-plane
+    # action (Search Service Contributor) and upload_chunks() is a
+    # dataAction (Search Index Data Contributor). Gerard's Owner
+    # inheritance on the Non-Prod management group covers the former,
+    # which is why probe_keyless_search.py step [3/3] passed -- that
+    # success was NOT evidence the Function identity could do it.
+    credential = DefaultAzureCredential()
 
     # --- Pipeline ---
     markdown = load_document_markdown()
