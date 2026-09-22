@@ -64,7 +64,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from m7_cv_audit_tool import ContentAudit
-from provenance import end_check
+from provenance import end_check, deployment_builds
 from schema_provenance import sent_schema
 
 from m7_orchestrator import (
@@ -228,6 +228,25 @@ def main():
     # frozen. The audit schema reaches the model on every audit_thumbnail()
     # call; see schema_provenance.py for why it is recorded whole.
     provenance["content_response_format"] = sent_schema(ContentAudit)
+    # ADDED 2026-09-22, also outside run_provenance(). The deployment NAME was
+    # already recorded; the model BUILD behind it was not, and the deployments
+    # are set to auto-upgrade -- so a judge could change between passes with no
+    # commit and no diff, and the record could not tell. See
+    # provenance.deployment_builds(). Read BEFORE the loop, like the git
+    # snapshot, so it describes the build the run started against.
+    provenance["model_builds"] = deployment_builds(
+        os.environ["AIF_ACCOUNT"],
+        os.environ["AIF_RESOURCE_GROUP"],
+        [provenance.get("model_deployment"), provenance.get("judge_deployment")],
+    )
+    for _name, _b in provenance["model_builds"].items():
+        if "error" in _b:
+            print(f"WARNING: could not read the build for '{_name}': {_b['error']}")
+            print("  The run continues, but this result is not attributable to a model build.")
+        else:
+            _pinned = _b.get("upgradePolicy") == "NoAutoUpgrade"
+            print(f"  {_name}: {_b.get('model')} {_b.get('version')} "
+                  f"({'pinned' if _pinned else 'AUTO-UPGRADE: this version is current, not guaranteed'})")
     if provenance["git_dirty"]:
         print("WARNING: working tree is dirty. This result is not attributable to "
               "a commit and cannot be re-derived later.")

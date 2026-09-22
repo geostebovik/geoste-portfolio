@@ -210,3 +210,68 @@ def core_provenance(script: str | None = None, extra: dict | None = None,
     if extra:
         provenance.update(extra)
     return provenance
+
+
+def deployment_builds(account: str, resource_group: str, deployments) -> dict:
+    """Which MODEL BUILD each deployment was serving, at run time.
+
+    ADDED 2026-09-22, after a gap this module had from the start.
+
+    THE GAP. Every results file recorded `judge_deployment: "gpt-5-4"` -- a
+    DEPLOYMENT NAME. The model build behind that name was recorded nowhere. So
+    when item7's groundedness moved on 2026-09-22 (2.0 twice, where the Sep 9
+    judge-isolation probe had recorded 4.0 x10 with "no variance"), the record
+    could not answer the first question anyone would ask: *was this the same
+    judge?* Four results files were checked -- 20260910, 20260911, 20260915,
+    20260922 -- and not one contained a version string.
+
+    WHY THAT IS THE ONE FIELD THAT MATTERS HERE. This module is meticulous
+    about everything a human must change to change: the commit, the dirty
+    tree, the elapsed time. A model build is the opposite -- it can move with
+    no commit, no what-if diff, and nobody's decision, because the deployment
+    carries `versionUpgradeOption: OnceNewDefaultVersionAvailable` (hardcoded
+    in infrastructure/iip/modules/foundry.bicep). Provenance that captures
+    only the human-controlled variables is blind precisely where it is needed.
+
+    It was answered for the Sep 2026 window by the Azure Activity Log -- no
+    `accounts/deployments` write between Sep 7 and Sep 21, so no upgrade fired
+    -- but that is an argument reconstructed after the fact, from a record
+    with 90-day retention. This makes it a fact in the file instead.
+
+    `versionUpgradeOption` is captured too, deliberately: it says whether the
+    version in this record is PINNED or merely CURRENT, which is the
+    difference between "this run is reproducible" and "this run was a
+    snapshot".
+
+    Never raises. Provenance is not worth failing a run over -- the standing
+    rule in this module -- so an az failure records the error instead of
+    propagating it. A record saying `{"error": ...}` is honest; a crashed
+    90-minute run is not.
+    """
+    import json as _json
+    import shutil as _shutil
+    import subprocess as _subprocess
+
+    az = _shutil.which("az")
+    if az is None:
+        return {"error": "az not found on PATH"}
+
+    builds = {}
+    for name in sorted(set(d for d in deployments if d)):
+        try:
+            out = _subprocess.run(
+                [az, "cognitiveservices", "account", "deployment", "show",
+                 "--name", account, "--resource-group", resource_group,
+                 "--deployment-name", name,
+                 "--query", "{model:properties.model.name,"
+                            " version:properties.model.version,"
+                            " upgradePolicy:properties.versionUpgradeOption,"
+                            " capacity:sku.capacity}",
+                 "-o", "json"],
+                capture_output=True, text=True, timeout=60,
+            )
+            builds[name] = (_json.loads(out.stdout) if out.returncode == 0 and out.stdout.strip()
+                            else {"error": (out.stderr or "empty response").strip()[:200]})
+        except Exception as exc:  # noqa: BLE001 -- see docstring
+            builds[name] = {"error": f"{type(exc).__name__}: {exc}"[:200]}
+    return builds
