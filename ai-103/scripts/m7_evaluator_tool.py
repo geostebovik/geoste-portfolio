@@ -64,6 +64,16 @@ def judge_deployment() -> str:
     ALL THREE judges, two of which are not the drafter. Zero crossings in 60
     calls. Self-grading is not buying the drafter a favorable verdict -- that is
     measured, not argued. Re-check it if either model changes.
+
+    CORRECTED 2026-09-23 -- the choice stands, two claims above do not. A
+    pre-registered n=40 test-retest on gpt-5-4 (build 2026-03-05, five fixed
+    item7 texts; STATUS.md Sep 23) drew two or more distinct groundedness
+    scores on EVERY text. The item7 draft above: 4.0 x38, 2.0 x2, both 2.0
+    reasons "off-target relative to the query". So "no variance" and "applies
+    that definition every time" were n=10 artifacts -- a 1-in-20 wobble is
+    invisible in 10 reads about 60% of the time. And "zero crossings" held for
+    these two drafts only: other unchanged item7 drafts pass 8, 14 or 17 of 40
+    re-reads. gpt-5-4 is still the most faithful of the three on this draft.
     """
     load_dotenv()
     return os.environ.get("JUDGE_DEPLOYMENT") or os.environ["CHAT_DEPLOYMENT_GPT_5_4"]
