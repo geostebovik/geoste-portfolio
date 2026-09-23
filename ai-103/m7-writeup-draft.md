@@ -247,9 +247,16 @@ The judge model had been carried over from M6 without anyone choosing it.
 Three deployments were each run 10 times on two drafts, 60 judge calls in
 all. On a draft whose claims are supported but which dodges the topic,
 `gpt-5-2` scored groundedness 1.0 in 8 of 10 runs. `gpt-5-4` scored 4.0 in
-all 10, which is the metric's documented meaning: groundedness measures
-whether claims are supported, not whether they answer the question.
+all 10, which is closest to the metric's documented meaning: groundedness
+measures whether claims are supported, not whether they answer the question.
 **`gpt-5-4` became the judge (Sep 9).**
+
+*Re-measured Sep 23, with the judge's model build on record.* 40 re-reads of
+that same draft gave 4.0 in 38. So `gpt-5-4` is the most faithful of the three,
+not a perfect one: on every one of five fixed item7 drafts it sometimes let
+off-topicness pull groundedness down, and on the one draft that makes no
+unsupported claim at all it did so in most reads. Ten reads could not have
+shown a wobble of 1 in 20.
 
 That model also writes the drafts, so could it be grading its own work too
 kindly? The data answers that. Across those 60 calls, pass/fail was
@@ -271,6 +278,12 @@ A related finding came from testing the redraft loop: **a failing draft
 that isn't changed at all passes 7 of 10 times when it is simply judged
 again.** So a pass after a redraft doesn't show that the redraft fixed
 anything. That is why the acceptance test uses the first-draft verdict.
+
+The same test on fixed item7 drafts (Sep 23) showed that for a topic the fact
+sheet can't cover, even the first-draft verdict isn't stable: one unchanged
+draft passed 0 of 40 re-reads, another 17 of 40. So item7's judged result is
+reported as a rate, not scored against the answer key (Gerard's decision,
+Sep 23). Its deterministic checks stay pass/fail.
 
 ### 6. Reject the better-scoring wording when it breaks another check
 

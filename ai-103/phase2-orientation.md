@@ -68,6 +68,12 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   rows. item7 came in at 12/15 — a pre-registered known variance whose Sep 11
   revisit trigger has now fired, **not** a migration regression, and the answer
   key was deliberately left unchanged. See STATUS.md's Sep 22 entry.
+  **Explained 2026-09-23:** a pre-registered fixed-text test-retest showed one
+  unchanged item7 draft passing 0–17 of 40 re-reads by the same judge — the
+  trigger was judge variance, not agent behaviour. **Decision (a), Gerard:**
+  item7's judged first-draft row is reported as a rate with an expected band,
+  not scored against the key. Implementation is the current next action in
+  STATUS.md.
   The run carries `git_changed_during_run: true`; no `.py` file is in the
   changed set, so the measured code is byte-identical to `aa96bea`.
 - **M10 IS NOT FINISHED.** Two clauses of its done-when remain:

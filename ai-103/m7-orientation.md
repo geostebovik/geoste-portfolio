@@ -1224,6 +1224,15 @@ session's narrative paragraph in `STATUS.md`.
   any of this.
   Judge changed to gpt-5-4 the same day; see `m7_evaluator_tool.py`'s
   `judge_deployment()`.
+  **[Added 2026-09-23 — two sentences above no longer stand as written.** A
+  pre-registered n=40 test-retest on gpt-5-4 (build `2026-03-05`, five fixed
+  item7 texts, STATUS.md Sep 23) drew two or more distinct groundedness scores
+  on EVERY text. The Sep 9 text itself: 4.0 x38, 2.0 x2 — both 2.0 reasons say
+  "off-target relative to the query". The draft that makes no unsupported
+  claim: 1.0 x23. So "applies that definition on every call" is false, and
+  "pass/fail is judge-invariant" held for these two drafts only — on other item7
+  drafts one unchanged text passes 8, 14 or 17 of 40. gpt-5-4 remains the most
+  faithful of the three; n=10 could not see a 1-in-20 wobble.**]**
 - ~~**The redraft loop may be retry-until-lucky rather than remediation
   (Sep 8) — settle before certifying.**~~ — **SETTLED 2026-09-09. It re-rolls.**
   `probe_judge_isolation.py` called `evaluate_draft()` on run 15's recorded
@@ -1554,6 +1563,10 @@ session's narrative paragraph in `STATUS.md`.
   the drafter — zero crossings in 60 calls. The coupling exists and is documented;
   it demonstrably is not buying the drafter a favorable verdict. Re-check if
   either model changes.
+  **[Added 2026-09-23:** "only one that applies the metric's documented
+  definition every time" is narrowed by the Sep 23 test-retest — see the
+  bracket on the groundedness entry in this Backlog, and STATUS.md Sep 23. The
+  choice stands; the "every time" does not.**]**
   **Two things ruled out on the way, both cheaply:** `reasoning_effort` is not
   reachable through the Evaluation SDK (accepted by `**kwargs`, retained nowhere,
   while `is_reasoning_model=True` lands visibly as `_is_reasoning_model`); and no

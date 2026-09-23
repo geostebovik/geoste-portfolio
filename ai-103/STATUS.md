@@ -80,20 +80,21 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: verify the build capture, then thread 2 — re-measure the Sep 9
-judge selection.** Updated 2026-09-23. M10's acceptance test is certified and
-its done-when amended (`phase2-orientation.md`); the marker stays on M10 until
-its two remaining clauses close.
+**Next action: implement decision (a) — item7's judged first-draft row is
+reported as a rate, not scored against the key.** Updated 2026-09-23 (midday).
+M10's acceptance test is certified and its done-when amended
+(`phase2-orientation.md`); the marker stays on M10 until its two remaining
+clauses close. Done today: the build capture verified live, and thread 2 (the
+judge test-retest) run and read — see the Sep 23 entry.
 
-1. **Verify `deployment_builds()` live** (added at `5798ece`, crash path fixed
-   Sep 23). One zero-cost call, no model traffic. Close the P1 Todoist
-   provenance task on the result. Must precede the next measured run, which
-   will be the first whose judge build is on the record.
-2. **Thread 2 — the Sep 9 judge selection is the weakest claim in the
-   record.** It rests on n=10 on one item (item7 groundedness 4.0 x10, "no
-   variance"); the Sep 22 acceptance pass drew 2.0 twice. ~30 min, and the
-   first judge measurement with an attributable build. Pre-register the rule
-   before it runs.
+1. **Decision (a), Gerard, Sep 23.** Change how the orchestrator probe reports
+   item7's judged row: out of the "N/15 match key" count, reported as a
+   first-draft pass rate with an expected band. **Set the band from the Sep 23
+   fixed-text data and pre-register it before the next measured pass.** Not
+   model-facing; the deterministic rows stay pass/fail.
+2. **If `m7-writeup-draft.md` is already with outside readers:** section 4 was
+   corrected Sep 23 ("4.0 in all 10" no longer stands alone). Send them the
+   change (Gerard's step).
 3. **Thread 3 — M3's migration.** A small REST auth swap in `m3_analyze.py`,
    plus a real design decision: account-key SAS → user-delegation SAS amends
    the RBAC model. This is what lets `get_subscription_key()` and
@@ -102,7 +103,7 @@ its two remaining clauses close.
 4. **M10's two remaining clauses** (`phase2-orientation.md`): remove
    `get_search_admin_key()` and the dead `get_subscription_key` imports in
    their own commit; hand-run `m6_generate.py` and `m6_probe.py`. Not yet
-   ordered against 2–3.
+   ordered against 1 and 3.
 
 **Settled — do not reopen:** the `listKeys` calls on `aif-dev-wus-01` are
 Visual Studio Code's (Sep 23 entry).
@@ -461,11 +462,74 @@ turning local auth off at M11 has two known breakages, this poll and
 audit value, since roughly eight retrievals an hour under Gerard's own identity
 hide any genuine one.
 
+**THREAD 2 — the judge test-retest. Pre-registered in Todoist 10:02 MST,
+before any data (Claude proposed; Gerard approved and raised n from 20 to 40).**
+
+*The reframe that shaped it (Claude, from existing data):* Sep 9's "gpt-5-4
+groundedness 4.0 x10, no variance" was test-retest on ONE fixed text; Sep 22's
+two 2.0s were on DIFFERENT drafts, so they could not contradict it. But two
+Sep 22 first drafts differing by one clause (runs 1 and 13) had scored 4.0 and
+2.0, and across all 39 item7 judge calls in that pass groundedness was 4.0 x32,
+2.0 x4, 1.0 x3. So the question became: is gpt-5-4 stable on a fixed text?
+
+*Instrument:* `probe_judge_isolation.py`, judge gpt-5-4, build `2026-03-05`
+recorded in every file (`model_builds`, added at `ba54311`), n=40 per text,
+all at `ba54311` with a clean tree, 200/200 calls measured, 0 errored.
+
+| Text | Source | Originally | Groundedness x40 | Relevance x40 | all_passed |
+|---|---|---|---|---|---|
+| A | `20260909-122233` item7 run 1 d1 | 4.0 x10 (Sep 9, gpt-5-4) | 4.0 x38, 2.0 x2 | 1.0 x20, 2.0 x20 | 0/40 |
+| B | `20260922-131551` item7 run 13 d1 | 2.0 | 4.0 x38, 2.0 x2 | 2.0 x32, 3.0 x8 | 8/40 |
+| C | `20260922-131551` item7 run 15 d1 | 2.0 | 4.0 x29, 2.0 x11 | 2.0 x17, 3.0 x23 | 17/40 |
+| D | `20260922-131551` item7 run 1 d1 | 4.0 | 4.0 x37, 2.0 x3 | 2.0 x25, 3.0 x15 | 14/40 |
+| E | `20260922-131551` item7 run 2 d2 | 1.0 | 1.0 x23, 2.0 x5, 4.0 x12 | 1.0 x40 | 0/40 |
+
+Files: `20260923-101620`, `-102419`, `-103341`, `-105824`, `-110516`
+`_judge_isolation.json`, in that order.
+
+**Verdict, by the pre-registered rule: R2 and R3 both fired.** Every text drew
+at least two distinct groundedness scores. Claude predicted R2 with A stable:
+B and D unstable was right, A stable was wrong.
+
+**What it means:**
+1. **The judge CHOICE stands; two claims about it narrow.** On text A gpt-5-2
+   scored 1.0 in 8 of 10 (Sep 9) and gpt-5-4 scores 4.0 in 38 of 40 — still
+   clearly the most faithful of the three. But "no variance" and "applies the
+   definition on every call" were n=10 artifacts: a 1-in-20 wobble is invisible
+   in 10 reads about 60% of the time. Sep 9 was not wrong; it could not see this.
+2. **item7's judged verdict is a rate, not a property.** One unchanged draft
+   passes 0 to 17 of 40 re-reads depending on its wording. Sep 22's 3/15 (and
+   B's 2.0) are fully explained by judge variance on fixed text; no change in
+   agent behaviour is needed to explain them. The Sep 11 revisit trigger was
+   the judge, not the agent.
+3. **On an unanswerable query, groundedness imports relevance.** E is the one
+   draft that makes no unsupported claim — it describes what the store does
+   offer — and it draws gpt-5-4's LOWEST groundedness: 1.0 in 23 of 40, and 22
+   of those 23 reasons say "not responsive", "unrelated" or "irrelevant" (the
+   23rd says it "does not answer" the query). Both of A's 2.0 reads
+   say "off-target relative to the query". The failure Sep 9 attributed to
+   gpt-5-2 is present in gpt-5-4 at a lower, text-dependent rate.
+
+**Decision (a), Gerard:** item7's judged first-draft row is reported as a rate,
+not scored against the answer key; its deterministic rows stay pass/fail. Not
+circular in the way re-keying from the Sep 22 run would have been: the evidence
+is this pre-registered fixed-text measurement, with no agent in the loop.
+
+Recorded as dated corrections in `m7-orientation.md` (two closed backlog
+entries), `m7-writeup-draft.md` sections 4 and 5, `phase2-orientation.md`'s M10
+bullet, and `m7_evaluator_tool.py`'s docstring (own commit). Cost ~780K tokens,
+~$3 estimated.
+
 **Claude errors this session:** (1) questioned the validity of the Sep 22
 shutdown test without knowing it was Claude's own design and already settled; (2) attributed the `5498ece` hash to a typo of
 Gerard's — it was in Claude's summary; (3) put a `<placeholder>` inside a
 copy-paste command block, which Gerard ran as written; (4) said "eight" tracked
-scripts import `get_subscription_key` unused — it is nine.
+scripts import `get_subscription_key` unused — it is nine; (5) reported
+text B's relevance as 3.0 x9 in the interim read — it is x8; (6) buried the
+item7 decision inside an analysis instead of asking it as a question — Gerard
+had to find it, and chose with less confidence than the decision deserved; (7) counted E's
+"irrelevant" reasons as 16 of 23 with a substring match that also hit "offer"
+— the correct count is 22 of 23.
 
 ### Session — September 22, 2026 — M10: the keyless migration, and four probes that reshaped it
 
