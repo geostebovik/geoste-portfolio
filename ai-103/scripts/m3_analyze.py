@@ -82,6 +82,23 @@ def run_az(args: list[str]) -> str:
 
 
 def get_endpoint(account: str, resource_group: str) -> str:
+    """The Foundry account's endpoint: the AIF_ENDPOINT setting if present,
+    otherwise a live `az` lookup.
+
+    ADDED 2026-09-23 for M11 (m11-prep.md, "the M7 code assumes a developer's
+    laptop"). A Function has no Azure CLI, and m7_evaluator_tool.py calls this
+    at MODULE SCOPE -- so without the setting, merely importing the evaluator
+    inside a Function would fail while the host loads the code. With it set,
+    no subprocess runs at all. Laptop runs without the setting are unchanged.
+
+    The value is the custom-subdomain endpoint (aif-iip-dev-wus-01 -- the
+    project's naming exception, pinned in infrastructure/iip/dev.bicepparam).
+    Nothing here verifies a configured value against the live account; a
+    wrong value surfaces as a DNS or 401 error on the first call.
+    """
+    configured = os.environ.get("AIF_ENDPOINT", "").strip()
+    if configured:
+        return configured.rstrip("/")
     # Matches: az cognitiveservices account show --name <account>
     #   --resource-group <rg> --query properties.endpoint -o tsv
     return run_az([
