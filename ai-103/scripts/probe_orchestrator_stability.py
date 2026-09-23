@@ -176,6 +176,36 @@ def summarize(item_id: str, records: list[dict], runs: int) -> dict:
     else:
         print("  stop-on-pass: not observed in this batch")
 
+    # RATE items (added 2026-09-23, item7 -- see its key in m7_orchestrator.py).
+    # Their judged row is not scored against the key; the batch is checked
+    # against a flag threshold instead. The threshold is a COUNT for a 15-run
+    # pass, so it is only evaluated when exactly that many runs were measured --
+    # a smaller batch reports the count and says the flag does not apply.
+    key = next((r.get("expected_text") for r in records if r.get("expected_text")), None) or {}
+    rate_item = None
+    if key.get("mode") == "rate":
+        flag_at = key.get("first_pass_flag_at")
+        defined_for = key.get("flag_defined_for_runs")
+        applies = flag_at is not None and len(measured) == defined_for
+        flagged = applies and first_pass_count >= flag_at
+        rate_item = {
+            "first_pass_count": first_pass_count,
+            "measured_runs": len(measured),
+            "flag_at": flag_at,
+            "flag_defined_for_runs": defined_for,
+            "flag_applies": applies,
+            "flagged": flagged,
+        }
+        if not applies:
+            verdict = f"flag not evaluated -- defined for {defined_for} measured runs"
+        elif flagged:
+            verdict = "FLAG -- outside the expected range; something changed, investigate"
+        else:
+            verdict = "within the expected range"
+        print(f"  RATE ITEM (judged row not scored against the key): "
+              f"{first_pass_count}/{len(measured)} first-draft passes, "
+              f"flag at >= {flag_at} -> {verdict}")
+
     return {
         "runs": runs,
         "first_text_passed": firsts,
@@ -188,6 +218,7 @@ def summarize(item_id: str, records: list[dict], runs: int) -> dict:
         "first_pass_agreement": agreement,
         "stable": stable,
         "stop_on_pass_runs": fired,
+        "rate_item": rate_item,
         "per_run_draft_scores": [draft_scores(r) for r in records],
     }
 

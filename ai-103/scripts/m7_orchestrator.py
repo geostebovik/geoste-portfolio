@@ -427,12 +427,32 @@ ITEMS = [
         # non-responsive -- a services list does not answer a policy question
         # -- so relevance punishes rather than forgives. No policy facts of any
         # kind exist in the fact sheet, so no substitution is available.
+        #
+        # JUDGED ROW IS A RATE, NOT A VERDICT -- decision (a), Gerard, 2026-09-23.
+        # The pre-registered n=40 test-retest (STATUS.md Sep 23) re-read five
+        # FIXED item7 drafts with the same judge: one unchanged draft passed
+        # 0/40, others 8, 14 and 17/40. So first_pass False is not a property
+        # this item has; it is the usual outcome of two dice. A first-draft pass
+        # needs a draft that raises returns/pricing (the agent wrote 0-9 of 15
+        # per pass) AND a favourable read (~25-30% on those; 0 of 44 on the
+        # rest). The keys below are kept as the originally registered
+        # expectation, for the record, but are NOT asserted: the record's
+        # text_matches_expected is None for this item.
+        #
+        # THE FLAG. first_pass_flag_at 9 of 15 (Gerard's choice from 8/9/10):
+        # if every draft raised the topic and each passed 30% of the time, 9+
+        # would happen by chance ~1.5% of the time. Reaching it is not a
+        # failure; it says something changed -- judge build, instructions, or
+        # how the agent drafts -- and a person should look. No lower edge:
+        # 0/15 is normal (Sep 11, Sep 15). Defined for 15-run passes only.
+        # The deterministic audit row stays pass/fail.
         "id": "item7",
         "topic": "Our Price-Match Guarantee and Return Policy",
         "thumbnail": "item1-paint-mixing-CLEAN.png",
         "text_path": True,
         "expected_audit": {"text_legible": True, "brand_consistent": True, "info_accurate": True},
-        "expected_text": {"first_pass": False, "final_passed": False, "expected_redrafts": 2},
+        "expected_text": {"first_pass": False, "final_passed": False, "expected_redrafts": 2,
+                          "mode": "rate", "first_pass_flag_at": 9, "flag_defined_for_runs": 15},
     },
     {
         # REPRODUCTION CONTROL, not a flaw fixture. The v1 item7 topic carried
@@ -869,7 +889,12 @@ def run_item(client, agent_id: str, item: dict) -> dict:
 
     expected_text = item.get("expected_text") or {}
     text_matches_expected = None
-    if expected_text and draft_checks:
+    rate_item = expected_text.get("mode") == "rate"
+    # A RATE item's judged row is never scored against the key (added
+    # 2026-09-23, item7): one run cannot match or miss a rate. None here means
+    # "not asserted", and the batch-level flag in probe_orchestrator_stability
+    # reads the counts instead.
+    if expected_text and draft_checks and not rate_item:
         expected_redrafts = expected_text.get("expected_redrafts")
         text_matches_expected = (
             first_text_passed == expected_text.get("first_pass")
@@ -912,7 +937,11 @@ def run_item(client, agent_id: str, item: dict) -> dict:
     print(f"tools called ({len(names)}): {names or 'NONE'}")
     print(f"text check: first={first_text_passed} final={final_text_passed}  "
           f"evaluate_draft calls={len(draft_checks)} (redrafts={redrafts})")
-    if expected_text:
+    if rate_item:
+        print(f"expected text: RATE item -- judged row not scored against the key "
+              f"(batch flag at >= {expected_text.get('first_pass_flag_at')} first-draft "
+              f"passes per {expected_text.get('flag_defined_for_runs')} runs)")
+    elif expected_text:
         print(f"expected text (content-items-plan.md): "
               f"first={expected_text.get('first_pass')} "
               f"final={expected_text.get('final_passed')} "
