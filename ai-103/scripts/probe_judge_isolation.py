@@ -82,6 +82,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from provenance import deployment_builds
+
 # NOTE ON IMPORT ORDER, added 2026-09-09 with --judge-deployment.
 # m7_evaluator_tool builds its judge config AT MODULE SCOPE, so the deployment is
 # fixed the moment it is imported. A --judge-deployment flag that set the
@@ -491,6 +493,25 @@ def main():
     # -- the environment says what was REQUESTED, this says what is in use.
     provenance["judge_deployment"] = ACTIVE_JUDGE_DEPLOYMENT
     provenance["judge_deployment_overridden"] = bool(args.judge_deployment)
+    # ADDED 2026-09-23. The deployment NAME above says which judge was asked for;
+    # the model BUILD behind it was recorded nowhere, and the deployment is set to
+    # auto-upgrade. probe_orchestrator_stability.py gained this on 2026-09-22
+    # (5798ece); this probe did not, so a judge re-measurement taken here could not
+    # say which judge it measured -- the exact question it exists to answer.
+    # deployment_builds() never raises; an az failure is recorded, not fatal.
+    provenance["model_builds"] = deployment_builds(
+        os.environ["AIF_ACCOUNT"],
+        os.environ["AIF_RESOURCE_GROUP"],
+        [ACTIVE_JUDGE_DEPLOYMENT],
+    )
+    for _name, _b in provenance["model_builds"].items():
+        if "error" in _b:
+            print(f"WARNING: could not read the build for '{_name}': {_b['error']}")
+            print("  The run continues, but this result is not attributable to a model build.")
+        else:
+            _pinned = _b.get("upgradePolicy") == "NoAutoUpgrade"
+            print(f"  judge {_name}: {_b.get('model')} {_b.get('version')} "
+                  f"({'pinned' if _pinned else 'AUTO-UPGRADE: this version is current, not guaranteed'})")
 
     if provenance["git_dirty"]:
         print("WARNING: working tree is dirty. This result is not attributable to "
