@@ -252,12 +252,18 @@ def deployment_builds(account: str, resource_group: str, deployments) -> dict:
     import shutil as _shutil
     import subprocess as _subprocess
 
+    names = sorted(set(d for d in deployments if d))
     az = _shutil.which("az")
     if az is None:
-        return {"error": "az not found on PATH"}
+        # One entry PER DEPLOYMENT, the same shape as the success path.
+        # Fixed 2026-09-23: this returned a bare {"error": ...}, which the
+        # caller in probe_orchestrator_stability.py iterates as {name: build}.
+        # It read "error" as a deployment name and called .get() on a string,
+        # crashing the run this function promises never to crash.
+        return {name: {"error": "az not found on PATH"} for name in names}
 
     builds = {}
-    for name in sorted(set(d for d in deployments if d)):
+    for name in names:
         try:
             out = _subprocess.run(
                 [az, "cognitiveservices", "account", "deployment", "show",
