@@ -4,10 +4,14 @@
 >
 > | Item | Result |
 > |---|---|
-> | Probe 1, region | **`westus` supports Flex Consumption** (Gerard ran `list-flexconsumption-locations`). The Function stays in the resource group's region; no naming or residency decision. Python runtime list for `westus` not yet run. |
+> | Probe 1, region | **`westus` supports Flex Consumption** (Gerard ran `list-flexconsumption-locations`), with Python **3.10–3.14** available there. The Function stays in the resource group's region; no naming or residency decision. |
 > | D-M11-1, trigger | **(b) Event Grid → Storage queue → queue trigger** (Gerard). No webhook, no `blobs_extension` key; the M12 inbound-restriction question dissolves. |
 > | D-M11-2, sign-in | **(b) managed identity as a federated credential**, dedicated identity `id-iip-dev-wus-03` (Gerard). No client secret. |
-> | Laptop fix (1) | **Written, uncommitted:** `get_endpoint()` returns `AIF_ENDPOINT` when set, else falls back to `az`. `.env.example` documents it. Probe 2 runs after it. |
+> | Laptop fix (1) | **Committed at `71b90b9`.** Verified: `get_endpoint('x','x')` returned the endpoint with no `az` call (a fallback would have failed on the bogus account), and `m6_probe.py` completed live through it. |
+| Probe 2, import time | **4.57 s** for `import m7_orchestrator` on the laptop, with `az` out of the path. Heaviest: `openai` 2.07 s (its `types` package 1.43 s), `azure.ai.evaluation` 1.51 s, `azure.identity` 0.27 s, `azure.ai.agents` 0.24 s. Under the 10 s "proceed" line — but a laptop figure is a floor, and the 1-core instance plus the Functions host share the same 30 s. Cheap insurance at build time: import the tools inside the function body, not at the top of `function_app.py`. |
+>
+> | Probe 3, package size | **235 MB** installed (Windows wheels, `playwright` excluded). Under the 1 GB package limit Microsoft documents for run-from-package — but see the next row. |
+> | Found while sizing probe 3 | Microsoft's Python build guide: **"Remote build has a 60-second timeout: If dependency installation exceeds the limit, the build fails."** 235 MB of dependencies is a real risk against 60 s. The documented fallback is a local build **on Linux** (never Windows) — e.g. a GitHub Actions `ubuntu` runner, which M14's OIDC pipeline would use anyway. The same guide gives Python **3.13+** a **2-minute** module-import window, where the Flex page says app initialization times out after 30 s; which ceiling governs is **unverified**. |
 >
 > The survey below is unedited.
 

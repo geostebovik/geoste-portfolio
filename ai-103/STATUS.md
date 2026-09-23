@@ -80,32 +80,35 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: M11 prep — survey and plan the app before building it, the way
-`m10-prep.md` did for M10.** Updated 2026-09-23, end of session. **M10 is
-complete** (Gerard moved the marker to M11 on Sep 23); see the Sep 23 entry.
+**Next action: settle how the Function gets built, then put M11's new rows in
+the RBAC model — before any Bicep.** Updated 2026-09-23, end of session. M11 is
+the working milestone; `m11-prep.md` is its survey, with a results box at the
+top.
 
-1. **Write `m11-prep.md`:** the Function on Flex Consumption, the Event Grid
-   blob trigger, host storage, App Insights / Log Analytics, sign-in, and the
-   RBAC model's VERIFY rows (4–7). Fold in the decisions the backlog parks at
-   M11 (`phase2-orientation.md`):
-   - **`disableLocalAuth`** — the VS Code poll is now the ONLY known consumer
-     of the account key (M3 is keyless). Identify which extension polls, then
-     decide.
-   - **Foundry Agent Consumer** as a narrower role for the Function identity.
-   - **Blob soft delete** on `stiipdevwus01` before the Function writes there.
-2. **Before the next measured pass:** decide `versionUpgradeOption` on the
-   model deployments (Todoist P2). The judge and the drafter both auto-upgrade
-   today; the build is now recorded, but not pinned.
-3. **If `m7-writeup-draft.md` is already with outside readers:** send them the
+1. **Build path.** Microsoft's Python guide gives remote build a **60-second**
+   timeout; the Function's dependencies are **235 MB**. Time a clean Linux
+   install (Cloud Shell: `pip install -r requirements.txt --target /tmp/pkg`,
+   `playwright` excluded) to see which side of 60 s it lands. Over it: plan a
+   Linux local build (GitHub Actions `ubuntu` runner, which M14 needs anyway).
+2. **Pick the Function's Python version** (3.10–3.14 all available in
+   `westus`). Match the local venv unless there is a reason not to; note that
+   3.13+ gets a documented 2-minute import window (vs the Flex page's 30 s
+   initialization timeout — which governs is unverified).
+3. **RBAC model:** add the rows D-M11-1 (b) and D-M11-2 (b) imply — system-topic
+   identity → Storage Queue Data Message Sender; Function identity → Queue Data
+   Reader + Message Processor; `id-iip-dev-wus-03` with a federated credential
+   and no Azure RBAC — and promote the Storage Blob Delegator note to a row.
+4. **Before the next measured pass:** decide `versionUpgradeOption` (Todoist P2).
+5. **If `m7-writeup-draft.md` is already with outside readers:** send them the
    Sep 23 section 4 change (Gerard's step).
-4. **Small, any time:** make D1 accurate in the RBAC model; promote the
-   Storage Blob Delegator note to a numbered RBAC row; the `__main__`-guard
-   refactor for `m6_generate.py`, `m6_probe.py` and now `m6_evaluate.py`;
-   `.gitattributes` for `.gitignore`.
+6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
+   `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
+   `.gitignore`.
 
-**Settled — do not reopen:** the `listKeys` calls on `aif-dev-wus-01` are
-Visual Studio Code's; item7's judged row is a rate with a flag at 9 of 15; M3's
-`--blob` path uses a user-delegation SAS (all Sep 23).
+**Settled — do not reopen:** the `listKeys` calls are VS Code's; item7's judged
+row is a rate flagged at 9 of 15; M3's `--blob` uses a user-delegation SAS;
+M11's trigger is Event Grid → queue, and its sign-in uses a managed identity as
+a federated credential (all Sep 23).
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step) and goes out in one group push with Phase 2 and the two stale site lines.
@@ -572,6 +575,28 @@ with `text_matches_expected: None`; the summary's `rate_item` reads
 
 Claude wrote all the code and doc changes in thread 3. Gerard chose (A), ran
 every command, and made the milestone call.
+
+**M11 PREP — the survey, started the same afternoon (`m11-prep.md`, `390eb55`).**
+Claude surveyed the M7 code paths and Microsoft Learn; nothing was built.
+- **Headline: the M7 code assumes a laptop.** `get_endpoint()` shelled out to
+  `az`, and `m7_evaluator_tool.py` calls it at module scope — so importing the
+  evaluator in a Function would fail while the host loads. **Fixed at
+  `71b90b9`:** an `AIF_ENDPOINT` setting wins; `az` is the fallback. Verified
+  with a deliberately bogus account name (no `az` error) and a live `m6_probe`.
+- **Two keys hiding in the textbook design** — the blob trigger's
+  `blobs_extension` webhook key and Easy Auth's client secret. **Gerard chose
+  the keyless alternative for both:** D-M11-1 (b) Event Grid → storage queue →
+  queue trigger (no inbound endpoint; the M12 inbound-restriction question
+  dissolves); D-M11-2 (b) a dedicated `id-iip-dev-wus-03` as a federated
+  credential on the app registration.
+- **Probes (Gerard ran all three):** `westus` supports Flex Consumption, with
+  Python 3.10–3.14; `import m7_orchestrator` takes **4.57 s** on the laptop
+  (`openai` 2.07 s, `azure.ai.evaluation` 1.51 s) against a 30 s ceiling; the
+  dependencies install to **235 MB**. Sizing that surfaced the real risk:
+  remote build has a documented **60-second** timeout.
+- **Claude error:** drafted a placeholder where a commit hash belonged in
+  `m11-prep.md`, the third hash slip of the day; caught before commit and
+  replaced with `71b90b9` from `git log`.
 
 Recorded as dated corrections in `m7-orientation.md` (two closed backlog
 entries), `m7-writeup-draft.md` sections 4 and 5, `phase2-orientation.md`'s M10
