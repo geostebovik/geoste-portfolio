@@ -7,21 +7,34 @@ Drive > IIP folder, "Submit an analyze call" / "Poll for the analyze result"
 sections -- full debugging history behind these lives in MASTER-REFERENCE
 Section 4.12):
 
-    endpoint -> key -> SAS or base64 -> POST :analyze -> poll Operation-Location
-    -> save structured result
+    endpoint -> Entra ID token -> user-delegation SAS or base64 -> POST :analyze
+    -> poll Operation-Location -> save structured result
 
 Design decisions:
   - Config storage: .env (git-ignored) holds NON-secret resource names only
     (account name, resource group, storage account, analyzer id, api version).
-  - The subscription key is fetched LIVE from Azure CLI every run via
-    subprocess and is never written to disk. This is a stricter version of
-    "keep secrets out of committed files" -- the key never touches a file
-    at all, not even a git-ignored one.
-  - Auth: key-based (Ocp-Apim-Subscription-Key), matching the already-proven
-    REST calls. Managed identity/Entra ID doesn't apply cleanly here because
-    this script runs on YOUR machine, not on an Azure-hosted resource -- there
-    is no "managed identity" for a laptop. Revisit if this ever moves to a
-    hosted context (Function App, App Service, etc).
+  - Auth: KEYLESS since 2026-09-23 (M3's migration, the last piece of M10).
+    Both the analyze call and the result poll send an Entra ID bearer token
+    for https://cognitiveservices.azure.com/.default -- the scope the
+    Content Understanding REST reference (2025-11-01) names, and the one M10
+    proved on Vision Read and the Evaluation SDK. Role: Foundry User.
+    CORRECTED 2026-09-23: this bullet used to say Entra ID "doesn't apply
+    cleanly here because ... there is no managed identity for a laptop". That
+    conflated the two. A managed identity is one KIND of Entra ID principal;
+    on a laptop, DefaultAzureCredential signs in as the developer through
+    `az login`, which is how every other script here already works.
+  - --blob uses a USER-DELEGATION SAS (decision (A), Gerard, 2026-09-23):
+    the same read-only, 30-minute URL as before, but signed with the caller's
+    Entra ID credentials instead of the storage account key. Needs Storage
+    Blob Delegator (to get the delegation key) and a blob data role that
+    covers read -- Gerard holds both on stiipdevwus01 (RBAC model row 3 and
+    the Delegator row). Microsoft recommends user-delegation SAS whenever a
+    SAS is used. Content Understanding fetching the blob with the Foundry
+    account's own identity was considered and ruled out: no Microsoft
+    documentation shows it for this API; every example is a SAS or public URL.
+  - get_subscription_key() and get_storage_key() are now UNCALLED here. Kept
+    until the keyless path is verified live, then removed in their own commit
+    with the dead imports elsewhere -- the same keep-the-fallback rule M10 used.
 
 Request body verified against iip-cli-runbook.md's actual working curl
 commands (not reconstructed/guessed): the input is wrapped in an "inputs"
@@ -134,22 +147,30 @@ def get_storage_key(storage_account: str, resource_group: str) -> str:
     ])
 
 
-def get_sas_url(storage_account: str, storage_key: str, container: str, blob: str, minutes: int = 30) -> str:
-    # Matches iip-cli-runbook.md "Generate a read-only SAS URL for a blob":
-    # az storage blob generate-sas --account-name <acct>
-    #   --account-key "$STORAGE_KEY" --container-name <c> --name <b>
-    #   --permissions r --expiry <ISO8601> --https-only --full-uri -o tsv
+def get_sas_url(storage_account: str, container: str, blob: str, minutes: int = 30) -> str:
+    """Read-only USER-DELEGATION SAS for one blob -- no account key involved.
+
+    CHANGED 2026-09-23 from an account-key SAS. `--as-user` signs the SAS with a
+    user delegation key obtained with the caller's Entra ID credentials, and
+    Azure CLI requires `--auth-mode login` with it. A user delegation key is
+    valid for at most 7 days, so a longer --expiry would be silently capped;
+    30 minutes is far inside that. Revocation: revoking the user's delegation
+    keys invalidates every SAS signed with them.
+    """
+    # Matches iip-cli-runbook.md "Generate a read-only SAS URL for a blob"
+    # (keyless version, 2026-09-23).
     expiry = (datetime.now(timezone.utc) + timedelta(minutes=minutes)).strftime("%Y-%m-%dT%H:%MZ")
     return run_az([
         "storage", "blob", "generate-sas",
         "--account-name", storage_account,
-        "--account-key", storage_key,
         "--container-name", container,
         "--name", blob,
         "--permissions", "r",
         "--expiry", expiry,
         "--https-only",
         "--full-uri",
+        "--as-user",
+        "--auth-mode", "login",
     ])
 
 
@@ -170,7 +191,14 @@ def build_input_from_sas(sas_url: str) -> dict:
     return {"url": sas_url}
 
 
-def submit_analyze(endpoint: str, key: str, analyzer_id: str, api_version: str, analysis_input: dict) -> str:
+def _auth_header(token_provider) -> dict:
+    # Called per request rather than once: a bearer token lives ~60-90 minutes,
+    # and the provider refreshes it when needed. The poll loop is short (300 s
+    # cap), but calling per request keeps both functions correct if it grows.
+    return {"Authorization": f"Bearer {token_provider()}"}
+
+
+def submit_analyze(endpoint: str, token_provider, analyzer_id: str, api_version: str, analysis_input: dict) -> str:
     # Matches: POST {endpoint}contentunderstanding/analyzers/{analyzerId}:analyze
     #   ?api-version=2025-11-01
     # Body shape confirmed from iip-cli-runbook.md: the input dict is wrapped
@@ -180,7 +208,7 @@ def submit_analyze(endpoint: str, key: str, analyzer_id: str, api_version: str, 
         url,
         params={"api-version": api_version},
         headers={
-            "Ocp-Apim-Subscription-Key": key,
+            **_auth_header(token_provider),
             "Content-Type": "application/json",
         },
         json={"inputs": [analysis_input]},
@@ -196,14 +224,14 @@ def submit_analyze(endpoint: str, key: str, analyzer_id: str, api_version: str, 
     return op_location
 
 
-def poll_result(op_location: str, key: str, interval_s: int = 2, timeout_s: int = 300) -> dict:
+def poll_result(op_location: str, token_provider, interval_s: int = 2, timeout_s: int = 300) -> dict:
     # iip-cli-runbook.md: "poll every 1-2 seconds ... copy the real header
     # value" -- GET this exact URL, no extra query params appended.
     deadline = time.monotonic() + timeout_s
     while time.monotonic() < deadline:
         resp = requests.get(
             op_location,
-            headers={"Ocp-Apim-Subscription-Key": key},
+            headers=_auth_header(token_provider),
             timeout=30,
         )
         resp.raise_for_status()
@@ -246,8 +274,8 @@ def main() -> None:
     print(f"[1/5] Resolving endpoint for {account}...")
     endpoint = get_endpoint(account, resource_group)
 
-    print("[2/5] Fetching subscription key (live from az, not cached anywhere)...")
-    key = get_subscription_key(account, resource_group)
+    print("[2/5] Entra ID token provider (keyless; signs in as the az login user)...")
+    token_provider = build_token_provider()
 
     print("[3/5] Preparing input payload...")
     if args.file:
@@ -255,14 +283,13 @@ def main() -> None:
         label = args.file.stem
     else:
         container, blob = args.blob
-        storage_key = get_storage_key(storage_account, resource_group)
-        sas_url = get_sas_url(storage_account, storage_key, container, blob)
+        sas_url = get_sas_url(storage_account, container, blob)
         analysis_input = build_input_from_sas(sas_url)
         label = Path(blob).stem
 
     print(f"[4/5] Submitting to analyzer '{analyzer_id}' and polling...")
-    op_location = submit_analyze(endpoint, key, analyzer_id, api_version, analysis_input)
-    result = poll_result(op_location, key)
+    op_location = submit_analyze(endpoint, token_provider, analyzer_id, api_version, analysis_input)
+    result = poll_result(op_location, token_provider)
 
     args.out.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
