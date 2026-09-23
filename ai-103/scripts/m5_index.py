@@ -20,29 +20,17 @@ from azure.search.documents.indexes.models import (
     VectorSearchProfile,
 )
 
-from m3_analyze import run_az, get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
+from m3_analyze import get_endpoint, build_token_provider   # reuse, don't rewrite
 
 BASE_DIR = Path(__file__).parent
 DOCUMENT_PATH = BASE_DIR / ".." / "iip-docs" / "Loan_Agreement_Promissory_Note-CUPortal-Custom-Schema.json"
 EMBEDDING_DIMENSIONS = 1536   # text-embedding-3-small default -- verify against the deployment, not assumed
 
 
-def get_search_admin_key(service: str, resource_group: str) -> str:
-    """Fetch the Search admin key live via `az search admin-key show`.
-
-    Same live-fetch-never-persist convention as get_subscription_key() in
-    m3_analyze.py -- mirrors that function's shape but a different `az`
-    command surface (`az search admin-key show`, not `cognitiveservices
-    account keys list`). See iip-cli-runbook.md's "Get a Search admin key"
-    section for the proven command this wraps.
-    """
-
-    return run_az([
-        "search", "admin-key", "show",
-        "--service-name", service,
-        "--resource-group", resource_group,
-        "--query", "primaryKey",
-    ])
+# get_search_admin_key() REMOVED 2026-09-23 (M10 clause 1, own commit). It
+# fetched the Search admin key via `az search admin-key show`; nothing tracked
+# had called it since the keyless migration at aa96bea -- Search is queried
+# with Entra ID and Search Index Data Reader (probe_keyless_search.py).
 
 def load_document_markdown() -> str:
     """Read the CU analyzer output JSON at DOCUMENT_PATH, return

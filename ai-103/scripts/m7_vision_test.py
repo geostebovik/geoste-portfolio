@@ -14,6 +14,8 @@ Reuses m3_analyze.py's get_endpoint()/get_subscription_key() -- same
 live-fetch-the-key-via-az-cli pattern, nothing secret written to disk --
 and mirrors m6_generate.py's build_client() shape, so this stays consistent
 with the existing scripts instead of inventing a second way to authenticate.
+[2026-09-23: get_subscription_key() no longer exists. This script has
+authenticated with build_token_provider() since M10 (aa96bea).]
 
 """
 
@@ -24,7 +26,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 
-from m3_analyze import get_endpoint, get_subscription_key, build_token_provider  # reuse, don't rewrite
+from m3_analyze import get_endpoint, build_token_provider  # reuse, don't rewrite
 
 
 # One of the five M7 thumbnails -- start with the clean one, per the

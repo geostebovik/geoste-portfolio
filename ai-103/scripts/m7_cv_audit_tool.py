@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from openai import AzureOpenAI
 
-from m3_analyze import get_endpoint, get_subscription_key, build_token_provider  # reuse, don't rewrite
+from m3_analyze import get_endpoint, build_token_provider  # reuse, don't rewrite
 from m7_vision_test import encode_image  # reuse, don't rewrite -- no api_version dependency
 from m7_legibility_check import audit_legibility
 

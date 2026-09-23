@@ -34,7 +34,7 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 
-from m3_analyze import get_endpoint, get_subscription_key  # reuse, don't rewrite
+from m3_analyze import get_endpoint  # reuse, don't rewrite
 
 # NOTE: Pillow is imported lazily inside measure_contrast(), not here. The
 # --selftest path exercises only the WCAG arithmetic and must run with numpy

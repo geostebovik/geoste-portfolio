@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from openai import AzureOpenAI
 from pathlib import Path
 from datetime import datetime
-from m3_analyze import get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
+from m3_analyze import get_endpoint, build_token_provider   # reuse, don't rewrite
 
 # This script reads a text file containing question and answer pairs separated by "|"
 # Splits each line into question and answer parts and removes any leading or trailing whitespace

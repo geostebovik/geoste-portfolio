@@ -32,9 +32,10 @@ Design decisions:
     SAS is used. Content Understanding fetching the blob with the Foundry
     account's own identity was considered and ruled out: no Microsoft
     documentation shows it for this API; every example is a SAS or public URL.
-  - get_subscription_key() and get_storage_key() are now UNCALLED here. Kept
-    until the keyless path is verified live, then removed in their own commit
-    with the dead imports elsewhere -- the same keep-the-fallback rule M10 used.
+  - get_subscription_key() and get_storage_key() were REMOVED 2026-09-23,
+    after both paths were verified live keyless (results 20260923-121256 and
+    -121335: all 21 non-generative extracted values identical to the July 27
+    key-based run). No function in this repo reads an account key any more.
 
 Request body verified against iip-cli-runbook.md's actual working curl
 commands (not reconstructed/guessed): the input is wrapped in an "inputs"
@@ -91,17 +92,6 @@ def get_endpoint(account: str, resource_group: str) -> str:
     ]).rstrip("/")
 
 
-def get_subscription_key(account: str, resource_group: str) -> str:
-    # Matches: az cognitiveservices account keys list --name <account>
-    #   --resource-group <rg> --query key1 -o tsv
-    return run_az([
-        "cognitiveservices", "account", "keys", "list",
-        "--name", account,
-        "--resource-group", resource_group,
-        "--query", "key1",
-    ])
-
-
 def build_token_provider(scope: str = "https://cognitiveservices.azure.com/.default"):
     """Entra ID bearer-token provider -- the keyless replacement for
     get_subscription_key(), added for M10 (2026-09-22).
@@ -126,25 +116,12 @@ def build_token_provider(scope: str = "https://cognitiveservices.azure.com/.defa
     also grants accounts/listkeys/action -- keyless code does not by itself
     make keys unavailable; disableLocalAuth does.
 
-    get_subscription_key() is deliberately KEPT until the acceptance test
-    passes on this path. Removing the fallback at the moment it is most
-    likely to be needed is how a migration becomes an outage.
+    get_subscription_key() was kept as a fallback until the acceptance test
+    passed on this path (2026-09-22), and removed 2026-09-23 in its own
+    commit. Removing a fallback at the moment it is most likely to be needed
+    is how a migration becomes an outage.
     """
     return get_bearer_token_provider(DefaultAzureCredential(), scope)
-
-
-def get_storage_key(storage_account: str, resource_group: str) -> str:
-    # NOTE the different --query shape vs. get_subscription_key above:
-    # `cognitiveservices account keys list` returns a flat object with
-    # key1/key2. `storage account keys list` returns a LIST of {keyName,
-    # value, ...} objects -- index [0] for the first key. Same-sounding
-    # command family, different response shape.
-    return run_az([
-        "storage", "account", "keys", "list",
-        "--account-name", storage_account,
-        "--resource-group", resource_group,
-        "--query", "[0].value",
-    ])
 
 
 def get_sas_url(storage_account: str, container: str, blob: str, minutes: int = 30) -> str:

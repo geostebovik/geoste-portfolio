@@ -2,7 +2,7 @@
 from datetime import datetime
 from dotenv import load_dotenv
 import os
-from m3_analyze import get_endpoint, get_subscription_key   # reuse, don't rewrite
+from m3_analyze import get_endpoint   # reuse, don't rewrite
 from azure.ai.evaluation import evaluate, AzureOpenAIModelConfiguration, GroundednessEvaluator, RelevanceEvaluator, SimilarityEvaluator, F1ScoreEvaluator
 
 # load .env

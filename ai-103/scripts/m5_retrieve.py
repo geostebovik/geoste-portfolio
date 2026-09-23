@@ -7,8 +7,8 @@ from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 
-from m3_analyze import get_endpoint, get_subscription_key, build_token_provider   # reuse, don't rewrite
-from m5_index import get_search_admin_key, build_embedding_client   # reuse, don't rewrite
+from m3_analyze import get_endpoint, build_token_provider   # reuse, don't rewrite
+from m5_index import build_embedding_client   # reuse, don't rewrite
 
 
 def build_chat_client() -> AzureOpenAI:
