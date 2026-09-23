@@ -80,22 +80,32 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: read the M10 acceptance run, then remove the key helpers.**
-Updated 2026-09-22. The keyless migration is written, smoke-tested and
-committed at `aa96bea`; the 15-run acceptance pass was launched the same day.
-M10 is **not done until that pass comes back matching the answer key** —
-everything so far is "migrated and smoke-tested", which is real but is not the
-milestone.
+**Next action: verify the build capture, then thread 2 — re-measure the Sep 9
+judge selection.** Updated 2026-09-23. M10's acceptance test is certified and
+its done-when amended (`phase2-orientation.md`); the marker stays on M10 until
+its two remaining clauses close.
 
-When the pass lands:
-1. Check it against the key the same way the 8x1 was checked
-   (`20260922-114320_orchestrator_stability.json`, `git_head aa96bea`,
-   `git_dirty false`, 8/8 deterministic and 8/8 judged).
-2. If green, remove `get_subscription_key()` and `get_search_admin_key()` **in
-   their own commit** — they are deliberately kept and unused until then.
-3. Then, and only then, consider `disableLocalAuth` on the Foundry account.
-   See the Phase 2 backlog: Foundry User grants `listkeys`, so keyless code
-   alone does not make keys unavailable.
+1. **Verify `deployment_builds()` live** (added at `5798ece`, crash path fixed
+   Sep 23). One zero-cost call, no model traffic. Close the P1 Todoist
+   provenance task on the result. Must precede the next measured run, which
+   will be the first whose judge build is on the record.
+2. **Thread 2 — the Sep 9 judge selection is the weakest claim in the
+   record.** It rests on n=10 on one item (item7 groundedness 4.0 x10, "no
+   variance"); the Sep 22 acceptance pass drew 2.0 twice. ~30 min, and the
+   first judge measurement with an attributable build. Pre-register the rule
+   before it runs.
+3. **Thread 3 — M3's migration.** A small REST auth swap in `m3_analyze.py`,
+   plus a real design decision: account-key SAS → user-delegation SAS amends
+   the RBAC model. This is what lets `get_subscription_key()` and
+   `get_storage_key()` go, and it is one of the two known breakages for
+   `disableLocalAuth`.
+4. **M10's two remaining clauses** (`phase2-orientation.md`): remove
+   `get_search_admin_key()` and the dead `get_subscription_key` imports in
+   their own commit; hand-run `m6_generate.py` and `m6_probe.py`. Not yet
+   ordered against 2–3.
+
+**Settled — do not reopen:** the `listKeys` calls on `aif-dev-wus-01` are
+Visual Studio Code's (Sep 23 entry).
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step) and goes out in one group push with Phase 2 and the two stale site lines.
@@ -410,6 +420,53 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
+### Session — September 23, 2026 — housekeeping, and the `listKeys` caller named
+
+**Claude drafted this entry and every doc edit in it, and proposed the VS Code
+hypothesis (Sep 22). Gerard ran every Azure CLI command, supplied the Sep 22
+evidence from the previous chat, and caught that the handoff never reached the
+repo.**
+
+**The session opened on a process failure.** Sep 22 closed with a "threads for
+next time" list that lived only in the chat's closing summary. `## Current next
+action` was not replaced after the day's last commit, so it still said "read
+the acceptance run", and nothing from the late Sep 22 work was in this log
+(now bracketed onto the Sep 22 entry). A new session reads the repo, not the
+last chat: it rebuilt the agenda from stale docs and re-questioned a finding
+Gerard had already settled. The same summary gave HEAD as `5498ece`; the real
+hash is `5798ece` — typed, not copied. New end-of-session rule in
+`m7-orientation.md`: the closing summary is derived *from* `## Current next
+action`, and hashes are copied from `git log -1 --oneline`.
+
+**The `listKeys` caller is Visual Studio Code.** Evidence, strongest first:
+- **appid.** Every `Microsoft.CognitiveServices/accounts/listKeys/action` row in
+  a 2-day window carries `claims.appid` `aebc6443-996d-45c2-90f0-388ff96faa56`,
+  which Microsoft Learn's first-party app list names as Visual Studio Code;
+  caller Gerard's account. (`az ad sp show` finds no service principal for it:
+  VS Code is a Microsoft client with none in the tenant. Expected.)
+- **Cadence.** Sep 22 baseline: calls arrive in pairs a fraction of a second
+  apart, on a fixed 14m42s timer (20:19:37, 20:34:18, 20:49:00, 21:03:42 UTC).
+  Not a person, not event-driven.
+- **Shutdown.** VS Code closed ~21:35 UTC Sep 22; a query afterwards returned
+  nothing. VS Code was not reopened until after attribution on Sep 23.
+- **Not determined: which extension.** The Activity Log sees the VS Code client
+  ID, which every Azure extension signs in with.
+- Also in the window: two `Microsoft.Search/searchServices/listAdminKeys/action`
+  rows, appid `c44b4083-…` (Azure Portal) — the portal loading Search pages,
+  the same pattern as the Sep 16 note. Benign.
+
+**What it changes** (both now in the `disableLocalAuth` backlog entry):
+turning local auth off at M11 has two known breakages, this poll and
+`m3_analyze.py`'s exempted pipeline; and the poll leaves `listKeys` with no
+audit value, since roughly eight retrievals an hour under Gerard's own identity
+hide any genuine one.
+
+**Claude errors this session:** (1) questioned the validity of the Sep 22
+shutdown test without knowing it was Claude's own design and already settled; (2) attributed the `5498ece` hash to a typo of
+Gerard's — it was in Claude's summary; (3) put a `<placeholder>` inside a
+copy-paste command block, which Gerard ran as written; (4) said "eight" tracked
+scripts import `get_subscription_key` unused — it is nine.
+
 ### Session — September 22, 2026 — M10: the keyless migration, and four probes that reshaped it
 
 **Claude wrote every probe, the migration script and all code changes in this
@@ -553,6 +610,19 @@ actions include `listkeys`. Keyless code does not remove the permission to
 retrieve a key — `disableLocalAuth` does. And Principle 2 cannot be satisfied
 for row 4 while one shared AIServices account serves both OpenAI and Vision;
 that is now stated as an accepted trade-off rather than left implicit.
+
+**[Added 2026-09-23 — late Sep 22 work that never reached this log.** Committed
+at `5798ece`, after the entry above was written: (1) `provenance.deployment_builds()`
+now records each deployment's model build and `versionUpgradeOption` at run
+start; (2) the Activity Log shows no `Microsoft.CognitiveServices/accounts/deployments`
+write between Sep 7 and Sep 21 from any caller, and the live build reads
+`2026-03-05`, so the Sep 9, 10, 11, 15 and 22 runs are comparable; (3) M10's
+done-when amended to name `m3_analyze.py`'s own pipeline as a stated exception.
+Claude wrote the code and the amendment. Gerard directed the work, ran every
+command, chose to amend the done-when rather than leave the milestone open, and
+pushed back on certifying data whose provenance was in question — which is
+what surfaced (1) and (2). The commit message has the full reasoning. Why this
+bracket exists: see the Sep 23 entry.**]**
 
 
 ### Session — September 21, 2026 — M8: the IaC baseline, written and what-if'd

@@ -38,7 +38,7 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 
 ## Status
 
-**Status as of:** September 22, 2026.
+**Status as of:** September 23, 2026.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
@@ -71,9 +71,14 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   The run carries `git_changed_during_run: true`; no `.py` file is in the
   changed set, so the measured code is byte-identical to `aa96bea`.
 - **M10 IS NOT FINISHED.** Two clauses of its done-when remain:
-  1. **Remove `get_subscription_key()` and `get_search_admin_key()`** — kept
-     deliberately unused until the acceptance test passed, and removed in their
-     own commit, not bundled with anything.
+  1. **Remove `get_search_admin_key()` and the dead `get_subscription_key`
+     imports** — in their own commit, not bundled with anything.
+     *(Corrected 2026-09-23: this clause said to remove both helpers.
+     `get_subscription_key()` cannot go — `m3_analyze.py:250` calls it, inside
+     the pipeline the amended done-when names as a stated exception. It and
+     `get_storage_key()` leave with M3's migration. Nine tracked scripts still
+     import it without calling it; `get_search_admin_key()` has no tracked
+     caller at all.)*
   2. **Hand-run `m6_generate.py` and `m6_probe.py`** — the "M3-M6 scripts are
      smoke-tested" clause. Neither can be imported for automated checking
      (module-scope side effects, see the backlog), so
@@ -109,7 +114,10 @@ project doc `claude/2026-09-16-phase2-plan-review.md`.
   Storage accounts of its own.
 
 **Facts that shape the order of work:**
-- **Only one script is keyless today.** `m7_orchestrator.py` signs in with
+- ~~**Only one script is keyless today.**~~ **Superseded 2026-09-22 (M10,
+  `aa96bea`):** all twelve call sites in the nine tracked scripts are keyless;
+  `m3_analyze.py`'s own pipeline is the stated exception. As written Sep 16:
+  `m7_orchestrator.py` signs in with
   Entra ID; **eleven scripts use account keys**, including M7's audit
   tool, evaluator and legibility check. The Function must not use keys, so
   the M7 tools are migrated **before** the Function is built.
@@ -119,8 +127,10 @@ project doc `claude/2026-09-16-phase2-plan-review.md`.
 - **Security defaults are ON in `letter7`** (Gerard's screenshot, Sep 16).
   Conditional Access requires turning them **off** for the whole tenant.
   The baseline policies go on first (see the spec).
-- **Nothing in the IIP resource group is in Bicep.** That includes the
-  model deployments, which were raised to 300K TPM in the portal.
+- ~~**Nothing in the IIP resource group is in Bicep.**~~ **Superseded
+  2026-09-21 (M8):** all of it is, model deployments and their TPM included —
+  see `infrastructure/iip/`. As written Sep 16: that includes the model
+  deployments, which were raised to 300K TPM in the portal.
 
 ## Milestones
 
@@ -207,6 +217,16 @@ milestone; it records a probable blocker on the free-tier Search service.*
   `disableLocalAuth` as optional step 6 tidy-up. It is not tidy-up — it is the
   step that renders a retrieved key useless. Decide it deliberately at **M11**,
   once nothing key-based remains.
+  **Two known breakages, and a stronger reason (added 2026-09-23).** Turning
+  it on stops (1) a **VS Code poll** that retrieves the account key every
+  14m42s under Gerard's account (STATUS.md, Sep 23), and (2) **`m3_analyze.py`'s
+  exempted pipeline**, until M3 is migrated. "Nothing key-based remains" is
+  therefore not yet true, and these two are the list. The poll also means
+  `listKeys` currently has **no audit value**: at roughly eight retrievals an
+  hour under Gerard's own identity, a genuine retrieval is indistinguishable
+  from the timer. `disableLocalAuth` makes a retrieved key useless *and* makes
+  "who retrieved a key?" worth asking again — a stronger argument than "the
+  code no longer needs keys".
 - **Foundry User is a wildcard role, and Principle 2 cannot currently be met.**
   Its `dataActions` are `Microsoft.CognitiveServices/*` — everything on the
   account, not "Vision Read and chat". There is no narrower built-in role

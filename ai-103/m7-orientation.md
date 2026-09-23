@@ -99,6 +99,16 @@ ordering mistake — see session-start item 3. A handoff that describes files as
 uncommitted which were committed minutes later is worse than one that omits
 git state entirely, because it reads as verified.
 
+**The chat summary is not the handoff — `## Current next action` is** (added
+Sep 23). Sep 22 ended with a "threads for next time" list that existed only in
+the closing chat message; `STATUS.md` still named the previous step. The next
+session reads the repo, not the last chat, so it rebuilt the agenda from stale
+docs and re-questioned a finding settled the day before. Write the threads into
+`## Current next action` before the final commit, and derive the closing
+summary *from* that section, never the other way round. Copy any commit hash
+from `git log -1 --oneline` output: the same summary gave `5498ece` for
+`5798ece`.
+
 ## Standing lessons worth not relearning (added 2026-09-03)
 
 Consolidated here from the dated session prompts, where they were restated
