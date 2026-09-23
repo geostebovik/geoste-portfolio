@@ -80,18 +80,22 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: implement decision (a) — item7's judged first-draft row is
-reported as a rate, not scored against the key.** Updated 2026-09-23 (midday).
-M10's acceptance test is certified and its done-when amended
-(`phase2-orientation.md`); the marker stays on M10 until its two remaining
-clauses close. Done today: the build capture verified live, and thread 2 (the
-judge test-retest) run and read — see the Sep 23 entry.
+**Next action: one-run smoke of the item7 rate code, then thread 3 (M3's
+migration).** Updated 2026-09-23 (afternoon). M10's acceptance test is
+certified and its done-when amended (`phase2-orientation.md`); the marker stays
+on M10 until its two remaining clauses close. Done today: the build capture
+verified live; thread 2 (the judge test-retest) run and read; decision (a)
+implemented — see the Sep 23 entry.
 
-1. **Decision (a), Gerard, Sep 23.** Change how the orchestrator probe reports
-   item7's judged row: out of the "N/15 match key" count, reported as a
-   first-draft pass rate with an expected band. **Set the band from the Sep 23
-   fixed-text data and pre-register it before the next measured pass.** Not
-   model-facing; the deterministic rows stay pass/fail.
+1. **Smoke the item7 rate code on one live run:** `python
+   probe_orchestrator_stability.py --runs 1 --items item7` on the committed
+   tree. Expect the per-run line "RATE item -- judged row not scored against the
+   key" and the batch line "flag not evaluated -- defined for 15 measured runs".
+   `summarize()` was tested offline against `20260922-131551`; the
+   `m7_orchestrator.py` path was not, because it needs the Azure SDKs.
+   **The band is set:** flag at >= 9 of 15 first-draft passes (Gerard, from
+   8/9/10); ~1.5% false alarm if every draft raised the topic at 30%. Not a
+   failure — a prompt to look.
 2. **If `m7-writeup-draft.md` is already with outside readers:** section 4 was
    corrected Sep 23 ("4.0 in all 10" no longer stands alone). Send them the
    change (Gerard's step).
@@ -502,6 +506,16 @@ B and D unstable was right, A stable was wrong.
    B's 2.0) are fully explained by judge variance on fixed text; no change in
    agent behaviour is needed to explain them. The Sep 11 revisit trigger was
    the judge, not the agent.
+   **[Corrected same day, after `4d52012` — the last two sentences overclaim.**
+   The agent's draft mix moved too. Counting item7 first drafts that raise
+   returns or pricing (regex `bring something back|pricing|better price|return`,
+   chosen by Claude AFTER seeing the data, so exploratory, not pre-registered):
+   Sep 10 2/15, Sep 11 0/15, Sep 15 5/15, Sep 22 9/15. Across all four passes,
+   those drafts passed first time 4 of 16; drafts without it, 0 of 44 — matching
+   text A's 0/40 and B–D's 8–17/40. So a first-draft pass needs BOTH a draft
+   that raises the topic (the agent's variance) AND a favourable read (the
+   judge's). Sep 22's 3/15 is what nine such drafts at ~25–30% produce. Neither
+   factor alone explains it.**]**
 3. **On an unanswerable query, groundedness imports relevance.** E is the one
    draft that makes no unsupported claim — it describes what the store does
    offer — and it draws gpt-5-4's LOWEST groundedness: 1.0 in 23 of 40, and 22
@@ -514,6 +528,19 @@ B and D unstable was right, A stable was wrong.
 not scored against the answer key; its deterministic rows stay pass/fail. Not
 circular in the way re-keying from the Sep 22 run would have been: the evidence
 is this pre-registered fixed-text measurement, with no agent in the loop.
+
+**Decision (a) implemented (afternoon).** `m7_orchestrator.py`: item7's key
+gains `mode: "rate"`, `first_pass_flag_at: 9`, `flag_defined_for_runs: 15`; for
+a rate item `text_matches_expected` is None (not asserted) and the per-run line
+says so. `probe_orchestrator_stability.py`: `summarize()` prints and records a
+`rate_item` block — count, threshold, whether the flag applies and whether it
+fired. The original first_pass/final_passed/redrafts keys are kept as the
+registered expectation, unasserted. **Gerard chose the threshold** (9 of 15) from
+three offered. Claude wrote the code; `summarize()` was checked offline against
+the Sep 22 file (3/15 within range; a forced 10/15 flags; a 7-run batch reports
+"not evaluated"). Known wart, left alone: the pre-existing STABLE/NOT STABLE
+label still prints for item7 and means only "80% of runs agreed", which for a
+rate item says nothing.
 
 Recorded as dated corrections in `m7-orientation.md` (two closed backlog
 entries), `m7-writeup-draft.md` sections 4 and 5, `phase2-orientation.md`'s M10

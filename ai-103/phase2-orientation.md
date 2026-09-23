@@ -69,8 +69,11 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   revisit trigger has now fired, **not** a migration regression, and the answer
   key was deliberately left unchanged. See STATUS.md's Sep 22 entry.
   **Explained 2026-09-23:** a pre-registered fixed-text test-retest showed one
-  unchanged item7 draft passing 0–17 of 40 re-reads by the same judge — the
-  trigger was judge variance, not agent behaviour. **Decision (a), Gerard:**
+  unchanged item7 draft passing 0–17 of 40 re-reads by the same judge. The
+  trigger needs two things at once: drafts that raise returns or pricing (the
+  agent wrote 0–9 of 15 per pass) and a favourable read by the judge (~25–30%
+  on those drafts; 0 of 44 on the rest). Corrected the same day; the first
+  wording blamed the judge alone. **Decision (a), Gerard:**
   item7's judged first-draft row is reported as a rate with an expected band,
   not scored against the key. Implementation is the current next action in
   STATUS.md.
