@@ -101,20 +101,27 @@ az storage blob list --account-name stiipdevwus01 --container-name <container> -
 
 ## Generate a read-only SAS URL for a blob
 
-```bash
-STORAGE_KEY=$(az storage account keys list --account-name stiipdevwus01 --resource-group rg-iip-dev-wus-01 --query "[0].value" -o tsv)
+**Keyless since 2026-09-23** — a user-delegation SAS, signed with your Entra ID
+sign-in instead of the storage account key (M3 migration, `fcc55b6`). Needs
+Storage Blob Delegator plus a blob data role on the account. A user delegation
+key lasts at most 7 days, so a longer expiry is silently capped.
 
+```bash
 az storage blob generate-sas \
   --account-name stiipdevwus01 \
-  --account-key "$STORAGE_KEY" \
   --container-name <container> \
   --name <blob> \
   --permissions r \
   --expiry $(date -u -d "1 hour" +%Y-%m-%dT%H:%MZ) \
   --https-only \
   --full-uri \
+  --as-user \
+  --auth-mode login \
   -o tsv
 ```
+
+*Retired:* the account-key version (`az storage account keys list` →
+`--account-key "$STORAGE_KEY"`).
 
 `--full-uri` returns the complete blob URL with the SAS token appended —
 no manual concatenation needed. Blob names are case-sensitive; a SAS
@@ -124,6 +131,18 @@ Current sample doc: `--container-name docs --name loan-agreement-promissory-note
 (confirmed via `az storage blob list`, July 27, 2026).
 
 ## Submit an analyze call
+
+**Keyless since 2026-09-23:** use an Entra ID bearer token instead of
+`Ocp-Apim-Subscription-Key`. Scope per the Content Understanding 2025-11-01
+REST reference:
+
+```bash
+TOKEN=$(az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv)
+```
+
+Then, in every `curl` below and in the poll, replace
+`-H "Ocp-Apim-Subscription-Key: $KEY"` with `-H "Authorization: Bearer $TOKEN"`.
+The commands are kept as they were proven in July, with the key header.
 
 ```bash
 curl -i -X POST "${ENDPOINT}contentunderstanding/analyzers/iip_loan_agreement_analyzer:analyze?api-version=2025-11-01" \

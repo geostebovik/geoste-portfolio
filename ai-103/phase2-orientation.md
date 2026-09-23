@@ -2,7 +2,7 @@
 
 ---
 
-> ## CURRENT MILESTONE: **M10** — Keyless migration
+> ## CURRENT MILESTONE: **M11** — The app
 >
 > **This line is the single source of truth for "where are we".** Nothing else
 > — not the project instructions, not a scheduled task, not the portfolio site
@@ -10,7 +10,8 @@
 > moves, change this line and the table's checkmark. That is the whole
 > update.**
 >
-> Last moved: 2026-09-21, M9 → M10. (M8 → M9 also 2026-09-21.)
+> Last moved: 2026-09-23, M10 → M11 (Gerard). (M9 → M10 and M8 → M9 both
+> 2026-09-21.)
 >
 > **The rule that keeps this true:** a *dated* statement may name a milestone,
 > because it was correct on its date and reads as history — STATUS.md session
@@ -79,7 +80,9 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   STATUS.md.
   The run carries `git_changed_during_run: true`; no `.py` file is in the
   changed set, so the measured code is byte-identical to `aa96bea`.
-- **M10 IS NOT FINISHED.** Two clauses of its done-when remain:
+- **M10 is COMPLETE (2026-09-23, Gerard moved the marker).** Both remaining
+  clauses closed that day, and M3's stated exception with them — see STATUS.md
+  Sep 23. *As written before closing:* two clauses of its done-when remain:
   1. **Remove `get_search_admin_key()` and the dead `get_subscription_key`
      imports** — in their own commit, not bundled with anything.
      *(Corrected 2026-09-23: this clause said to remove both helpers.
@@ -92,6 +95,12 @@ write-up is waiting for outside readers and a joint push with Phase 2.
      smoke-tested" clause. Neither can be imported for automated checking
      (module-scope side effects, see the backlog), so
      `probe_keyless_smoke.py` verifies them statically only.
+  **Closed 2026-09-23.** Clause 1 at `08bc35c`: `get_subscription_key()`,
+  `get_storage_key()` and `get_search_admin_key()` removed with their dead
+  imports, after M3's migration (`fcc55b6`) left them uncalled; the eight
+  import-safe modules import cleanly. Clause 2: `m6_generate.py` (28 answers, 14
+  per model, none empty, `20260923-122420_generate_results.json`) and
+  `m6_probe.py` both hand-run keyless.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID
@@ -153,7 +162,7 @@ Function must not use keys.
 |---|---|---|---|---|
 | **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** ✅ | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
-| **M10** | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no **surveyed** script reads a key. **Amended 2026-09-22, by Gerard:** `m3_analyze.py`'s own Content Understanding pipeline is a STATED EXCEPTION. It reads two keys (`Ocp-Apim-Subscription-Key` at lines 183/206, and an account-key SAS via `get_storage_key()`), and `m10-prep.md` never surveyed it — it treated `m3_analyze.py` as the *home* of the key helper and never looked at the module's own `main()`. M3's migration is tracked separately: the REST auth swap is small, the account-key SAS → user-delegation SAS is a design change that amends the RBAC model. The exception is named here rather than left as a milestone that quietly stays open. | 1–2 sessions (includes the ~95 min run) | M9 |
+| **M10** ✅ | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no **surveyed** script reads a key. **Amended 2026-09-22, by Gerard:** `m3_analyze.py`'s own Content Understanding pipeline is a STATED EXCEPTION. It reads two keys (`Ocp-Apim-Subscription-Key` at lines 183/206, and an account-key SAS via `get_storage_key()`), and `m10-prep.md` never surveyed it — it treated `m3_analyze.py` as the *home* of the key helper and never looked at the module's own `main()`. M3's migration is tracked separately: the REST auth swap is small, the account-key SAS → user-delegation SAS is a design change that amends the RBAC model. The exception is named here rather than left as a milestone that quietly stays open. **Exception CLOSED 2026-09-23:** `m3_analyze.py` migrated at `fcc55b6` (Entra ID bearer auth; user-delegation SAS for `--blob`, decision (A), Gerard) and verified live on both paths, so "no script reads a key" now holds without exception. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. Decides Event Grid delivery vs. inbound restrictions (Todoist task), and the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
@@ -230,7 +239,9 @@ milestone; it records a probable blocker on the free-tier Search service.*
   it on stops (1) a **VS Code poll** that retrieves the account key every
   14m42s under Gerard's account (STATUS.md, Sep 23), and (2) **`m3_analyze.py`'s
   exempted pipeline**, until M3 is migrated. "Nothing key-based remains" is
-  therefore not yet true, and these two are the list. The poll also means
+  therefore not yet true, and these two are the list. **(2) resolved
+  2026-09-23** — M3 is keyless (`fcc55b6`). The VS Code poll is now the only
+  known consumer of the account key. The poll also means
   `listKeys` currently has **no audit value**: at roughly eight retrievals an
   hour under Gerard's own identity, a genuine retrieval is indistinguishable
   from the timer. `disableLocalAuth` makes a retrieved key useless *and* makes
@@ -254,7 +265,9 @@ milestone; it records a probable blocker on the free-tier Search service.*
   verifies them by reading their source instead. `m5_retrieve.py`'s docstring
   flagged this about `m6_generate` on 2026-08-20; it is now also the reason
   two scripts sit outside every automated check. Small refactor: move the
-  module-scope work under `if __name__ == "__main__":`.
+  module-scope work under `if __name__ == "__main__":`. **Add `m6_evaluate.py`**
+  (found 2026-09-23): no `__main__` guard either, so it was left out of the
+  import check that closed M10 clause 1 and is covered by a compile check only.
 - **Two emergency-access accounts,** as Microsoft recommends, instead of
   one. One is a deliberate choice for a lab with a single admin (C2).
 - **Guest access to the results page.** Authentication strength for guests

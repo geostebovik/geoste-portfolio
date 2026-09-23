@@ -120,6 +120,13 @@ real call at build time. They were. Four corrections:
 - **Gerard also holds Storage Blob Delegator** on `stiipdevwus01`, which is not
   in the table above. It grants user-delegation SAS keys. Harmless, left alone,
   recorded so the next audit does not treat it as a surprise.
+  **[Updated 2026-09-23: no longer incidental.** M3's keyless migration
+  (`fcc55b6`, decision (A), Gerard) makes `m3_analyze.py --blob` sign its
+  30-minute read-only SAS with a user delegation key, which needs exactly this
+  role plus row 3's data role. It is now load-bearing: removing it breaks
+  `--blob` (the `--file` path is unaffected). Like row 3 it pre-existed and is
+  not declared in Bicep. Promote it to a numbered row when this table is next
+  revised.**]**
 
 **Verified after deployment.** All five declared rows (2, 4, 5, 6, 9) exist at
 the intended scope with the intended role and principal. Rows 5 and 6 are at

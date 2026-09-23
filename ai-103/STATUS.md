@@ -80,37 +80,32 @@ started" / "M7 in progress", held for a group push.
 
 ## Current next action
 
-**Next action: one-run smoke of the item7 rate code, then thread 3 (M3's
-migration).** Updated 2026-09-23 (afternoon). M10's acceptance test is
-certified and its done-when amended (`phase2-orientation.md`); the marker stays
-on M10 until its two remaining clauses close. Done today: the build capture
-verified live; thread 2 (the judge test-retest) run and read; decision (a)
-implemented — see the Sep 23 entry.
+**Next action: M11 prep — survey and plan the app before building it, the way
+`m10-prep.md` did for M10.** Updated 2026-09-23, end of session. **M10 is
+complete** (Gerard moved the marker to M11 on Sep 23); see the Sep 23 entry.
 
-1. **Smoke the item7 rate code on one live run:** `python
-   probe_orchestrator_stability.py --runs 1 --items item7` on the committed
-   tree. Expect the per-run line "RATE item -- judged row not scored against the
-   key" and the batch line "flag not evaluated -- defined for 15 measured runs".
-   `summarize()` was tested offline against `20260922-131551`; the
-   `m7_orchestrator.py` path was not, because it needs the Azure SDKs.
-   **The band is set:** flag at >= 9 of 15 first-draft passes (Gerard, from
-   8/9/10); ~1.5% false alarm if every draft raised the topic at 30%. Not a
-   failure — a prompt to look.
-2. **If `m7-writeup-draft.md` is already with outside readers:** section 4 was
-   corrected Sep 23 ("4.0 in all 10" no longer stands alone). Send them the
-   change (Gerard's step).
-3. **Thread 3 — M3's migration.** A small REST auth swap in `m3_analyze.py`,
-   plus a real design decision: account-key SAS → user-delegation SAS amends
-   the RBAC model. This is what lets `get_subscription_key()` and
-   `get_storage_key()` go, and it is one of the two known breakages for
-   `disableLocalAuth`.
-4. **M10's two remaining clauses** (`phase2-orientation.md`): remove
-   `get_search_admin_key()` and the dead `get_subscription_key` imports in
-   their own commit; hand-run `m6_generate.py` and `m6_probe.py`. Not yet
-   ordered against 1 and 3.
+1. **Write `m11-prep.md`:** the Function on Flex Consumption, the Event Grid
+   blob trigger, host storage, App Insights / Log Analytics, sign-in, and the
+   RBAC model's VERIFY rows (4–7). Fold in the decisions the backlog parks at
+   M11 (`phase2-orientation.md`):
+   - **`disableLocalAuth`** — the VS Code poll is now the ONLY known consumer
+     of the account key (M3 is keyless). Identify which extension polls, then
+     decide.
+   - **Foundry Agent Consumer** as a narrower role for the Function identity.
+   - **Blob soft delete** on `stiipdevwus01` before the Function writes there.
+2. **Before the next measured pass:** decide `versionUpgradeOption` on the
+   model deployments (Todoist P2). The judge and the drafter both auto-upgrade
+   today; the build is now recorded, but not pinned.
+3. **If `m7-writeup-draft.md` is already with outside readers:** send them the
+   Sep 23 section 4 change (Gerard's step).
+4. **Small, any time:** make D1 accurate in the RBAC model; promote the
+   Storage Blob Delegator note to a numbered RBAC row; the `__main__`-guard
+   refactor for `m6_generate.py`, `m6_probe.py` and now `m6_evaluate.py`;
+   `.gitattributes` for `.gitignore`.
 
 **Settled — do not reopen:** the `listKeys` calls on `aif-dev-wus-01` are
-Visual Studio Code's (Sep 23 entry).
+Visual Studio Code's; item7's judged row is a rate with a flag at 9 of 15; M3's
+`--blob` path uses a user-delegation SAS (all Sep 23).
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step) and goes out in one group push with Phase 2 and the two stale site lines.
@@ -425,7 +420,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — September 23, 2026 — housekeeping, and the `listKeys` caller named
+### Session — September 23, 2026 — the `listKeys` caller named, the judge test-retest, item7 becomes a rate, and M10 closed
 
 **Claude drafted this entry and every doc edit in it, and proposed the VS Code
 hypothesis (Sep 22). Gerard ran every Azure CLI command, supplied the Sep 22
@@ -542,6 +537,42 @@ the Sep 22 file (3/15 within range; a forced 10/15 flags; a 7-run batch reports
 label still prints for item7 and means only "80% of runs agreed", which for a
 rate item says nothing.
 
+**Smoke of the rate code (live, one run):** `20260923-115337_orchestrator_stability.json`
+at `287d740`, clean tree, build `2026-03-05`. The record carries the rate key
+with `text_matches_expected: None`; the summary's `rate_item` reads
+`flag_applies: False` for a 1-run batch. Both code paths confirmed.
+
+**THREAD 3 — M3's migration, and M10 closed.**
+- **Service auth** (`fcc55b6`): `submit_analyze()` and `poll_result()` send an
+  Entra ID bearer token for `cognitiveservices.azure.com/.default` — the scope
+  the Content Understanding 2025-11-01 REST reference names — refreshed per
+  request. The module docstring's old claim that Entra ID "doesn't apply" on a
+  laptop was corrected: it conflated managed identity with Entra ID.
+- **`--blob`: decision (A), Gerard** — a user-delegation SAS
+  (`--as-user --auth-mode login`), chosen over downloading and sending inline.
+  **Claude's reading found the Todoist task wrong on one point:** it did NOT
+  amend the RBAC model — Gerard already held Storage Blob Delegator and Storage
+  Blob Data Contributor on `stiipdevwus01`. Letting the Foundry account's own
+  identity read the blob was ruled out: no Microsoft documentation shows it for
+  Content Understanding.
+- **Verified live on both paths:** `20260923-121256` (`--file`) and
+  `20260923-121335` (`--blob`) against the July 27 key-based run: all 21
+  non-generative extracted values identical, markdown identical in length
+  (4,186 characters). Only the 11 model-written KeyPhrases differ, in wording
+  — and today's two keyless runs differ from EACH OTHER in 2 of them, so that
+  is generation variance, not auth.
+- **M10 clause 1** (`08bc35c`, own commit): `get_subscription_key()`,
+  `get_storage_key()` and `get_search_admin_key()` removed with dead imports in
+  nine scripts. Import check on the eight import-safe modules passed.
+  Gitignored `m6_probe.py` fixed to match; gitignored `tester3.py` left broken.
+- **M10 clause 2:** `m6_generate.py` hand-run (`20260923-122420_generate_results.json`,
+  28 answers, 14 per model, none empty) and `m6_probe.py` hand-run — both keyless.
+- **M10 COMPLETE. Gerard moved the marker to M11.** Every clause of the
+  done-when is met and M3's stated exception is closed.
+
+Claude wrote all the code and doc changes in thread 3. Gerard chose (A), ran
+every command, and made the milestone call.
+
 Recorded as dated corrections in `m7-orientation.md` (two closed backlog
 entries), `m7-writeup-draft.md` sections 4 and 5, `phase2-orientation.md`'s M10
 bullet, and `m7_evaluator_tool.py`'s docstring (own commit). Cost ~780K tokens,
@@ -556,7 +587,9 @@ text B's relevance as 3.0 x9 in the interim read — it is x8; (6) buried the
 item7 decision inside an analysis instead of asking it as a question — Gerard
 had to find it, and chose with less confidence than the decision deserved; (7) counted E's
 "irrelevant" reasons as 16 of 23 with a substring match that also hit "offer"
-— the correct count is 22 of 23.
+— the correct count is 22 of 23; (8) typed a commit hash from memory into a
+Todoist comment ("3de3…") hours after writing the rule against it — corrected
+with the real `67d0e31`; (9) estimated m6_generate at 13 questions — it has 14.
 
 ### Session — September 22, 2026 — M10: the keyless migration, and four probes that reshaped it
 

@@ -1,0 +1,170 @@
+[
+  {
+    "model": "gpt-5-4",
+    "question": "Who is the borrower?",
+    "answer": "The borrower is **Harry Sample of 321 Central Ave, Phoenix, Arizona, 85012**.",
+    "expected_answer": "Harry Sample"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "Who is the lender?",
+    "answer": "The lender is **Scrooge McDuck of 982 W Treasure Trl, Apache Junction, Arizona, 85120**.",
+    "expected_answer": "Scrooge McDuck"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What is the loan amount?",
+    "answer": "The loan amount is $50,000.00.",
+    "expected_answer": "$50,000.00"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What is the interest rate?",
+    "answer": "The interest rate is **11.25% per annum**.",
+    "expected_answer": "11.25% per annum"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What is the monthly payment amount?",
+    "answer": "The monthly payment amount is **$958.12**.",
+    "expected_answer": "$958.12"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "Is the loan secured or unsecured?",
+    "answer": "The loan is unsecured.",
+    "expected_answer": "Unsecured"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What is the late fee for a missed payment?",
+    "answer": "The late fee for a missed payment is **$50 (U.S. Dollars)**.",
+    "expected_answer": "$50.00"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What state's law governs this agreement?",
+    "answer": "Arizona.",
+    "expected_answer": "Arizona"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "When is the full balance due?",
+    "answer": "The full balance is due on **June 30, 2031**.",
+    "expected_answer": "June 30, 2031"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "How many monthly payments are there?",
+    "answer": "There are 72 monthly payments.",
+    "expected_answer": "72"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "If a payment is received while both late fees and interest are owed, what is the order in which the payment is applied?",
+    "answer": "Payments are applied in this order:\n\n1. Late fees due  \n2. Interest due  \n3. Remaining amount to principal\n\nThis is stated in Section V, \u201cAllocation of Payments.\u201d",
+    "expected_answer": "Late fees first, then interest, then any remainder to principal."
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "What is the total amount of all scheduled monthly payments over the full term of the loan, not including any late fees or default interest?",
+    "answer": "The scheduled monthly payment is $958.12 for 72 months.\n\nTotal scheduled monthly payments:\n$958.12 \u00d7 72 = $68,984.64\n\nSo, the total amount is $68,984.64.",
+    "expected_answer": "$68,984.64"
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "If the Borrower defaults and the default is not cured after written notice, what can happen to the loan under this agreement?",
+    "answer": "If the Borrower defaults and does not cure the default within the minimum time allowed by law after written notice, the Lender may, at its option, declare all outstanding sums owed under the Agreement to be immediately due and payable.",
+    "expected_answer": "The unpaid principal begins accruing interest at the maximum rate allowed by law, and the Lender may declare the entire outstanding balance immediately due and payable."
+  },
+  {
+    "model": "gpt-5-4",
+    "question": "How many days does the Borrower have after a payment's due date before a late fee is charged?",
+    "answer": "The document does not specify any grace period in days. It only states: \u201cIf the Lender does not receive payment on time for any installment there shall be a late payment fee of $50.\u201d",
+    "expected_answer": "Not specified in the document."
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "Who is the borrower?",
+    "answer": "The borrower is **Harry Sample**.",
+    "expected_answer": "Harry Sample"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "Who is the lender?",
+    "answer": "The lender is **Scrooge McDuck**.",
+    "expected_answer": "Scrooge McDuck"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What is the loan amount?",
+    "answer": "The loan amount is **$50,000.00**.",
+    "expected_answer": "$50,000.00"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What is the interest rate?",
+    "answer": "The interest rate is **11.25% per annum**.",
+    "expected_answer": "11.25% per annum"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What is the monthly payment amount?",
+    "answer": "The monthly payment amount is **$958.12**.",
+    "expected_answer": "$958.12"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "Is the loan secured or unsecured?",
+    "answer": "The loan is **unsecured**.",
+    "expected_answer": "Unsecured"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What is the late fee for a missed payment?",
+    "answer": "The late fee for a missed payment is **$50**.",
+    "expected_answer": "$50.00"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What state's law governs this agreement?",
+    "answer": "This agreement is governed by the laws of the State of Arizona.",
+    "expected_answer": "Arizona"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "When is the full balance due?",
+    "answer": "The full balance is due on **June 30, 2031**.",
+    "expected_answer": "June 30, 2031"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "How many monthly payments are there?",
+    "answer": "The agreement states that the monthly payments shall be made \u201cfor a period of 72 months,\u201d so there are **72 monthly payments**.",
+    "expected_answer": "72"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "If a payment is received while both late fees and interest are owed, what is the order in which the payment is applied?",
+    "answer": "Payments are applied first to any late fees due, then to interest due, and any remainder is credited to principal.",
+    "expected_answer": "Late fees first, then interest, then any remainder to principal."
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "What is the total amount of all scheduled monthly payments over the full term of the loan, not including any late fees or default interest?",
+    "answer": "The scheduled monthly payment is **$958.12** for **72 months**.\n\nTotal scheduled payments: **$958.12 \u00d7 72 = $68,984.64**.",
+    "expected_answer": "$68,984.64"
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "If the Borrower defaults and the default is not cured after written notice, what can happen to the loan under this agreement?",
+    "answer": "If the Borrower defaults and the default is not cured within the minimum time allowed by law after written notice, the Lender may, at its option, declare all outstanding sums owed under the Agreement to be immediately due and payable.",
+    "expected_answer": "The unpaid principal begins accruing interest at the maximum rate allowed by law, and the Lender may declare the entire outstanding balance immediately due and payable."
+  },
+  {
+    "model": "gpt-5-4-mini",
+    "question": "How many days does the Borrower have after a payment's due date before a late fee is charged?",
+    "answer": "The document does not specify a number of days after the payment due date before a late fee is charged. It only says that if the Lender does not receive payment on time for any installment, there is a $50 late payment fee.",
+    "expected_answer": "Not specified in the document."
+  }
+]

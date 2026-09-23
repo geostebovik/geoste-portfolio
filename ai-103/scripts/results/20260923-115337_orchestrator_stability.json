@@ -1,0 +1,248 @@
+{
+  "run": {
+    "timestamp": "2026-09-23T11:52:14-07:00",
+    "script": "probe_orchestrator_stability.py",
+    "git_head": "287d7404891051d00b4d6b3c950c5ccdff5ea22c",
+    "git_branch": "main",
+    "git_dirty": false,
+    "git_dirty_files": [],
+    "judge_deployment": "gpt-5-4",
+    "model_deployment": "gpt-5-4",
+    "agent_name": "riverside-content-agent",
+    "temperature": 0.0,
+    "instructions_label": "INSTRUCTIONS_V4",
+    "instructions": "You draft and check short marketing video content for Riverside Hardware & Supply, a small independent hardware store.\n\nFor each content item you are given a topic and the file path of a thumbnail image.\n\nGET THE FACTS FIRST\n1. Call get_fact_sheet before writing anything. It returns the store's hours,\n   services, contact details and brand guide, and it is the only approved\n   source of facts about the store. Everything below depends on having it.\n\nDRAFT\n2. Write a title in this format, with an em dash:\n     <benefit or topic, plain language> \u2014 Riverside Hardware & Supply\n   Spell the store name in full. Do not abbreviate it, drop it, or use a\n   different separator.\n3. Write a description in three parts, in this order. Write it as flowing\n   copy \u2014 do not label the parts or print the words Hook, Body or CTA.\n     A hook: one sentence stating the problem or question the video answers.\n     A body: two or three sentences on what is covered, using the concrete\n       services and details the fact sheet gives you.\n     A closing line: the store name with its hours, or the store name with the\n       phone number, copied from the fact sheet exactly.\n4. Every factual claim \u2014 hours, services, pricing, availability \u2014 must be\n   traceable to the fact sheet. If the fact sheet does not support a claim,\n   leave it out. Do not compensate by writing vaguely: a description with no\n   specifics in it fails for being uninformative, so use the specifics the\n   fact sheet does give you. Do not ever mention the fact sheet, the\n   instructions or the drafting process. The reader is the customer and has no\n   need to know about the internal process.\n\nCHECK THE TEXT\n5. Call evaluate_draft. Pass your full title and description as `response`.\n   For `query`, use exactly this sentence with the topic filled in:\n     Draft a video title and description for a piece of content about:\n     '<topic>,' grounded in the store's fact sheet.\n6. Decide on the `all_passed` field alone. Do not decide from the `reason`\n   text \u2014 it is unreliable, and has contradicted itself inside a single\n   paragraph.\n7. If `all_passed` is false, redraft and check again \u2014 at most twice. Each\n   time, remove unsupported claims and replace them with supported ones from\n   the fact sheet. If the fact sheet does not support a claim, leave it out. Do\n   not compensate by writing vaguely or making unsupported claims. Instead, use\n   the valid details available to draft the best-supportable copy possible and\n   allow the check to fail. Call evaluate_draft on each new draft under the same\n   rules. Stop as soon as `all_passed` is true. If the third draft still fails,\n   keep it and report every result.\n\nCHECK THE THUMBNAIL\n8. Call audit_thumbnail on the image path you were given.\n9. You cannot change the image. Never attempt to, and never suggest a specific\n   redesign. If any of its three checks is false, the item is flagged.\n\nREPORT \u2014 always, and in this order\n10. The final title and description.\n11. The text check: each score, whether it passed, and the overall result. If\n    you redrafted, say how many times and give all results.\n12. The thumbnail check: the three checks and their results. Quote any figures\n    or text the tool returned exactly as it returned them \u2014 including contrast\n    ratios, and including text read out of the image even where it looks\n    garbled. Garbled text is evidence, not an error to tidy up.\n13. A final line that is exactly one of:\n      READY\n      FLAGGED FOR REVIEW: <the failing checks, comma separated>\n\nDo not offer improvement suggestions on a check that passed.",
+    "content_response_format": {
+      "source": "openai 2.53.0 to_strict_json_schema",
+      "schema": {
+        "properties": {
+          "observed_colors": {
+            "description": "The colors actually present in this image, named from looking at it: the two or three that occupy the most area, and where each appears. Describe what you see before judging it. Never name a color because the brand guide lists it -- if a brand color does not appear in the image, do not name it. Name each color by its hue -- what the color actually is -- not by how light, dark or muted it is. A color that resembles a brand-palette color only in lightness is not that color: describe its hue and qualify it, rather than reaching for the brand's name for it.",
+            "title": "Observed Colors",
+            "type": "string"
+          },
+          "brand_consistent": {
+            "title": "Brand Consistent",
+            "type": "boolean"
+          },
+          "info_accurate": {
+            "title": "Info Accurate",
+            "type": "boolean"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "observed_colors",
+          "brand_consistent",
+          "info_accurate",
+          "notes"
+        ],
+        "title": "ContentAudit",
+        "type": "object",
+        "additionalProperties": false
+      }
+    },
+    "model_builds": {
+      "gpt-5-4": {
+        "capacity": 300,
+        "model": "gpt-5.4",
+        "upgradePolicy": "OnceNewDefaultVersionAvailable",
+        "version": "2026-03-05"
+      }
+    },
+    "git_changed_during_run": false,
+    "started_at": "2026-09-23T11:52:14-07:00",
+    "elapsed_seconds": 82.7
+  },
+  "probe": {
+    "runs_requested": 1,
+    "items": [
+      "item7"
+    ],
+    "sleep_between_runs": 5.0,
+    "stable_threshold": 0.8
+  },
+  "summary": {
+    "item7": {
+      "runs": 1,
+      "first_text_passed": [
+        false
+      ],
+      "final_text_passed": [
+        false
+      ],
+      "redrafts": [
+        2
+      ],
+      "first_draft_groundedness": {
+        "min": 4.0,
+        "max": 4.0,
+        "mean": 4.0,
+        "values": [
+          4.0
+        ]
+      },
+      "first_draft_relevance": {
+        "min": 2.0,
+        "max": 2.0,
+        "mean": 2.0,
+        "values": [
+          2.0
+        ]
+      },
+      "measured_runs": 1,
+      "unmeasured_runs": [],
+      "first_pass_agreement": 0.0,
+      "stable": true,
+      "stop_on_pass_runs": [],
+      "rate_item": {
+        "first_pass_count": 0,
+        "measured_runs": 1,
+        "flag_at": 9,
+        "flag_defined_for_runs": 15,
+        "flag_applies": false,
+        "flagged": false
+      },
+      "per_run_draft_scores": [
+        [
+          {
+            "groundedness": 4.0,
+            "relevance": 2.0,
+            "all_passed": false
+          },
+          {
+            "groundedness": 4.0,
+            "relevance": 1.0,
+            "all_passed": false
+          },
+          {
+            "groundedness": 4.0,
+            "relevance": 1.0,
+            "all_passed": false
+          }
+        ]
+      ]
+    }
+  },
+  "items": {
+    "item7": [
+      {
+        "id": "item7",
+        "topic": "Our Price-Match Guarantee and Return Policy",
+        "thumbnail": "item1-paint-mixing-CLEAN.png",
+        "thread_id": "thread_K3o6b9Q3OnxwVU9Q9Fll7W8K",
+        "run_id": "run_uFG3YFlg0jPV8sP5GfKz78oT",
+        "run_status": "RunStatus.COMPLETED",
+        "last_error": null,
+        "text_path": true,
+        "evaluate_draft_calls": 3,
+        "redrafts": 2,
+        "first_text_passed": false,
+        "final_text_passed": false,
+        "expected_text": {
+          "first_pass": false,
+          "final_passed": false,
+          "expected_redrafts": 2,
+          "mode": "rate",
+          "first_pass_flag_at": 9,
+          "flag_defined_for_runs": 15
+        },
+        "text_matches_expected": null,
+        "expected_audit": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "actual_audit": {
+          "text_legible": true,
+          "brand_consistent": true,
+          "info_accurate": true
+        },
+        "audit_matches_expected": true,
+        "requested_tool_calls": [
+          {
+            "name": "get_fact_sheet",
+            "arguments": "{}"
+          },
+          {
+            "name": "evaluate_draft",
+            "arguments": "{\"query\":\"Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.\",\"response\":\"Price-Match Guarantee and Return Policy \u2014 Riverside Hardware & Supply\\nNot sure what happens if you find a lower price or need to bring something back? This video walks through what Riverside Hardware & Supply can help with in store, including general hardware and tools, custom paint mixing, key cutting with walk-in service, tool rental with daily and weekly rates, and propane tank refill. It keeps the focus on practical shopping questions and the services available at our single Riverside location. Riverside Hardware & Supply (555) 014-7742\"}"
+          },
+          {
+            "name": "evaluate_draft",
+            "arguments": "{\"query\":\"Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.\",\"response\":\"Shopping questions at the hardware store \u2014 Riverside Hardware & Supply\\nWondering what kind of help you can get before you buy? This video covers the in-store services Riverside Hardware & Supply offers, including custom paint mixing, walk-in key cutting, tool rental with daily and weekly rates, and propane tank refill, along with general hardware and tools for everyday projects. It keeps the focus on practical details customers ask about at our single Riverside location. Riverside Hardware & Supply (555) 014-7742\"}"
+          },
+          {
+            "name": "evaluate_draft",
+            "arguments": "{\"query\":\"Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.\",\"response\":\"Store policies and in-store help \u2014 Riverside Hardware & Supply\\nNeed clear answers before you shop at your local hardware store? This video highlights the practical services available at Riverside Hardware & Supply, including general hardware and tools, custom paint mixing, walk-in key cutting, tool rental with daily and weekly rates, and propane tank refill. It stays focused on concrete in-store help available at our single Riverside location. Riverside Hardware & Supply (555) 014-7742\"}"
+          },
+          {
+            "name": "audit_thumbnail",
+            "arguments": "{\"image_path\":\"C:\\\\Users\\\\gerar\\\\geoste-portfolio\\\\ai-103\\\\iip-docs\\\\m7-riverside-hardware\\\\item1-paint-mixing-CLEAN.png\"}"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "get_fact_sheet",
+            "arguments": {},
+            "output": "# Fact Sheet \u2014 Riverside Hardware & Supply\n\n**Status:** synthetic grounding data for IIP M7 (single orchestrator agent,\ncomputer-vision audit module). All content below is fictional \u2014 no real business,\naddress, phone number, or person. Written before any drafting/evaluation code runs,\nsame discipline as `loan-agreement-expected-output.md` for M2\u2013M5.\n\nThis document plays the same role for M7 that the loan agreement PDF played for\nM5's RAG pipeline: it's the ground truth that drafted content and thumbnails both\nget checked against. \"Groundedness\" here means \"does this claim match a fact in\nthis document,\" exactly as it did for Q&A grounding in M5/M6.\n\n---\n\n## Business\n\n**Name:** Riverside Hardware & Supply\n**Type:** Independent, single-location hardware store\n**Location:** Riverside (fictional small town, no real-world city intended)\n**Tagline:** \"Everything you need, nothing you don't.\"\n\n## Hours\n\n| Day | Hours |\n|---|---|\n| Monday \u2013 Saturday | 8:00 AM \u2013 6:00 PM |\n| Sunday | Closed |\n\n**Note for the info-accuracy check:** any claim of 24/7 availability, Sunday hours,\nor hours outside 8\u20136 M\u2013Sat is a factual error against this fact sheet.\n\n## Services / Products\n\n- General hardware and tools (retail)\n- Custom paint mixing\n- Key cutting (walk-in, no appointment)\n- Tool rental (daily and weekly rates)\n- Propane tank refill\n\n## Contact\n\n- **Phone:** (555) 014-7742 *(fictional \u2014 not a real number)*\n- **Address:** 118 Mill Street, Riverside *(fictional)*\n\n## Brand Guide\n\n- **Primary colors:** orange (`#FD5A1E`-family) and cream (`#EFE4B0`-family) \u2014\n  these are the only brand colors. Any thumbnail using a materially different\n  palette (e.g. blue/gray) as its dominant scheme is a brand-consistency violation.\n- **Logo:** a simple toolbox icon, no wordmark flourishes.\n- **Voice/tone:** friendly, practical, no-nonsense \u2014 a local business owner talking\n  to a neighbor, not corporate marketing copy. Short sentences, concrete details\n  (prices, hours, what's included), minimal hype language.\n\n## Out of scope for this fact sheet\n\nNo employee names, no ownership history, no financial figures beyond what's listed\nabove \u2014 kept deliberately thin. This is scaffolding for a technical build, not a\nworldbuilding exercise.\n",
+            "seconds": 0.0
+          },
+          {
+            "tool": "evaluate_draft",
+            "arguments": {
+              "query": "Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.",
+              "response": "Price-Match Guarantee and Return Policy \u2014 Riverside Hardware & Supply\nNot sure what happens if you find a lower price or need to bring something back? This video walks through what Riverside Hardware & Supply can help with in store, including general hardware and tools, custom paint mixing, key cutting with walk-in service, tool rental with daily and weekly rates, and propane tank refill. It keeps the focus on practical shopping questions and the services available at our single Riverside location. Riverside Hardware & Supply (555) 014-7742"
+            },
+            "output": "{\"groundedness\": {\"score\": 4.0, \"passed\": true, \"threshold\": 3, \"reason\": \"Let's think step by step: the response is clearly related to the query and uses several facts from the fact sheet, including the business name, phone number, single Riverside location, and listed services such as custom paint mixing, key cutting, tool rental, and propane tank refill. However, the query specifically asks for a video title and description about 'Our Price-Match Guarantee and Return Policy.' The fact sheet contains no information about any price-match guarantee or return policy. Instead of addressing that topic directly, the response shifts to general store services and practical shopping help. It avoids inventing unsupported policy details, which is good, but it does not fully answer the requested content topic. Because it is grounded in the provided facts yet incomplete/misaligned with the specific request, this is best rated as partially correct.\", \"status\": \"completed\"}, \"relevance\": {\"score\": 2.0, \"passed\": false, \"threshold\": 3, \"reason\": \"The response provides a plausible title and description format, but it does not stay grounded in the requested topic. Instead of focusing on the price-match guarantee and return policy, it shifts to unrelated store services and omits the actual policy details.\", \"status\": \"completed\"}, \"all_passed\": false}",
+            "seconds": 11.01
+          },
+          {
+            "tool": "evaluate_draft",
+            "arguments": {
+              "query": "Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.",
+              "response": "Shopping questions at the hardware store \u2014 Riverside Hardware & Supply\nWondering what kind of help you can get before you buy? This video covers the in-store services Riverside Hardware & Supply offers, including custom paint mixing, walk-in key cutting, tool rental with daily and weekly rates, and propane tank refill, along with general hardware and tools for everyday projects. It keeps the focus on practical details customers ask about at our single Riverside location. Riverside Hardware & Supply (555) 014-7742"
+            },
+            "output": "{\"groundedness\": {\"score\": 4.0, \"passed\": true, \"threshold\": 3, \"reason\": \"Let's think step by step: the response is related to the store fact sheet and uses several grounded details correctly, such as the business name, phone number, single Riverside location, and listed services like custom paint mixing, key cutting, tool rental, propane refill, and general hardware/tools. However, it does not answer the actual query well, which asks for a video title and description specifically about 'Our Price-Match Guarantee and Return Policy.' The fact sheet contains no information about a price-match guarantee or return policy, and instead of acknowledging that limitation, the response shifts to a different topic about store services. Because it attempts to respond but fails to address the requested topic and substitutes unrelated content, it is only partially grounded and incomplete rather than fully correct.\", \"status\": \"completed\"}, \"relevance\": {\"score\": 1.0, \"passed\": false, \"threshold\": 3, \"reason\": \"The response is about store services like paint mixing, key cutting, rentals, and propane, but the user asked for a video title and description focused on the price-match guarantee and return policy. It misses the requested topic and deliverable.\", \"status\": \"completed\"}, \"all_passed\": false}",
+            "seconds": 9.24
+          },
+          {
+            "tool": "evaluate_draft",
+            "arguments": {
+              "query": "Draft a video title and description for a piece of content about: 'Our Price-Match Guarantee and Return Policy,' grounded in the store's fact sheet.",
+              "response": "Store policies and in-store help \u2014 Riverside Hardware & Supply\nNeed clear answers before you shop at your local hardware store? This video highlights the practical services available at Riverside Hardware & Supply, including general hardware and tools, custom paint mixing, walk-in key cutting, tool rental with daily and weekly rates, and propane tank refill. It stays focused on concrete in-store help available at our single Riverside location. Riverside Hardware & Supply (555) 014-7742"
+            },
+            "output": "{\"groundedness\": {\"score\": 4.0, \"passed\": true, \"threshold\": 3, \"reason\": \"Let's think step by step: the response is grounded in several facts from the fact sheet, such as the store name, single Riverside location, phone number, and listed services like paint mixing, key cutting, tool rental, and propane refill. However, it does not actually answer the query well. The query asks for a video title and description specifically about the store's price-match guarantee and return policy. The fact sheet contains no information about either a price-match guarantee or a return policy, so a fully grounded answer should avoid inventing such policies and likely acknowledge that the fact sheet does not provide those details. Instead, the response shifts to a different topic\\u2014general store services and in-store help. Because it is relevant to the business but fails to address the requested topic, it is only partially responsive and incomplete rather than fully correct.\", \"status\": \"completed\"}, \"relevance\": {\"score\": 1.0, \"passed\": false, \"threshold\": 3, \"reason\": \"The response offers a title and description format, but it is about general store services rather than the requested price-match guarantee and return policy. It fails to address the main topic and ignores the fact-sheet grounding requirement.\", \"status\": \"completed\"}, \"all_passed\": false}",
+            "seconds": 9.24
+          },
+          {
+            "tool": "audit_thumbnail",
+            "arguments": {
+              "image_path": "C:\\Users\\gerar\\geoste-portfolio\\ai-103\\iip-docs\\m7-riverside-hardware\\item1-paint-mixing-CLEAN.png"
+            },
+            "output": "{\"text_legible\":true,\"brand_consistent\":true,\"info_accurate\":true,\"notes\":\"[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\\n[observed] A pale cream background fills most of the thumbnail, a bright orange vertical wedge occupies the right side, and dark brown/black text and a small toolbox icon sit on the left.\\n[content] Brand colors are consistent: the dominant scheme is cream and orange, with neutral dark text/icon accents that are out of scope. No visible hours or service claims contradict the fact sheet; the thumbnail only shows a topic title about paint mixing, which is compatible with Riverside Hardware & Supply\u2019s listed custom paint mixing service. No issues found.\"}",
+            "seconds": 15.34
+          }
+        ],
+        "messages": [
+          {
+            "role": "MessageRole.USER",
+            "text": "Topic: Our Price-Match Guarantee and Return Policy\nThumbnail image path: C:\\Users\\gerar\\geoste-portfolio\\ai-103\\iip-docs\\m7-riverside-hardware\\item1-paint-mixing-CLEAN.png"
+          },
+          {
+            "role": "MessageRole.AGENT",
+            "text": "1. **Final title and description**\n\n**Store policies and in-store help \u2014 Riverside Hardware & Supply**\n\nNeed clear answers before you shop at your local hardware store? This video highlights the practical services available at Riverside Hardware & Supply, including general hardware and tools, custom paint mixing, walk-in key cutting, tool rental with daily and weekly rates, and propane tank refill. It stays focused on concrete in-store help available at our single Riverside location. Riverside Hardware & Supply (555) 014-7742\n\n2. **Text check**\n\nRedrafted **2** time(s). Results for all 3 drafts:\n\n- **Draft 1**\n  - Groundedness: **4.0** \u2014 passed: **true**\n  - Relevance: **2.0** \u2014 passed: **false**\n  - Overall: **FAILED** (`all_passed: false`)\n\n- **Draft 2**\n  - Groundedness: **4.0** \u2014 passed: **true**\n  - Relevance: **1.0** \u2014 passed: **false**\n  - Overall: **FAILED** (`all_passed: false`)\n\n- **Draft 3**\n  - Groundedness: **4.0** \u2014 passed: **true**\n  - Relevance: **1.0** \u2014 passed: **false**\n  - Overall: **FAILED** (`all_passed: false`)\n\n3. **Thumbnail check**\n\n- text_legible: **true**\n- brand_consistent: **true**\n- info_accurate: **true**\n\nNotes:\n\"[legibility] All 3 text element(s) meet 3.0:1. Measured: 'How to Mix Exterior Paint Colors' 14.46:1 (min OCR confidence 0.99); 'at Home' 14.46:1 (min OCR confidence 0.99); 'RIVERSIDE HARDWARE & SUPPLY' 4.95:1 (min OCR confidence 0.93)\n[observed] A pale cream background fills most of the thumbnail, a bright orange vertical wedge occupies the right side, and dark brown/black text and a small toolbox icon sit on the left.\n[content] Brand colors are consistent: the dominant scheme is cream and orange, with neutral dark text/icon accents that are out of scope. No visible hours or service claims contradict the fact sheet; the thumbnail only shows a topic title about paint mixing, which is compatible with Riverside Hardware & Supply\u2019s listed custom paint mixing service. No issues found.\"\n\nFLAGGED FOR REVIEW: text check"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 20404,
+          "completion_tokens": 1047,
+          "total_tokens": 21451
+        }
+      }
+    ]
+  }
+}
