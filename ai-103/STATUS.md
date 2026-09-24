@@ -99,9 +99,11 @@ decided so far.
    path, toolset check, and a mocked `run_item`); see `function/README.md`.
    `m7_orchestrator.py` changed in its own commit: `expected_audit` is
    optional, and `None` means not scored.
-   **Next:** (a) Gerard pastes `pip freeze` from the venv, and Claude pins
-   `function/requirements.txt`; (b) upload one fixture with `topic` metadata
-   and run `python local_run.py <name>`, the first live pass of the handler.
+   Committed at `b713df9`. **(a) Done:** `function/requirements.txt` is fully
+   pinned to Gerard's venv freeze, plus `azure-functions` 2.3.0 and `werkzeug`,
+   which are new and unmeasured. **Next, (b):** upload one fixture with `topic`
+   metadata and run `python local_run.py <name>`, the first live pass of the
+   handler.
 3. **M11 Bicep:** price it with the calculator first (`m11-prep.md` "Cost,
    sized"), then declare the Flex plan, `func-iip-dev-wus-01`, host storage
    `stiipdevwus02`, App Insights and Log Analytics, `id-iip-dev-wus-03`, the

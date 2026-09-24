@@ -31,7 +31,7 @@ which means **not scored**, never "failed".
 | `function_app.py` | The queue trigger. A thin adapter over `upload_handler.process()`. |
 | `upload_handler.py` | All the per-upload logic. It never imports `azure.functions`, so it runs on the laptop. |
 | `host.json` | Queue settings. **Read the next section before changing any of them.** |
-| `requirements.txt` | The Function's own dependencies, not the lab's. **Not yet pinned** (see its TODO). |
+| `requirements.txt` | The Function's own dependencies, not the lab's. **Fully pinned** to the measured venv, plus `azure-functions` and `werkzeug`, which are new and unmeasured. |
 | `build_package.py` | Builds `.build/` and `iip-function.zip`, mirroring the repo layout so the tools' `../iip-docs` paths resolve. It refuses to build if a packaged module imports an unpackaged sibling. |
 | `local_run.py` | Runs `process()` on the laptop against a real blob already in `uploads`. |
 
