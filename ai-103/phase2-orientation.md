@@ -76,8 +76,9 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   on those drafts; 0 of 44 on the rest). Corrected the same day; the first
   wording blamed the judge alone. **Decision (a), Gerard:**
   item7's judged first-draft row is reported as a rate with an expected band,
-  not scored against the key. Implementation is the current next action in
-  STATUS.md.
+  not scored against the key. **Implemented at `67d0e31` (2026-09-23).**
+  *(Updated 2026-09-24: this line said "Implementation is the current next
+  action in STATUS.md" after it had been done.)*
   The run carries `git_changed_during_run: true`; no `.py` file is in the
   changed set, so the measured code is byte-identical to `aa96bea`.
 - **M10 is COMPLETE (2026-09-23, Gerard moved the marker).** Both remaining
@@ -105,7 +106,7 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID
   (committed `aa96bea`). The key helpers remain in the source, unused, pending
-  removal — see the M10 clauses above.
+  removal — see the M10 clauses above. *(Removed at `08bc35c`, 2026-09-23.)*
 
 ## What Phase 2 builds
 
@@ -163,8 +164,8 @@ Function must not use keys.
 | **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** ✅ | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
 | **M10** ✅ | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no **surveyed** script reads a key. **Amended 2026-09-22, by Gerard:** `m3_analyze.py`'s own Content Understanding pipeline is a STATED EXCEPTION. It reads two keys (`Ocp-Apim-Subscription-Key` at lines 183/206, and an account-key SAS via `get_storage_key()`), and `m10-prep.md` never surveyed it — it treated `m3_analyze.py` as the *home* of the key helper and never looked at the module's own `main()`. M3's migration is tracked separately: the REST auth swap is small, the account-key SAS → user-delegation SAS is a design change that amends the RBAC model. The exception is named here rather than left as a milestone that quietly stays open. **Exception CLOSED 2026-09-23:** `m3_analyze.py` migrated at `fcc55b6` (Entra ID bearer auth; user-delegation SAS for `--blob`, decision (A), Gerard) and verified live on both paths, so "no script reads a key" now holds without exception. | 1–2 sessions (includes the ~95 min run) | M9 |
-| **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the blob trigger → agent → results flow, the results page with built-in sign-in, the app registration and the viewers group. Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
-| **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. Decides Event Grid delivery vs. inbound restrictions (Todoist task), and the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
+| **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the ~~blob trigger~~ **storage queue → queue trigger** → agent → results flow, the results page with built-in sign-in (via `id-iip-dev-wus-03` as a federated credential, no client secret), the app registration and the viewers group. *(Amended 2026-09-24: Gerard's D-M11-1 (b) and D-M11-2 (b), Sep 23 — see `m11-prep.md`.)* Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
+| **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. ~~Decides Event Grid delivery vs. inbound restrictions (Todoist task),~~ *(Amended 2026-09-24. D-M11-1 (b) removed the Function's inbound webhook, so the original question is gone and the Todoist task was closed Sep 23 — but the constraint **moved to the storage account**, it did not disappear. Microsoft Learn (Event Grid, storage queue handler): once `stiipdevwus01` has a firewall or network rule, Event Grid can deliver to its queue only with the system topic's **system-assigned** identity and only with *Allow Azure services on the trusted service list* enabled; a user-assigned identity is not supported at all. So M11 should give the system topic a system-assigned identity now, and M12 must keep the trusted-services exception on.)* Decides the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
 | **M14** | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
 
@@ -189,8 +190,11 @@ write-up and the two out-of-date site lines.
 
 Deferred items go here, not in `STATUS.md`.
 
-*`m10-prep.md` holds the surveyed plan for M10 — read it before starting that
-milestone; it records a probable blocker on the free-tier Search service.*
+*Each milestone's pre-build survey lives in its own `m<N>-prep.md`
+(`m10-prep.md`, `m11-prep.md`). Read the current milestone's — the marker at
+the top of this file says which — results box first, before starting work.
+(Amended 2026-09-24: this line pointed only at `m10-prep.md`, after M10
+closed.)*
 - **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
   what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
   blob service. M9 declares it as found rather than changing it. Worth revisiting
@@ -287,5 +291,6 @@ milestone; it records a probable blocker on the free-tier Search service.*
 | Who can access what? | `phase2-rbac-model-draft.md` |
 | The Conditional Access design and its tests | `phase2-conditional-access-spec-draft.md` |
 | Session checklists; the M7 backlog | `m7-orientation.md` |
+| A milestone's pre-build survey and probe results | `m10-prep.md`, `m11-prep.md` |
 | Why Phase 2 looks the way it does | Claude project doc `claude/2026-09-16-phase2-plan-review.md` |
 | The M7 write-up | `m7-writeup-draft.md` |

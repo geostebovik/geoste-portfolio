@@ -13,6 +13,13 @@
 > | Probe 3, package size | **235 MB** installed (Windows wheels, `playwright` excluded). Under the 1 GB package limit Microsoft documents for run-from-package — but see the next row. |
 > | Found while sizing probe 3 | Microsoft's Python build guide: **"Remote build has a 60-second timeout: If dependency installation exceeds the limit, the build fails."** 235 MB of dependencies is a real risk against 60 s. The documented fallback is a local build **on Linux** (never Windows) — e.g. a GitHub Actions `ubuntu` runner, which M14's OIDC pipeline would use anyway. The same guide gives Python **3.13+** a **2-minute** module-import window, where the Flex page says app initialization times out after 30 s; which ceiling governs is **unverified**. |
 >
+> | Item | Result (2026-09-24) |
+> |---|---|
+> | Build path | **Remote build first** (Gerard). A GitHub Actions `ubuntu` local build is the documented fallback, and M14 needs that runner anyway. Stand-in timing (Claude ran it; Linux, 2 cores, pip 26.2.1, `--no-cache-dir --only-binary=:all:`, `playwright` excluded): 3.12 **22.6 s**; 3.13 **21.1 / 23.4 / 21.8 s**; 3.14 **57.6 / 30.2 / 26.2 / 27.2 s**. **Caveat:** the first 3.14 run came within 3 s of the 60 s limit, so a cold network path can roughly double the time. This isn't Oryx: the first real remote build is the measurement, and a failed build costs minutes and changes nothing in Azure. |
+> | Package size, corrected | **303–310 MB on Linux**, not probe 3's 235 MB, which was measured on Windows. Linux wheels carry bundled libraries (for example `numpy.libs`). Still well under 1 GB. Largest: `pandas` 77 MB, pulled in by `azure-ai-evaluation`, so it can't be trimmed. Every package has a 3.14 wheel, so nothing builds from source. |
+> | Python version | **3.14**, matching the local venv (`Python 3.14.0`, Gerard). GA on Functions, expected end of support April 2029 (Microsoft Learn, supported languages). 3.13+ gets the 2-minute import window; the Flex 30 s initialization ceiling is still unresolved against it. |
+> | Function requirements | `scripts/requirements.txt` covers the whole lab. The Function gets its **own** requirements file: drop `playwright`, `python-dotenv` and `azure-search-documents`. |
+>
 > The survey below is unedited.
 
 **Surveyed 2026-09-23,** straight after M10 closed. Claude read the M7 code

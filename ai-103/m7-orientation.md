@@ -69,6 +69,10 @@ hygiene for its own sake. Counterpart to the end-of-session reconcile above.
    session prompt is only what changed and what is next. When they disagree,
    this doc wins, and the disagreement itself is a finding worth fixing on
    the spot.
+   *(Phase 2, noted 2026-09-24: from M8 on, the map is
+   `phase2-orientation.md` — its milestone marker, Status, Milestones table
+   and Phase 2 Backlog. This file still supplies these checklists and the M7
+   Backlog.)*
 
 ## End-of-session checklist (added 2026-09-02)
 

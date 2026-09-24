@@ -64,43 +64,48 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 16, 2026. **M7 is certified at `a915217`, the
-code as it stands, with zero misses**: 120/120 text rows and 120/120 audit
-rows (`results/20260915-184006`). The Sep 14 audit change had reopened the
-Sep 11 certification, and the re-certification that followed failed. The
-cause was the `ContentAudit` class docstring, which is sent to the model as
-schema text. **The item3 colour flaw is not fixed. It moved.** The audit's
-`[observed]` line no longer names "cream" (0/45, then 1/45). Its `[content]`
-line, which explains the brand verdict, still does: 40/45, then 34/45 on a
-pre-registered repeat on Sep 16. Verdicts are unaffected. Phase 1 of the IIP
-labs is closed. **The write-up draft has been reworked against all of this
-and waits for Gerard's edit.** ostebovik.net's AI domain still reads "M7 not
-started" / "M7 in progress", held for a group push.
+**Status as of:** September 24, 2026. Phase 1 of the IIP labs is closed: M7
+passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
+and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23). For
+which milestone is current, read the marker at the top of
+`phase2-orientation.md` — that line is the single source of truth. The M7
+write-up waits on outside readers and goes out in one group push with the Phase
+2 write-up and the two stale ostebovik.net lines.
+*(Replaced 2026-09-24, housecleaning — Claude drafted, at Gerard's request.
+The previous paragraph was dated Sep 16 and predated M8-M10. Its M7 detail —
+the item3 colour flaw moving from `[observed]` to `[content]`, 40/45 then
+34/45 — is in the Sep 16 session entry and the Todoist task that accepts it as
+a stated limit.)*
 ---
 
 ## Current next action
 
-**Next action: settle how the Function gets built, then put M11's new rows in
-the RBAC model — before any Bicep.** Updated 2026-09-23, end of session. M11 is
-the working milestone; `m11-prep.md` is its survey, with a results box at the
-top.
+**Next action: decide `versionUpgradeOption`, then start M11's build — the
+Function's code shape first, then its Bicep.** Updated 2026-09-24, mid-session.
+M11 is the working milestone; `m11-prep.md`'s results box holds everything
+decided so far.
 
-1. **Build path.** Microsoft's Python guide gives remote build a **60-second**
-   timeout; the Function's dependencies are **235 MB**. Time a clean Linux
-   install (Cloud Shell: `pip install -r requirements.txt --target /tmp/pkg`,
-   `playwright` excluded) to see which side of 60 s it lands. Over it: plan a
-   Linux local build (GitHub Actions `ubuntu` runner, which M14 needs anyway).
-2. **Pick the Function's Python version** (3.10–3.14 all available in
-   `westus`). Match the local venv unless there is a reason not to; note that
-   3.13+ gets a documented 2-minute import window (vs the Flex page's 30 s
-   initialization timeout — which governs is unverified).
-3. **RBAC model:** add the rows D-M11-1 (b) and D-M11-2 (b) imply — system-topic
-   identity → Storage Queue Data Message Sender; Function identity → Queue Data
-   Reader + Message Processor; `id-iip-dev-wus-03` with a federated credential
-   and no Azure RBAC — and promote the Storage Blob Delegator note to a row.
-4. **Before the next measured pass:** decide `versionUpgradeOption` (Todoist P2).
-5. **If `m7-writeup-draft.md` is already with outside readers:** send them the
-   Sep 23 section 4 change (Gerard's step).
+1. ~~**Decide `versionUpgradeOption`**~~ **Decided 2026-09-24 (Gerard):
+   `OnceCurrentVersionExpired` on all four deployments, now a per-deployment
+   parameter.** Remaining: Gerard runs `what-if` (expect exactly four
+   `~ properties.versionUpgradeOption` lines plus the register), then deploys,
+   then re-runs `what-if` to confirm those four are gone.
+2. **M11 code shape:** `function_app.py` with a queue trigger, tool imports
+   inside the function body (probe 2's insurance), and the Function's **own**
+   `requirements.txt` (no `playwright`, `python-dotenv` or
+   `azure-search-documents`). Python **3.14**. Remote build first.
+3. **M11 Bicep:** price it with the calculator first (`m11-prep.md` "Cost,
+   sized"), then declare the Flex plan, `func-iip-dev-wus-01`, host storage
+   `stiipdevwus02`, App Insights and Log Analytics, `id-iip-dev-wus-03`, the
+   `upload-events` and `upload-events-poison` queues, and the system topic
+   with a **system-assigned** identity; RBAC rows 7, 8, 12 and 14–16.
+4. **End of day, before wrap-up (Gerard, 2026-09-24):** split the pre-Sep 17
+   session log out of this file into `STATUS-archive-m7.md`, like the Sep 6
+   Phase 1 split.
+5. **Gerard's steps:** add `m11-prep.md` and `phase2-rbac-model-draft.md` to
+   the project instructions' Key files, and the M9 identities to its resource
+   list; if `m7-writeup-draft.md` is already with outside readers, send them
+   the Sep 23 section 4 change.
 6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
    `.gitignore`.
@@ -108,7 +113,10 @@ top.
 **Settled — do not reopen:** the `listKeys` calls are VS Code's; item7's judged
 row is a rate flagged at 9 of 15; M3's `--blob` uses a user-delegation SAS;
 M11's trigger is Event Grid → queue, and its sign-in uses a managed identity as
-a federated credential (all Sep 23).
+a federated credential (all Sep 23). **Added Sep 24 (Gerard):** remote build
+first, GitHub Actions Linux build as fallback; Python 3.14; the event queue
+lives on `stiipdevwus01` with queue-scoped roles; the poison queue is declared
+in Bicep and the Function gets Message Sender on it only.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step) and goes out in one group push with Phase 2 and the two stale site lines.
@@ -150,7 +158,7 @@ step) and goes out in one group push with Phase 2 and the two stale site lines.
   the Aug 5 run's apparent `gpt-5-4` edge, in the Aug 6 session notes
   (`STATUS-archive-phase1.md`).
   Small infra items remain (see Next action) but don't block M5.
-- [ ] **M7:** Build a single orchestrator agent (Generative AI/agentic exam
+- [x] **M7:** Build a single orchestrator agent (Generative AI/agentic exam
   domain) over a neutral, synthetic small-business content-review scenario —
   decoupled from the YouTube-cleanup business thesis as of August 4, see
   `agent-system-project-plan.md`'s "Decoupling note." Same technical shape
@@ -161,8 +169,10 @@ step) and goes out in one group push with Phase 2 and the two stale site lines.
   exam domain not otherwise touched through M6. No longer tied to Anne's
   engagement or any specific unvalidated business premise; "is this a real
   business" is now a separate, evidence-gated question, not assumed live.
-  Not built yet — scaffolding complete and design decision made (Aug 21),
-  see Next action below. → Phase 1 (of IIP labs) complete once built.
+  **Complete: acceptance test passed at `a915217`** (`results/20260915-184006`,
+  120/120 text rows, 120/120 audit rows). Phase 1 of the IIP labs is closed.
+  *(Updated 2026-09-24, housecleaning: until today this entry still read "Not
+  built yet", unticked, from Aug 21.)*
 
 ---
 
@@ -180,6 +190,8 @@ step) and goes out in one group push with Phase 2 and the two stale site lines.
 | Embedding deployment | `text-embedding-3-small` |
 | Analyzer | `iip_loan_agreement_analyzer` (`ai-103/infrastructure/content-understanding/loan-agreement-analyzer.json`) |
 | AI Search service | `srch-iip-dev-wus-01` (Free tier, West US) — `https://srch-iip-dev-wus-01.search.windows.net`, provisioned Aug 7 for M5 |
+| Managed identities | `id-iip-dev-wus-01` (Function runtime) and `id-iip-dev-wus-02` (GitHub Actions deploy, OIDC) — deployed by M9, 2026-09-21. `id-iip-dev-wus-03` (sign-in federated credential, D-M11-2 (b)) is planned, not deployed |
+| App data containers | `uploads` and `results` on `stiipdevwus01` — deployed by M9, 2026-09-21 |
 
 ---
 
