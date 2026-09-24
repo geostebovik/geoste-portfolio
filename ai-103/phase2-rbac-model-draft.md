@@ -112,8 +112,13 @@ These rows were confirmed by a real upload the Function processed end to end
 - **Row 15:** Reader + Message Processor were enough for the queue trigger.
 - **Row 14:** needed **account** scope; see its row.
 
-**Still VERIFY:** row 8 (telemetry reaching App Insights under Entra) and row 16
-(the poison path).
+- **Row 8** (confirmed the same afternoon): App Insights has `DisableLocalAuth:
+  true`, so it accepts only Entra-signed telemetry, and in the 3 hours after
+  the deploy it received 491 traces, 2 requests (the two uploads), 44 custom
+  metrics and 21 performance counters. Monitoring Metrics Publisher on the
+  component is sufficient.
+
+**Still VERIFY:** row 16 (the poison path).
 
 ## Build-time findings (M9, 2026-09-21)
 

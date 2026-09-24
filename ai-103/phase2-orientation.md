@@ -39,7 +39,7 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 
 ## Status
 
-**Status as of:** September 23, 2026.
+**Status as of:** September 24, 2026.
 - **Both Phase 2 entry-checklist items are agreed on paper:**
   - the RBAC model, in `phase2-rbac-model-draft.md`;
   - the Conditional Access spec, in `phase2-conditional-access-spec-draft.md`.
@@ -102,6 +102,12 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   import-safe modules import cleanly. Clause 2: `m6_generate.py` (28 answers, 14
   per model, none empty, `20260923-122420_generate_results.json`) and
   `m6_probe.py` both hand-run keyless.
+- **M11 pass 1 (upload → result) is DEPLOYED AND WORKING (2026-09-24).**
+  Upload → Event Grid → queue → Function → agent → result in 46 s. Two runs in
+  Azure matched item4's answer key. RBAC rows 4-8, 14 and 15 confirmed in
+  production, and row 14 is account-scoped (see the RBAC model). Remaining for
+  M11: the poison path (row 16) and pass 2, sign-in. Details in `m11-prep.md`
+  and STATUS.md Sep 24.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID

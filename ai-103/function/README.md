@@ -41,7 +41,7 @@ which means **not scored**, never "failed".
 |---|---|---|
 | `queues.batchSize` / `newBatchThreshold` | 1 / 0 | **Correctness, not tuning.** The orchestrator keeps `TOOL_CALLS` and `_item_deadline` at module level, so two uploads processed at once in one worker would record each other's tool calls. Microsoft: the maximum concurrent per function is batchSize + newBatchThreshold, so these values give 1. |
 | `queues.maxDequeueCount` | 2 | Each retry is a full agent run, and `run_item()` already retries transport failures 4 times internally. After 2 attempts the message goes to `upload-events-poison` (RBAC row 16). |
-| `queues.messageEncoding` | `none` | We don't know whether Event Grid writes plain or base64 JSON. `parse_event()` accepts both, so `none` stops the host rejecting either. **VERIFY at first light** and record which. |
+| `queues.messageEncoding` | `none` | Written before we knew which encoding Event Grid uses. **Settled 2026-09-24 (run 2): Event Grid writes base64 JSON** (`upload.message_encoding` in every result). The host default `base64` would therefore also have worked. `none` plus `parse_event()`'s tolerance for both forms works either way, so it stays. |
 | `functionTimeout` | 45 min | The worst case inside `run_item()` is 4 attempts × `ITEM_DEADLINE_SECONDS` (600 s) plus backoff (5 + 10 + 20 s) = 2,435 s, about 40.6 min. That's over the 30-minute Flex default, which would have killed the orchestrator's own retries. |
 | sampling | off | At this volume every trace is worth keeping. |
 
@@ -73,6 +73,7 @@ Checked against the **built package**, on Python 3.14.7 with this
   `None`, `audit_matches_expected` is `None`, and the agent receives the
   absolute temp path. A fixture item still records its answer key unchanged.
 
-**Not verified yet:** anything that needs Azure. That means the queue trigger,
-Event Grid's encoding, the identity-based connection, and a real agent run
-inside the Function.
+**Verified in Azure since (2026-09-24):** two end-to-end runs through the
+queue trigger, the identity-based connection and a real agent run inside the
+Function. Both matched item4's key. See `m11-prep.md`. **Still not verified:**
+telemetry (RBAC row 8) and the poison path (row 16).
