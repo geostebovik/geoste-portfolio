@@ -97,8 +97,27 @@ def git_snapshot() -> dict:
     untracked = _git("ls-files", "--others", "--exclude-standard", "--full-name",
                      "--", ":/")
     status = "\n".join(x for x in (tracked, untracked) if x)
+    # NO GIT IS NOT A CLEAN TREE (2026-09-24, Claude; found in the first M11
+    # Function result). _git() returns "" on any failure, so where git does
+    # not exist -- inside the Azure Function -- every call came back empty and
+    # this function reported git_dirty: False. That asserted a clean tree it
+    # had no way to see: the confidently-wrong record this project keeps a
+    # standing lesson about. An empty HEAD now means UNKNOWN, recorded as None
+    # with the reason. Where git works (every laptop run), rev-parse HEAD is
+    # never empty, so those records are byte-for-byte unchanged.
+    head = _git("rev-parse", "HEAD")
+    if not head:
+        return {
+            "git_head": None,
+            "git_branch": None,
+            "git_dirty": None,
+            "git_dirty_files": None,
+            "git_unavailable": ("git returned nothing for rev-parse HEAD: no git "
+                                "here, or not a repository. Tree state UNKNOWN, "
+                                "not clean."),
+        }
     return {
-        "git_head": _git("rev-parse", "HEAD"),
+        "git_head": head,
         "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "git_dirty": bool(status),
         "git_dirty_files": status.splitlines(),
@@ -194,6 +213,10 @@ def core_provenance(script: str | None = None, extra: dict | None = None,
         "git_dirty": git["git_dirty"],
         "git_dirty_files": git["git_dirty_files"],
     }
+    if "git_unavailable" in git:
+        # Carried through so a None above is never read without its reason.
+        # Absent whenever git works, so laptop records keep their exact shape.
+        provenance["git_unavailable"] = git["git_unavailable"]
     if git_at_start is not None:
         provenance.update(end_check(git_at_start))
     if started_at is not None:
