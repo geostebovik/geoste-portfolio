@@ -791,7 +791,7 @@ def _unmeasured_record(item: dict, exc: BaseException, attempts: int) -> dict:
         "final_text_passed": None,
         "expected_text": item.get("expected_text") or None,
         "text_matches_expected": None,
-        "expected_audit": item["expected_audit"],
+        "expected_audit": item.get("expected_audit"),
         "actual_audit": None,
         "audit_matches_expected": None,
         "requested_tool_calls": [],
@@ -917,9 +917,14 @@ def run_item(client, agent_id: str, item: dict) -> dict:
         "final_text_passed": final_text_passed,
         "expected_text": expected_text or None,
         "text_matches_expected": text_matches_expected,
-        "expected_audit": item["expected_audit"],
+        # .get(), not ["expected_audit"] (2026-09-24, M11): an uploaded item
+        # has no answer key. None means NOT SCORED, never "failed". Fixture
+        # items all carry the key, so their records are unchanged.
+        "expected_audit": item.get("expected_audit"),
         "actual_audit": actual,
-        "audit_matches_expected": (actual == item["expected_audit"]) if actual else None,
+        "audit_matches_expected": (
+            (actual == item["expected_audit"])
+            if actual and item.get("expected_audit") else None),
         "requested_tool_calls": collect_steps(client, thread.id, run.id),
         "tool_calls": calls,
         "messages": collect_messages(client, thread.id),
@@ -947,7 +952,8 @@ def run_item(client, agent_id: str, item: dict) -> dict:
               f"final={expected_text.get('final_passed')} "
               f"redrafts={expected_text.get('expected_redrafts')}"
               f"   match={text_matches_expected}")
-    print(f"expected audit (content-items-plan.md): {json.dumps(item['expected_audit'])}")
+    print(f"expected audit (content-items-plan.md): "
+          f"{json.dumps(item.get('expected_audit')) if item.get('expected_audit') else 'none -- not scored'}")
     print(f"actual audit (from tool output):        {json.dumps(actual)}"
           f"   match={record['audit_matches_expected']}")
 
