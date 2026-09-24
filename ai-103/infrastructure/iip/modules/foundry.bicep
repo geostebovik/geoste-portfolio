@@ -94,7 +94,11 @@ resource deployments 'Microsoft.CognitiveServices/accounts/deployments@2025-06-0
         version: d.modelVersion
       }
       raiPolicyName: 'Microsoft.DefaultV2'
-      versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+      // Chosen per deployment in dev.bicepparam, not hardcoded (Gerard,
+      // 2026-09-24). Was a bare 'OnceNewDefaultVersionAvailable' inherited
+      // from the portal default, which let the judge's build move within two
+      // weeks of a new default with no commit, no what-if diff and no decision.
+      versionUpgradeOption: d.versionUpgradeOption
       // currentCapacity is writable, not read-only, despite reading like a
       // status field. Held equal to sku.capacity so the two cannot drift.
       currentCapacity: d.capacity

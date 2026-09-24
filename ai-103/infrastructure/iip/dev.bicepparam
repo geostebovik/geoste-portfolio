@@ -42,6 +42,14 @@ param adminPrincipalId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'
 // capacity is in units of 1,000 TPM: 300 = 300K TPM, 30 = 30K, 10 = 10K.
 // gpt-5-4 and gpt-5-4-mini were raised to 300K in the portal; that raise is
 // captured here, which is the point of M8.
+//
+// versionUpgradeOption (Gerard, 2026-09-24): OnceCurrentVersionExpired on all
+// four. The build moves only when Microsoft retires the pinned version, never
+// because a new default ships, and the deployment never stops working (which
+// NoAutoUpgrade would do at retirement). gpt-5-4 is both drafter and judge, so
+// a silent build change would split every longitudinal comparison in two. A
+// forced move at retirement is still detectable: model_builds provenance
+// records the build on every measured run since 2026-09-23. See README.md.
 param modelDeployments = [
   {
     name: 'gpt-5-4'
@@ -49,6 +57,7 @@ param modelDeployments = [
     capacity: 300
     modelName: 'gpt-5.4'
     modelVersion: '2026-03-05'
+    versionUpgradeOption: 'OnceCurrentVersionExpired'
   }
   {
     name: 'gpt-5-4-mini'
@@ -56,6 +65,7 @@ param modelDeployments = [
     capacity: 300
     modelName: 'gpt-5.4-mini'
     modelVersion: '2026-03-17'
+    versionUpgradeOption: 'OnceCurrentVersionExpired'
   }
   {
     name: 'gpt-5-2'
@@ -63,6 +73,7 @@ param modelDeployments = [
     capacity: 30
     modelName: 'gpt-5.2'
     modelVersion: '2025-12-11'
+    versionUpgradeOption: 'OnceCurrentVersionExpired'
   }
   {
     name: 'text-embedding-3-small'
@@ -70,5 +81,6 @@ param modelDeployments = [
     capacity: 10
     modelName: 'text-embedding-3-small'
     modelVersion: '1'
+    versionUpgradeOption: 'OnceCurrentVersionExpired'
   }
 ]

@@ -69,6 +69,9 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
     // See the Phase 2 Backlog item on soft delete.
     deleteRetentionPolicy: {
       enabled: false
+      // Declared as found (2026-09-24): surfaced as '- allowPermanentDelete:
+      // false' in the Sep 24 what-if; writable per the provider schema.
+      allowPermanentDelete: false
     }
   }
 }
@@ -78,6 +81,14 @@ resource uploadsContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
   name: 'uploads'
   properties: {
     publicAccess: 'None'
+    // Both declared as found (2026-09-24). They appeared as '-' in the
+    // Sep 24 what-if and are NOT ReadOnly in the provider schema (checked
+    // with the Bicep schema tool), so by this template's rule they are real
+    // diffs, not noise. '$account-encryption-key' is the account default;
+    // the encryption scope is fixed at container creation, so these must
+    // match live, never 'improve' it.
+    defaultEncryptionScope: '$account-encryption-key'
+    denyEncryptionScopeOverride: false
   }
 }
 
@@ -86,6 +97,14 @@ resource resultsContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
   name: 'results'
   properties: {
     publicAccess: 'None'
+    // Both declared as found (2026-09-24). They appeared as '-' in the
+    // Sep 24 what-if and are NOT ReadOnly in the provider schema (checked
+    // with the Bicep schema tool), so by this template's rule they are real
+    // diffs, not noise. '$account-encryption-key' is the account default;
+    // the encryption scope is fixed at container creation, so these must
+    // match live, never 'improve' it.
+    defaultEncryptionScope: '$account-encryption-key'
+    denyEncryptionScopeOverride: false
   }
 }
 
