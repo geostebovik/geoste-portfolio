@@ -1,0 +1,7 @@
+local_run.py
+build_package.py
+README.md
+__pycache__/
+.venv/
+.build/
+*.zip

@@ -87,13 +87,21 @@ decided so far.
 
 1. ~~**Decide `versionUpgradeOption`**~~ **Decided 2026-09-24 (Gerard):
    `OnceCurrentVersionExpired` on all four deployments, now a per-deployment
-   parameter.** Remaining: Gerard runs `what-if` (expect exactly four
-   `~ properties.versionUpgradeOption` lines plus the register), then deploys,
-   then re-runs `what-if` to confirm those four are gone.
-2. **M11 code shape:** `function_app.py` with a queue trigger, tool imports
-   inside the function body (probe 2's insurance), and the Function's **own**
-   `requirements.txt` (no `playwright`, `python-dotenv` or
-   `azure-search-documents`). Python **3.14**. Remote build first.
+   parameter.** **Deployed and verified, committed at `c923daa`:** gpt-5-4
+   still on build `2026-03-05`; post-deploy `what-if` is register-only (3
+   modify, 12 no change, 4 unsupported). The same commit declared three
+   writable storage properties the Sep 24 `what-if` surfaced as unregistered.
+2. **M11 code shape — WRITTEN 2026-09-24 (Claude), not yet run live.**
+   `function/` holds `function_app.py`, `upload_handler.py`, `host.json`,
+   `requirements.txt`, `build_package.py`, `local_run.py` and a README. Gerard
+   decided: topic as blob metadata, and one agent per upload (D-M11-3). The built
+   package was checked on Python 3.14.7 (imports, event parsing, fact-sheet
+   path, toolset check, and a mocked `run_item`); see `function/README.md`.
+   `m7_orchestrator.py` changed in its own commit: `expected_audit` is
+   optional, and `None` means not scored.
+   **Next:** (a) Gerard pastes `pip freeze` from the venv, and Claude pins
+   `function/requirements.txt`; (b) upload one fixture with `topic` metadata
+   and run `python local_run.py <name>`, the first live pass of the handler.
 3. **M11 Bicep:** price it with the calculator first (`m11-prep.md` "Cost,
    sized"), then declare the Flex plan, `func-iip-dev-wus-01`, host storage
    `stiipdevwus02`, App Insights and Log Analytics, `id-iip-dev-wus-03`, the

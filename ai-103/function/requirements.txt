@@ -1,0 +1,20 @@
+# The Function's own dependencies (M11, 2026-09-24). NOT scripts/requirements.txt,
+# which is the whole lab's. Derived from the M7 import chain plus the Function:
+#   dropped: playwright, azure-search-documents -- nothing in the chain imports them
+#   kept:    python-dotenv -- six chain modules import load_dotenv at module scope
+#   added:   azure-functions, azure-storage-blob -- the trigger and the blob I/O
+# TODO before the first deploy: pin every line to the certified local venv's
+# versions (pip freeze). Unpinned, a remote build picks up whatever is newest
+# that day, and the deployed code stops being the code M10 measured.
+azure-functions
+azure-storage-blob
+azure-identity
+azure-ai-agents
+azure-ai-evaluation==1.18.3
+azure-ai-vision-imageanalysis
+openai
+pydantic
+numpy
+pillow
+requests
+python-dotenv

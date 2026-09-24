@@ -120,3 +120,7 @@ resources/qr_codes/
 !ai-103/scripts/results/20260923-121256_loan-agreement-promissory-note.json
 !ai-103/scripts/results/20260923-121335_loan-agreement-promissory-note.json
 !ai-103/scripts/results/20260923-122420_generate_results.json
+
+# M11 Function build output (function/build_package.py), 2026-09-24
+ai-103/function/.build/
+ai-103/function/*.zip

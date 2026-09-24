@@ -16,9 +16,12 @@
 > | Item | Result (2026-09-24) |
 > |---|---|
 > | Build path | **Remote build first** (Gerard). A GitHub Actions `ubuntu` local build is the documented fallback, and M14 needs that runner anyway. Stand-in timing (Claude ran it; Linux, 2 cores, pip 26.2.1, `--no-cache-dir --only-binary=:all:`, `playwright` excluded): 3.12 **22.6 s**; 3.13 **21.1 / 23.4 / 21.8 s**; 3.14 **57.6 / 30.2 / 26.2 / 27.2 s**. **Caveat:** the first 3.14 run came within 3 s of the 60 s limit, so a cold network path can roughly double the time. This isn't Oryx: the first real remote build is the measurement, and a failed build costs minutes and changes nothing in Azure. |
+> | 3.14 timings, corrected (same day) | The four 3.14 runs in the Build path row ran on **3.14.0rc2**, a release candidate. My workspace only had that build, and I didn't notice until pydantic failed on it. Re-measured on **3.14.7** with the Function's **actual** requirements file (`function/requirements.txt`): **24.3 s, 308 MB**. It's still a stand-in, not Oryx. (Claude) |
+> | D-M11-3, agent lifecycle | **Per invocation** (Gerard): create, run, delete in `finally`, the path M7/M10 certified. |
+> | Upload contract | **`topic` as blob metadata** (Gerard). A missing topic gives an error result with no retry. See `function/README.md`. |
 > | Package size, corrected | **303–310 MB on Linux**, not probe 3's 235 MB, which was measured on Windows. Linux wheels carry bundled libraries (for example `numpy.libs`). Still well under 1 GB. Largest: `pandas` 77 MB, pulled in by `azure-ai-evaluation`, so it can't be trimmed. Every package has a 3.14 wheel, so nothing builds from source. |
 > | Python version | **3.14**, matching the local venv (`Python 3.14.0`, Gerard). GA on Functions, expected end of support April 2029 (Microsoft Learn, supported languages). 3.13+ gets the 2-minute import window; the Flex 30 s initialization ceiling is still unresolved against it. |
-> | Function requirements | `scripts/requirements.txt` covers the whole lab. The Function gets its **own** requirements file: drop `playwright`, `python-dotenv` and `azure-search-documents`. |
+> | Function requirements | `scripts/requirements.txt` covers the whole lab. The Function gets its **own** requirements file. Drop `playwright` and `azure-search-documents`: nothing in the M7 import chain uses them. **Keep `python-dotenv`.** *(Corrected 2026-09-24, same day: this row first said to drop it, but six modules in the chain import `load_dotenv` at module scope, so dropping it would break the app at import.)* **Add** `azure-functions` and `azure-storage-blob`, which the Function needs to read the uploaded blob and write the result. The lab file never needed them. |
 >
 > The survey below is unedited.
 
