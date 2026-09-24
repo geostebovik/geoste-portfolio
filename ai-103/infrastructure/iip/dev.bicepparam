@@ -39,6 +39,30 @@ param cicdIdentityName = 'id-iip-dev-wus-02'
 // Gerard's Entra object ID, read from `az ad signed-in-user show` on 2026-09-21.
 param adminPrincipalId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'
 
+// --- M11, pass 1 (2026-09-24) --------------------------------------------------
+// Names from phase2-rbac-model-draft.md's naming table (CAF, Sep 16).
+param hostStorageAccountName = 'stiipdevwus02'
+param logAnalyticsName = 'log-iip-dev-wus-01'
+param appInsightsName = 'appi-iip-dev-wus-01'
+param planName = 'asp-iip-dev-wus-01'
+param functionAppName = 'func-iip-dev-wus-01'
+param systemTopicName = 'egst-iip-dev-wus-01'
+
+// Each instance runs one upload at a time (host.json batchSize 1), so this is
+// also the cap on uploads processed at once: 2 x ~16K tokens is far inside
+// gpt-5-4's 300K TPM, and it bounds a runaway to two concurrent agent runs.
+param maximumInstanceCount = 2
+
+// Cost guard on Log Analytics ingestion. At $2.99/GB (westus, Sep 24 retail),
+// 1 GB/day caps a worst-case month at about $75 (30 GB less the 5 GB free).
+// Still inside the $90 budget alert, which would fire first on anything worse.
+// Expected use is well under the free 5 GB/month.
+param logDailyCapGb = 1
+
+// Copied from scripts/.env, where M10 measured them.
+param chatApiVersion = '2024-06-01'
+param pfWorkerCount = '2'
+
 // capacity is in units of 1,000 TPM: 300 = 300K TPM, 30 = 30K, 10 = 10K.
 // gpt-5-4 and gpt-5-4-mini were raised to 300K in the portal; that raise is
 // captured here, which is the point of M8.

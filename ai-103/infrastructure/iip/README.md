@@ -77,6 +77,55 @@ accepting any `-` as a false positive. `what-if`'s own "may contain false
 positive predictions (noise)" banner is an invitation to dismiss real findings,
 and should be read as a reason to check rather than a reason to relax.
 
+## M11 pass 1 — the app (written and DEPLOYED 2026-09-24)
+
+Claude wrote it. The decisions are Gerard's, recorded in `m11-prep.md`. It
+compiles cleanly with Bicep 0.47.16 (`bicep build` and `bicep build-params`,
+no warnings), which proves syntax and nothing more.
+
+**New modules:**
+- `app.bicep`: host storage `stiipdevwus02` (shared keys off from birth),
+  `log-`/`appi-` (Entra-only ingestion, 1 GB/day cap), the Flex plan, and
+  `func-iip-dev-wus-01` (Python 3.14, at most 2 instances, 2 GB). It also
+  holds the system topic `egst-iip-dev-wus-01` with a **system-assigned**
+  identity.
+- `eventsub.bicep`: BlobCreated under `uploads/` goes to the queue
+  `upload-events`, delivered with the topic's own identity. It deploys after
+  `rbac.bicep`.
+
+**Changed modules:**
+- `storage.bicep` declares the queues `upload-events` and
+  `upload-events-poison`. The queue *service* is `existing` on purpose, so
+  this template doesn't take ownership of its CORS or other settings.
+- `rbac.bicep` adds rows 7 (Blob Data Owner + Table Data Contributor on host
+  storage), 8, 12, 14, 15 and 16. That brings the declared assignments to 13.
+
+**Pre-deploy checks (Gerard):**
+1. **Only one Event Grid system topic can exist per storage account.** If
+   `stiipdevwus01` already has one (Defender for Storage can create one), the
+   create fails and `app.bicep` must reference that topic instead.
+2. `Microsoft.EventGrid` must be registered on the subscription.
+
+**Deployed** as `m11-app-pass1-20260924` after one fix. The event subscription
+failed 3/3 with a "Managed Identity Authorization Error" until row 14 moved
+from queue scope to **account** scope; see `modules/rbac.bicep`. The orphaned
+queue-scoped grant was then deleted by hand, because Incremental mode never
+deletes anything. **Register additions from here on:** 8 more "Unsupported"
+diagnostics (rows 7×2, 8, 12, 14, 15×2 and 16, whose principals are computed at
+deploy time), which makes 12 in total. Confirm against the next post-deploy
+`what-if`.
+
+**Expected `what-if` (as written before the deploy):**
+- The register above, unchanged.
+- **Creates** for everything listed under "New modules", plus the two queues
+  and the new role assignments.
+- More "Unsupported" diagnostics. Every new role assignment whose principal
+  comes from `reference()` falls in the same structural blind spot as rows
+  4/5/6/9.
+- **Nothing may show `~` or `-` on an existing resource.**
+
+This section becomes a register entry after the first deploy.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).

@@ -116,7 +116,32 @@ resource resultsContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
 // account (so: keys enabled). M10 is the milestone that sets it false; naming
 // it here would make M8 predict a change it is not making.
 
+// --- M11: the event queue and its poison queue (2026-09-24, Claude) ---------
+// On THIS account, not the host account (Gerard, Sep 24), so the Function's
+// queue roles can be scoped to one queue each (rows 15, 16).
+// The queue SERVICE is referenced as `existing`, not declared: declaring it
+// would make this template own its CORS and other writable settings, and
+// what-if would start reporting them -- the same trap as blobServices.
+// The poison queue is declared on purpose (Gerard): the Functions runtime
+// would otherwise need create-queue rights the first time a message poisons.
+resource queueService 'Microsoft.Storage/storageAccounts/queueServices@2023-05-01' existing = {
+  parent: storage
+  name: 'default'
+}
+
+resource uploadEventsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-05-01' = {
+  parent: queueService
+  name: 'upload-events'
+}
+
+resource uploadEventsPoisonQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-05-01' = {
+  parent: queueService
+  name: 'upload-events-poison'
+}
+
 output storageAccountName string = storage.name
 output storageAccountId string = storage.id
 output uploadsContainerName string = uploadsContainer.name
 output resultsContainerName string = resultsContainer.name
+output uploadEventsQueueName string = uploadEventsQueue.name
+output uploadEventsPoisonQueueName string = uploadEventsPoisonQueue.name

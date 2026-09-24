@@ -91,10 +91,29 @@ that doesn't exist.
 | 11 | CA test user | Member of row 10's group | — | The subject for Conditional Access in report-only mode, then enforced. |
 | 12 | CI/CD identity `id-iip-dev-wus-02` (D6: in scope) | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
 | 13 | Gerard | `stiipdevwus01` | Storage Blob Delegator *(existing; not in Bicep, like row 3)* | `m3_analyze.py --blob` signs its 30-minute read-only SAS with a user delegation key (M3 keyless migration, `fcc55b6`, decision (A)). Load-bearing since 2026-09-23. *(Promoted from the M9 build-time note, 2026-09-24.)* |
-| 14 | Event Grid system topic `egst-iip-dev-wus-01` — **system-assigned** identity | `stiipdevwus01` / queue `upload-events` | Storage Queue Data Message Sender | D-M11-1 (b): delivers `BlobCreated` events to the queue with its own identity (`deliveryWithResourceIdentity`); no webhook, no key. **Must be system-assigned:** once the account has a firewall or network rule (M12), Event Grid can deliver to a queue only with a system-assigned identity plus *Allow Azure services on the trusted service list*. A user-assigned identity isn't supported there at all (Microsoft Learn, Event Grid storage-queue handler). Queue-scoped. |
+| 14 | Event Grid system topic `egst-iip-dev-wus-01` — **system-assigned** identity | `stiipdevwus01` **(account)** — *was queue `upload-events`; widened 2026-09-24, Gerard: the queue-scoped grant made the event subscription's create-time validation fail 3/3 over ~20 min ("Managed Identity Authorization Error"). The check appears to run against the destination `resourceId`, which is the account; Microsoft Learn's steps say "on the storage account". **Confirmed:** the account-scoped redeploy succeeded first time (deployment `m11-app-pass1-20260924`), and the orphaned queue-scoped grant was then deleted. Cost: the topic can add messages to any queue on the account (today two); no read or delete.* | Storage Queue Data Message Sender | D-M11-1 (b): delivers `BlobCreated` events to the queue with its own identity (`deliveryWithResourceIdentity`); no webhook, no key. **Must be system-assigned:** once the account has a firewall or network rule (M12), Event Grid can deliver to a queue only with a system-assigned identity plus *Allow Azure services on the trusted service list*. A user-assigned identity isn't supported there at all (Microsoft Learn, Event Grid storage-queue handler). Account-scoped (see Scope). |
 | 15 | Function identity `id-iip-dev-wus-01` | `stiipdevwus01` / queue `upload-events` | Storage Queue Data Reader, Storage Queue Data Message Processor | The queue trigger's documented minimum (Microsoft Learn, *Configure connections … Grant permissions to an identity*). Queue-scoped, not account-scoped (Gerard, 2026-09-24: the queue lives on the app data account, so these roles cover this one queue only). |
 | 16 | Function identity | `stiipdevwus01` / queue `upload-events-poison` | Storage Queue Data Message Sender | After 5 failed attempts the runtime **adds** the message to `<queue>-poison`. Row 15's roles can't add messages, and Microsoft's table has no footnote for this (the blob trigger's row does). The poison queue is **declared in Bicep** so the runtime never needs create-queue rights (Gerard, 2026-09-24). **VERIFY** at M11 by forcing five failures and confirming the message lands in the poison queue. |
 | 17 | Sign-in identity `id-iip-dev-wus-03` | — | **None (no Azure RBAC)** | D-M11-2 (b): attached to `func-iip-dev-wus-01` as a user-assigned identity, and trusted by a **federated identity credential** on the **IIP Results (dev)** app registration, so built-in authentication needs no client secret. Dedicated to this purpose per Microsoft: it *"should only be assigned to the App Service or Azure Functions application through this registration."* |
+
+## First-light findings (M11 pass 1, 2026-09-24)
+
+These rows were confirmed by a real upload the Function processed end to end
+(`results/item4-key-cutting-FLAW-brand/20260924T191158Z.json`):
+- **Row 4:** Foundry User covers the agent, the judge, Vision Read and
+  gpt-5-4-mini **under the managed identity in production**, not only under
+  Gerard.
+- **Row 5:** container-scoped Blob Data Reader is enough for the SDK read. The
+  broader blob-trigger guidance no longer applies.
+- **Row 6:** container-scoped Blob Data Contributor is enough for the result write.
+- **Row 7:** Blob Data Owner + Table Data Contributor were enough for the host.
+  **Storage Queue Data Contributor and Storage Account Contributor were not
+  needed** and are not assigned.
+- **Row 15:** Reader + Message Processor were enough for the queue trigger.
+- **Row 14:** needed **account** scope; see its row.
+
+**Still VERIFY:** row 8 (telemetry reaching App Insights under Entra) and row 16
+(the poison path).
 
 ## Build-time findings (M9, 2026-09-21)
 

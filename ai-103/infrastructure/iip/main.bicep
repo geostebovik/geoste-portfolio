@@ -33,6 +33,36 @@ param cicdIdentityName string
 @description('Gerard\'s Entra object ID, from `az ad signed-in-user show --query id`.')
 param adminPrincipalId string
 
+// --- M11, pass 1: upload -> result (2026-09-24) -------------------------------
+param hostStorageAccountName string
+param logAnalyticsName string
+param appInsightsName string
+param planName string
+param functionAppName string
+param systemTopicName string
+param maximumInstanceCount int
+param logDailyCapGb int
+
+@description('Same value as scripts/.env CHAT_API_VERSION -- the version M10 measured.')
+param chatApiVersion string
+
+@description('Same value as scripts/.env PF_WORKER_COUNT (caps evaluate() concurrency).')
+param pfWorkerCount string
+
+// The settings the M7 code reads, under the names scripts/.env uses. Endpoints
+// are DERIVED from the pinned custom subdomain, never typed: that subdomain is
+// the load-bearing name (README "Load-bearing lines").
+var m7Settings = {
+  AIF_ENDPOINT: 'https://${foundryCustomSubDomainName}.cognitiveservices.azure.com'
+  AIF_PROJECT_ENDPOINT: 'https://${foundryCustomSubDomainName}.services.ai.azure.com/api/projects/${foundryProjectName}'
+  AIF_ACCOUNT: foundryAccountName
+  AIF_RESOURCE_GROUP: resourceGroup().name
+  CHAT_DEPLOYMENT_GPT_5_4: 'gpt-5-4'
+  CHAT_DEPLOYMENT_GPT_5_4_MINI: 'gpt-5-4-mini'
+  CHAT_API_VERSION: chatApiVersion
+  PF_WORKER_COUNT: pfWorkerCount
+}
+
 // =============================================================================
 // MODULE: Storage
 // =============================================================================
@@ -100,6 +130,32 @@ module identity 'modules/identity.bicep' = {
 }
 
 // =============================================================================
+// MODULE: The app, pass 1 (M11) -- host storage, telemetry, plan, Function,
+// Event Grid system topic. The event subscription waits for rbac (below).
+// =============================================================================
+module app 'modules/app.bicep' = {
+  name: 'deploy-iip-app'
+  params: {
+    location: location
+    tags: tags
+    hostStorageAccountName: hostStorageAccountName
+    logAnalyticsName: logAnalyticsName
+    appInsightsName: appInsightsName
+    planName: planName
+    functionAppName: functionAppName
+    systemTopicName: systemTopicName
+    dataStorageAccountName: storage.outputs.storageAccountName
+    functionIdentityName: functionIdentityName
+    m7Settings: m7Settings
+    maximumInstanceCount: maximumInstanceCount
+    logDailyCapGb: logDailyCapGb
+  }
+  dependsOn: [
+    identity
+  ]
+}
+
+// =============================================================================
 // MODULE: Role assignments (M9)
 // Mirrors the RBAC model's table in row order. Depends on every scope it
 // assigns at, so it runs last.
@@ -114,7 +170,31 @@ module rbac 'modules/rbac.bicep' = {
     adminPrincipalId: adminPrincipalId
     functionIdentityPrincipalId: identity.outputs.functionIdentityPrincipalId
     foundryProjectPrincipalId: foundry.outputs.projectPrincipalId
+    // M11
+    hostStorageAccountName: app.outputs.hostStorageAccountName
+    appInsightsName: app.outputs.appInsightsName
+    functionAppName: app.outputs.functionAppName
+    uploadEventsQueueName: storage.outputs.uploadEventsQueueName
+    uploadEventsPoisonQueueName: storage.outputs.uploadEventsPoisonQueueName
+    cicdIdentityPrincipalId: identity.outputs.cicdIdentityPrincipalId
+    systemTopicPrincipalId: app.outputs.systemTopicPrincipalId
   }
+}
+
+// =============================================================================
+// MODULE: Event subscription (M11) -- AFTER rbac, because delivery needs row 14.
+// =============================================================================
+module eventsub 'modules/eventsub.bicep' = {
+  name: 'deploy-iip-eventsub'
+  params: {
+    systemTopicName: app.outputs.systemTopicName
+    dataStorageAccountName: storage.outputs.storageAccountName
+    uploadEventsQueueName: storage.outputs.uploadEventsQueueName
+    uploadsContainerName: storage.outputs.uploadsContainerName
+  }
+  dependsOn: [
+    rbac
+  ]
 }
 
 // =============================================================================
@@ -134,3 +214,7 @@ output functionIdentityId string = identity.outputs.functionIdentityId
 output functionIdentityClientId string = identity.outputs.functionIdentityClientId
 output cicdIdentityId string = identity.outputs.cicdIdentityId
 output cicdIdentityClientId string = identity.outputs.cicdIdentityClientId
+
+// M11
+output functionAppName string = app.outputs.functionAppName
+output systemTopicPrincipalId string = app.outputs.systemTopicPrincipalId

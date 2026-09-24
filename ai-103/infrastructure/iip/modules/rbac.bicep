@@ -35,10 +35,32 @@ param functionIdentityPrincipalId string
 @description('Principal ID of the Foundry PROJECT system-assigned identity.')
 param foundryProjectPrincipalId string
 
+// --- M11 (2026-09-24) ----------------------------------------------------------
+param hostStorageAccountName string
+param appInsightsName string
+param functionAppName string
+param uploadEventsQueueName string
+param uploadEventsPoisonQueueName string
+
+@description('Principal ID of id-iip-dev-wus-02 (CI/CD), from the identity module.')
+param cicdIdentityPrincipalId string
+
+@description('Principal ID of the SYSTEM-ASSIGNED identity on egst-iip-dev-wus-01.')
+param systemTopicPrincipalId string
+
 var roleIds = {
   foundryUser: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
   storageBlobDataContributor: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   storageBlobDataReader: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+  // Added 2026-09-24 for M11. Read from Microsoft Learn's built-in roles pages
+  // and the Flex Consumption Bicep quickstart the same day, not from memory.
+  storageBlobDataOwner: 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+  storageTableDataContributor: '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
+  monitoringMetricsPublisher: '3913510d-42f4-4e42-8a64-420c390055eb'
+  websiteContributor: 'de139f84-1756-47ae-9be6-808fbbe84772'
+  storageQueueDataReader: '19e7f393-937e-4f77-808e-94535e297925'
+  storageQueueDataMessageProcessor: '8a0f0c08-91a1-4084-bc3d-661d67233fed'
+  storageQueueDataMessageSender: 'c6a89b2d-59bc-44d0-9896-0f6e12d7b80a'
 }
 
 resource foundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
@@ -158,16 +180,154 @@ resource projectFoundryUser 'Microsoft.Authorization/roleAssignments@2022-04-01'
   }
 }
 
-// --- Rows 7, 8, 12: DEFERRED ----------------------------------------------
-// Not omissions. A role assignment needs its scope resource to exist, and
-// these three point at resources M11 creates:
-//   row 7  -> stiipdevwus02 (Function host storage)
-//   row 8  -> appi-iip-dev-wus-01 (Application Insights)
-//   row 12 -> func-iip-dev-wus-01 (the Function app)
-// id-iip-dev-wus-02 is created in M9 so row 12 is a one-line addition later.
+// =============================================================================
+// M11 rows (2026-09-24, Claude). Rows 7, 8 and 12 were deferred from M9 because
+// their scopes did not exist yet; rows 14-16 come from D-M11-1 (b).
+// =============================================================================
+
+resource hostStorage 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
+  name: hostStorageAccountName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: appInsightsName
+}
+
+resource functionApp 'Microsoft.Web/sites@2024-04-01' existing = {
+  name: functionAppName
+}
+
+resource queueService 'Microsoft.Storage/storageAccounts/queueServices@2023-05-01' existing = {
+  parent: storage
+  name: 'default'
+}
+
+resource uploadEventsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-05-01' existing = {
+  parent: queueService
+  name: uploadEventsQueueName
+}
+
+resource uploadEventsPoisonQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-05-01' existing = {
+  parent: queueService
+  name: uploadEventsPoisonQueueName
+}
+
+// --- Row 7: Function identity -> host storage --------------------------------
+// Amended 2026-09-24: Microsoft's AzureWebJobsStorage minimum is Blob Data Owner,
+// plus Table Data Contributor so the host can write diagnostic events. Storage
+// Queue Data Contributor and Storage Account Contributor are NOT assigned: both
+// were blob-trigger requirements, and D-M11-1 (b) has no blob trigger.
+// VERIFY at first light: add Queue Data Contributor only if the host asks.
+resource functionHostBlobOwner 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: hostStorage
+  name: guid(hostStorage.id, functionIdentityPrincipalId, roleIds.storageBlobDataOwner)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageBlobDataOwner)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource functionHostTableContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: hostStorage
+  name: guid(hostStorage.id, functionIdentityPrincipalId, roleIds.storageTableDataContributor)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageTableDataContributor)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 8: Function identity -> App Insights, Monitoring Metrics Publisher ---
+resource functionAppInsightsPublisher 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: appInsights
+  name: guid(appInsights.id, functionIdentityPrincipalId, roleIds.monitoringMetricsPublisher)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.monitoringMetricsPublisher)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 12: CI/CD identity -> Function app, Website Contributor -------------
+// Used by M14's GitHub Actions deploy over OIDC. Assigned now because its scope
+// exists now. It grants nothing until a federated credential trusts GitHub.
+resource cicdWebsiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: functionApp
+  name: guid(functionApp.id, cicdIdentityPrincipalId, roleIds.websiteContributor)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.websiteContributor)
+    principalId: cicdIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 14: system topic (SYSTEM-assigned) -> stiipdevwus01, Message Sender --
+// ACCOUNT scope, not queue scope. Changed 2026-09-24 (Gerard's decision) after
+// the first deploy failed three times over ~20 minutes with "Managed Identity
+// Authorization Error ... does not have authorization to deliver to the
+// endpoint", while a queue-scoped Message Sender assignment for this exact
+// principal existed (confirmed with `az role assignment list`). Leading
+// explanation: Event Grid validates the identity at subscription CREATION
+// against the destination's `resourceId`, which is the STORAGE ACCOUNT (the
+// queue is only named in `queueName`). Microsoft Learn's steps for this setup
+// say the role goes "on the storage account". CONFIRMED the same day: the
+// redeploy with this account-scoped grant succeeded on its first attempt,
+// and the orphaned queue-scoped grant was then deleted by hand. Cost:
+// the topic can ADD messages to any queue on this account (today: our two);
+// it cannot read or delete them.
+resource topicQueueSender 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: storage
+  name: guid(storage.id, systemTopicPrincipalId, roleIds.storageQueueDataMessageSender)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataMessageSender)
+    principalId: systemTopicPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 15: Function identity -> upload-events, Reader + Message Processor --
+// The queue trigger's documented minimum (Microsoft Learn, "Configure
+// connections... Grant permissions to an identity"). Scoped to ONE queue.
+resource functionQueueReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: uploadEventsQueue
+  name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataReader)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataReader)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource functionQueueProcessor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: uploadEventsQueue
+  name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataMessageProcessor)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataMessageProcessor)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 16: Function identity -> upload-events-poison, Message Sender -------
+// The runtime ADDS a message to <queue>-poison after maxDequeueCount failures,
+// and row 15's roles cannot add. Microsoft's role table has no footnote for this.
+// VERIFY by forcing failures once deployed.
+resource functionPoisonSender 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: uploadEventsPoisonQueue
+  name: guid(uploadEventsPoisonQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataMessageSender)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataMessageSender)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// --- Row 13 (Gerard, Storage Blob Delegator): pre-existing, NOT declared, like
+// row 3. Row 17 (id-iip-dev-wus-03) holds no Azure RBAC by design.
 //
 // Rows 10 and 11 are Entra ID app assignment and a Conditional Access test
 // user -- not Azure RBAC at all, and not expressible here. Row 1 is Gerard's
 // existing subscription Owner, a documented single-admin exception (D1).
 
-output declaredAssignmentCount int = 5
+output declaredAssignmentCount int = 13

@@ -82,6 +82,22 @@ class Skipped(Exception):
     """An event this Function deliberately doesn't process. Not an error."""
 
 
+def decode_message(body: str) -> tuple[dict, str]:
+    """parse_event(), plus which encoding the message actually arrived in.
+
+    Recorded in every result as upload.message_encoding, so the VERIFY in
+    host.json ("plain or base64?") is settled by evidence rather than by
+    reading documentation.
+    """
+    text = body.strip()
+    try:
+        json.loads(text)
+        encoding = "plain-json"
+    except json.JSONDecodeError:
+        encoding = "base64-json"
+    return parse_event(body), encoding
+
+
 def parse_event(body: str) -> dict:
     """Decode one queue message into one Event Grid event.
 
@@ -138,7 +154,7 @@ def process(body: str, dequeue_count: int | None = None) -> dict:
     from azure.storage.blob import BlobServiceClient
 
     try:
-        event = parse_event(body)
+        event, message_encoding = decode_message(body)
         account_url, container, blob_name = blob_from_event(event)
     except Skipped as why:
         return {"status": "skipped", "reason": str(why)}
@@ -155,6 +171,7 @@ def process(body: str, dequeue_count: int | None = None) -> dict:
         "event_id": event.get("id"),
         "event_time": event.get("eventTime") or event.get("time"),
         "dequeue_count": dequeue_count,
+        "message_encoding": message_encoding,
     }
 
     blob = service.get_blob_client(container, blob_name)
@@ -183,9 +200,10 @@ def process(body: str, dequeue_count: int | None = None) -> dict:
         provenance["host"] = {
             "site_name": os.environ.get("WEBSITE_SITE_NAME"),
             "instance_id": os.environ.get("WEBSITE_INSTANCE_ID"),
-            "note": ("git fields describe the build tree when run on a laptop, "
-                     "and are expected to be errors inside the Function, which "
-                     "has no git. Deployed-package provenance is an M11 follow-up."),
+            "note": ("git fields describe the build tree when run on a laptop. "
+                     "Inside the Function there is no git, and they read None "
+                     "(unknown), never False (clean). Deployed-package provenance "
+                     "is an M11 follow-up."),
         }
 
         client = orch.build_client()

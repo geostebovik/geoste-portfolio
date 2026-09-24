@@ -101,14 +101,19 @@ decided so far.
    optional, and `None` means not scored.
    Committed at `b713df9`. **(a) Done:** `function/requirements.txt` is fully
    pinned to Gerard's venv freeze, plus `azure-functions` 2.3.0 and `werkzeug`,
-   which are new and unmeasured. **Next, (b):** upload one fixture with `topic`
-   metadata and run `python local_run.py <name>`, the first live pass of the
-   handler.
-3. **M11 Bicep:** price it with the calculator first (`m11-prep.md` "Cost,
-   sized"), then declare the Flex plan, `func-iip-dev-wus-01`, host storage
-   `stiipdevwus02`, App Insights and Log Analytics, `id-iip-dev-wus-03`, the
-   `upload-events` and `upload-events-poison` queues, and the system topic
-   with a **system-assigned** identity; RBAC rows 7, 8, 12 and 14–16.
+   which are new and unmeasured (`577bad3`). **(b) Done:** first live pass of
+   the handler on the laptop, item4 with `topic` metadata — audit matched
+   item4's key by eye, text passed first draft, result written to `results`
+   (see `m11-prep.md`). Queue, encoding and managed identity still unproven.
+3. **M11 pass 1 (upload -> result): DEPLOYED AND WORKING END TO END, 2026-09-24.**
+   Claude wrote the Bicep and code; Gerard ran every command. One fix on the
+   way: row 14 had to be ACCOUNT-scoped (Event Grid checks the account when it
+   creates a subscription). First light: item4 upload -> Function result in
+   46 s, audit matching item4's key, text passed first draft (see `m11-prep.md`).
+   **Next:** commit; redeploy the code with the provenance fix and the encoding
+   record, and re-run one upload; then row 8 (telemetry) and row 16 (poison);
+   then **pass 2, sign-in** (app registration, built-in auth,
+   `id-iip-dev-wus-03` federated credential, viewers group).
 4. **End of day, before wrap-up (Gerard, 2026-09-24):** split the pre-Sep 17
    session log out of this file into `STATUS-archive-m7.md`, like the Sep 6
    Phase 1 split.
