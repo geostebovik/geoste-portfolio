@@ -63,6 +63,60 @@ var roleIds = {
   storageQueueDataMessageSender: 'c6a89b2d-59bc-44d0-9896-0f6e12d7b80a'
 }
 
+// --- Custom role: IIP Queue Trigger (dev) -- added 2026-09-25 ---------------
+// Written by Claude. Decisions Gerard's, 2026-09-25: a custom role (option a),
+// ending as ONE role that replaces row 15's two built-ins, reached in two
+// stages so each test changes one thing.
+//   STAGE 1 (this deploy): messages/write only, ALONGSIDE the built-ins.
+//     Test proves messages/write fixes the retry.
+//     [DEPLOYED m11-row15-stage1-20260925; PROVEN 2026-09-25 21:00Z: no 403,
+//     retry about 100 s after the failure. It still 403'd 65 min after the
+//     assignment was created. For stage 2: expand the role FIRST, confirm it's
+//     effective, and only THEN delete the built-ins, or the trigger could lose
+//     read/process for as long as propagation takes.]
+//   STAGE 2 (next): expand THIS role in place (same GUID, so the assignment
+//     doesn't move) to the union -- Reader's queues/read (Get Queue Metadata)
+//     + messages/read + messages/process/action + messages/write. Remove the
+//     built-ins from this file AND delete their assignments by hand
+//     (Incremental mode never deletes). Test proves the role works alone.
+//
+// WHY IT EXISTS: row 15's documented minimum (Reader + Message Processor) can't
+// call Update Message. Found by forcing failures for row 16: after try 1 failed,
+// the host's Update Message (which applies host.json visibilityTimeout, 1 min)
+// got 403 AuthorizationPermissionMismatch, and try 2 came 10 min later -- the
+// visibility the message was retrieved with. The queue listener also renews
+// visibility every 5 min during a run with the same call, so without this a run
+// longer than ~10 min would reappear and could be processed twice.
+//
+// WHY ONLY THIS ACTION: Microsoft's permissions table maps Update Message to
+// messages/write and nothing else. Honest cost: messages/write ALSO satisfies
+// Put Message, so the Function can add messages to upload-events. No narrower
+// action exists. Storage Queue Data Contributor (option b) would have added
+// messages/delete plus ARM queues/delete and queues/write on top.
+//
+// assignableScopes = this resource group only.
+resource queueTriggerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' = {
+  name: guid(resourceGroup().id, 'iip-queue-trigger')
+  properties: {
+    roleName: 'IIP Queue Trigger (dev)'
+    description: 'What the IIP Function queue trigger needs on upload-events. Stage 1 of 2 (2026-09-25): Update Message only, so the host can apply visibilityTimeout and renew visibility. rg-iip-dev-wus-01 only.'
+    type: 'CustomRole'
+    permissions: [
+      {
+        actions: []
+        notActions: []
+        dataActions: [
+          'Microsoft.Storage/storageAccounts/queueServices/queues/messages/write'
+        ]
+        notDataActions: []
+      }
+    ]
+    assignableScopes: [
+      resourceGroup().id
+    ]
+  }
+}
+
 resource foundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: foundryAccountName
 }
@@ -289,6 +343,8 @@ resource topicQueueSender 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 // --- Row 15: Function identity -> upload-events, Reader + Message Processor --
 // The queue trigger's documented minimum (Microsoft Learn, "Configure
 // connections... Grant permissions to an identity"). Scoped to ONE queue.
+// [2026-09-25: NOT enough. The minimum can't call Update Message. The custom
+// role IIP Queue Trigger is assigned below; stage 2 retires these two.]
 resource functionQueueReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: uploadEventsQueue
   name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataReader)
@@ -304,6 +360,17 @@ resource functionQueueProcessor 'Microsoft.Authorization/roleAssignments@2022-04
   name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataMessageProcessor)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataMessageProcessor)
+    principalId: functionIdentityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Row 15, custom role (2026-09-25): IIP Queue Trigger, stage 1. See its comment.
+resource functionQueueTrigger 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: uploadEventsQueue
+  name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, queueTriggerRole.name)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', queueTriggerRole.name)
     principalId: functionIdentityPrincipalId
     principalType: 'ServicePrincipal'
   }
