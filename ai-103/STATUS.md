@@ -124,7 +124,7 @@ defect was found and fixed (stage 1). See the Sep 25 session entry.
      section 4 change.
 6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
-   `.gitignore`; the token-undercount backlog item (Friday check-in).
+   `.gitignore`; the token-undercount backlog item (Todoist).
 
 **Settled — do not reopen:**
 - The `listKeys` calls are VS Code's.
