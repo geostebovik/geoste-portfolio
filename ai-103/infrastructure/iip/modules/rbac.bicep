@@ -74,7 +74,13 @@ var roleIds = {
 //     assignment was created. For stage 2: expand the role FIRST, confirm it's
 //     effective, and only THEN delete the built-ins, or the trigger could lose
 //     read/process for as long as propagation takes.]
-//   STAGE 2 (next): expand THIS role in place (same GUID, so the assignment
+//   STAGE 2a (deployed 2026-09-25, end of session): the role expanded in place
+//     to the union below. The built-ins are still assigned, so no functional
+//     change. The propagation wait runs over the weekend.
+//   STAGE 2b (next session): confirm the expanded role is effective, then
+//     remove functionQueueReader/functionQueueProcessor from this file AND
+//     delete their assignments by hand, then re-test.
+//   STAGE 2 as first planned: expand THIS role in place (same GUID, so the assignment
 //     doesn't move) to the union -- Reader's queues/read (Get Queue Metadata)
 //     + messages/read + messages/process/action + messages/write. Remove the
 //     built-ins from this file AND delete their assignments by hand
@@ -99,13 +105,19 @@ resource queueTriggerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' =
   name: guid(resourceGroup().id, 'iip-queue-trigger')
   properties: {
     roleName: 'IIP Queue Trigger (dev)'
-    description: 'What the IIP Function queue trigger needs on upload-events. Stage 1 of 2 (2026-09-25): Update Message only, so the host can apply visibilityTimeout and renew visibility. rg-iip-dev-wus-01 only.'
+    description: 'What the IIP Function queue trigger needs on upload-events: queue metadata, peek, get/delete, and Update Message (visibilityTimeout and renewal). Replaces Storage Queue Data Reader + Message Processor. rg-iip-dev-wus-01 only.'
     type: 'CustomRole'
     permissions: [
       {
-        actions: []
+        // STAGE 2a (2026-09-25): the union of row 15's two built-ins + write.
+        // queues/read is Reader's ACTION -- Get Queue Metadata (message count).
+        actions: [
+          'Microsoft.Storage/storageAccounts/queueServices/queues/read'
+        ]
         notActions: []
         dataActions: [
+          'Microsoft.Storage/storageAccounts/queueServices/queues/messages/read'
+          'Microsoft.Storage/storageAccounts/queueServices/queues/messages/process/action'
           'Microsoft.Storage/storageAccounts/queueServices/queues/messages/write'
         ]
         notDataActions: []
