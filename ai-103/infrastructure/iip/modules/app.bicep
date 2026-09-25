@@ -78,9 +78,25 @@ resource hostStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
   resource blobService 'blobServices' = {
     name: 'default'
+    // Declared as found (2026-09-25): the first what-if after the M11 deploy
+    // showed '- deleteRetentionPolicy' here. It's writable, the same class as
+    // stiipdevwus01's fix (storage.bicep), so it's declared rather than accepted.
+    // Soft delete is OFF on host storage, as found.
+    properties: {
+      deleteRetentionPolicy: {
+        enabled: false
+        allowPermanentDelete: false
+      }
+    }
     resource deploymentContainer 'containers' = {
       name: deploymentContainerName
-      properties: { publicAccess: 'None' }
+      // Encryption-scope pair declared as found (2026-09-25), same reason and
+      // same values as the uploads/results containers in storage.bicep.
+      properties: {
+        publicAccess: 'None'
+        defaultEncryptionScope: '$account-encryption-key'
+        denyEncryptionScopeOverride: false
+      }
     }
   }
 }

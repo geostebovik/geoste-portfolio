@@ -32,6 +32,12 @@ appearing in a future run is a real change and should be treated as one.
 | `srch-iip-dev-wus-01` | ~~`+ tags.managed-by`~~ | **Applied 2026-09-21** by the M9 deployment. No longer expected; if it reappears, something removed the tag. |
 | `stiipdevwus01/blobServices/default` | `- properties.deleteRetentionPolicy` | **Fixed, not accepted.** M9 declared `blobServices/default` with no properties, and `deleteRetentionPolicy` is writable — the same class of real diff as `defaultProject` in M8. Now declared as found (`enabled: false`). Should not reappear. **It partly did, 2026-09-24:** `- deleteRetentionPolicy.allowPermanentDelete: false`. That sub-property is writable too, so it's now declared as found. The record can't tell whether it was there after M9's deploy or appeared later. |
 | `stiipdevwus01/.../containers/uploads`, `/results` | `- properties.defaultEncryptionScope`, `.denyEncryptionScopeOverride` | **Fixed, not accepted (2026-09-24).** Both are writable in the provider schema, and M9 declared the containers with only `publicAccess`. Now declared as found (`$account-encryption-key`, `false`). Should not reappear. |
+| `appi-iip-dev-wus-01` | `+ properties.Flow_Type: "Bluefield"`, `+ properties.Request_Source: "rest"` | **Registered 2026-09-25** (first what-if after the M11 deploy). Not in the template, which sets only `Application_Type`, and not returned on read. The provider fills them in when it normalizes the request, so no template can make the diff go away. |
+| `func-iip-dev-wus-01` | `+ siteConfig.localMySqlEnabled`, `+ siteConfig.minTlsVersion`, `+ siteConfig.netFrameworkVersion` | **Registered 2026-09-25.** A read-back gap: Flex doesn't return these on GET, so what-if always shows them as additions. The M11 deploy already sent the same template. |
+| `func-iip-dev-wus-01` | `~ functionAppConfig.deployment.storage.value` | **Registered 2026-09-25.** The live value is the literal URL. The template's is `format(reference(stiipdevwus02).primaryEndpoints.blob, …)`, which what-if can't evaluate. It resolves to the same URL. |
+| `func-iip-dev-wus-01/config/appsettings` | `+ properties` (the whole block) | **Registered 2026-09-25.** What-if can't read app settings (it would expose secrets), so the full block always shows as `+`. It carries no information. **Check app settings with `az functionapp config appsettings list`, never with what-if.** |
+| `stiipdevwus02/blobServices/default` | ~~`- deleteRetentionPolicy`~~ | **Fixed, not accepted (2026-09-25).** Writable, the same class as `stiipdevwus01`'s. Declared as found in `app.bicep` (`enabled: false`, `allowPermanentDelete: false`). Should not reappear. |
+| `stiipdevwus02/.../containers/app-package-func-iip-dev-wus-01` | ~~`- defaultEncryptionScope`, `- denyEncryptionScopeOverride`~~ | **Fixed, not accepted (2026-09-25).** Declared as found in `app.bicep`, with the same values as `uploads`/`results`. Should not reappear. |
 
 Storage also shows `x properties.encryption.services` (Noeffect). That symbol
 means ARM accepts the property and it changes nothing. The resource itself
@@ -49,6 +55,13 @@ reports `=` No change.
   `az role assignment list` check, not on what-if.
 - An empty `Scope: /` header and the Bicep "new release available" warning.
   Neither is a resource diff.
+- **Added 2026-09-25:** `x sku.tier: "FlexConsumption"` on `asp-iip-dev-wus-01`
+  (Noeffect), and **2 "to ignore"** (`*`): the Smart Detection alert rule and
+  action group that App Insights creates for itself. Neither is in the template.
+- **Unsupported diagnostics are 13 as of 2026-09-25:** rows 4, 5, 6, 9, 7×2, 8,
+  12, 14, 15×2, 16, plus the custom-role assignment on `upload-events` (row 15,
+  stage 1). Stage 2b removes two of these (row 15's built-ins), which brings it
+  to 11.
 
 ## How the register was built, and why it matters
 

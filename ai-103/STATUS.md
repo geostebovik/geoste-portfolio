@@ -87,22 +87,25 @@ Updated 2026-09-25, end of session, at the HEAD this entry's commit creates.
 M11 is the working milestone. Row 16 is verified. Row 15's failure-path
 defect was found and fixed (stage 1). See the Sep 25 session entry.
 
-1. **Row 15 stage 2 (about 45 min, plus a long wait).** Expand **IIP Queue
-   Trigger (dev)** in `modules/rbac.bicep` to Action `queues/read` + dataActions
-   `messages/read`, `messages/process/action` and `messages/write`, which is the
-   union of the two built-ins and the custom role. Then remove
-   `functionQueueReader`/`functionQueueProcessor` from the Bicep. **ORDER MATTERS:**
-   deploy the expanded role first and **confirm it's effective** (the stage 1
-   assignment took 65+ min). Only then delete the two built-in assignments by
-   hand (Incremental mode never deletes), or the trigger may lose read/process
-   for as long as propagation takes. Re-test with the confirmed-pause method
-   (`m11-prep.md`, row 16 caveat). Also check that scale-from-zero still works:
-   `queues/read` is Get Queue Metadata.
-2. **`what-if` register (about 30 min).** The Sep 25 what-if showed 8
-   unregistered diffs (listed in the Sep 25 entry). Register the read-back gaps.
-   Declare `stiipdevwus02/blobServices/default` `deleteRetentionPolicy` and the
-   `app-package-…` container's encryption-scope properties as found, in their
-   own change. Unsupported diagnostics are now **13** (12 + the stage 1 assignment).
+1. **Row 15 stage 2b (about 30 min).** Stage 2a is **deployed**
+   (`m11-row15-stage2a-20260925`, Sep 25 14:33 local). **IIP Queue Trigger
+   (dev)** now holds Action `queues/read` + `messages/read`,
+   `messages/process/action` and `messages/write`. The built-ins are still
+   assigned, so there's been no functional change. By next session the
+   expanded role will have had days to take effect (stage 1 needed 65-110 min),
+   so the weekend *is* the confirmation wait. Then:
+   - remove `functionQueueReader`/`functionQueueProcessor` from `rbac.bicep`;
+   - what-if (Unsupported 13 → 11) and deploy;
+   - **delete the two built-in assignments by hand** (Incremental never deletes);
+   - wait ~30 min, then re-test with the confirmed-pause method (`m11-prep.md`,
+     row 16 caveat): no 403, retry ~1-2 min;
+   - check scale-from-zero with one normal upload (`queues/read` = Get Queue
+     Metadata);
+   - update RBAC row 15 to the one custom role.
+2. ~~`what-if` register~~ **Done Sep 25, end of session.** Six rows were
+   registered in `infrastructure/iip/README.md` (four accepted read-back gaps,
+   two fixed), and `stiipdevwus02`'s two writable properties were declared as
+   found in `app.bicep`. The next what-if matched the register exactly.
 3. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
    (dev)**, the viewers group, built-in authentication on
    `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
@@ -530,6 +533,19 @@ from today's change:
 - the `app-package-…` container `-defaultEncryptionScope`/`-denyEncryptionScopeOverride`.
 
 The last two are the writable class, to be declared as found. Next action, item 2.
+
+**After the wrap-up (14:20-14:35), two more changes (Gerard's choice):**
+- **Stage 2a deployed** (`m11-row15-stage2a-20260925`): the custom role expanded
+  in place to the full queue-trigger set, with the built-ins still assigned.
+  It was deployed now so the propagation wait happens over the weekend.
+- **The `what-if` register caught up.** Six rows were added (appi `Flow_Type`/
+  `Request_Source`; func `siteConfig` ×3; func `deployment.storage.value`;
+  func `appsettings`; and two fixed rows), and `stiipdevwus02`'s
+  `deleteRetentionPolicy` and the package container's encryption-scope pair
+  were declared as found. The what-if before the deploy **matched the
+  register exactly**: 7 modify (the role definition + 6 registered), 13
+  Unsupported, 2 to ignore, and both `stiipdevwus02` entries now `=`.
+  Gerard reviewed it first; Claude checked it line by line.
 
 **Cleaned up:** the temporary Contributor on the Function (removed ~20:08Z);
 Gerard's temporary Message Processor and custom role on the poison queue.
