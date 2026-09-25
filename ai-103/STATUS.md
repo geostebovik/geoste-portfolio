@@ -82,33 +82,44 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: prove row 16 (the poison path), then start M11 pass 2, sign-in.**
-Updated 2026-09-24, end of session, at the HEAD this entry's commit creates. M11
-is the working milestone. Pass 1 (upload → result) is deployed, and it has
-worked twice in Azure. `m11-prep.md`'s results box has everything measured so far.
+**Next action: row 15 stage 2 (one custom role), then M11 pass 2, sign-in.**
+Updated 2026-09-25, end of session, at the HEAD this entry's commit creates.
+M11 is the working milestone. Row 16 is verified. Row 15's failure-path
+defect was found and fixed (stage 1). See the Sep 25 session entry.
 
-1. **Row 16, the poison path (about 20-30 min).** Force two failures and confirm
-   the message lands in `upload-events-poison`. The easy failures don't raise:
-   a missing topic writes an error result, and tool errors go back to the agent.
-   So this needs a deliberate design. Options: (a) a test-only environment switch
-   that makes `process()` raise; (b) a hand-crafted message naming a blob that
-   doesn't exist, which needs Gerard to hold a queue *data* role he doesn't
-   have today. Decide first, then run.
-2. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
+1. **Row 15 stage 2 (about 45 min, plus a long wait).** Expand **IIP Queue
+   Trigger (dev)** in `modules/rbac.bicep` to Action `queues/read` + dataActions
+   `messages/read`, `messages/process/action` and `messages/write`, which is the
+   union of the two built-ins and the custom role. Then remove
+   `functionQueueReader`/`functionQueueProcessor` from the Bicep. **ORDER MATTERS:**
+   deploy the expanded role first and **confirm it's effective** (the stage 1
+   assignment took 65+ min). Only then delete the two built-in assignments by
+   hand (Incremental mode never deletes), or the trigger may lose read/process
+   for as long as propagation takes. Re-test with the confirmed-pause method
+   (`m11-prep.md`, row 16 caveat). Also check that scale-from-zero still works:
+   `queues/read` is Get Queue Metadata.
+2. **`what-if` register (about 30 min).** The Sep 25 what-if showed 8
+   unregistered diffs (listed in the Sep 25 entry). Register the read-back gaps.
+   Declare `stiipdevwus02/blobServices/default` `deleteRetentionPolicy` and the
+   `app-package-…` container's encryption-scope properties as found, in their
+   own change. Unsupported diagnostics are now **13** (12 + the stage 1 assignment).
+3. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
    (dev)**, the viewers group, built-in authentication on
    `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
    (D-M11-2 (b), row 17); plus an HTTP function for the results page. M11's
    done-when needs "a group member can sign in and see it".
-3. **Small follow-ups from pass 1:**
+4. **Small follow-ups from pass 1:**
    - deployed-package provenance (the Function records no git; record the
      package or deployment instead);
-   - add the 8 new "Unsupported" diagnostics to the `what-if` register;
-   - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field.
-4. **Gerard's steps:** add `m11-prep.md`, `phase2-rbac-model-draft.md` and
-   `function/` to the project instructions' Key files, and the M9/M11 resources
-   to its resource list. If `m7-writeup-draft.md` is already with outside
-   readers, send them the Sep 23 section 4 change.
-5. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
+   - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field;
+   - the Azure SDK's HTTP logging fills `AppTraces` at Information on every call,
+     so trim it.
+5. **Gerard's steps:**
+   - add the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`) and RBAC
+     row 18 to the project instructions' resource notes;
+   - if `m7-writeup-draft.md` is with outside readers, send them the Sep 23
+     section 4 change.
+6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
    `.gitignore`; the token-undercount backlog item (Friday check-in).
 
@@ -123,6 +134,11 @@ worked twice in Azure. `m11-prep.md`'s results box has everything measured so fa
 - `versionUpgradeOption` = `OnceCurrentVersionExpired`.
 - One agent per upload; topic as blob metadata.
 - Event Grid writes base64 JSON to the queue.
+- **Row 16 works** (poison after `maxDequeueCount` 2; verified 2026-09-25).
+- **Update Message needs `messages/write`**, which neither built-in in row 15
+  has. Proven by a probe and a negative control, 2026-09-25.
+- **Row 15's final shape: one custom role** (Gerard, 2026-09-25), not the
+  built-in Contributor.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with Phase 2 and the two stale site lines.
@@ -440,6 +456,85 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 25, 2026 — row 16 verified; row 15's failure path found broken and fixed
+
+**Claude wrote every doc edit and the Bicep in this entry, and did the analysis
+and test design, except where a design is credited to Gerard below. Gerard
+made every decision named below, ran every Azure CLI command and deployment,
+and caught two of the problems himself: the what-if's unregistered diffs, and
+the empty peek before R2.** Two app-side disconnects before 10:15 lost the
+first run's questions and answers. The session restarted from the handoff, and
+decisions were asked in plain text from then on. Claude kept running notes in
+`Claude outputs/2026-09-25-session-notes.md` (gitignored).
+
+**Housekeeping.** The VS Code "Initialize Azure Functions project" prompt
+appeared because `40f9199` added `function/host.json`. Gerard dismissed it;
+`.vscode/` is gitignored, and initializing would add a second, untested deploy
+path. The previous entry's step 4 (project-instruction key files) was already
+done.
+
+**Row 16 verified.** The method is Gerard's upload-then-delete idea. Claude
+added pausing the Function (`AzureWebJobs.process_upload.Disabled`), which
+removes the race. A real Event Grid message named a deleted blob, and
+`get_blob_properties()` raised on both tries. The host logged the move to
+`upload-events-poison`, and the message was peeked there. Two tries, not the
+row's "five": five is the runtime default, and `host.json` says 2. The test
+needed **row 18** (Gerard: Storage Queue Data Reader on both queues, CLI, not in
+Bicep; kept as an operator role). Model cost $0 throughout. **Method caveat:**
+confirm the pause with `appsettings list` about 2 min before uploading. One
+re-test didn't, and was voided.
+
+**Found: a failed message couldn't be released.** Failed tries retried after
+**10 min, not 1**, each time with a 403 `AuthorizationPermissionMismatch` from the
+queue service. The stack trace (`QueueProcessor.ReleaseMessageAsync` →
+`QueueClient.UpdateMessageAsync`) identified Update Message. Microsoft's
+permissions table maps it to `messages/write`, which row 15's documented
+minimum (Reader + Message Processor) lacks. There's a latent risk too: the
+listener renews visibility every 5 min during a run with the same call, so a
+run over ~10 min could be processed twice.
+
+**The fix, and a detour.** Gerard chose a custom role (option a) over the
+built-in Contributor, ending as one role reached in two stages ("A then R",
+his reasoning: cleaner, one point of change). Stage 1, **IIP Queue Trigger
+(dev)** with `messages/write` only, was deployed as
+`m11-row15-stage1-20260925`. The re-test **still got 403, 65 min after
+assignment.** A temporary built-in Contributor fixed it within ~20 min, which
+pointed at the custom role. A probe on Gerard's own identity (poison queue,
+`az storage message get`/`update`) showed the custom role **works**: update
+allowed with it, refused without it (a negative control, run in plain text at
+Gerard's option 1). With Contributor removed, the Function passed at 20:14Z
+(inconclusive: only 6 min after the removal) and **cleanly at 21:00:28Z: no 403,
+retry at +100 s.** **The 65-min delay is open:** a slow custom-role assignment
+for a managed identity, or a permission refresh triggered by the Contributor
+add and remove. It's recorded both ways; not claimed either way.
+
+**Claude's errors today, for the record:**
+- Called row 8 "unproven"; it was confirmed on Sep 24, and today's check was a
+  re-check.
+- Two "Expected" outputs were wrong (`role assignment create` doesn't return
+  the role name; `appsettings set` hides values).
+- The first 403 diagnosis was right about *what*, but the fix had to be proven.
+- Probe P0 had no negative control until N1.
+- One verdict query started after try 1, and missed it.
+- The upload came too soon after a pause (the voided run).
+
+**What-if, first since the M11 deploy.** The stage 1 what-if showed the create
+and 13 Unsupported, as expected. It also showed **8 unregistered diffs**, none
+from today's change:
+- `appi-…` `+Flow_Type`/`+Request_Source`;
+- `func-…` `+siteConfig` ×3, and `~deployment.storage.value` (literal vs
+  `reference()`);
+- `func-…/config/appsettings` `+` block;
+- `stiipdevwus02/blobServices/default` `-deleteRetentionPolicy`;
+- the `app-package-…` container `-defaultEncryptionScope`/`-denyEncryptionScopeOverride`.
+
+The last two are the writable class, to be declared as found. Next action, item 2.
+
+**Cleaned up:** the temporary Contributor on the Function (removed ~20:08Z);
+Gerard's temporary Message Processor and custom role on the poison queue.
+**Left in place:** 6 test messages in `upload-events-poison` (17:41:38Z to
+21:02:08Z), which expire 2026-10-02; one "missing topic" result, `results/row16-retest5/20260925T203810Z.json`.
 
 ### Session — September 24, 2026 — housecleaning, then M11 pass 1 built, deployed and working end to end
 

@@ -92,9 +92,10 @@ that doesn't exist.
 | 12 | CI/CD identity `id-iip-dev-wus-02` (D6: in scope) | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
 | 13 | Gerard | `stiipdevwus01` | Storage Blob Delegator *(existing; not in Bicep, like row 3)* | `m3_analyze.py --blob` signs its 30-minute read-only SAS with a user delegation key (M3 keyless migration, `fcc55b6`, decision (A)). Load-bearing since 2026-09-23. *(Promoted from the M9 build-time note, 2026-09-24.)* |
 | 14 | Event Grid system topic `egst-iip-dev-wus-01` — **system-assigned** identity | `stiipdevwus01` **(account)** — *was queue `upload-events`; widened 2026-09-24, Gerard: the queue-scoped grant made the event subscription's create-time validation fail 3/3 over ~20 min ("Managed Identity Authorization Error"). The check appears to run against the destination `resourceId`, which is the account; Microsoft Learn's steps say "on the storage account". **Confirmed:** the account-scoped redeploy succeeded first time (deployment `m11-app-pass1-20260924`), and the orphaned queue-scoped grant was then deleted. Cost: the topic can add messages to any queue on the account (today two); no read or delete.* | Storage Queue Data Message Sender | D-M11-1 (b): delivers `BlobCreated` events to the queue with its own identity (`deliveryWithResourceIdentity`); no webhook, no key. **Must be system-assigned:** once the account has a firewall or network rule (M12), Event Grid can deliver to a queue only with a system-assigned identity plus *Allow Azure services on the trusted service list*. A user-assigned identity isn't supported there at all (Microsoft Learn, Event Grid storage-queue handler). Account-scoped (see Scope). |
-| 15 | Function identity `id-iip-dev-wus-01` | `stiipdevwus01` / queue `upload-events` | Storage Queue Data Reader, Storage Queue Data Message Processor | The queue trigger's documented minimum (Microsoft Learn, *Configure connections … Grant permissions to an identity*). Queue-scoped, not account-scoped (Gerard, 2026-09-24: the queue lives on the app data account, so these roles cover this one queue only). |
-| 16 | Function identity | `stiipdevwus01` / queue `upload-events-poison` | Storage Queue Data Message Sender | After 5 failed attempts the runtime **adds** the message to `<queue>-poison`. Row 15's roles can't add messages, and Microsoft's table has no footnote for this (the blob trigger's row does). The poison queue is **declared in Bicep** so the runtime never needs create-queue rights (Gerard, 2026-09-24). **VERIFY** at M11 by forcing five failures and confirming the message lands in the poison queue. |
+| 15 | Function identity `id-iip-dev-wus-01` | `stiipdevwus01` / queue `upload-events` | Storage Queue Data Reader, Storage Queue Data Message Processor, **IIP Queue Trigger (dev)** *(custom role: `messages/write` only; added 2026-09-25)* | The queue trigger's documented minimum (Microsoft Learn, *Configure connections … Grant permissions to an identity*). Queue-scoped, not account-scoped (Gerard, 2026-09-24: the queue lives on the app data account, so these roles cover this one queue only). **[2026-09-25: the documented minimum is not enough.** It can't call Update Message, so a failed message can't be released and `visibilityTimeout` never applies. Fixed with the custom role, deployed as `m11-row15-stage1-20260925`. Decisions (Gerard): a custom role, not the built-in Contributor, which would add Clear Messages plus ARM queue delete and write; and ending as ONE custom role, reached in two stages so each test changes one thing. Stage 2, folding Reader and Processor into it, is next. See the First-light findings.**]** |
+| 16 | Function identity | `stiipdevwus01` / queue `upload-events-poison` | Storage Queue Data Message Sender | After 5 failed attempts the runtime **adds** the message to `<queue>-poison`. Row 15's roles can't add messages, and Microsoft's table has no footnote for this (the blob trigger's row does). The poison queue is **declared in Bicep** so the runtime never needs create-queue rights (Gerard, 2026-09-24). **VERIFY** at M11 by forcing five failures and confirming the message lands in the poison queue. **[VERIFIED 2026-09-25.** Two failures, not five: five is the runtime default, and `host.json` sets `maxDequeueCount` to 2. Method: Gerard's upload-then-delete approach, made deterministic by pausing the Function (`AzureWebJobs.process_upload.Disabled`) until the blob was gone, so a real Event Grid message named a missing blob and `get_blob_properties()` raised on both tries. The host logged *"Message has reached MaxDequeueCount of 2. Moving message to queue 'upload-events-poison'"* (17:41:38Z), and the message was peeked in the poison queue under row 18. Repeated at 19:04:35Z. Model cost $0. **Found along the way:** row 15 can't release a failed message; see the First-light findings.**]** |
 | 17 | Sign-in identity `id-iip-dev-wus-03` | — | **None (no Azure RBAC)** | D-M11-2 (b): attached to `func-iip-dev-wus-01` as a user-assigned identity, and trusted by a **federated identity credential** on the **IIP Results (dev)** app registration, so built-in authentication needs no client secret. Dedicated to this purpose per Microsoft: it *"should only be assigned to the App Service or Azure Functions application through this registration."* |
+| 18 | Gerard | `stiipdevwus01` / queues `upload-events` and `upload-events-poison` | Storage Queue Data Reader | Operator read access: peek the working queue and inspect poison messages. Read-only and queue-scoped, one assignment per queue. Added 2026-09-25 by CLI (Gerard's decision) to verify row 16, and kept: reading the poison queue is a normal operator task. **Not in Bicep**, like rows 3 and 13. |
 
 ## First-light findings (M11 pass 1, 2026-09-24)
 
@@ -110,6 +111,27 @@ These rows were confirmed by a real upload the Function processed end to end
   **Storage Queue Data Contributor and Storage Account Contributor were not
   needed** and are not assigned.
 - **Row 15:** Reader + Message Processor were enough for the queue trigger.
+  **[2026-09-25: on the success path only.** When a run fails, the host calls
+  Update Message to apply `host.json`'s `visibilityTimeout` (1 min), and it gets
+  **403 `AuthorizationPermissionMismatch`**: the stack trace runs
+  `QueueProcessor.ReleaseMessageAsync` → `QueueClient.UpdateMessageAsync`. The
+  message keeps the 10-minute visibility it was retrieved with, so the retry
+  comes 10 min later, not 1. Microsoft's permissions table maps Update Message
+  to `messages/write`, which neither role has.
+  **Fixed the same day** with the custom role **IIP Queue Trigger (dev)**
+  (`messages/write` only, on `upload-events`). **Proven** at 21:00Z: try 1 failed,
+  **no 403**, try 2 about 100 s later, then the move to poison. The built-in
+  Contributor had been removed 52 min earlier. The action itself was proven
+  with Gerard's identity on the poison queue. The update was allowed with the
+  custom role, and refused once it was removed, with Message Processor still held
+  (a negative control). **Open, recorded rather than resolved:** the
+  Function's assignment still got 403 **65 min** after it was created, although
+  Gerard's identical user assignment worked within ~7 min, and built-in
+  Contributor on the Function worked within ~20 min. By 21:00Z it worked.
+  Two explanations fit equally: (a) a managed identity's new *custom*-role
+  assignment took 65–110 min to take effect; (b) adding and then removing
+  Contributor refreshed the identity's cached permissions. It was created in
+  the same deployment, seconds after the role definition.**]**
 - **Row 14:** needed **account** scope; see its row.
 
 - **Row 8** (confirmed the same afternoon): App Insights has `DisableLocalAuth:
@@ -119,6 +141,7 @@ These rows were confirmed by a real upload the Function processed end to end
   component is sufficient.
 
 **Still VERIFY:** row 16 (the poison path).
+**[Verified 2026-09-25; see row 16.]**
 
 ## Build-time findings (M9, 2026-09-21)
 
