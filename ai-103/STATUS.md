@@ -82,26 +82,29 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: row 15 stage 2 (one custom role), then M11 pass 2, sign-in.**
-Updated 2026-09-25, end of session, at the HEAD this entry's commit creates.
-M11 is the working milestone. Row 16 is verified. Row 15's failure-path
-defect was found and fixed (stage 1). See the Sep 25 session entry.
+**Next action: row 15 stage 2b re-test (FIRST, ~25 min), then M11 pass 2, sign-in.**
+Updated 2026-09-28, end of a short session, at the HEAD this entry's commit
+creates. M11 is the working milestone. Row 15 is now ONE custom role in Bicep
+and in Azure; what it still lacks is a test that proves the role works alone.
+See the Sep 28 session entry.
 
-1. **Row 15 stage 2b (about 30 min).** Stage 2a is **deployed**
-   (`m11-row15-stage2a-20260925`, Sep 25 14:33 local). **IIP Queue Trigger
-   (dev)** now holds Action `queues/read` + `messages/read`,
-   `messages/process/action` and `messages/write`. The built-ins are still
-   assigned, so there's been no functional change. By next session the
-   expanded role will have had days to take effect (stage 1 needed 65-110 min),
-   so the weekend *is* the confirmation wait. Then:
-   - remove `functionQueueReader`/`functionQueueProcessor` from `rbac.bicep`;
-   - what-if (Unsupported 13 → 11) and deploy;
-   - **delete the two built-in assignments by hand** (Incremental never deletes);
-   - wait ~30 min, then re-test with the confirmed-pause method (`m11-prep.md`,
-     row 16 caveat): no 403, retry ~1-2 min;
-   - check scale-from-zero with one normal upload (`queues/read` = Get Queue
-     Metadata);
-   - update RBAC row 15 to the one custom role.
+1. **Row 15 stage 2b re-test (about 25 min). Do this first.** The built-ins
+   were removed from Bicep, deployed (`m11-row15-stage2b-20260928`), and their
+   two assignments **deleted by hand at about 09:00 local (16:00Z) on Sep 28**.
+   Gerard's list after the deletes showed exactly one row: IIP Queue Trigger
+   (dev), created 2026-09-25T18:12:31Z. A test on Sep 28 could not have proved
+   anything: the custom role does everything both built-ins did, so a pass
+   inside the deletion's propagation window (stage 1's grant took 65-110 min
+   to arrive) could still be running on the leftover built-ins. By next
+   session that window has long closed, so a pass means the role works alone:
+   - **failure path**, with the confirmed-pause method (`m11-prep.md`, row 16
+     caveat: set the pause, wait ~2 min, confirm with `appsettings list`,
+     THEN upload): expect no 403, and the retry after ~1-2 min, not 10;
+   - **scale-from-zero**, with one normal upload (`queues/read` = Get Queue
+     Metadata, which only the custom role now grants);
+   - then mark RBAC row 15 **verified**.
+   **If either fails:** redeploy the Bicep at `46bdbd6`, which re-creates both
+   built-ins under their original guid() names, then investigate.
 2. ~~`what-if` register~~ **Done Sep 25, end of session.** Six rows were
    registered in `infrastructure/iip/README.md` (four accepted read-back gaps,
    two fixed), and `stiipdevwus02`'s two writable properties were declared as
@@ -124,7 +127,11 @@ defect was found and fixed (stage 1). See the Sep 25 session entry.
      section 4 change.
 6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
-   `.gitignore`; the token-undercount backlog item (Todoist).
+   `.gitignore`; the token-undercount backlog item (Todoist). **Both
+   read-only Sep 28 findings are in `Claude outputs/2026-09-28-unattended-findings.md`**
+   (gitignored, local only): the role-GUID audit came back clean, apart from
+   two one-line comment nits, and the undercount turned out to be a scope gap
+   with a $0 Azure Monitor check proposed before any code.
 
 **Settled — do not reopen:**
 - The `listKeys` calls are VS Code's.
@@ -459,6 +466,44 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 28, 2026 — short session (~60 min): row 15 stage 2b deployed; re-test deferred on purpose
+
+**Claude wrote the Bicep and doc edits in this entry and did the analysis.
+Gerard made both decisions below and ran every Azure CLI command and the
+deployment.** Short window: the rest of the day went to the tower rebuild. The
+Sunday punch-list task hadn't run (the machine was idle). Gerard chose to skip
+it, and Claude read the punch list against STATUS by hand instead.
+
+**Decision (Gerard): split stage 2b.** STATUS's "about 30 min" left out the
+tests, and the tests couldn't have proved anything today anyway. Found by
+Claude while sizing the session: **IIP Queue Trigger (dev) is a superset of
+both built-ins, so there is no test that tells it apart from them.** That
+holds before the deletion, which is why stage 2a's "confirm effective first"
+step couldn't be done as a test and was satisfied by elapsed time (3 days),
+and after it, while the deletion propagates. A pass at +30 min could have
+been leftover built-in permissions. So the build happened today, and the test
+waits until the propagation window has surely closed.
+
+**Done:**
+- `rbac.bicep`: `functionQueueReader`/`functionQueueProcessor` removed, their
+  two `roleIds` entries retired (GUIDs kept in a comment), the stage log and
+  the row 15 header rewritten.
+- **What-if: exactly as registered.** 6 modify (all registered), 22 no change,
+  **11 Unsupported** (13 → 11, both built-ins gone), 2 to ignore, and the role
+  definition `=`. Claude checked it line by line against the register.
+- **Deployed** `m11-row15-stage2b-20260928`: Succeeded.
+- **Built-ins deleted by hand** (Incremental never deletes), by role GUID,
+  filtered to `id-iip-dev-wus-01`'s principal so Gerard's own row 18 Reader
+  on the queue was untouched. Before: 3 rows, as expected. After (about 09:00
+  local, 16:00Z): **1 row, IIP Queue Trigger (dev)**.
+- `infrastructure/iip/README.md`: Unsupported count 13 → 11.
+- RBAC row 15 now shows the one custom role, marked unverified until the re-test.
+
+**Read-only work while Gerard was on the other PC (his pick):** the Todoist
+role-GUID audit and the token-undercount diagnosis. Findings are in
+`Claude outputs/2026-09-28-unattended-findings.md`. No Azure calls, and no
+repo changes beyond this commit.
 
 ### Session — September 25, 2026 — row 16 verified; row 15's failure path found broken and fixed
 

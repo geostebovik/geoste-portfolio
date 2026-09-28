@@ -58,8 +58,9 @@ var roleIds = {
   storageTableDataContributor: '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
   monitoringMetricsPublisher: '3913510d-42f4-4e42-8a64-420c390055eb'
   websiteContributor: 'de139f84-1756-47ae-9be6-808fbbe84772'
-  storageQueueDataReader: '19e7f393-937e-4f77-808e-94535e297925'
-  storageQueueDataMessageProcessor: '8a0f0c08-91a1-4084-bc3d-661d67233fed'
+  // storageQueueDataReader (19e7f393-...) and storageQueueDataMessageProcessor
+  // (8a0f0c08-...) were here for row 15 until stage 2b (2026-09-28), when the
+  // custom role below replaced them. Nothing else in this file used them.
   storageQueueDataMessageSender: 'c6a89b2d-59bc-44d0-9896-0f6e12d7b80a'
 }
 
@@ -77,9 +78,14 @@ var roleIds = {
 //   STAGE 2a (deployed 2026-09-25, end of session): the role expanded in place
 //     to the union below. The built-ins are still assigned, so no functional
 //     change. The propagation wait runs over the weekend.
-//   STAGE 2b (next session): confirm the expanded role is effective, then
-//     remove functionQueueReader/functionQueueProcessor from this file AND
-//     delete their assignments by hand, then re-test.
+//   STAGE 2b (2026-09-28): functionQueueReader/functionQueueProcessor
+//     removed from this file, and their assignments deleted by hand
+//     (Incremental never deletes), after three days for the role to take
+//     effect. No test could confirm it while the built-ins were assigned:
+//     this role is a superset of both, so it can't be seen on its own.
+//     RE-TEST DEFERRED to the next session, once the deletion has surely
+//     propagated, so a pass proves this role works ALONE: the failure path
+//     (confirmed-pause method, m11-prep.md row 16) and scale-from-zero.
 //   STAGE 2 as first planned: expand THIS role in place (same GUID, so the assignment
 //     doesn't move) to the union -- Reader's queues/read (Get Queue Metadata)
 //     + messages/read + messages/process/action + messages/write. Remove the
@@ -352,32 +358,11 @@ resource topicQueueSender 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   }
 }
 
-// --- Row 15: Function identity -> upload-events, Reader + Message Processor --
-// The queue trigger's documented minimum (Microsoft Learn, "Configure
-// connections... Grant permissions to an identity"). Scoped to ONE queue.
-// [2026-09-25: NOT enough. The minimum can't call Update Message. The custom
-// role IIP Queue Trigger is assigned below; stage 2 retires these two.]
-resource functionQueueReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: uploadEventsQueue
-  name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataReader)
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataReader)
-    principalId: functionIdentityPrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource functionQueueProcessor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: uploadEventsQueue
-  name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, roleIds.storageQueueDataMessageProcessor)
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIds.storageQueueDataMessageProcessor)
-    principalId: functionIdentityPrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// Row 15, custom role (2026-09-25): IIP Queue Trigger, stage 1. See its comment.
+// --- Row 15: Function identity -> upload-events, IIP Queue Trigger (dev) ----
+// ONE custom role, queue-scoped. It replaced the documented minimum, Storage
+// Queue Data Reader + Message Processor, which can't call Update Message.
+// Stage 1 added it alongside them (2026-09-25); stage 2b removed them
+// (2026-09-28). See the role definition's comment above.
 resource functionQueueTrigger 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: uploadEventsQueue
   name: guid(uploadEventsQueue.id, functionIdentityPrincipalId, queueTriggerRole.name)

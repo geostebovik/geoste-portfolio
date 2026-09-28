@@ -58,10 +58,11 @@ reports `=` No change.
 - **Added 2026-09-25:** `x sku.tier: "FlexConsumption"` on `asp-iip-dev-wus-01`
   (Noeffect), and **2 "to ignore"** (`*`): the Smart Detection alert rule and
   action group that App Insights creates for itself. Neither is in the template.
-- **Unsupported diagnostics are 13 as of 2026-09-25:** rows 4, 5, 6, 9, 7×2, 8,
-  12, 14, 15×2, 16, plus the custom-role assignment on `upload-events` (row 15,
-  stage 1). Stage 2b removes two of these (row 15's built-ins), which brings it
-  to 11.
+- **Unsupported diagnostics are 11 as of 2026-09-28:** rows 4, 5, 6, 9, 7×2, 8,
+  12, 14, 16, plus row 15's one custom-role assignment on `upload-events`.
+  *(13 on 2026-09-25; stage 2b removed row 15's two built-ins. Confirmed by the
+  stage 2b what-if, 2026-09-28: 6 modify, 22 no change, 11 unsupported, 2 to
+  ignore, all as registered.)*
 
 ## How the register was built, and why it matters
 
