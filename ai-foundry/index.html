@@ -332,7 +332,27 @@
   }
 
   .footer-brand span { color: var(--orange); }
+
+  /* Footer links -- added 2026-09-28 with the shared nav, which dropped this
+     page's header GitHub link. Same three links as the AZ-104 domain pages. */
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin-top: 1rem;
+  }
+  .footer-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-light);
+    text-decoration: none;
+  }
+  .footer-links a:hover { color: var(--orange); }
 </style>
+  <link rel="stylesheet" href="/css/mobile.css">
 </head>
 <body>
 
@@ -340,8 +360,13 @@
     <a class="nav-brand" href="/">oste<span>bovik</span>.net</a>
     <ul class="nav-links">
       <li><a href="/">Home</a></li>
-      <li><a href="/#skills">Skill Domains</a></li>
-      <li><a href="https://github.com/geostebovik/geoste-portfolio" target="_blank">GitHub</a></li>
+      <li><a href="/az-104/identity-governance/">Identity</a></li>
+      <li><a href="/az-104/networking/">Networking</a></li>
+      <li><a href="/az-104/compute-storage/">Compute</a></li>
+      <li><a href="/az-104/infrastructure-as-code/">IaC</a></li>
+      <li><a href="/az-104/monitoring-security/">Monitoring</a></li>
+      <li><a href="/ai-foundry/" class="active">AI</a></li>
+      <li><a href="/resources/">Resources</a></li>
       <li><a href="/resume/">Resume</a></li>
     </ul>
   </nav>
@@ -473,6 +498,11 @@
 
   <footer>
     <div class="footer-brand">oste<span>bovik</span>.net · AI-103 · Phase 1 complete · Phase 2 in progress</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="https://github.com/geostebovik/geoste-portfolio/tree/main/ai-103" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/gerard-ostebovik-b5924b15b" target="_blank">LinkedIn</a></li>
+    </ul>
   </footer>
 
 </body>

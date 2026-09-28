@@ -1,0 +1,46 @@
+/* Shared small-screen fixes for ostebovik.net -- loaded LAST in <head> on
+   every page that uses the <nav> + .nav-links header, so these rules win over
+   each page's own inline styles. Tested headless at 360 and 390px with the
+   site's real fonts.
+
+   1. NAV.
+   Why (2026-09-28): the header is position:fixed, 56px tall, and its links
+   never wrapped. On a phone (390px) only Home, Identity and Networking were
+   visible and the rest ran off-screen, and on some pages that also widened
+   the whole document. On narrow screens the links now scroll sideways inside
+   the header. The header's height doesn't change, so no page content
+   moves. */
+@media (max-width: 900px) {
+  nav { padding: 0 1rem !important; gap: 1rem; }
+  .nav-brand { flex-shrink: 0; }
+  .nav-links {
+    gap: 1.25rem !important;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 1.5rem;
+    -webkit-mask-image: linear-gradient(to right, #000 80%, transparent);
+            mask-image: linear-gradient(to right, #000 80%, transparent);
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+}
+
+/* 2. HERO HEADINGS. On 360px phones "Infrastructure as Code" in the domain
+   hero (Barlow Condensed 800, min 3.5rem) ran 23px past the screen edge. */
+@media (max-width: 400px) {
+  .hero h1 { font-size: clamp(2.6rem, 12.5vw, 3.5rem) !important; }
+}
+
+/* 3. RESUME HEADER. The resume had no small-screen rules at all: name and
+   contact block sat side by side (grid 1fr auto), and the contact lines pushed
+   the page to ~500px wide on any phone. Stack them instead. */
+@media (max-width: 640px) {
+  .resume-header { grid-template-columns: 1fr !important; gap: 1rem !important; }
+  .resume-contact { text-align: left !important; }
+  /* the three skill columns were ~100px each on a phone */
+  .skills-grid { grid-template-columns: 1fr !important; }
+  /* 3.5rem side padding left a ~210px text column on a 390px phone */
+  .resume-card { padding: 1.75rem 1.25rem !important; }
+}
