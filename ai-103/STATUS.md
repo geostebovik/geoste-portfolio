@@ -470,7 +470,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — September 28, 2026 — short session (~60 min): row 15 stage 2b deployed; re-test deferred on purpose
+### Session — September 28, 2026 — row 15 stage 2b deployed (re-test deferred on purpose); then site cleanup
 
 **Claude wrote the Bicep and doc edits in this entry and did the analysis.
 Gerard made both decisions below and ran every Azure CLI command and the
@@ -507,6 +507,23 @@ waits until the propagation window has surely closed.
 role-GUID audit and the token-undercount diagnosis. Findings are in
 `Claude outputs/2026-09-28-unattended-findings.md`. No Azure calls, and no
 repo changes beyond this commit.
+
+**Afternoon, not IIP: ostebovik.net cleanup** (Claude wrote the changes and
+tested them headless; Gerard found the issues noted, made the calls and
+pushed). Commits `8104f8c`..`cab4706`:
+- M9 shown as Complete.
+- The claim that two site lines were stale corrected in three docs; they had
+  been fixed Sep 21, in `5fccd4a`.
+- Tracking on every page via `js/telemetry.js`; it had been on the homepage
+  only, so every visit looked like a bounce.
+- Three orphaned project pages removed. They carried a wrong name and a wrong
+  GitHub account.
+- One shared nav; the AI page was missing from every menu (Gerard found it).
+- Phone layout fixes in `css/mobile.css`.
+- Owner-browser opt-out (`/?internal=1`).
+
+Open site items live in Todoist, not here. The first is Gerard's find: the
+homepage shows no menu on phones, so it has no path to the resume.
 
 ### Session — September 25, 2026 — row 16 verified; row 15's failure path found broken and fixed
 
