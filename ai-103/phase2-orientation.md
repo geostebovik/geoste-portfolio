@@ -190,7 +190,8 @@ justified in writing in the register, and any line not in the register is a
 real change. **This wording is inherited by M9-M14.**
 
 **After M14:** write up Phase 2, then make **one joint push** with the M7
-write-up and the two out-of-date site lines.
+write-up. *(Corrected 2026-09-28: this used to include "the two out-of-date
+site lines". They were fixed on 2026-09-21 in `5fccd4a`.)*
 
 ## Phase 2 Backlog
 

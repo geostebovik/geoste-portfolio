@@ -151,7 +151,10 @@ See the Sep 28 session entry.
   built-in Contributor.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
-step), and goes out in one group push with Phase 2 and the two stale site lines.
+step), and goes out in one group push with the Phase 2 write-up. *(Corrected
+2026-09-28: this used to add "and the two stale site lines". Those two were
+already fixed on 2026-09-21 in `5fccd4a`. The last stale site line, M9 shown
+as "Not started", was fixed on 2026-09-28.)*
 
 ## Milestones (Phase 1)
 

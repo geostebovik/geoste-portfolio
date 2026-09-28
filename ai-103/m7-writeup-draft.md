@@ -62,7 +62,8 @@ STILL OPEN BEFORE PUBLISHING:
 - Outside readers for "In short".
 - At publish time: an "On this page" link list at the top, and the evidence
   table's repo-relative paths turned into GitHub links.
-- The group push with Phase 2 and the two stale site lines.
+- The group push with Phase 2. *(The "two stale site lines" once listed here were
+  fixed on 2026-09-21 in `5fccd4a`. Corrected 2026-09-28.)*
 
 GERARD'S REVIEW, Sep 15: he read "In short" and kept it as written. He
 judged it longer than ideal, but found that each point says something
