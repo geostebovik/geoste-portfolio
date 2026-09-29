@@ -202,7 +202,11 @@ Deferred items go here, not in `STATUS.md`.
 the top of this file says which — results box first, before starting work.
 (Amended 2026-09-24: this line pointed only at `m10-prep.md`, after M10
 closed.)*
-- **Blob soft delete is OFF on `stiipdevwus01`.** Found 2026-09-21 from an M9
+- ~~**Blob soft delete is OFF on `stiipdevwus01`.**~~ **DONE 2026-09-29.**
+  Gerard's decision: blob **and** container soft delete, 7 days each (container
+  soft delete because deleting a container bypasses blob soft delete). Deployed
+  as `m11-softdelete-20260929` and checked with `blob-service-properties show`.
+  The original note follows. Found 2026-09-21 from an M9
   what-if: `deleteRetentionPolicy.enabled` is `false` on the app data account's
   blob service. M9 declares it as found rather than changing it. Worth revisiting
   at **M11**, when the Function starts writing results there — an accidental

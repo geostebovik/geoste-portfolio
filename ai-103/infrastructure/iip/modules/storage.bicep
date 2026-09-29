@@ -57,21 +57,29 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
   parent: storage
   name: 'default'
   properties: {
-    // Declared to match live, NOT as a preference. The first M9 what-if showed
-    // this being removed because the resource was declared with no properties
-    // at all -- deleteRetentionPolicy is writable, so that is the same class of
-    // real diff as defaultProject and currentCapacity were in M8, and the same
-    // rule applies: a writable property left undeclared is one a deploy can
-    // clear.
+    // M9 declared this AS FOUND (enabled:false): the first M9 what-if showed it
+    // being removed because the resource had no properties, and a writable
+    // property left undeclared is one a deploy can clear.
     //
-    // enabled:false means BLOB SOFT DELETE IS OFF on the app data account.
-    // That is the state as found, and M9 is not the milestone that changes it.
-    // See the Phase 2 Backlog item on soft delete.
+    // CHANGED 2026-09-29 (Gerard's decision, M11): soft delete ON, 7 days, for
+    // both blobs and containers. The Function has written to `results` since
+    // Sep 24, and until now a deleted results blob was unrecoverable.
+    // Container soft delete is separate and needed: deleting a CONTAINER
+    // bypasses blob soft delete, so the blobs inside would be lost with it.
+    // Both policies are account-wide, so they also cover the undeclared
+    // `docs` container. 7 days: dev data, small PNG/JSON blobs, cost ~$0.
     deleteRetentionPolicy: {
-      enabled: false
+      enabled: true
+      days: 7
       // Declared as found (2026-09-24): surfaced as '- allowPermanentDelete:
       // false' in the Sep 24 what-if; writable per the provider schema.
+      // Kept false: true would allow permanently deleting a soft-deleted blob
+      // before its 7 days are up.
       allowPermanentDelete: false
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 7
     }
   }
 }

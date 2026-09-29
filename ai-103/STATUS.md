@@ -82,56 +82,45 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: row 15 stage 2b re-test (FIRST, ~25 min), then M11 pass 2, sign-in.**
-Updated 2026-09-28, end of a short session, at the HEAD this entry's commit
-creates. M11 is the working milestone. Row 15 is now ONE custom role in Bicep
-and in Azure; what it still lacks is a test that proves the role works alone.
-See the Sep 28 session entry.
+**Next action: M11 pass 2, sign-in (1-2 sessions).**
+Updated 2026-09-29, at the HEAD this entry's commit creates. M11 is the
+working milestone. Row 15 is **verified alone** and blob and container soft
+delete are **on**, so pass 1's loose ends are closed. See the Sep 29 session
+entry.
 
-1. **Row 15 stage 2b re-test (about 25 min). Do this first.** The built-ins
-   were removed from Bicep, deployed (`m11-row15-stage2b-20260928`), and their
-   two assignments **deleted by hand at about 09:00 local (16:00Z) on Sep 28**.
-   Gerard's list after the deletes showed exactly one row: IIP Queue Trigger
-   (dev), created 2026-09-25T18:12:31Z. A test on Sep 28 could not have proved
-   anything: the custom role does everything both built-ins did, so a pass
-   inside the deletion's propagation window (stage 1's grant took 65-110 min
-   to arrive) could still be running on the leftover built-ins. By next
-   session that window has long closed, so a pass means the role works alone:
-   - **failure path**, with the confirmed-pause method (`m11-prep.md`, row 16
-     caveat: set the pause, wait ~2 min, confirm with `appsettings list`,
-     THEN upload): expect no 403, and the retry after ~1-2 min, not 10;
-   - **scale-from-zero**, with one normal upload (`queues/read` = Get Queue
-     Metadata, which only the custom role now grants);
-   - then mark RBAC row 15 **verified**.
-   **If either fails:** redeploy the Bicep at `46bdbd6`, which re-creates both
-   built-ins under their original guid() names, then investigate.
-2. ~~`what-if` register~~ **Done Sep 25, end of session.** Six rows were
-   registered in `infrastructure/iip/README.md` (four accepted read-back gaps,
-   two fixed), and `stiipdevwus02`'s two writable properties were declared as
-   found in `app.bicep`. The next what-if matched the register exactly.
-3. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
+1. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
    (dev)**, the viewers group, built-in authentication on
    `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
    (D-M11-2 (b), row 17); plus an HTTP function for the results page. M11's
-   done-when needs "a group member can sign in and see it".
-4. **Small follow-ups from pass 1:**
+   done-when needs "a group member can sign in and see it". If a session only
+   has room to start it, start with the app registration.
+2. **Small follow-ups from pass 1:**
    - deployed-package provenance (the Function records no git; record the
      package or deployment instead);
-   - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field;
+   - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field.
+     That field would also answer the open observation below;
    - the Azure SDK's HTTP logging fills `AppTraces` at Information on every call,
      so trim it.
-5. **Gerard's steps:**
-   - add the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`) and RBAC
-     row 18 to the project instructions' resource notes;
+3. **Gerard's steps:**
+   - add the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`), RBAC row
+     18, and "soft delete on, 7 days" for `stiipdevwus01` to the project
+     instructions' resource notes;
+   - decide whether the project instructions' "Ask decisions with the question
+     tool" should become "plain text": the question tool's answer was lost to an
+     app disconnect on Sep 25 and again on Sep 29;
    - if `m7-writeup-draft.md` is with outside readers, send them the Sep 23
      section 4 change.
-6. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
+4. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
-   `.gitignore`; the token-undercount backlog item (Todoist). **Both
-   read-only Sep 28 findings are in `Claude outputs/2026-09-28-unattended-findings.md`**
-   (gitignored, local only): the role-GUID audit came back clean, apart from
-   two one-line comment nits, and the undercount turned out to be a scope gap
-   with a $0 Azure Monitor check proposed before any code.
+   `.gitignore`; the token-undercount backlog item (Todoist; the Sep 28
+   findings are in `Claude outputs/2026-09-28-unattended-findings.md`). Optional,
+   ~2 min: one what-if to confirm the register is back to 6 modify, 22 no
+   change after the soft delete deploy.
+
+**Open observation, not chased:** every host start on Sep 29 logged its
+`QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
+16:40:20/16:40:50Z). A second instance (max is 2) or a restart of the first.
+Harmless so far; the instance-id follow-up in item 2 would tell them apart.
 
 **Settled — do not reopen:**
 - The `listKeys` calls are VS Code's.
@@ -147,14 +136,13 @@ See the Sep 28 session entry.
 - **Row 16 works** (poison after `maxDequeueCount` 2; verified 2026-09-25).
 - **Update Message needs `messages/write`**, which neither built-in in row 15
   has. Proven by a probe and a negative control, 2026-09-25.
-- **Row 15's final shape: one custom role** (Gerard, 2026-09-25), not the
-  built-in Contributor.
+- **Row 15 is one custom role, verified alone** (2026-09-29): failure path
+  (retry +103 s, no 403, poison move) and scale-from-zero both passed.
+- **Soft delete on `stiipdevwus01`:** blob and container, 7 days,
+  `allowPermanentDelete: false` (Gerard, 2026-09-29).
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
-step), and goes out in one group push with the Phase 2 write-up. *(Corrected
-2026-09-28: this used to add "and the two stale site lines". Those two were
-already fixed on 2026-09-21 in `5fccd4a`. The last stale site line, M9 shown
-as "Not started", was fixed on 2026-09-28.)*
+step), and goes out in one group push with the Phase 2 write-up.
 
 ## Milestones (Phase 1)
 
@@ -469,6 +457,61 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 29, 2026 — row 15 verified alone; blob and container soft delete on
+
+**Claude designed the tests and verdict queries and wrote the Bicep and doc
+edits in this entry. Gerard made the soft delete decisions and ran every Azure
+CLI command and the deployment.** A split day: the rest went to the tower
+rebuild. Started from the Sep 28 handoff and the Todoist punch list, which
+agreed. Claude couldn't see git this session: the bridge mounted only
+`ai-103`, and the repo root is one level up. Granting `geoste-portfolio`
+instead would allow read-only git checks. The question tool's answer was lost
+to an app disconnect once (as on Sep 25). Gerard re-supplied it, and
+decisions went to plain text after that.
+
+**Row 15, failure path (about 24 h after the Sep 28 deletes): passed.**
+Paused `process_upload`, waited, and confirmed the pause with `appsettings
+list`, per the Sep 25 caveat. Uploaded `row15-retest-fail.png` **without**
+`topic` ($0), peeked it at `dequeueCount` 0 (15:39:55Z), deleted the blob, and
+un-paused by deleting the setting at 15:48:26Z. Try 1 at 15:48:50Z, try 2 at
+15:50:33Z: **+103 s, not 10 min.** **Zero** `AuthorizationPermissionMismatch`
+rows, searched across every column of `AppExceptions` and `AppTraces`. Moved
+to `upload-events-poison` at 15:50:33Z and peeked there.
+
+**Row 15, scale-from-zero: passed.** The first test's host was started by the
+un-pause, so it said nothing about scaling from zero. Claude caught that from
+the `QueuesOptions` startup trace. After about 50 min idle, Gerard uploaded
+`row15-scale0.png` with a topic at 16:40:04Z. A **new host started at
+16:40:20Z**, `process_upload` **Succeeded** in 43.9 s, and the result is
+`results/row15-scale0/20260929T164105Z.json`. **RBAC row 15 is verified:** the
+custom role alone does everything the two built-ins did. Rollback to `46bdbd6`
+is no longer needed.
+
+**Blob soft delete: done** (Phase 2 Backlog; overdue since the Function began
+writing results on Sep 24). Gerard's decisions: **7 days**, and **container
+soft delete too**, because deleting a container bypasses blob soft delete.
+`storage.bicep` changed from "declared as found" to on. The what-if matched the
+register plus exactly one new Modify on `stiipdevwus01/blobServices/default`:
+7 modify, 21 no change, 11 Unsupported, 2 to ignore. The 11 role-assignment
+diagnostics include the custom role and neither retired built-in. Deployed
+`m11-softdelete-20260929`: Succeeded. `blob-service-properties show`: blob
+enabled/7 days/`allowPermanentDelete: false`; container enabled/7 days. Row
+16's upload-then-delete method still works with soft delete on, because a
+soft-deleted blob is invisible to `get_blob_properties()`.
+
+**Observation, not chased:** each host start logged `QueuesOptions` twice,
+about 30 s apart. See Current next action.
+
+**Claude's errors today, for the record:**
+- V3 was predicted to return "exactly one row" and returned three; the filter
+  also matched the startup trace. The verdict was unaffected.
+- The peek query guessed the message `id` field name wrong, and the column
+  came back blank. Not needed for the test.
+
+**Left in place:** one test message in `upload-events-poison` (15:50:33Z,
+expires with the queue's default TTL); `uploads/row15-scale0.png` and its
+result.
 
 ### Session — September 28, 2026 — row 15 stage 2b deployed (re-test deferred on purpose); then site cleanup
 
