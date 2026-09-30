@@ -140,7 +140,7 @@ deploy time), which makes 12 in total. Confirm against the next post-deploy
 
 This section becomes a register entry after the first deploy.
 
-## M11 pass 2 — sign-in (written 2026-09-30; steps A and B deployed)
+## M11 pass 2 — sign-in (written 2026-09-30; steps A, B and C deployed)
 
 Claude wrote it. Gerard made the decisions on 2026-09-30: Entra objects go in
 **Graph Bicep, in a separate file**; RBAC row 10 starts with a **user**
@@ -191,8 +191,48 @@ matched the template:**
 - exactly one group, **IIP Results Viewers (dev)**: security-enabled, not mail-enabled;
 - owner of the app and of the group: `djeemunee@letter7.onmicrosoft.com`.
 
-Nobody is assigned yet, so nobody can sign in. That's intended until the CA
-test user is assigned (row 10, the user-first path).
+Nobody is assigned yet, so no **non-admin** can sign in (see step C for why
+that qualifier matters).
+
+**Step C, `app.bicep` (ARM, what-if applies), 2026-09-30.** It attaches
+`id-iip-dev-wus-03` to `func-iip-dev-wus-01`, adds the app setting
+`OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID` = `-03`'s client ID, and turns on
+`authsettingsV2`: Microsoft provider with the app's client ID, the v2.0 issuer,
+`clientSecretSettingName` = that setting, require authentication, redirect to
+login, token store off, HTTPS only. `main.bicep` takes the app's client ID as
+the parameter `resultsAppClientId` (in `dev.bicepparam`).
+- **What-if:** 7 modify, 23 no change, 11 Unsupported, 2 to ignore.
+  `authsettingsV2` showed as a **Modify** (`platform.enabled: false => true`
+  plus the new blocks), not a Create. The Function's existing Modify gained
+  exactly one line, `+ identity.userAssignedIdentities.../id-iip-dev-wus-03`.
+  **Register from now on:** 7 modify, with `authsettingsV2` among them,
+  because `clientSecretSettingName` is masked and what-if may keep reporting
+  the block. Confirm on the next run.
+- **Deployed** as `m11-signin-easyauth-20260930`: Succeeded. App settings:
+  `OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID` = `2544a963-…` (`-03`), and
+  `AZURE_CLIENT_ID` is unchanged (`efc6dd4a-…`, `-01`).
+
+**Browser test 1: AADSTS700054** (`response_type 'id_token' is not enabled`).
+Built-in authentication always asks `/authorize` for an ID token: the hybrid
+flow (`code id_token`) when it has a credential, and the implicit flow
+(`id_token`) when it doesn't. So `entra.bicep` now turns ID-token issuance
+**on**, with access tokens still off. It was Claude's error: the first version
+turned both off. Redeployed as `m11-entra-20260930c`: Succeeded.
+
+**Browser test 2 (private window, as `djeemunee`, a Global Administrator):**
+- The authorize URL carried **`response_type=code+id_token`**, so built-in
+  authentication treated the `-03` setting as a credential. It did not fall
+  back to the implicit flow.
+- **Sign-in completed** and the Functions default page loaded. The code was
+  redeemed with `-03`'s federated assertion and **no secret exists anywhere**.
+  **D-M11-2 (b) is proven end to end.**
+- **Not proven: the assignment gate.** Nobody is assigned, yet the sign-in
+  succeeded. Microsoft's AADSTS50105 troubleshooting page says why: *"The
+  assignment requirement doesn't apply to Global Administrators."* The gate has
+  to be tested with a **non-admin** account (the CA test user, RBAC row 11):
+  first unassigned (expect AADSTS50105), then assigned (expect the page).
+  The same bypass matters for the Conditional Access design, because admin
+  accounts skip this gate.
 
 **Why a separate file:** Graph resources are extensible resources, and what-if
 does not support them. Inside `main.bicep` they would sit unanalysed in the one

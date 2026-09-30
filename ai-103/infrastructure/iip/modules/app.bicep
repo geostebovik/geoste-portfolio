@@ -7,6 +7,10 @@
 // federated credential, and the viewers group) is pass 2. Both halves are in
 // M11's done-when.
 //
+// Pass 2, step C (Claude, 2026-09-30): this file now also attaches
+// id-iip-dev-wus-03 to the Function and turns on built-in authentication
+// (authsettingsV2). The Entra objects it points at live in entra.bicep.
+//
 // Shape and decisions: m11-prep.md; RBAC rows: phase2-rbac-model-draft.md
 // (the role assignments themselves live in rbac.bicep, in row order).
 //
@@ -36,6 +40,13 @@ param systemTopicName string
 param dataStorageAccountName string
 param functionIdentityName string
 
+// --- Pass 2, step C: sign-in ------------------------------------------------------
+@description('id-iip-dev-wus-03 (RBAC row 17). Attached to the Function ONLY so built-in authentication can present it as a client assertion.')
+param signInIdentityName string
+
+@description('Application (client) ID of the IIP Results (dev) app registration. An entra.bicep output, passed as a parameter so this ARM deployment never references a Graph resource (what-if cannot analyse those).')
+param resultsAppClientId string
+
 @description('Non-secret settings the M7 code reads, same names as scripts/.env.')
 param m7Settings object
 
@@ -56,6 +67,22 @@ resource functionIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023
 resource dataStorage 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: dataStorageAccountName
 }
+
+resource signInIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: signInIdentityName
+}
+
+// The same issuer the federated credential trusts (entra.bicep builds it the
+// same way): this tenant's v2.0 endpoint, from the environment, not typed.
+// Microsoft recommends the v2.0 issuer over the legacy sts.windows.net one that
+// the portal's express setup still writes.
+var tenantIssuer = '${environment().authentication.loginEndpoint}${tenant().tenantId}/v2.0'
+
+// Built-in authentication reads the client credential from the app setting
+// NAMED here. This reserved name tells it the setting holds a managed
+// identity's client ID, to be used as a federated client assertion, not a
+// secret (Microsoft Learn, "Use a managed identity instead of a secret").
+var ficSettingName = 'OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID'
 
 // --- Host storage (D3) --------------------------------------------------------
 resource hostStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
@@ -152,6 +179,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${functionIdentity.id}': {}
+      // Pass 2, step C. From here on the app holds two user-assigned
+      // identities, which is why every setting below names -01 explicitly
+      // (AZURE_CLIENT_ID and the __clientId settings).
+      '${signInIdentity.id}': {}
     }
   }
   properties: {
@@ -203,7 +234,54 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       // Telemetry, Entra-authenticated (row 8).
       APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
       APPLICATIONINSIGHTS_AUTHENTICATION_STRING: 'ClientId=${functionIdentity.properties.clientId};Authorization=AAD'
+
+      // Pass 2, step C: -03's CLIENT ID (not the app registration's). Built-in
+      // authentication uses it to get a token for the federated credential.
+      // Not a secret: a client ID proves nothing without the identity itself.
+      '${ficSettingName}': signInIdentity.properties.clientId
     }, m7Settings)
+  }
+
+  // --- Pass 2, step C: built-in authentication (Easy Auth), V2 settings ----------
+  resource authSettings 'config' = {
+    name: 'authsettingsV2'
+    // The setting it names must exist before sign-in is switched on.
+    dependsOn: [
+      appSettings
+    ]
+    properties: {
+      platform: {
+        enabled: true
+      }
+      globalValidation: {
+        // Every HTTP request must be signed in. Non-HTTP triggers (the queue
+        // trigger, process_upload) never pass through this layer.
+        requireAuthentication: true
+        unauthenticatedClientAction: 'RedirectToLoginPage'
+        redirectToProvider: 'azureactivedirectory'
+      }
+      identityProviders: {
+        azureActiveDirectory: {
+          enabled: true
+          registration: {
+            clientId: resultsAppClientId
+            clientSecretSettingName: ficSettingName
+            openIdIssuer: tenantIssuer
+          }
+        }
+      }
+      login: {
+        // Off: the results page reads blobs with the Function's OWN identity
+        // (RBAC principle 3), so it never needs the viewer's tokens. Storing
+        // them would keep credentials the app doesn't use.
+        tokenStore: {
+          enabled: false
+        }
+      }
+      httpSettings: {
+        requireHttps: true
+      }
+    }
   }
 }
 

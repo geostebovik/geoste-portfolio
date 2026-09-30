@@ -46,6 +46,10 @@ param systemTopicName string
 param maximumInstanceCount int
 param logDailyCapGb int
 
+// --- M11, pass 2, step C: sign-in (2026-09-30) -----------------------------------
+@description('Application (client) ID of IIP Results (dev), from entra.bicep\'s output resultsAppClientId.')
+param resultsAppClientId string
+
 @description('Same value as scripts/.env CHAT_API_VERSION -- the version M10 measured.')
 param chatApiVersion string
 
@@ -150,6 +154,8 @@ module app 'modules/app.bicep' = {
     systemTopicName: systemTopicName
     dataStorageAccountName: storage.outputs.storageAccountName
     functionIdentityName: functionIdentityName
+    signInIdentityName: signInIdentityName
+    resultsAppClientId: resultsAppClientId
     m7Settings: m7Settings
     maximumInstanceCount: maximumInstanceCount
     logDailyCapGb: logDailyCapGb

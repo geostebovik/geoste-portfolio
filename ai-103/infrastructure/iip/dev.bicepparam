@@ -61,6 +61,11 @@ param maximumInstanceCount = 2
 // Expected use is well under the free 5 GB/month.
 param logDailyCapGb = 1
 
+// --- M11, pass 2, step C (2026-09-30) -------------------------------------------
+// IIP Results (dev)'s Application (client) ID: entra.bicep's output, deployed as
+// m11-entra-20260930b and read back with `az ad app list`. Not a secret.
+param resultsAppClientId = '16565c24-5afd-4581-8430-c615ded0291a'
+
 // Copied from scripts/.env, where M10 measured them.
 param chatApiVersion = '2024-06-01'
 param pfWorkerCount = '2'

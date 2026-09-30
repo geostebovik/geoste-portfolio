@@ -12,7 +12,8 @@
 //
 //   IIP Results (dev)          app registration; single tenant; one Web
 //                              redirect URI on the Function's default host;
-//                              implicit grant OFF; no client secret, ever
+//                              ID tokens on, access tokens off (see web
+//                              below); no client secret, ever
 //     fic-id-iip-dev-wus-03    federated credential: trusts id-iip-dev-wus-03
 //                              (D-M11-2 (b), RBAC row 17)
 //   its service principal      the enterprise app; "Assignment required" = Yes
@@ -91,13 +92,18 @@ resource resultsApp 'Microsoft.Graph/applications@v1.0' = {
     redirectUris: [
       'https://${functionApp.properties.defaultHostName}/.auth/login/aad/callback'
     ]
-    // OFF on purpose. With a client assertion (the federated credential),
-    // built-in authentication uses the authorization code flow. Implicit grant
-    // is only its fallback when there is NO credential, so if the federated
-    // credential is misconfigured, sign-in fails loudly instead of quietly
-    // downgrading to the flow Microsoft doesn't recommend.
+    // ID tokens ON, access tokens OFF. Corrected 2026-09-30. The first version
+    // turned both off, on Claude's wrong reading that built-in authentication
+    // uses the pure code flow when it has a credential. It doesn't: with a
+    // credential it uses the HYBRID flow (response_type=code id_token), and
+    // without one it falls back to the implicit flow (response_type=id_token).
+    // Both ask /authorize for an ID token, so ID-token issuance must be on
+    // either way. The first sign-in failed with AADSTS700054 until it was.
+    // (Microsoft Learn: "Client type and OAuth flow behavior"; Container Apps
+    // Easy Auth: "Enable the app to issue ID tokens. This step is required.")
+    // Access tokens stay off: nothing here asks /authorize for one.
     implicitGrantSettings: {
-      enableIdTokenIssuance: false
+      enableIdTokenIssuance: true
       enableAccessTokenIssuance: false
     }
   }
