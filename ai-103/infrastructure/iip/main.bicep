@@ -30,6 +30,9 @@ param modelDeployments array
 param functionIdentityName string
 param cicdIdentityName string
 
+@description('M11 pass 2: the sign-in identity (row 17). Created here; trusted by entra.bicep.')
+param signInIdentityName string
+
 @description('Gerard\'s Entra object ID, from `az ad signed-in-user show --query id`.')
 param adminPrincipalId string
 
@@ -126,6 +129,7 @@ module identity 'modules/identity.bicep' = {
     tags: tags
     functionIdentityName: functionIdentityName
     cicdIdentityName: cicdIdentityName
+    signInIdentityName: signInIdentityName
   }
 }
 
@@ -214,6 +218,8 @@ output functionIdentityId string = identity.outputs.functionIdentityId
 output functionIdentityClientId string = identity.outputs.functionIdentityClientId
 output cicdIdentityId string = identity.outputs.cicdIdentityId
 output cicdIdentityClientId string = identity.outputs.cicdIdentityClientId
+output signInIdentityPrincipalId string = identity.outputs.signInIdentityPrincipalId
+output signInIdentityClientId string = identity.outputs.signInIdentityClientId
 
 // M11
 output functionAppName string = app.outputs.functionAppName

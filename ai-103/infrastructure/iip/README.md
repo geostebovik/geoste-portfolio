@@ -30,7 +30,7 @@ appearing in a future run is a real change and should be treated as one.
 | `.../projects/proj-iip-dev-wus-01` | `- properties.agentIdentity`, `.endpoints`, `.internalId`, `.isDefault` | All flagged `ReadOnly`, or absent from the schema entirely (`agentIdentity`). |
 | `srch-iip-dev-wus-01` | `- properties.endpoint` | Not flagged `ReadOnly`, but a search endpoint is not choosable. **Settled empirically 2026-09-21:** the M9 deployment left it as `https://srch-iip-dev-wus-01.search.windows.net`. Confirmed a schema inaccuracy, not a real setting. |
 | `srch-iip-dev-wus-01` | ~~`+ tags.managed-by`~~ | **Applied 2026-09-21** by the M9 deployment. No longer expected; if it reappears, something removed the tag. |
-| `stiipdevwus01/blobServices/default` | `- properties.deleteRetentionPolicy` | **Fixed, not accepted.** M9 declared `blobServices/default` with no properties, and `deleteRetentionPolicy` is writable — the same class of real diff as `defaultProject` in M8. Now declared as found (`enabled: false`). Should not reappear. **It partly did, 2026-09-24:** `- deleteRetentionPolicy.allowPermanentDelete: false`. That sub-property is writable too, so it's now declared as found. The record can't tell whether it was there after M9's deploy or appeared later. **Changed on purpose, 2026-09-29:** soft delete is now ON (blob and container, 7 days; Gerard's decision), deployed as `m11-softdelete-20260929`. The pre-deploy what-if showed exactly one new Modify here (`enabled: false => true`, `+ days: 7`, `+ containerDeleteRetentionPolicy`), with totals 7 modify, 21 no change, 11 Unsupported, 2 to ignore. **Expected from now on:** back to the stage 2b totals (6 modify, 22 no change). **Confirmed 2026-09-30** by the first what-if on the new machine (the tower): 6 modify, 22 no change. UNSUP_NOTE |
+| `stiipdevwus01/blobServices/default` | `- properties.deleteRetentionPolicy` | **Fixed, not accepted.** M9 declared `blobServices/default` with no properties, and `deleteRetentionPolicy` is writable — the same class of real diff as `defaultProject` in M8. Now declared as found (`enabled: false`). Should not reappear. **It partly did, 2026-09-24:** `- deleteRetentionPolicy.allowPermanentDelete: false`. That sub-property is writable too, so it's now declared as found. The record can't tell whether it was there after M9's deploy or appeared later. **Changed on purpose, 2026-09-29:** soft delete is now ON (blob and container, 7 days; Gerard's decision), deployed as `m11-softdelete-20260929`. The pre-deploy what-if showed exactly one new Modify here (`enabled: false => true`, `+ days: 7`, `+ containerDeleteRetentionPolicy`), with totals 7 modify, 21 no change, 11 Unsupported, 2 to ignore. **Expected from now on:** back to the stage 2b totals (6 modify, 22 no change). **Confirmed 2026-09-30** by the first what-if on the new machine (the tower): 6 modify, 22 no change. |
 | `stiipdevwus01/.../containers/uploads`, `/results` | `- properties.defaultEncryptionScope`, `.denyEncryptionScopeOverride` | **Fixed, not accepted (2026-09-24).** Both are writable in the provider schema, and M9 declared the containers with only `publicAccess`. Now declared as found (`$account-encryption-key`, `false`). Should not reappear. |
 | `appi-iip-dev-wus-01` | `+ properties.Flow_Type: "Bluefield"`, `+ properties.Request_Source: "rest"` | **Registered 2026-09-25** (first what-if after the M11 deploy). Not in the template, which sets only `Application_Type`, and not returned on read. The provider fills them in when it normalizes the request, so no template can make the diff go away. |
 | `func-iip-dev-wus-01` | `+ siteConfig.localMySqlEnabled`, `+ siteConfig.minTlsVersion`, `+ siteConfig.netFrameworkVersion` | **Registered 2026-09-25.** A read-back gap: Flex doesn't return these on GET, so what-if always shows them as additions. The M11 deploy already sent the same template. |
@@ -139,6 +139,49 @@ deploy time), which makes 12 in total. Confirm against the next post-deploy
 - **Nothing may show `~` or `-` on an existing resource.**
 
 This section becomes a register entry after the first deploy.
+
+## M11 pass 2 — sign-in (written 2026-09-30; step A deployed, step B not)
+
+Claude wrote it. Gerard made the decisions on 2026-09-30: Entra objects go in
+**Graph Bicep, in a separate file**; RBAC row 10 starts with a **user**
+assignment and swaps to the group on the P2 trial's first day (a group
+assignment to an app needs Entra ID P1/P2).
+
+**Step A, `main.bicep` (ARM, what-if applies):** `identity.bicep` adds
+`id-iip-dev-wus-03` (tag `purpose: easyauth-fic`, no Azure role, RBAC row 17).
+Compiles cleanly with Bicep 0.47.16 (`build` and `build-params`), which proves
+syntax only. **Expected what-if:** the register unchanged (6 modify, 22 no
+change, 11 Unsupported, 2 to ignore) **plus exactly 1 Create**, the identity.
+Nothing else may move. **Result, 2026-09-30:** exactly that (1 create, 6
+modify, 22 no change, 11 Unsupported, 2 to ignore). Deployed as
+: Succeeded.  gives the tag
+, and  for its principal
+returns nothing, as row 17 requires. **Register from now on:** the same
+totals, with 23 no change (the identity joins them).
+
+**Step B, `entra.bicep` + `entra.bicepparam` (Microsoft Graph, NO what-if):**
+the app registration **IIP Results (dev)** with its federated credential
+`fic-id-iip-dev-wus-03`, the service principal ("Assignment required" = Yes),
+tenant-wide admin consent for `openid profile email` only, and the group **IIP
+Results Viewers (dev)** (no members). `bicepconfig.json` pins the Graph types to
+`microsoftgraph/v1.0:1.0.0`. **Not compiled by Claude:** the types restore from
+mcr.microsoft.com, which Claude's workspace can't reach, so `az bicep build` on
+the tower is the first compile check.
+
+**Why a separate file:** Graph resources are extensible resources, and what-if
+does not support them. Inside `main.bicep` they would sit unanalysed in the one
+deployment whose what-if is registered line by line. Kept apart, `main.bicep`'s
+register stays exact, and `entra.bicep` is verified by **reading the objects
+back** (`az ad app show`, `az ad app federated-credential list`, `az ad sp
+show`, `az ad group show`) against the template.
+
+**Not in pass 2 step B, on purpose:** built-in authentication
+(`Microsoft.Web/sites/config` `authsettingsV2`), attaching `-03` to the Function,
+and the `OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID` app setting. Those are ARM, so
+they go in `main.bicep` as step C, where what-if covers them. Step C takes the
+app's client ID as a parameter (an `entra.bicep` output) rather than referencing
+a Graph resource from `main.bicep`, which would drag an unsupported type into
+the registered what-if.
 
 ## Load-bearing lines — do not edit casually
 

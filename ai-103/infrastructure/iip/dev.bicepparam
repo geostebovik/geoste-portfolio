@@ -35,6 +35,8 @@ param foundryCustomSubDomainName = 'aif-iip-dev-wus-01'
 // `purpose` tag, because they differ only by instance number.
 param functionIdentityName = 'id-iip-dev-wus-01'
 param cicdIdentityName = 'id-iip-dev-wus-02'
+// M11 pass 2 (2026-09-30): sign-in identity, purpose tag 'easyauth-fic' (row 17).
+param signInIdentityName = 'id-iip-dev-wus-03'
 
 // Gerard's Entra object ID, read from `az ad signed-in-user show` on 2026-09-21.
 param adminPrincipalId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'
