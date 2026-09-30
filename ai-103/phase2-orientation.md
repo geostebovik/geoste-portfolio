@@ -228,7 +228,11 @@ closed.)*
   scope, which is what makes M10's results transfer to the Function.
   **Lesson:** a precondition that the thing being gated would itself defeat is
   not a safety check.
-- **Make D1 accurate.** *(Re-confirmed live 2026-09-22 from
+- ~~**Make D1 accurate.**~~ **DONE 2026-09-21; closed out 2026-09-30.**
+  `phase2-rbac-model-draft.md`'s "D1 correction" section, written 2026-09-21,
+  records the real posture, and both row 1 and the D1 row point to it. This
+  item was never struck through, so it stayed open here, in STATUS.md and in
+  Todoist. The original text follows. *(Re-confirmed live 2026-09-22 from
   `az role assignment list --include-inherited`: Owner on the `Non-Prod`
   management group, Contributor on management group `e0249b00-…`. Still open;
   this is now a read-twice fact, not a single observation.)*

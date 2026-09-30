@@ -82,12 +82,21 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M11 pass 2, sign-in (1-2 sessions).**
-Updated 2026-09-29, at the HEAD this entry's commit creates. M11 is the
+**Next action: finish the move to the tower, then M11 pass 2, sign-in (1-2
+sessions).**
+Updated 2026-09-30, at the HEAD this entry's commit creates. M11 is the
 working milestone. Row 15 is **verified alone** and blob and container soft
-delete are **on**, so pass 1's loose ends are closed. See the Sep 29 session
-entry.
+delete are **on**, so pass 1's loose ends are closed. See the Sep 29 and Sep 30 session
+entries.
 
+0. **Before item 1: move to the tower (Gerard's call, 2026-09-30).** The
+   Surface Book is being retired, so pass 2 starts on the tower rather than
+   straddling the switch. Copy the whole `geoste-portfolio` folder, `.git`
+   included, instead of cloning: git ignores `scripts/.env`, `Claude outputs/`
+   and 30 older results files. (The 9 results files the M7 write-up cites are
+   all tracked, checked 2026-09-30.) IIP toolchain only, time-boxed.
+   **Done when:** `git status` on the tower is clean and the what-if matches
+   the register (6 modify, 22 no change).
 1. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
    (dev)**, the viewers group, built-in authentication on
    `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
@@ -110,12 +119,11 @@ entry.
      app disconnect on Sep 25 and again on Sep 29;
    - if `m7-writeup-draft.md` is with outside readers, send them the Sep 23
      section 4 change.
-4. **Small, any time:** make D1 accurate; the `__main__`-guard refactor for
+4. **Small, any time:** the `__main__`-guard refactor for
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
    `.gitignore`; the token-undercount backlog item (Todoist; the Sep 28
-   findings are in `Claude outputs/2026-09-28-unattended-findings.md`). Optional,
-   ~2 min: one what-if to confirm the register is back to 6 modify, 22 no
-   change after the soft delete deploy.
+   findings are in `Claude outputs/2026-09-28-unattended-findings.md`). The
+   ~2 min what-if (6 modify, 22 no change) is now item 0's done-when.
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -457,6 +465,31 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — September 30, 2026 — D1 closed out; moving to the tower
+
+**Claude checked the docs, Todoist and the laptop's untracked files and wrote
+these edits. Gerard chose the order.** Late start. Started from the Sep 29
+handoff and the Todoist punch list, which agreed.
+
+**D1 was already fixed.** `phase2-rbac-model-draft.md` has carried a "D1
+correction" section since 2026-09-21: the full role table, Owner on
+`Non-Prod`, Contributor at the tenant root. Row 1 and the D1 row point to it.
+Only the bookkeeping was stale: the `phase2-orientation.md` backlog item,
+STATUS item 4 and the Todoist task. All three are closed now. No Azure change.
+
+**Order: switch machines before pass 2.** Pass 2 is 1-2 sessions, so starting
+it on the laptop today would have put the machine switch in the middle of
+sign-in work, which depends heavily on local state (`az login` token cache,
+tenant, two GitHub accounts). Two changes at once, two suspects. Gerard's
+choice.
+
+**What a fresh clone would lose** (from `git status --ignored` on the laptop):
+`scripts/.env`, `Claude outputs/` (292 KB), 30 untracked files in
+`scripts/results/`, `scratch.py`, `tester.py`, `m6_probe.py`, `.vscode/`,
+`Get-RgResources.ps1` and the Axon .docx files at the repo root. The 9 results
+files the M7 write-up cites are all tracked. Hence: copy the folder, don't
+clone.
 
 ### Session — September 29, 2026 — row 15 verified alone; blob and container soft delete on
 
