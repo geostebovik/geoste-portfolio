@@ -140,7 +140,7 @@ deploy time), which makes 12 in total. Confirm against the next post-deploy
 
 This section becomes a register entry after the first deploy.
 
-## M11 pass 2 — sign-in (written 2026-09-30; steps A, B and C deployed)
+## M11 pass 2 — sign-in (2026-09-30; steps A-C deployed, gate proven; results page to come)
 
 Claude wrote it. Gerard made the decisions on 2026-09-30: Entra objects go in
 **Graph Bicep, in a separate file**; RBAC row 10 starts with a **user**
@@ -233,6 +233,29 @@ turned both off. Redeployed as `m11-entra-20260930c`: Succeeded.
   first unassigned (expect AADSTS50105), then assigned (expect the page).
   The same bypass matters for the Conditional Access design, because admin
   accounts skip this gate.
+
+**The gate, tested with a non-admin (2026-09-30).** Gerard created the RBAC row
+11 user by CLI: `iip-ca-test@letter7.onmicrosoft.com`, display name **IIP CA
+Test User (dev)**, a member with no directory role. The password was generated
+locally, changed at first sign-in, and never recorded here or seen by Claude.
+Users are created by CLI because a Graph Bicep user needs its password in the
+template.
+- **Unassigned:** sign-in refused with **AADSTS50105** ("…blocked because they
+  are not a direct member of a group with access, nor had access directly
+  assigned…"). **The assignment gate holds.**
+- **Assigned:** `entra.bicep` gained the INTERIM row 10 assignment,
+  `iip-ca-test` → **IIP Results (dev)** with Default Access (`00000000-…`),
+  deployed as `m11-entra-20260930d`: Succeeded. `appRoleAssignedTo` shows
+  exactly one row. Sign-in as `iip-ca-test` then **reached the Functions
+  default page.**
+- **Interim, by decision:** letter7 has no Entra licences (`subscribedSkus` is
+  empty), so a group can't be assigned yet. On the P2 trial's day 1: assign
+  **IIP Results Viewers (dev)**, add `iip-ca-test` to it, delete the direct
+  assignment, and re-run both tests.
+
+**Still to build for M11's done-when** ("a group member can sign in and *see
+it*"): the HTTP function that shows results. Today the page behind the gate is
+only the Functions default page.
 
 **Why a separate file:** Graph resources are extensible resources, and what-if
 does not support them. Inside `main.bicep` they would sit unanalysed in the one

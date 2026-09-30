@@ -22,3 +22,7 @@ param appDisplayName = 'IIP Results (dev)'
 param viewersGroupUniqueName = 'iip-results-viewers-dev'
 param viewersGroupDisplayName = 'IIP Results Viewers (dev)'
 param viewersGroupMailNickname = 'iip-results-viewers-dev'
+
+// RBAC row 11, the Conditional Access test user: a non-admin, created by CLI on
+// 2026-09-30. Also the INTERIM direct assignment for row 10 (see entra.bicep).
+param caTestUserUpn = 'iip-ca-test@letter7.onmicrosoft.com'

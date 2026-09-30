@@ -23,13 +23,16 @@
 //                              assignment needs admin consent, even where
 //                              user consent would otherwise be allowed
 //   IIP Results Viewers (dev)  security group, no members yet (RBAC row 10)
+//   CA test user assignment    INTERIM row 10: iip-ca-test is assigned to the
+//                              app DIRECTLY (Default Access). letter7 is on
+//                              Entra ID Free (no licences, checked 2026-09-30),
+//                              and assigning a GROUP to an app needs P1/P2.
+//                              Gerard's decision (2026-09-30): user first, then
+//                              on the P2 trial's day 1 assign the group, add
+//                              the user to it, and delete this direct
+//                              assignment.
 //
-// NOT here yet, on purpose:
-//   - The app-role assignment (row 10). letter7 is assumed to be on Entra ID
-//     Free, and assigning a GROUP to an app needs P1/P2. Gerard's decision
-//     (2026-09-30): prove the gate with the CA test user assigned directly
-//     (works on Free), then start the P2 trial and swap to the group as the
-//     first step on trial day 1. Both land in this file when they happen.
+// NOT here, on purpose:
 //   - Built-in authentication on the Function, and attaching id-iip-dev-wus-03
 //     to it. Those are ARM (Microsoft.Web/sites, authsettingsV2) and go in
 //     main.bicep, where what-if covers them.
@@ -54,6 +57,9 @@ param appDisplayName string
 param viewersGroupUniqueName string
 param viewersGroupDisplayName string
 param viewersGroupMailNickname string
+
+@description('UPN of the Conditional Access test user (RBAC row 11). A non-admin, created with az ad user create on 2026-09-30: Global Administrators skip "Assignment required", so only a non-admin can test the gate.')
+param caTestUserUpn string
 
 // --- Existing ARM resources this file reads from ------------------------------
 resource functionApp 'Microsoft.Web/sites@2024-04-01' existing = {
@@ -175,6 +181,22 @@ resource viewersGroup 'Microsoft.Graph/groups@v1.0' = {
       adminPrincipalId
     ]
   }
+}
+
+// --- INTERIM row 10: the CA test user, assigned directly --------------------------
+// Proven necessary 2026-09-30: unassigned, this user got AADSTS50105. The user
+// itself is created by CLI, not here, because a Graph Bicep user needs its
+// password in the template.
+resource caTestUser 'Microsoft.Graph/users@v1.0' existing = {
+  userPrincipalName: caTestUserUpn
+}
+
+resource caTestUserAssignment 'Microsoft.Graph/appRoleAssignedTo@v1.0' = {
+  // The all-zeros role is "Default Access". The app defines no app roles, so
+  // this satisfies "Assignment required" without adding a roles claim.
+  appRoleId: '00000000-0000-0000-0000-000000000000'
+  principalId: caTestUser.id
+  resourceId: resultsSp.id
 }
 
 // --- Outputs: main.bicep's built-in authentication step needs the first two ----
