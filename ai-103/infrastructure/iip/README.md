@@ -140,7 +140,7 @@ deploy time), which makes 12 in total. Confirm against the next post-deploy
 
 This section becomes a register entry after the first deploy.
 
-## M11 pass 2 — sign-in (written 2026-09-30; step A deployed, step B not)
+## M11 pass 2 — sign-in (written 2026-09-30; steps A and B deployed)
 
 Claude wrote it. Gerard made the decisions on 2026-09-30: Entra objects go in
 **Graph Bicep, in a separate file**; RBAC row 10 starts with a **user**
@@ -154,8 +154,8 @@ syntax only. **Expected what-if:** the register unchanged (6 modify, 22 no
 change, 11 Unsupported, 2 to ignore) **plus exactly 1 Create**, the identity.
 Nothing else may move. **Result, 2026-09-30:** exactly that (1 create, 6
 modify, 22 no change, 11 Unsupported, 2 to ignore). Deployed as
-: Succeeded.  gives the tag
-, and  for its principal
+`m11-signin-id-20260930`: Succeeded. `az identity show` gives the tag
+`purpose: easyauth-fic`, and `az role assignment list --all` for its principal
 returns nothing, as row 17 requires. **Register from now on:** the same
 totals, with 23 no change (the identity joins them).
 
@@ -167,6 +167,32 @@ Results Viewers (dev)** (no members). `bicepconfig.json` pins the Graph types to
 `microsoftgraph/v1.0:1.0.0`. **Not compiled by Claude:** the types restore from
 mcr.microsoft.com, which Claude's workspace can't reach, so `az bicep build` on
 the tower is the first compile check.
+
+**Step B result, 2026-09-30.** It took two fixes, both Claude's errors:
+1. **`owners` takes plain object IDs in types version `1.0.0`**
+   (`relationships: [ '<id>' ]`). Microsoft's current reference page shows
+   `{ id: '<id>' }` objects, which belongs to a later types version. The build
+   flagged it as warning BCP034 on all three `owners` blocks.
+2. **The federated credential's `name` must be `'{parent}/{child}'`**, here
+   `iip-results-dev/fic-id-iip-dev-wus-03`, even though the resource is nested.
+   The compiler accepted a one-part name. The server rejected it, so the first
+   deployment, `m11-entra-20260930`, **failed** on that resource.
+
+Redeployed as `m11-entra-20260930b`: **Succeeded**. It updated in place, and
+no duplicates appeared (the `uniqueName` keys did their job). **Read back and
+matched the template:**
+- exactly one app **IIP Results (dev)**, appId `16565c24-5afd-4581-8430-c615ded0291a`,
+  `AzureADMyOrg`, redirect `https://func-iip-dev-wus-01.azurewebsites.net/.auth/login/aad/callback`,
+  implicit ID tokens off;
+- credential `fic-id-iip-dev-wus-03`: issuer `https://login.microsoftonline.com/e0249b00-…/v2.0`,
+  subject `1030295e-…` (the principal ID of `id-iip-dev-wus-03`), audience `api://AzureADTokenExchange`;
+- enterprise app: assignment required;
+- consent grant: `AllPrincipals`, `openid profile email` only;
+- exactly one group, **IIP Results Viewers (dev)**: security-enabled, not mail-enabled;
+- owner of the app and of the group: `djeemunee@letter7.onmicrosoft.com`.
+
+Nobody is assigned yet, so nobody can sign in. That's intended until the CA
+test user is assigned (row 10, the user-first path).
 
 **Why a separate file:** Graph resources are extensible resources, and what-if
 does not support them. Inside `main.bicep` they would sit unanalysed in the one
