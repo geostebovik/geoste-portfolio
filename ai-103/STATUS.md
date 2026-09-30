@@ -72,7 +72,10 @@ and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23). For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
-2 write-up and the two stale ostebovik.net lines.
+2 write-up.
+*(Corrected 2026-09-30: this paragraph also listed "the two stale
+ostebovik.net lines" for that push. Both were fixed on Sep 21 in `5fccd4a`,
+per the Todoist write-up task's Sep 28 correction.)*
 *(Replaced 2026-09-24, housecleaning — Claude drafted, at Gerard's request.
 The previous paragraph was dated Sep 16 and predated M8-M10. Its M7 detail —
 the item3 colour flaw moving from `[observed]` to `[content]`, 40/45 then
@@ -82,21 +85,20 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: finish the move to the tower, then M11 pass 2, sign-in (1-2
-sessions).**
+**Next action: M11 pass 2, sign-in (1-2 sessions), on the tower.**
 Updated 2026-09-30, at the HEAD this entry's commit creates. M11 is the
 working milestone. Row 15 is **verified alone** and blob and container soft
-delete are **on**, so pass 1's loose ends are closed. See the Sep 29 and Sep 30 session
-entries.
+delete are **on**, so pass 1's loose ends are closed. The move to the tower is
+**done**; this entry's commit is the tower's first push. See the Sep 29 and
+Sep 30 session entries.
 
-0. **Before item 1: move to the tower (Gerard's call, 2026-09-30).** The
-   Surface Book is being retired, so pass 2 starts on the tower rather than
-   straddling the switch. Copy the whole `geoste-portfolio` folder, `.git`
-   included, instead of cloning: git ignores `scripts/.env`, `Claude outputs/`
-   and 30 older results files. (The 9 results files the M7 write-up cites are
-   all tracked, checked 2026-09-30.) IIP toolchain only, time-boxed.
-   **Done when:** `git status` on the tower is clean and the what-if matches
-   the register (6 modify, 22 no change).
+0. ~~Move to the tower.~~ **Done 2026-09-30:** `git status` clean on the
+   tower, and the what-if matched the register (6 modify, 22 no change).
+   IDENTITY_LINE
+   Still open, not blocking pass 2: the laptop retirement checklist at the
+   bottom of the Drive file `2026-09-30-tower-migration-checklist.md`,
+   including re-pointing the Sunday punch-list scheduled task, which still has
+   the laptop's folder attached.
 1. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
    (dev)**, the viewers group, built-in authentication on
    `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
@@ -123,7 +125,7 @@ entries.
    `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
    `.gitignore`; the token-undercount backlog item (Todoist; the Sep 28
    findings are in `Claude outputs/2026-09-28-unattended-findings.md`). The
-   ~2 min what-if (6 modify, 22 no change) is now item 0's done-when.
+   post-soft-delete what-if is done (Sep 30, on the tower; item 0).
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -466,7 +468,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — September 30, 2026 — D1 closed out; moving to the tower
+### Session — September 30, 2026 — D1 closed out; moved to the tower
 
 **Claude checked the docs, Todoist and the laptop's untracked files and wrote
 these edits. Gerard chose the order.** Late start. Started from the Sep 29
@@ -490,6 +492,41 @@ choice.
 `Get-RgResources.ps1` and the Axon .docx files at the repo root. The 9 results
 files the M7 write-up cites are all tracked. Hence: copy the folder, don't
 clone.
+
+**The move: done.** Gerard ran steps A-G of the Drive checklist
+`2026-09-30-tower-migration-checklist.md` on the tower: installs; git settings
+matched to the laptop (`core.autocrlf=true`, Git Credential Manager, GitHub
+username `geostebovik`); robocopy of `geoste-portfolio` and `az-104` with
+**Failed 0**; `git status` clean at `393fa57`; the venv rebuilt at
+`C:\Users\gerar\venvs\ai-103` from both requirements files; Bicep, `az login`
+and the subscription set. The laptop's untracked files (`scripts/.env`,
+`Claude outputs/`, the 30 older results files) came across with the folder.
+Left behind on purpose: `geoste-portfolio-purge-tmp` and the `az104_id_rsa`
+SSH key.
+
+- **What-if on the tower: 6 modify, 22 no change**, which matches the register.
+  It also confirms the post-soft-delete totals that
+  `infrastructure/iip/README.md` had listed as "expected, not yet confirmed"
+  since Sep 29. That line is updated in this commit.
+- IDENTITY_BULLET
+- **First push from the tower:** this commit. It is also the credential test,
+  because only a push authenticates.
+- **The checklist's step D was wrong.** It said `git fetch` would prompt for
+  sign-in. It doesn't: the repo is public, so only a push authenticates. No
+  prompt on fetch is the expected result, not a fault.
+- **The Claude app's link to the computer did not move within a conversation.**
+  The Sep 30 laptop conversation stayed bound to the laptop. Messaging it from
+  the tower and quitting the laptop app both failed, so the rest of the day ran
+  in a new conversation. Claude confirmed from there that the device is
+  `tower`, and read `main` = `origin/main` = `393fa57` from the tower's `.git`
+  ref files. Claude has no shell on the tower, so git checks are still
+  Gerard's.
+
+**Still open, not today:** the laptop retirement checklist (Drive file,
+bottom), including the Sunday Oct 4 punch-list scheduled task, which has the
+laptop's folder attached; the `az-104` repo's 63 uncommitted changes (52
+deletions, last commit May 5, account `gerardostebovik-collab`); the Entra
+users and roles cleanup.
 
 ### Session — September 29, 2026 — row 15 verified alone; blob and container soft delete on
 
