@@ -205,9 +205,10 @@ the parameter `resultsAppClientId` (in `dev.bicepparam`).
   `authsettingsV2` showed as a **Modify** (`platform.enabled: false => true`
   plus the new blocks), not a Create. The Function's existing Modify gained
   exactly one line, `+ identity.userAssignedIdentities.../id-iip-dev-wus-03`.
-  **Register from now on:** 7 modify, with `authsettingsV2` among them,
-  because `clientSecretSettingName` is masked and what-if may keep reporting
-  the block. Confirm on the next run.
+  **Register from now on (corrected 2026-09-30, next run):** 6 modify, 24 no
+  change, 11 Unsupported, 2 to ignore. Once deployed, `authsettingsV2`
+  reports `=` No change. Claude had guessed it might stay a Modify because of
+  the masked setting name. It doesn't.
 - **Deployed** as `m11-signin-easyauth-20260930`: Succeeded. App settings:
   `OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID` = `2544a963-…` (`-03`), and
   `AZURE_CLIENT_ID` is unchanged (`efc6dd4a-…`, `-01`).
@@ -253,9 +254,22 @@ template.
   **IIP Results Viewers (dev)**, add `iip-ca-test` to it, delete the direct
   assignment, and re-run both tests.
 
-**Still to build for M11's done-when** ("a group member can sign in and *see
-it*"): the HTTP function that shows results. Today the page behind the gate is
-only the Functions default page.
+**The results page (2026-09-30).** `app.bicep` adds the app setting
+`RESULTS_BLOB_ENDPOINT` (the endpoint of `stiipdevwus01`, read from the
+resource). What-if: 6 modify, 24 no change, 11 Unsupported, 2 to ignore. The
+new setting is visible in the `appsettings` block, which what-if always prints
+whole, as additions. Deployed as `m11-results-setting-20260930`: Succeeded.
+The code (`function/results_page.py` and two routes in `function_app.py`) was
+deployed by `config-zip --build-remote true`: 14 files, "Deployment was
+successful", and 3 functions registered.
+
+**M11's sign-in half, seen working:** as `iip-ca-test` (a non-admin, assigned
+directly), `/api/results` listed all 5 result files with topic, status and
+verdicts, including one `error` row rendered with dashes. The detail page
+for `item4-key-cutting-FLAW-brand/20260924T191158Z` showed the facts, the
+three audit verdicts and the final drafted copy. **Qualifier:** the done-when
+says "a group member". The interim is a direct assignment until the P2 trial
+(see above).
 
 **Why a separate file:** Graph resources are extensible resources, and what-if
 does not support them. Inside `main.bicep` they would sit unanalysed in the one

@@ -239,6 +239,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       // authentication uses it to get a token for the federated credential.
       // Not a secret: a client ID proves nothing without the identity itself.
       '${ficSettingName}': signInIdentity.properties.clientId
+
+      // Pass 2, the results page (results_page.py): where it reads result files,
+      // with -01's identity (RBAC row 6). Read from the resource, not typed.
+      RESULTS_BLOB_ENDPOINT: dataStorage.properties.primaryEndpoints.blob
     }, m7Settings)
   }
 

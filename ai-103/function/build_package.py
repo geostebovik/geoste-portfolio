@@ -10,7 +10,8 @@ exactly the files the Function needs into function/.build/, in the SAME
 relative layout as the repo, which means that path resolves with no change to
 any certified module:
 
-  .build/function_app.py, upload_handler.py, host.json, requirements.txt
+  .build/function_app.py, upload_handler.py, results_page.py, host.json,
+  .build/requirements.txt
   .build/scripts/<the M7 import chain>
   .build/iip-docs/m7-riverside-hardware/fact-sheet.md
 
@@ -33,7 +34,8 @@ AI103 = HERE.parent
 BUILD = HERE / ".build"
 ZIP_BASE = HERE / "iip-function"          # make_archive appends .zip
 
-FUNCTION_FILES = ["function_app.py", "upload_handler.py", "host.json", "requirements.txt"]
+FUNCTION_FILES = ["function_app.py", "upload_handler.py", "results_page.py",
+                  "host.json", "requirements.txt"]
 SCRIPT_MODULES = [
     "m7_orchestrator.py", "m7_cv_audit_tool.py", "m7_evaluator_tool.py",
     "m7_fact_sheet_tool.py", "m7_legibility_check.py", "m7_vision_test.py",

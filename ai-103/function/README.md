@@ -2,7 +2,8 @@
 
 Written by Claude, 2026-09-24. Gerard approved the design and made its
 decisions: the queue trigger (D-M11-1 (b)), the topic carried as blob metadata,
-and one agent per upload (D-M11-3). Deployed: **not yet.**
+and one agent per upload (D-M11-3). Deployed 2026-09-24 (pass 1). The results
+page was added 2026-09-30 (pass 2; see "The results page").
 
 ## The upload contract
 
@@ -28,12 +29,51 @@ which means **not scored**, never "failed".
 
 | File | What it is |
 |---|---|
-| `function_app.py` | The queue trigger. A thin adapter over `upload_handler.process()`. |
+| `function_app.py` | The queue trigger and the two results-page routes. A thin adapter over `upload_handler.process()` and `results_page.py`. |
 | `upload_handler.py` | All the per-upload logic. It never imports `azure.functions`, so it runs on the laptop. |
+| `results_page.py` | What a signed-in viewer sees: the list and detail pages. It never imports `azure.functions` either. |
 | `host.json` | Queue settings. **Read the next section before changing any of them.** |
 | `requirements.txt` | The Function's own dependencies, not the lab's. **Fully pinned** to the measured venv, plus `azure-functions` and `werkzeug`, which are new and unmeasured. |
 | `build_package.py` | Builds `.build/` and `iip-function.zip`, mirroring the repo layout so the tools' `../iip-docs` paths resolve. It refuses to build if a packaged module imports an unpackaged sibling. |
 | `local_run.py` | Runs `process()` on the laptop against a real blob already in `uploads`. |
+
+## The results page (pass 2, 2026-09-30)
+
+Written by Claude to Gerard's decisions: a list plus a detail view, at
+`/api/results`, with `host.json` unchanged.
+
+- `GET /api/results` shows the newest 25 results: upload, time, topic, status,
+  the three audit verdicts and whether the copy passed.
+- `GET /api/results/{upload}/{timestamp}` shows one result: the same facts
+  plus the agent's final drafted copy, or the error.
+
+**Security:**
+- **The gate is built-in authentication** (`app.bicep`). Only users assigned to
+  **IIP Results (dev)** get in (RBAC rows 10, 11).
+- **Function auth level is anonymous on purpose.** A function key would put a
+  shared secret in every URL.
+- **Second lock:** `require_principal()` refuses with 401 when the
+  `X-MS-CLIENT-PRINCIPAL-*` headers are absent. Built-in authentication sets
+  them and strips any a client sends, so if sign-in were ever switched off,
+  the page fails closed.
+- **Every value is HTML-escaped**, because the drafted copy is model output.
+- **Only names shaped like `_write_result()`'s are accepted**, so a crafted URL
+  can't read another blob.
+- **Headers:** a CSP with no scripts at all, `nosniff` and `no-store`.
+- **Reads with the Function's identity** (`-01`, RBAC row 6) from
+  `RESULTS_BLOB_ENDPOINT`. The viewer holds no Azure role (RBAC principle 3).
+
+**Tested offline (Claude, 2026-09-30),** against fake result files through the
+real `function_app` handlers (21 checks, all passing):
+- 401 without a principal, on both routes;
+- script tags escaped in the topic, the copy and the error;
+- URL-encoded links;
+- 404 for `..`, a slash in a name, a bad timestamp or a missing result;
+- unreadable files shown as "unreadable", not a crash;
+- the security headers present.
+
+**Not tested offline:** the real storage calls and the real headers from
+built-in authentication. That's the Azure test.
 
 ## host.json: why each value
 
