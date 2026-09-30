@@ -85,47 +85,67 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M11 pass 2, sign-in (1-2 sessions), on the tower.**
+**Next action: close M11. Record pass 2 in the RBAC model and orientation
+docs, then do the group swap on the Entra ID P2 trial's first day.**
 Updated 2026-09-30, at the HEAD this entry's commit creates. M11 is the
-working milestone. Row 15 is **verified alone** and blob and container soft
-delete are **on**, so pass 1's loose ends are closed. The move to the tower is
-**done**; this entry's commit is the tower's first push. See the Sep 29 and
-Sep 30 session entries.
+working milestone. Pass 2 (sign-in) is **built, deployed and proven** on the
+tower: secretless sign-in, the assignment gate, and the results page, seen
+by a non-admin. What's left is the done-when's literal "group member", which
+needs the P2 trial. See the Sep 30 session entry.
 
-0. ~~Move to the tower.~~ **Done 2026-09-30:** `git status` clean on the
-   tower, and the what-if matched the register (6 modify, 22 no change).
-   IDENTITY_LINE
-   Still open, not blocking pass 2: the laptop retirement checklist at the
-   bottom of the Drive file `2026-09-30-tower-migration-checklist.md`,
-   including re-pointing the Sunday punch-list scheduled task, which still has
-   the laptop's folder attached.
-1. **M11 pass 2, sign-in (1-2 sessions).** The app registration **IIP Results
-   (dev)**, the viewers group, built-in authentication on
-   `func-iip-dev-wus-01`, and `id-iip-dev-wus-03` as a federated credential
-   (D-M11-2 (b), row 17); plus an HTTP function for the results page. M11's
-   done-when needs "a group member can sign in and see it". If a session only
-   has room to start it, start with the app registration.
-2. **Small follow-ups from pass 1:**
+1. **Record pass 2 in the docs not touched on Sep 30 (docs only, about
+   30 min).**
+   - `phase2-rbac-model-draft.md`:
+     - rows 10, 11 and 17: built; the interim direct assignment; the Global
+       Administrator bypass;
+     - the D1 table's gaps: Foundry User is at the **account** scope, not the
+       subscription, and the two Search Index roles are missing;
+     - M11's VERIFY rows, confirmed or changed (part of M11's done-when).
+   - `phase2-orientation.md`: the M11 row and the milestone marker.
+   - `m11-prep.md`: a pass 2 line in the measured-results box.
+2. **The group swap (M11's last step; it starts a 30-day clock).**
+   - Start the P2 trial only when ready to go straight on to Conditional
+     Access. Turn recurring billing **off** straight away (Todoist).
+   - Then, in `entra.bicep`: assign **IIP Results Viewers (dev)** to the app,
+     add `iip-ca-test` to the group, and delete the direct assignment.
+   - Re-run both gate tests: a non-member gets AADSTS50105, and a member
+     reaches `/api/results`.
+3. **Before Sunday Oct 4:** the laptop retirement checklist (bottom of the
+   Drive file `2026-09-30-tower-migration-checklist.md`). The Sunday punch-list
+   scheduled task still has the **laptop's** folder attached, so re-point it
+   before its Oct 4 run.
+4. **Small follow-ups from pass 1:**
    - deployed-package provenance (the Function records no git; record the
      package or deployment instead);
    - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field.
      That field would also answer the open observation below;
-   - the Azure SDK's HTTP logging fills `AppTraces` at Information on every call,
-     so trim it.
-3. **Gerard's steps:**
-   - add the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`), RBAC row
-     18, and "soft delete on, 7 days" for `stiipdevwus01` to the project
-     instructions' resource notes;
-   - decide whether the project instructions' "Ask decisions with the question
-     tool" should become "plain text": the question tool's answer was lost to an
-     app disconnect on Sep 25 and again on Sep 29;
-   - if `m7-writeup-draft.md` is with outside readers, send them the Sep 23
+   - the Azure SDK's HTTP logging fills `AppTraces` at Information on every
+     call, so trim it.
+5. **Gerard's steps:**
+   - Project instructions:
+     - `id-iip-dev-wus-03` is **deployed** (the instructions still say
+       PLANNED);
+     - add the app registration **IIP Results (dev)** (appId `16565c24-…`),
+       the group **IIP Results Viewers (dev)**, the test user `iip-ca-test`,
+       and the results page
+       `https://func-iip-dev-wus-01.azurewebsites.net/api/results`;
+     - the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`), RBAC row 18;
+     - "soft delete on, 7 days" for `stiipdevwus01`.
+   - Decide whether "Ask decisions with the question tool" should become
+     "plain text". It lost answers on Sep 25 and Sep 29, but worked for all 6
+     questions on Sep 30.
+   - If `m7-writeup-draft.md` is with outside readers, send them the Sep 23
      section 4 change.
-4. **Small, any time:** the `__main__`-guard refactor for
-   `m6_generate.py`, `m6_probe.py` and `m6_evaluate.py`; `.gitattributes` for
-   `.gitignore`; the token-undercount backlog item (Todoist; the Sep 28
-   findings are in `Claude outputs/2026-09-28-unattended-findings.md`). The
-   post-soft-delete what-if is done (Sep 30, on the tower; item 0).
+6. **Small, any time:**
+   - the `__main__`-guard refactor for `m6_generate.py`, `m6_probe.py` and
+     `m6_evaluate.py`;
+   - `.gitattributes` for `.gitignore`;
+   - the token-undercount backlog item (Todoist; the Sep 28 findings are in
+     `Claude outputs/2026-09-28-unattended-findings.md`);
+   - the `az-104` repo's 63 uncommitted changes (account
+     `gerardostebovik-collab`);
+   - the Entra users and roles cleanup. **Keep** `iip-ca-test`: it's RBAC
+     row 11.
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -150,6 +170,17 @@ Harmless so far; the instance-id follow-up in item 2 would tell them apart.
   (retry +103 s, no 403, poison move) and scale-from-zero both passed.
 - **Soft delete on `stiipdevwus01`:** blob and container, 7 days,
   `allowPermanentDelete: false` (Gerard, 2026-09-29).
+- **Sign-in is secretless and works** (2026-09-30): the authorize request
+  carries `response_type=code+id_token`, and the code is redeemed with
+  `id-iip-dev-wus-03`'s federated assertion. **ID-token issuance must stay
+  on**, because built-in authentication always asks for an ID token.
+- **Global Administrators bypass "Assignment required"** (Microsoft's
+  AADSTS50105 page). Test the gate with `iip-ca-test`, never with an admin.
+- **Entra objects live in `entra.bicep`** (Graph Bicep types `1.0.0`: `owners`
+  take plain IDs, and a federated credential's name is `parent/child`). They
+  get no what-if, so they're verified by reading them back.
+- **The `main.bicep` register is 6 modify, 24 no change, 11 Unsupported, 2 to
+  ignore** (Sep 30). `authsettingsV2` reports No change once deployed.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -468,7 +499,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — September 30, 2026 — D1 closed out; moved to the tower
+### Session — September 30, 2026 — moved to the tower; M11 pass 2 (sign-in) built and proven
 
 **Claude checked the docs, Todoist and the laptop's untracked files and wrote
 these edits. Gerard chose the order.** Late start. Started from the Sep 29
@@ -508,7 +539,16 @@ SSH key.
   It also confirms the post-soft-delete totals that
   `infrastructure/iip/README.md` had listed as "expected, not yet confirmed"
   since Sep 29. That line is updated in this commit.
-- IDENTITY_BULLET
+- **`az` identity: correct.** Gerard thought he had picked the wrong account at
+  `az login`. The check showed `djeemunee@letter7.onmicrosoft.com`, tenant
+  `e0249b00-…`, object ID `fdc0b6bb-…`. Both IDs match `dev.bicepparam`.
+  "VSE Sandbox" is simply the subscription's display name. No re-login was
+  needed.
+- **Noticed, not chased:** the full role list shows **Foundry User at the
+  account scope** (`aif-dev-wus-01`), where the D1 correction table says
+  subscription. It also shows **Search Index Data Reader and Contributor** on
+  `srch-iip-dev-wus-01`, which that table doesn't list. It's a documentation
+  gap in `phase2-rbac-model-draft.md`, not a permission problem.
 - **First push from the tower:** this commit. It is also the credential test,
   because only a push authenticates.
 - **The checklist's step D was wrong.** It said `git fetch` would prompt for
@@ -522,11 +562,84 @@ SSH key.
   ref files. Claude has no shell on the tower, so git checks are still
   Gerard's.
 
-**Still open, not today:** the laptop retirement checklist (Drive file,
-bottom), including the Sunday Oct 4 punch-list scheduled task, which has the
-laptop's folder attached; the `az-104` repo's 63 uncommitted changes (52
-deletions, last commit May 5, account `gerardostebovik-collab`); the Entra
-users and roles cleanup.
+**Still open, not today:** see Current next action (items 3 and 6).
+
+#### M11 pass 2, sign-in: built, deployed and proven (afternoon, on the tower)
+
+**Claude wrote all the Bicep, the Function code, the offline tests and the doc
+edits, and researched each step in Microsoft Learn. Gerard made every decision
+below, and ran every Azure CLI command, deployment, commit and browser test.**
+Commits `8bdae42` → `482fe58`. The details are in
+`infrastructure/iip/README.md` ("M11 pass 2") and `function/README.md` ("The
+results page").
+
+**Gerard's decisions:**
+- the Entra objects go in Graph Bicep, in a separate `entra.bicep` (Graph
+  resources get no what-if, so they're kept out of the registered
+  `main.bicep`);
+- RBAC row 10 goes **user first**. letter7 has no Entra licences, and a group
+  assignment needs P1/P2, so the group swap waits for the P2 trial's day 1.
+  This was found today: row 10 and "start the trial after M11" were circular;
+- the test user is created by CLI;
+- the page is a list plus a detail view, at `/api/results`, with `host.json`
+  unchanged;
+- a regression upload before wrapping up.
+
+**What was built:**
+- **Step A:** `id-iip-dev-wus-03` (`m11-signin-id-20260930`). Verified: no
+  Azure role.
+- **Step B:** `entra.bicep` creates the app registration **IIP Results
+  (dev)**, the federated credential `fic-id-iip-dev-wus-03`, the enterprise
+  app with assignment required, consent for `openid profile email` only, and
+  the group **IIP Results Viewers (dev)**. Deployed `m11-entra-20260930b`.
+  Every object read back and matched.
+- **Step C:** `app.bicep` attaches `-03`, adds
+  `OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID`, and turns on `authsettingsV2`
+  (`m11-signin-easyauth-20260930`).
+- **The test user** `iip-ca-test` (RBAC row 11), a non-admin. Its password
+  never left Gerard's machine.
+- **The interim row 10 assignment** (`m11-entra-20260930d`).
+- **The results page:** `results_page.py`, two HTTP routes, and
+  `RESULTS_BLOB_ENDPOINT` (`m11-results-setting-20260930`), deployed by
+  remote build. Its second lock refuses any request without built-in
+  authentication's identity headers. Every value is escaped. 21 offline
+  checks pass.
+
+**Proven in Azure:**
+- **Secretless sign-in:** `response_type=code+id_token`, and the sign-in
+  completed.
+- **The gate:** unassigned `iip-ca-test` got **AADSTS50105**; assigned, it
+  reached the page.
+- **The page:** as `iip-ca-test`, the list shows every result, and the detail
+  shows the audit and the final drafted copy.
+- **Regression:** `regress-20260930.png` (item4's image) went through
+  upload → Event Grid → queue → agent → result. Status `ok` at 23:01:49Z,
+  with the same verdicts as item4's earlier runs. It shows up on the page.
+  The upload path survived two identities, sign-in, and a code redeploy.
+
+**Not done:** the "group member" in the done-when (item 2 of Current next
+action), and the RBAC and orientation doc updates (item 1).
+
+**Claude's errors today, for the record:**
+- **The first identity check was clumsier than needed.** `dev.bicepparam`
+  already held the tenant and object IDs.
+- **Graph Bicep `owners`:** Claude wrote the object form. Types `1.0.0` wants
+  plain IDs (BCP034).
+- **The federated credential's name** was written as one segment. The first
+  Entra deploy failed on it (`m11-entra-20260930`).
+- **ID-token issuance off**, on a wrong reading of the flow, gave
+  AADSTS700054. Fixed by redeploying `m11-entra-20260930c`.
+- **AADSTS50105 predicted for a Global Administrator**, who bypasses the gate.
+- **`authsettingsV2` predicted to stay a Modify.** It reports No change.
+- **The file-transfer tool repeatedly delivered stale copies** of just-edited
+  files to the tower. Claude first blamed VS Code (wrong; Gerard hadn't opened
+  the file). From the Bicep fixes onward, every write was re-read from the
+  tower and compared byte for byte. **The first write wasn't checked, so
+  `52bbfc3` shipped this file with two unfilled placeholders
+  (`IDENTITY_LINE`, `IDENTITY_BULLET`).** Fixed in this entry's commit.
+- **Process:** one early message mixed several changing command sets. Pass 2
+  also ran past "if time allows" without a stated plan, until Gerard asked
+  where the day stood.
 
 ### Session — September 29, 2026 — row 15 verified alone; blob and container soft delete on
 
