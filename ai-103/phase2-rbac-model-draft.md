@@ -8,6 +8,14 @@ even where existing names do not.** Rows marked **VERIFY** are what the docs
 say and must be confirmed with a real call at build time. Nothing here is
 deployed.
 
+> **Status update, 2026-10-01 (Claude, from the Sep 21-30 records).** This model
+> is now **built**. M9 (identities and roles), M11 pass 1 (upload to result) and
+> M11 pass 2 (sign-in) are deployed, so the Resources table now reads
+> "deployed". **Every VERIFY is settled.** See "VERIFY ledger (M11's
+> done-when)" just before the Sources section. The one row still interim is
+> **row 10**: the app is assigned to the test user directly until the Entra ID
+> P2 trial allows a group assignment.
+
 ## The app this model is for
 
 A topic and thumbnail are uploaded to Blob storage, which triggers an Azure
@@ -52,22 +60,25 @@ resource are `owner`, `env`, `region`, `managed-by:bicep`, `project:iip` and
 | Foundry account / project | exists | `aif-dev-wus-01` / `proj-iip-dev-wus-01` | `aif` / `proj` |
 | App data storage (containers `uploads`, `results`) | exists (new containers) | `stiipdevwus01` | `st` |
 | Key Vault | exists | `kv-iip-dev-wus-01` | `kv` |
-| Function app | planned | `func-iip-dev-wus-01` | `func` |
-| Flex Consumption plan | planned | `asp-iip-dev-wus-01` | `asp` |
-| Function host storage (D3) | planned | `stiipdevwus02` (purpose: function-host) | `st` |
-| Function managed identity (D2) | planned | `id-iip-dev-wus-01` (purpose: function-runtime) | `id` |
-| CI/CD managed identity (D6) | planned | `id-iip-dev-wus-02` (purpose: github-deploy) | `id` |
-| Application Insights | planned | `appi-iip-dev-wus-01` | `appi` |
-| Log Analytics workspace | planned | `log-iip-dev-wus-01` | `log` |
-| Event Grid system topic (blob events) | planned | `egst-iip-dev-wus-01`, with a **system-assigned** identity (row 14) | `egst` |
-| Event queue (D-M11-1 (b)) | planned | `upload-events` on `stiipdevwus01` *(name proposed 2026-09-24; CAF has no queue abbreviation)* | — |
-| Poison queue | planned | `upload-events-poison` on `stiipdevwus01`, **declared in Bicep** rather than left to the runtime (row 16) | — |
-| Sign-in managed identity (D-M11-2 (b)) | planned | `id-iip-dev-wus-03` (purpose: easyauth-fic) | `id` |
+| Function app | deployed | `func-iip-dev-wus-01` | `func` |
+| Flex Consumption plan | deployed | `asp-iip-dev-wus-01` | `asp` |
+| Function host storage (D3) | deployed | `stiipdevwus02` (purpose: function-host) | `st` |
+| Function managed identity (D2) | deployed | `id-iip-dev-wus-01` (purpose: function-runtime) | `id` |
+| CI/CD managed identity (D6) | deployed | `id-iip-dev-wus-02` (purpose: github-deploy) | `id` |
+| Application Insights | deployed | `appi-iip-dev-wus-01` | `appi` |
+| Log Analytics workspace | deployed | `log-iip-dev-wus-01` | `log` |
+| Event Grid system topic (blob events) | deployed | `egst-iip-dev-wus-01`, with a **system-assigned** identity (row 14) | `egst` |
+| Event queue (D-M11-1 (b)) | deployed | `upload-events` on `stiipdevwus01` *(name proposed 2026-09-24; CAF has no queue abbreviation)* | — |
+| Poison queue | deployed | `upload-events-poison` on `stiipdevwus01`, **declared in Bicep** rather than left to the runtime (row 16) | — |
+| Sign-in managed identity (D-M11-2 (b)) | deployed | `id-iip-dev-wus-03` (purpose: easyauth-fic) | `id` |
 
 **Entra ID objects are outside CAF,** which only covers Azure resources.
 Their proposed names are:
 - the app registration for the results page: **IIP Results (dev)**;
 - the viewers group: **IIP Results Viewers (dev)**.
+
+*(Both created 2026-09-30 by `infrastructure/iip/entra.bicep`, along with the
+test user `iip-ca-test@letter7.onmicrosoft.com`, which is created by CLI.)*
 
 These are display names, not resource names. An earlier draft of this page
 used an `app-` prefix for the app registration. It was dropped, because
@@ -87,14 +98,14 @@ that doesn't exist.
 | 7 | Function identity | Host storage `stiipdevwus02` | Storage Blob Data Owner, Storage Queue Data Contributor | Needed by the Functions host (`AzureWebJobsStorage`) and for the deployment package. Microsoft Learn also lists Storage Account Contributor when blob triggers are used. That is a broad control-plane role, so **VERIFY** it is really needed before assigning it. **Amended 2026-09-24:** under D-M11-1 (b) there is no blob trigger, and Microsoft's host-required column is blank for the queue trigger. So **Storage Account Contributor drops out**, and Storage Queue Data Contributor here is probably droppable too: its only listed reason was the blob extension. Microsoft's `AzureWebJobsStorage` minimum is Storage Blob Data Owner, plus **Storage Table Data Contributor** so the host can write diagnostic events. **VERIFY** at M11: start with Blob Data Owner + Table Data Contributor, and add Queue Data Contributor only if the host asks for it. |
 | 8 | Function identity | `appi-iip-dev-wus-01` | Monitoring Metrics Publisher | Telemetry authenticated with Entra ID, so Application Insights can also disable local auth. |
 | 9 | Foundry project identity | `aif-dev-wus-01` | Foundry User *(automatic)* | Microsoft's minimum assignment. M7's tools run client-side, in the Function, so the project identity needs **nothing** on storage. |
-| 10 | Group **IIP Results Viewers (dev)** | Enterprise app **IIP Results (dev)** | App assignment, with "Assignment required" = Yes | Only group members can sign in. **No Azure RBAC.** |
-| 11 | CA test user | Member of row 10's group | — | The subject for Conditional Access in report-only mode, then enforced. |
+| 10 | Group **IIP Results Viewers (dev)** | Enterprise app **IIP Results (dev)** | App assignment, with "Assignment required" = Yes | Only group members can sign in. **No Azure RBAC.** **Built 2026-09-30, INTERIM:** "Assignment required" is on, and the group exists with no members. The app is assigned to row 11's user **directly** (Default Access). letter7 has no Entra licences, and assigning a group to an app needs P1/P2 (Gerard: user first, group on P2 trial day 1). **Proven:** unassigned, the user got AADSTS50105; assigned, it reached the results page. **Global Administrators bypass this gate** (Microsoft), so it can only be tested with a non-admin. |
+| 11 | CA test user | Member of row 10's group | — | The subject for Conditional Access in report-only mode, then enforced. **Created 2026-09-30:** `iip-ca-test@letter7.onmicrosoft.com` (**IIP CA Test User (dev)**), a member with no directory role, created by CLI. Its password was generated on Gerard's machine and changed at first sign-in. Assigned to the app directly until the group swap (row 10). |
 | 12 | CI/CD identity `id-iip-dev-wus-02` (D6: in scope) | `func-iip-dev-wus-01` | Website Contributor | GitHub Actions deploys code over OIDC (federated credential). No stored secret, and no rights outside the Function app. |
 | 13 | Gerard | `stiipdevwus01` | Storage Blob Delegator *(existing; not in Bicep, like row 3)* | `m3_analyze.py --blob` signs its 30-minute read-only SAS with a user delegation key (M3 keyless migration, `fcc55b6`, decision (A)). Load-bearing since 2026-09-23. *(Promoted from the M9 build-time note, 2026-09-24.)* |
 | 14 | Event Grid system topic `egst-iip-dev-wus-01` — **system-assigned** identity | `stiipdevwus01` **(account)** — *was queue `upload-events`; widened 2026-09-24, Gerard: the queue-scoped grant made the event subscription's create-time validation fail 3/3 over ~20 min ("Managed Identity Authorization Error"). The check appears to run against the destination `resourceId`, which is the account; Microsoft Learn's steps say "on the storage account". **Confirmed:** the account-scoped redeploy succeeded first time (deployment `m11-app-pass1-20260924`), and the orphaned queue-scoped grant was then deleted. Cost: the topic can add messages to any queue on the account (today two); no read or delete.* | Storage Queue Data Message Sender | D-M11-1 (b): delivers `BlobCreated` events to the queue with its own identity (`deliveryWithResourceIdentity`); no webhook, no key. **Must be system-assigned:** once the account has a firewall or network rule (M12), Event Grid can deliver to a queue only with a system-assigned identity plus *Allow Azure services on the trusted service list*. A user-assigned identity isn't supported there at all (Microsoft Learn, Event Grid storage-queue handler). Account-scoped (see Scope). |
 | 15 | Function identity `id-iip-dev-wus-01` | `stiipdevwus01` / queue `upload-events` | **IIP Queue Trigger (dev)** *(custom role `d28c60b2-…`, this RG only: Action `queues/read`; DataActions `messages/read`, `messages/process/action`, `messages/write`)* | The queue trigger's documented minimum (Microsoft Learn, *Configure connections … Grant permissions to an identity*). Queue-scoped, not account-scoped (Gerard, 2026-09-24: the queue lives on the app data account, so these roles cover this one queue only). **[2026-09-25: the documented minimum is not enough.** It can't call Update Message, so a failed message can't be released and `visibilityTimeout` never applies. Fixed with the custom role, deployed as `m11-row15-stage1-20260925`. Decisions (Gerard): a custom role, not the built-in Contributor, which would add Clear Messages plus ARM queue delete and write; and ending as ONE custom role, reached in two stages so each test changes one thing. Stage 2, folding Reader and Processor into it, is next. See the First-light findings.**]** **[2026-09-28, stage 2b: the two built-ins were removed from Bicep, deployed (`m11-row15-stage2b-20260928`), and deleted by hand. The custom role is now the only role on this row. NOT YET VERIFIED ALONE: it does everything both built-ins did, so no test could separate them while the deletion was still propagating. The failure-path and scale-from-zero re-tests are the next session's first item.]** **[VERIFIED ALONE 2026-09-29, about 24 h after the deletes. Failure path (confirmed-pause method): try 1 at 15:48:50Z, try 2 at 15:50:33Z, **+103 s, not 10 min**; zero `AuthorizationPermissionMismatch` rows across `AppExceptions` and `AppTraces`; the host moved the message to `upload-events-poison` at 15:50:33Z, and it was peeked there. Scale-from-zero: after about 50 min idle, uploaded 16:40:04Z; a new host started at 16:40:20Z (its `QueuesOptions` startup trace); `process_upload` Succeeded in 43.9 s and wrote `results/row15-scale0/20260929T164105Z.json`. The custom role alone does everything the two built-ins did. Gerard ran every command; Claude designed the checks.]** |
 | 16 | Function identity | `stiipdevwus01` / queue `upload-events-poison` | Storage Queue Data Message Sender | After 5 failed attempts the runtime **adds** the message to `<queue>-poison`. Row 15's roles can't add messages, and Microsoft's table has no footnote for this (the blob trigger's row does). The poison queue is **declared in Bicep** so the runtime never needs create-queue rights (Gerard, 2026-09-24). **VERIFY** at M11 by forcing five failures and confirming the message lands in the poison queue. **[VERIFIED 2026-09-25.** Two failures, not five: five is the runtime default, and `host.json` sets `maxDequeueCount` to 2. Method: Gerard's upload-then-delete approach, made deterministic by pausing the Function (`AzureWebJobs.process_upload.Disabled`) until the blob was gone, so a real Event Grid message named a missing blob and `get_blob_properties()` raised on both tries. The host logged *"Message has reached MaxDequeueCount of 2. Moving message to queue 'upload-events-poison'"* (17:41:38Z), and the message was peeked in the poison queue under row 18. Repeated at 19:04:35Z. Model cost $0. **Found along the way:** row 15 can't release a failed message; see the First-light findings.**]** |
-| 17 | Sign-in identity `id-iip-dev-wus-03` | — | **None (no Azure RBAC)** | D-M11-2 (b): attached to `func-iip-dev-wus-01` as a user-assigned identity, and trusted by a **federated identity credential** on the **IIP Results (dev)** app registration, so built-in authentication needs no client secret. Dedicated to this purpose per Microsoft: it *"should only be assigned to the App Service or Azure Functions application through this registration."* |
+| 17 | Sign-in identity `id-iip-dev-wus-03` | — | **None (no Azure RBAC)** | D-M11-2 (b): attached to `func-iip-dev-wus-01` as a user-assigned identity, and trusted by a **federated identity credential** on the **IIP Results (dev)** app registration, so built-in authentication needs no client secret. Dedicated to this purpose per Microsoft: it *"should only be assigned to the App Service or Azure Functions application through this registration."* **Built and proven 2026-09-30:** credential `fic-id-iip-dev-wus-03` (issuer `login.microsoftonline.com/<tenant>/v2.0`, subject = the identity's principal ID, audience `api://AzureADTokenExchange`). The app setting `OVERRIDE_USE_MI_FIC_ASSERTION_CLIENTID` holds `-03`'s client ID. The authorize request carries `response_type=code+id_token`, and sign-in completes with no secret anywhere. `az role assignment list --all` for `-03` returns nothing. |
 | 18 | Gerard | `stiipdevwus01` / queues `upload-events` and `upload-events-poison` | Storage Queue Data Reader | Operator read access: peek the working queue and inspect poison messages. Read-only and queue-scoped, one assignment per queue. Added 2026-09-25 by CLI (Gerard's decision) to verify row 16, and kept: reading the poison queue is a normal operator task. **Not in Bicep**, like rows 3 and 13. |
 
 ## First-light findings (M11 pass 1, 2026-09-24)
@@ -231,8 +242,10 @@ out. Role IDs and permissions are unchanged. Any `--role "Foundry User"` in a
 script or runbook is fragile; `--role 53ca6127-db72-4b80-b1b0-d745d6d5456d` is
 not.
 
-**Still VERIFY, and still open:** whether container-scoped Blob Data Reader is
-enough for the event-based blob trigger (row 5), which needs the trigger, so
+**[Closed 2026-09-24; see "First-light findings": container-scoped Blob Data
+Reader is enough. Under D-M11-1 (b) there is no blob trigger at all.]**
+~~**Still VERIFY, and still open:** whether container-scoped Blob Data Reader is
+enough for the event-based blob trigger (row 5), which needs the trigger, so~~
 M11.
 
 ## Deliberately given nothing
@@ -277,7 +290,7 @@ M11.
 | D1 | Your admin posture | (a) **Chosen.** Keep the existing standing access and document it as a single-admin exception. PIM is the enterprise answer and is out of scope. **See the correction below — what (a) actually keeps is broader than this row originally said.** (b) Day to day: Contributor plus **Role Based Access Control Administrator**, restricted to the roles in this table, at resource-group scope. Owner is kept only as break-glass. |
 | D2 | Function identity type | (a) **User-assigned.** Bicep can create it and assign roles before the app exists, and it survives the app being recreated. (b) System-assigned: simpler, but tied to the app's lifetime. |
 | D3 | Function host storage | (a) **Separate account.** It keeps the broad host roles (row 7) off the app data account. (b) Reuse `stiipdevwus01`: one less resource, but row 7's roles would land on the data account. |
-| D4 | Where the results page runs | (a) An HTTP-triggered function on the same Function app, with built-in App Service Authentication: one compute resource. **VERIFY** that Flex Consumption supports it. (b) A separate App Service (Basic tier or higher), billed hourly. |
+| D4 | Where the results page runs | (a) An HTTP-triggered function on the same Function app, with built-in App Service Authentication: one compute resource. ~~**VERIFY** that Flex Consumption supports it.~~ **Confirmed 2026-09-30:** built-in authentication runs on the Flex app (deployed as `m11-signin-easyauth-20260930`) and serves the results page. (b) A separate App Service (Basic tier or higher), billed hourly. |
 | D5 | Foundry role scope | (a) The account, which is what Microsoft Learn's minimum assignments use. (b) The project, which is narrower; confirm that model and Vision calls still work. |
 | D6 | CI/CD in Phase 2? | (a) Yes: row 12, with GitHub OIDC. AI-103 names CI/CD integration. (b) Later: deploy from your account for now. |
 | D7 | Key Vault after the keyless migration | (a) Keep it, still using RBAC authorization, for any third-party secret that comes up later, and document that it is empty on purpose. (b) Retire it. |
@@ -293,10 +306,18 @@ access is broader:
 | Owner | subscription `343a8a7e-…` | what D1 described |
 | **Owner** | **management group `Non-Prod`** | not previously documented |
 | **Contributor** | **management group `e0249b00-…`** — the tenant root | not previously documented |
-| Foundry User | subscription | inherits to `aif-dev-wus-01`; how `m7_orchestrator.py` authenticates keylessly today |
+| Foundry User | subscription | inherits to `aif-dev-wus-01`; how `m7_orchestrator.py` authenticates keylessly today. **Superseded 2026-09-22:** the subscription-scope grant was removed before M10's probes (`phase2-orientation.md` Backlog). Gerard now holds Foundry User at the **account** scope (`aif-dev-wus-01`, row 2), which is what `az role assignment list --all` showed on 2026-09-30. |
 | Storage Blob Data Contributor | `stgeostewus301` (portfolio prod) | outside this model's scope |
 | Key Vault Secrets Officer | `kv-geoste-prod-wus3-01` (portfolio prod) | outside this model's scope |
 | Storage Blob Data Contributor + Storage Blob Delegator | `stiipdevwus01` | row 3, plus the Delegator grant |
+
+*(Added 2026-10-01, Claude:)* the table above, read on 2026-09-21, does not list
+**Search Index Data Reader** and **Search Index Data Contributor** on
+`srch-iip-dev-wus-01`, nor **Storage Queue Data Reader** on the two queues
+(row 18, added 2026-09-25). Both Search roles are documented under "Deliberately
+given nothing" (the M5 scripts), and all of them showed in `az role assignment
+list --all` on 2026-09-30. Neither is wider than what's above. This note is
+about completeness, not exposure.
 
 **Two of those are wider than subscription Owner.** Management-group Owner covers
 every subscription under `Non-Prod`, and root-level Contributor reaches the whole
@@ -334,6 +355,20 @@ not lost, and each one says when it gets acted on.
   `disableLocalAuth` on the Foundry account and turn off shared-key access
   on storage. Doing it in any other order breaks the key-based scripts
   mid-migration.
+
+## VERIFY ledger (M11's done-when)
+
+M11's done-when includes "the VERIFY rows are recorded as confirmed or changed".
+Every VERIFY this page raised, in one place (Claude, 2026-10-01, from the dated
+records below and in `m11-prep.md`):
+
+| Item | Outcome | When, and the evidence |
+|---|---|---|
+| Row 4: Foundry User covers Vision Read and direct model calls | **Confirmed** | 2026-09-22 (probes), and in production 2026-09-24: first light, the Function called all three tools |
+| Row 5: container-scoped Blob Data Reader enough to read the upload | **Confirmed** | 2026-09-24, first light. The question changed shape: D-M11-1 (b) has no blob trigger |
+| Row 16: the poison path | **Confirmed** | 2026-09-25: poison after `maxDequeueCount` 2 |
+| D4: built-in authentication on Flex Consumption | **Confirmed** | 2026-09-30: deployed, and a non-admin signed in to the results page |
+| Row 10: group assignment | **Changed (interim)** | 2026-09-30: a direct user assignment, because a group needs P1/P2. Swap on P2 trial day 1 |
 
 ## Sources (Microsoft Learn, 2026-09-16)
 

@@ -107,7 +107,16 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   Azure matched item4's answer key. RBAC rows 4-8, 14 and 15 confirmed in
   production, and row 14 is account-scoped (see the RBAC model). Remaining for
   M11: the poison path (row 16) and pass 2, sign-in. Details in `m11-prep.md`
-  and STATUS.md Sep 24.
+  and STATUS.md Sep 24. *(Row 16 verified 2026-09-25.)*
+- **M11 pass 2 (sign-in) is DEPLOYED AND PROVEN (2026-09-30).** Secretless
+  built-in authentication through `id-iip-dev-wus-03`'s federated credential,
+  the app registration and the group in `infrastructure/iip/entra.bicep`, and
+  the results page at `/api/results`. A non-admin test user was refused
+  unassigned (AADSTS50105), then reached the page once assigned. The RBAC
+  model's VERIFY rows are all settled (its "VERIFY ledger"). **The one
+  remaining step for M11 is the "group member" in its done-when.** letter7 is
+  on Entra Free and a group-to-app assignment needs P1/P2, so the group swap
+  is the P2 trial's first step (STATUS.md Sep 30).
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID
@@ -129,7 +138,10 @@ project doc `claude/2026-09-16-phase2-plan-review.md`.
   VNets.
 - **Conditional Access is deployed, not just designed.** It uses a 30-day
   Entra ID P2 trial in the `letter7` tenant, **started only once M11 is
-  done**, with recurring billing turned off straight away.
+  done**, with recurring billing turned off straight away. *(Amended
+  2026-09-30: M11's own last step, assigning the viewers group to the app,
+  needs P1/P2. So the trial starts once everything else in M11 is done, and
+  the group swap is its first step. Found the day pass 2 was built.)*
 - **RBAC:** D1–D7 all option (a); see the RBAC model.
 - **Conditional Access design:** C1–C9 all option (a), with one break-glass
   account and passkeys; see the spec.

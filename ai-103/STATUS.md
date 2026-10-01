@@ -85,16 +85,16 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: close M11. Record pass 2 in the RBAC model and orientation
-docs, then do the group swap on the Entra ID P2 trial's first day.**
-Updated 2026-09-30, at the HEAD this entry's commit creates. M11 is the
+**Next action: close M11 with the group swap on the Entra ID P2 trial's first
+day.** (The docs half was done on 2026-10-01; see that session entry.)
+Updated 2026-10-01, at the HEAD this entry's commit creates. M11 is the
 working milestone. Pass 2 (sign-in) is **built, deployed and proven** on the
 tower: secretless sign-in, the assignment gate, and the results page, seen
 by a non-admin. What's left is the done-when's literal "group member", which
 needs the P2 trial. See the Sep 30 session entry.
 
-1. **Record pass 2 in the docs not touched on Sep 30 (docs only, about
-   30 min).**
+1. ~~**Record pass 2 in the docs not touched on Sep 30.**~~ **Done
+   2026-10-01** (Oct 1 entry). Kept for the record:
    - `phase2-rbac-model-draft.md`:
      - rows 10, 11 and 17: built; the interim direct assignment; the Global
        Administrator bypass;
@@ -498,6 +498,55 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 1, 2026 — M11 docs brought up to date (short session)
+
+**Claude wrote every edit in this entry. Gerard chose the plan** (scheduled
+tasks, then the M11 docs, then stop: about 45 min, after a morning of job
+search).
+
+**The laptop (`serenity`) died for good on battery.** It still runs on AC, so
+the files that lived only on it (Gerard's prompt-crafting notes) can be copied
+off while it's plugged in. His recent session prompts are already in Google
+Drive.
+
+**Scheduled tasks: no action needed.**
+- The Sunday punch-list task has no device binding on record. Its folder path
+  exists identically on the tower, and its prompt reads only GitHub and
+  Todoist. Its last run succeeded (Sep 28). If the Oct 4 run fails, its
+  run status will show it.
+- The Friday check-in was **paused by Gerard earlier**, not lost with the
+  laptop.
+
+**Docs (STATUS item 1, done):**
+- `phase2-rbac-model-draft.md`:
+  - a status note saying the model is built;
+  - the Resources table now reads "deployed" (11 rows);
+  - rows 10, 11 and 17 record what was built and proven on Sep 30, with row
+    10 marked **interim**;
+  - row 5's stale "still VERIFY" is struck, with a pointer to Sep 24's
+    confirmation;
+  - D4 is confirmed;
+  - the D1 table's Foundry User row is marked superseded;
+  - a completeness note on the D1 table;
+  - a new **VERIFY ledger**: rows 4, 5 and 16 and D4 confirmed, and row 10
+    changed (interim). That settles that half of M11's done-when.
+- `phase2-orientation.md`: a pass 2 status bullet, and the P2 trial decision
+  amended, because M11's last step now needs the trial.
+- `m11-prep.md`: a pass 2 row in the results box.
+
+**Correction to the Sep 30 entry:** it called the Search Index roles missing
+from `phase2-rbac-model-draft.md`. They're there, under "Deliberately given
+nothing". Only the D1 table omits them. Foundry User at account scope is
+**deliberate**: the subscription grant was removed on 2026-09-22 (the
+orientation Backlog). The D1 table was stale, not the permissions.
+
+**Tower setup, recorded here because it's in no other doc:** Node.js LTS
+(`winget install OpenJS.NodeJS.LTS`), and PowerShell
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, which `npx.ps1`
+needed. Together they fixed the pdf-viewer plug-in (`'npx' is not
+recognized`). Both belong on the Drive migration checklist for any future
+machine.
 
 ### Session — September 30, 2026 — moved to the tower; M11 pass 2 (sign-in) built and proven
 
