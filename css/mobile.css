@@ -9,10 +9,15 @@
    visible and the rest ran off-screen, and on some pages that also widened
    the whole document. On narrow screens the links now scroll sideways inside
    the header. The header's height doesn't change, so no page content
-   moves. */
+   moves.
+   2026-10-05: only the SIDE padding is overridden. The rule used to be
+   `padding: 0 1rem`, which was harmless on the fixed-height (56px) headers
+   but flattened the two padding-sized ones: the AI page's header measured
+   29px on a phone instead of ~50px, and the homepage's would have too.
+   .nav-logo is the homepage's name for .nav-brand. */
 @media (max-width: 900px) {
-  nav { padding: 0 1rem !important; gap: 1rem; }
-  .nav-brand { flex-shrink: 0; }
+  nav { padding-left: 1rem !important; padding-right: 1rem !important; gap: 1rem; }
+  .nav-brand, .nav-logo { flex-shrink: 0; }
   .nav-links {
     gap: 1.25rem !important;
     min-width: 0;
@@ -28,9 +33,11 @@
 }
 
 /* 2. HERO HEADINGS. On 360px phones "Infrastructure as Code" in the domain
-   hero (Barlow Condensed 800, min 3.5rem) ran 23px past the screen edge. */
+   hero (Barlow Condensed 800, min 3.5rem) ran 23px past the screen edge.
+   The homepage's name (.hero-name) is excluded: it fits at 360px as is
+   (measured 2026-10-05), so there is no reason to shrink it. */
 @media (max-width: 400px) {
-  .hero h1 { font-size: clamp(2.6rem, 12.5vw, 3.5rem) !important; }
+  .hero h1:not(.hero-name) { font-size: clamp(2.6rem, 12.5vw, 3.5rem) !important; }
 }
 
 /* 3. RESUME HEADER. The resume had no small-screen rules at all: name and
