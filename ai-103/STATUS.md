@@ -85,72 +85,55 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: close M11 with the group swap on the Entra ID P2 trial's first
-day.** (The docs half was done on 2026-10-01; see that session entry.)
-Updated 2026-10-01, at the HEAD this entry's commit creates. M11 is the
-working milestone. Pass 2 (sign-in) is **built, deployed and proven** on the
-tower: secretless sign-in, the assignment gate, and the results page, seen
-by a non-admin. What's left is the done-when's literal "group member", which
-needs the P2 trial. See the Sep 30 session entry.
+**Next action (Oct 7, first thing): start the Entra ID P2 trial and close M11
+with the group swap, in one sitting.** Replaced 2026-10-06 (Claude drafted at
+Gerard's request). The Oct 1 version's items are carried below or closed; see
+the Oct 6 session entry.
 
-1. ~~**Record pass 2 in the docs not touched on Sep 30.**~~ **Done
-   2026-10-01** (Oct 1 entry). Kept for the record:
-   - `phase2-rbac-model-draft.md`:
-     - rows 10, 11 and 17: built; the interim direct assignment; the Global
-       Administrator bypass;
-     - the D1 table's gaps: Foundry User is at the **account** scope, not the
-       subscription, and the two Search Index roles are missing;
-     - M11's VERIFY rows, confirmed or changed (part of M11's done-when).
-   - `phase2-orientation.md`: the M11 row and the milestone marker.
-   - `m11-prep.md`: a pass 2 line in the measured-results box.
-2. **The group swap (M11's last step; it starts a 30-day clock).**
-   - Start the P2 trial only when ready to go straight on to Conditional
-     Access. Turn recurring billing **off** straight away (Todoist).
-   - Then, in `entra.bicep`: assign **IIP Results Viewers (dev)** to the app,
-     add `iip-ca-test` to the group, and delete the direct assignment.
-   - Re-run both gate tests: a non-member gets AADSTS50105, and a member
-     reaches `/api/results`.
-3. **Before Sunday Oct 4:** the laptop retirement checklist (bottom of the
-   Drive file `2026-09-30-tower-migration-checklist.md`). The Sunday punch-list
-   scheduled task still has the **laptop's** folder attached, so re-point it
-   before its Oct 4 run.
-4. **Small follow-ups from pass 1:**
-   - deployed-package provenance (the Function records no git; record the
-     package or deployment instead);
-   - `WEBSITE_INSTANCE_ID` is empty on Flex, so find the right instance field.
-     That field would also answer the open observation below;
-   - the Azure SDK's HTTP logging fills `AppTraces` at Information on every
-     call, so trim it.
-5. **Gerard's steps:**
-   - Project instructions:
-     - `id-iip-dev-wus-03` is **deployed** (the instructions still say
-       PLANNED);
-     - add the app registration **IIP Results (dev)** (appId `16565c24-…`),
-       the group **IIP Results Viewers (dev)**, the test user `iip-ca-test`,
-       and the results page
-       `https://func-iip-dev-wus-01.azurewebsites.net/api/results`;
-     - the custom role **IIP Queue Trigger (dev)** (`d28c60b2-…`), RBAC row 18;
-     - "soft delete on, 7 days" for `stiipdevwus01`.
-   - Decide whether "Ask decisions with the question tool" should become
-     "plain text". It lost answers on Sep 25 and Sep 29, but worked for all 6
-     questions on Sep 30.
-   - If `m7-writeup-draft.md` is with outside readers, send them the Sep 23
-     section 4 change.
-6. **Small, any time:**
-   - the `__main__`-guard refactor for `m6_generate.py`, `m6_probe.py` and
-     `m6_evaluate.py`;
-   - `.gitattributes` for `.gitignore`;
-   - the token-undercount backlog item (Todoist; the Sep 28 findings are in
-     `Claude outputs/2026-09-28-unattended-findings.md`);
-   - the `az-104` repo's 63 uncommitted changes (account
-     `gerardostebovik-collab`);
-   - the Entra users and roles cleanup. **Keep** `iip-ca-test`: it's RBAC
-     row 11.
+1. **Start the trial.** Microsoft 365 admin center → Billing → Purchase
+   services → Microsoft Entra ID P2 → Details → Start free trial. Then **at
+   once**: Billing → Your products → Entra ID P2 → recurring billing **Off**.
+   Confirm `AAD_PREMIUM_P2` appears in `subscribedSkus` (it was empty on Sep
+   30). Assign P2 to `iip-ca-test` and `djeemunee` (set a usage location if
+   asked).
+2. **Deploy the group assignment.** `entra.bicep` is **already edited on disk,
+   uncommitted** (Claude, 2026-10-06): it assigns **IIP Results Viewers (dev)**
+   to the app and drops the INTERIM direct assignment from the template. Not
+   compiled by Claude (the Graph types restore from mcr.microsoft.com, which
+   Claude's workspace can't reach), so the deploy is the first compile.
+   Deploy as `m11-entra-20261007a`. Then list the app's `appRoleAssignedTo`,
+   **delete the User row by CLI** (removing it from Bicep doesn't delete it),
+   and list again: Group only.
+3. **Gate test 1** (new InPrivate window): `iip-ca-test`, now neither a member
+   nor directly assigned → expect **AADSTS50105**.
+4. **Add `iip-ca-test` to the group** (Claude edits `entra.bicep`), deploy,
+   then **gate test 2**: it reaches `/api/results`. One change per deploy, so
+   each test proves one path.
+5. **Close M11:** record the VERIFY rows in `phase2-rbac-model-draft.md`, flip
+   the M11 marker and row in `phase2-orientation.md`, and commit `entra.bicep`
+   with the docs.
+6. **Same day, while the trial is fresh:** re-run
+   `Get-EntraInventory.ps1` (OneDrive `Data\Claude\entra-inventory`) with a
+   last-sign-in section (Claude adds it; it needs P1/P2), then Gerard labels
+   each object keep / narrow / disable. **Before M13:** a break-glass account
+   (there is only one Global Administrator).
+
+**Carried from the Oct 1 list** (details in Todoist):
+- Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
+  trim the Azure SDK's HTTP logging.
+- Gerard's steps: update the project instructions (`id-iip-dev-wus-03` is
+  deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev),
+  `iip-ca-test`, the results page, the custom role IIP Queue Trigger (dev),
+  soft delete 7 days). The question-tool decision: it worked for every
+  question on Oct 6.
+- Small, any time: the `__main__`-guard refactor; `.gitattributes` for
+  `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
+  changes.
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
 16:40:20/16:40:50Z). A second instance (max is 2) or a restart of the first.
-Harmless so far; the instance-id follow-up in item 2 would tell them apart.
+Harmless so far; the instance-id follow-up would tell them apart.
 
 **Settled — do not reopen:**
 - The `listKeys` calls are VS Code's.
@@ -181,6 +164,12 @@ Harmless so far; the instance-id follow-up in item 2 would tell them apart.
   get no what-if, so they're verified by reading them back.
 - **The `main.bicep` register is 6 modify, 24 no change, 11 Unsupported, 2 to
   ignore** (Sep 30). `authsettingsV2` reports No change once deployed.
+- **The P2 trial starts Oct 7, not Oct 6** (Gerard, 2026-10-06): the day went
+  to the site and resume, and a 30-day clock shouldn't start on a day that
+  can't use it.
+- **Bare-domain DNS is an ALIAS record** (Gerard, 2026-10-06, option A). Its
+  Front Door certificate no longer auto-renews: a monthly Todoist task checks
+  for "Pending Revalidation". Current cert expires 2027-03-18.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -498,6 +487,61 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 6, 2026 — site and resume fixed, Entra inventory, subscription risk sized (P2 trial moved to Oct 7)
+
+**Attribution:** Claude wrote the inventory script, every file edit and the
+diagnoses below; Gerard ran every command, made every decision named here,
+and reworked the resume himself (`bcf7858`, in his job-search work).
+
+**VS Enterprise subscription risk, sized** (read-only; Gerard ran it):
+- The **whole ostebovik.net prod stack** is on `343a8a7e` (quotaId
+  `MSDN_2014-09-01`, spending limit On), so the public site depends on the
+  benefit.
+- Last cycle (Aug 18 - Sep 17) cost **$69.16** of the ~$150 credit. Front
+  Door is ~$32 of each cycle, so the site on pay-as-you-go would be ~$35-40/mo.
+- Three pay-as-you-go subscriptions exist in the tenant, **all empty**.
+  Fallback plan and the move-or-wait decision: Todoist.
+
+**Site: the a1ddb40 phone check failed, and it wasn't the deploy.**
+- **Claude's error, Oct 5:** `a1ddb40`'s message claims "hero count 15 -> 14"
+  and a Monitoring link restyle. Neither edit was in the commit or the working
+  tree. Fixed in `841f563`.
+- Front Door had cached a **404 for `/img/og-card.png`** (the plain URL 404'd;
+  the same URL with `?v=` served the image). One `/*` purge cleared it.
+- **LinkedIn couldn't read the bare domain** ("Bad DNS") while
+  `www.ostebovik.net` worked: `@` was a literal CNAME, which the DNS rules
+  forbid at the zone apex. Gerard switched it to **ALIAS** at Namecheap;
+  Google DNS then returned A records and Post Inspector worked. Trade-off,
+  from Microsoft Learn: Front Door no longer auto-renews that certificate
+  (expires **2027-03-18**), so a monthly Todoist task checks for "Pending
+  Revalidation".
+
+**Resume and homepage, support-first** (Gerard's direction: senior technical
+support, growing toward admin):
+- `e0d9cc2` (Claude): an AI-103 IIP block in Hands-on Azure Projects (three
+  bullets Gerard approved), a fixed link (`/monitoring-security/` was a 404),
+  and the page's preview text matched to the new headline.
+- Homepage (Claude, Gerard's answers): support-first tagline and intro, the
+  preview text, "Resources deployed" (was "in production") and 3
+  certifications (was 2, but the resume lists 3).
+
+**Entra inventory, step 1 (structure only).** `Get-EntraInventory.ps1`
+(Claude; read-only Graph GETs and `az` lists) in OneDrive
+`Data\Claude\entra-inventory`, with a findings file beside it. Kept out of
+the repo: it names users and object IDs.
+- **Every IIP identity and assignment maps to an RBAC model row.**
+- **Only one Global Administrator**, with a permanent assignment and no
+  break-glass account. Fix before M13.
+- `familytree-api-01881` has **Contributor on the whole VSE subscription** and
+  a live client secret. It's the largest standing risk in the tenant.
+- letter7.net is a **verified** domain with 4 users on it, so the
+  registration matters.
+- **Found:** last sign-in (`signInActivity`) needs Entra ID P1/P2 (Microsoft
+  Learn), so that column waits for the trial.
+
+**Not done:** the P2 trial and group swap. Moved to Oct 7 by Gerard; the steps
+are in Current next action. `entra.bicep` is edited on disk and uncommitted.
 
 ### Session — October 1, 2026 — M11 docs brought up to date (short session)
 
