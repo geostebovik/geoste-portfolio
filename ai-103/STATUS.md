@@ -506,7 +506,10 @@ and reworked the resume himself (`bcf7858`, in his job-search work).
 **Site: the a1ddb40 phone check failed, and it wasn't the deploy.**
 - **Claude's error, Oct 5:** `a1ddb40`'s message claims "hero count 15 -> 14"
   and a Monitoring link restyle. Neither edit was in the commit or the working
-  tree. Fixed in `841f563`.
+  tree. Fixed in `841f563`. *[Later the same day: this may not have been a
+  wrongly written message. See "Claude's file writes" below: the same
+  symptom was reproduced twice on Oct 6, and on Oct 5 Claude also wrote files
+  through the device bridge. Not proven for Oct 5.]*
 - Front Door had cached a **404 for `/img/og-card.png`** (the plain URL 404'd;
   the same URL with `?v=` served the image). One `/*` purge cleared it.
 - **LinkedIn couldn't read the bare domain** ("Bad DNS") while
@@ -520,11 +523,33 @@ and reworked the resume himself (`bcf7858`, in his job-search work).
 **Resume and homepage, support-first** (Gerard's direction: senior technical
 support, growing toward admin):
 - `e0d9cc2` (Claude): an AI-103 IIP block in Hands-on Azure Projects (three
-  bullets Gerard approved), a fixed link (`/monitoring-security/` was a 404),
-  and the page's preview text matched to the new headline.
-- Homepage (Claude, Gerard's answers): support-first tagline and intro, the
-  preview text, "Resources deployed" (was "in production") and 3
+  bullets Gerard approved) and a fixed link (`/monitoring-security/` was a
+  404). Its message also claims the preview text; that change actually
+  landed in `23497f4`.
+- Homepage (Claude, Gerard's answers), `a9b381f`: support-first tagline and
+  intro, the preview text, "Resources deployed" (was "in production") and 3
   certifications (was 2, but the resume lists 3).
+- Resume lab section (Gerard's call, Claude's edit): header "AZ-104 projects:
+  14 hands-on Azure labs" (2025 - 2026), parallel to the AI-103 block, and the
+  live production environment moved to the first bullet. `23497f4`'s message
+  claims this, but it carried only the preview text; the change itself is in
+  the commit after `8f1a77c`.
+
+**Claude's file writes lagged one version behind (found by Gerard, 14:28).**
+Gerard saw the resume in the repo didn't match what Claude said it had
+changed. Evidence, from the commits themselves:
+- Two resume writes 14 s apart (13:24:42, 13:24:56) to the same staging path:
+  `e0d9cc2` got only the first. A third write at 13:59 delivered the
+  **second** write's content, so `23497f4` got that.
+- Two STATUS.md writes about 5 min apart to the same path: only the first
+  landed (`8f1a77c` lacks the second).
+- The homepage's two writes to one path, about 3 h apart, both landed.
+- Likely cause (inferred, not proven): the bridge reused content for a
+  repeated staging path. **Fix, in Claude's practice:** a unique file name for
+  every write, and re-read the file from the device after every write to
+  compare it with what was intended. The resume fix at 14:35 was verified
+  that way. Claude also never checked a commit's diff against its message;
+  that's the second half of the miss.
 
 **Entra inventory, step 1 (structure only).** `Get-EntraInventory.ps1`
 (Claude; read-only Graph GETs and `az` lists) in OneDrive
@@ -541,7 +566,20 @@ the repo: it names users and object IDs.
   Learn), so that column waits for the trial.
 
 **Not done:** the P2 trial and group swap. Moved to Oct 7 by Gerard; the steps
-are in Current next action. `entra.bicep` is edited on disk and uncommitted.
+are in Current next action.
+
+**Working tree left dirty overnight, on purpose (Gerard, 2026-10-06):**
+`ai-103/infrastructure/iip/entra.bicep` is edited and uncommitted. Committing
+it before the deploy would put a template on `main` that disagrees with
+Entra (it drops an assignment that still exists and declares one that
+doesn't yet). It gets committed with the M11 close on Oct 7. Until then:
+stage files by name, never `git add .`, and any measurement run's provenance
+will record the tree as dirty. Claude verified its contents on the device
+before this was written.
+
+**Deploys:** push one commit, wait for its deploy to go green, then push the
+next. Two pushes 13 s apart (`23497f4`, `8f1a77c`) made the first deploy fail
+with "No matching Static Web App environment was found".
 
 ### Session — October 1, 2026 — M11 docs brought up to date (short session)
 
