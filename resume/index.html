@@ -442,6 +442,11 @@
       letter-spacing: 0.04em;
     }
 
+
+    .job-compact { margin-bottom: 1rem; padding-bottom: 1rem; }
+    .job-compact .job-company { margin-bottom: 0.3rem; }
+    .job-summary { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.55; }
+
     /* ── Print styles ──────────────────────────────────────────── */
     @media print {
       * {
@@ -520,7 +525,8 @@
         color: #666666 !important;
       }
 
-      .job-bullets li {
+      .job-bullets li,
+      .job-summary {
         color: #333333 !important;
       }
 
@@ -568,11 +574,22 @@
         border-bottom-color: #dddddd !important;
       }
 
-      .resume-section {
+      .job-compact {
         page-break-inside: avoid;
       }
 
-      .job {
+      .resume-section-title,
+      .job-header,
+      .job-company,
+      .skill-group-label {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .job-bullets li,
+      .skills-grid > div,
+      .cert-item {
+        break-inside: avoid;
         page-break-inside: avoid;
       }
     }
@@ -769,49 +786,7 @@
           </ul>
         </div>
 
-        <div class="job">
-          <div class="job-header">
-            <div class="job-title">Senior Technical Support / Onboarding Engineer</div>
-            <div class="job-dates">2011 – 2014</div>
-          </div>
-          <div class="job-company">Mercent Corporation · Seattle, WA</div>
-          <ul class="job-bullets">
-            <li>Used XML, XSLT, XPath, and XQuery to build and maintain customized e-commerce integrations, accelerating
-              customer production timelines and revenue.</li>
-            <li>Resolved complex escalated issues requiring development-level changes to customer integrations; served
-              as bridge between technical support and development teams.</li>
-          </ul>
-        </div>
-
-
-        <div class="job">
-          <div class="job-header">
-            <div class="job-title">Founder &amp; General Manager</div>
-            <div class="job-dates">2003 – 2010</div>
-          </div>
-          <div class="job-company">Hot Yoga of Issaquah · Issaquah, WA</div>
-          <ul class="job-bullets">
-            <li>Acquired and turned around a failing small business; grew revenue 150% through pricing restructure,
-              marketing, and customer retention focus.</li>
-            <li>Managed all operations including finance, facility, and a staff of 10 instructors.</li>
-          </ul>
-        </div>
-
-        <div class="job">
-          <div class="job-header">
-            <div class="job-title">Developer Support Engineer</div>
-            <div class="job-dates">1999 – 2002</div>
-          </div>
-          <div class="job-company">Onyx Software (Acquired by Consona Corp) · Bellevue, WA</div>
-          <ul class="job-bullets">
-            <li>Served as liaison between technical support and development for high-priority, medium-to-high-impact
-              software issues requiring immediate resolution.</li>
-            <li>Created and managed a self-service portal and knowledge base that reduced support contact volume and
-              accelerated customer issue resolution.</li>
-            <li>Performed QA testing on patches prior to release; trained and coached support engineers and customer
-              service representatives.</li>
-          </ul>
-        </div>
+      </div>
 
       </div>
 
@@ -861,6 +836,39 @@
               policies, MARS agent deployment, and ASR replication — translating direct customer exposure to
               backup failures into structured, documented lab coverage.</li>
           </ul>
+        </div>
+
+      </div>
+
+      <!-- EARLIER EXPERIENCE -->
+      <div class="resume-section">
+        <div class="resume-section-title">Earlier Experience</div>
+
+        <div class="job job-compact">
+          <div class="job-header">
+            <div class="job-title">Senior Technical Support / Onboarding Engineer</div>
+            <div class="job-dates">2011 – 2014</div>
+          </div>
+          <div class="job-company">Mercent Corporation · Seattle, WA</div>
+          <p class="job-summary">Built and maintained customized e-commerce integrations with XML, XSLT, XPath, and XQuery; resolved escalated issues requiring development-level changes and served as the bridge between support and development.</p>
+        </div>
+
+        <div class="job job-compact">
+          <div class="job-header">
+            <div class="job-title">Founder &amp; General Manager</div>
+            <div class="job-dates">2003 – 2010</div>
+          </div>
+          <div class="job-company">Hot Yoga of Issaquah · Issaquah, WA</div>
+          <p class="job-summary">Acquired and turned around a failing small business, growing revenue 150%; managed finance, facility, and a staff of 10 instructors.</p>
+        </div>
+
+        <div class="job job-compact">
+          <div class="job-header">
+            <div class="job-title">Developer Support Engineer</div>
+            <div class="job-dates">1999 – 2002</div>
+          </div>
+          <div class="job-company">Onyx Software (Acquired by Consona Corp) · Bellevue, WA</div>
+          <p class="job-summary">Liaison between support and development on high-priority issues; created a self-service portal and knowledge base that reduced contact volume; QA-tested patches and trained support engineers.</p>
         </div>
 
       </div>
