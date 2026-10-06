@@ -821,6 +821,29 @@
 
         <div class="job">
           <div class="job-header">
+            <div class="job-title">AI-103 project: Intelligent Insights Platform (in progress)</div>
+            <div class="job-dates">2026 – Present</div>
+          </div>
+          <ul class="job-bullets">
+            <li>Building an event-driven AI pipeline on Azure AI Foundry: Blob upload → Event Grid →
+              Storage queue → Azure Functions (Flex Consumption) → a Foundry agent with tool calling. Deployed
+              entirely with Bicep and run with no keys or secrets: managed identities throughout, and an Entra
+              ID sign-in that uses a federated credential instead of a client secret —
+              <a href="https://ostebovik.net/ai-foundry/" class="inline-link">ostebovik.net/ai-foundry</a>.
+            </li>
+            <li>Root-caused a broken retry path: the permissions Microsoft documents as the queue trigger's
+              minimum can't release a failed message back to the queue, so the configured retry delay never applied. Proved it with a targeted probe
+              and a negative control, then replaced two broad built-in roles with one least-privilege custom
+              role and re-tested the failure path on its own.</li>
+            <li>Designed an 18-entry least-privilege access model (who can reach what, at which scope, and why)
+              and tested it against the live tenant; certified a multi-tool agent against a pre-registered acceptance test: 120 of
+              120 runs completed and measured, zero crashes, with every run traceable to its exact code
+              version.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
             <div class="job-title">Self-directed lab work · ostebovik.net</div>
             <div class="job-dates">2025 – Present</div>
           </div>
@@ -828,7 +851,7 @@
             <li>Built Azure Monitor pipelines using Data Collection Rules and the Azure Monitor
               Agent, authoring KQL queries and configuring alert rules and action groups —
               documented lab work at
-              <a href="https://ostebovik.net/monitoring-security/" class="inline-link">ostebovik.net</a>.
+              <a href="https://ostebovik.net/az-104/monitoring-security/" class="inline-link">ostebovik.net</a>.
             </li>
             <li>Implemented Azure Backup and Site Recovery configurations including Recovery Services Vault
               policies, MARS agent deployment, and ASR replication — translating direct customer exposure to
