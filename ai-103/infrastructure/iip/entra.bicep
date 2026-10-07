@@ -22,15 +22,17 @@
 //                              all users. Needed because an app that requires
 //                              assignment needs admin consent, even where
 //                              user consent would otherwise be allowed
-//   IIP Results Viewers (dev)  security group, no members yet (RBAC row 10)
-//   CA test user assignment    INTERIM row 10: iip-ca-test is assigned to the
-//                              app DIRECTLY (Default Access). letter7 is on
-//                              Entra ID Free (no licences, checked 2026-09-30),
-//                              and assigning a GROUP to an app needs P1/P2.
-//                              Gerard's decision (2026-09-30): user first, then
-//                              on the P2 trial's day 1 assign the group, add
-//                              the user to it, and delete this direct
-//                              assignment.
+//   IIP Results Viewers (dev)  security group (RBAC row 10). One member since
+//                              2026-10-07: iip-ca-test (RBAC row 11). Members
+//                              use REPLACE semantics (Gerard, 2026-10-07)
+//   group assignment           row 10 as designed: IIP Results Viewers (dev)
+//                              is assigned to the app (Default Access). Needs
+//                              Entra ID P1/P2: done on the P2 trial's day 1,
+//                              2026-10-07. Replaces the INTERIM direct
+//                              assignment of iip-ca-test (2026-09-30 to
+//                              2026-10-07), which was deleted by CLI: removing
+//                              a resource from this file does NOT delete it
+//                              from Entra (Graph Bicep has no complete mode).
 //
 // NOT here, on purpose:
 //   - Built-in authentication on the Function, and attaching id-iip-dev-wus-03
@@ -181,23 +183,42 @@ resource viewersGroup 'Microsoft.Graph/groups@v1.0' = {
       adminPrincipalId
     ]
   }
+  // 2026-10-07: iip-ca-test (RBAC row 11) is the only member, so gate test 2
+  // proves the GROUP path alone: member -> group assignment -> sign-in.
+  // REPLACE semantics (Gerard's decision, 2026-10-07): this list is the whole
+  // membership. A member added by hand in the portal is REMOVED on the next
+  // deploy, and deleting an ID here removes that member from Entra. The Graph
+  // default is 'append', which only ever adds (Microsoft Learn, "Model
+  // relationships in Microsoft Graph Bicep types"). Owners stay on the default.
+  members: {
+    relationshipSemantics: 'replace'
+    relationships: [
+      caTestUser.id
+    ]
+  }
 }
 
-// --- INTERIM row 10: the CA test user, assigned directly --------------------------
-// Proven necessary 2026-09-30: unassigned, this user got AADSTS50105. The user
-// itself is created by CLI, not here, because a Graph Bicep user needs its
-// password in the template.
+// --- Row 10: the viewers group, assigned to the app ---------------------------
+// 2026-10-07, P2 trial day 1. The all-zeros role is "Default Access": the app
+// defines no app roles, so this satisfies "Assignment required" without adding
+// a roles claim. A group assignment covers DIRECT members only (nested groups
+// don't inherit app assignments).
+resource viewersGroupAssignment 'Microsoft.Graph/appRoleAssignedTo@v1.0' = {
+  appRoleId: '00000000-0000-0000-0000-000000000000'
+  principalId: viewersGroup.id
+  resourceId: resultsSp.id
+}
+
+// The CA test user (RBAC row 11). Created by CLI, not here, because a Graph
+// Bicep user needs its password in the template. Read here by UPN so the
+// viewers group can list it as a member (2026-10-07).
 resource caTestUser 'Microsoft.Graph/users@v1.0' existing = {
   userPrincipalName: caTestUserUpn
 }
 
-resource caTestUserAssignment 'Microsoft.Graph/appRoleAssignedTo@v1.0' = {
-  // The all-zeros role is "Default Access". The app defines no app roles, so
-  // this satisfies "Assignment required" without adding a roles claim.
-  appRoleId: '00000000-0000-0000-0000-000000000000'
-  principalId: caTestUser.id
-  resourceId: resultsSp.id
-}
+// REMOVED 2026-10-07: caTestUserAssignment, the INTERIM direct assignment of
+// iip-ca-test (Default Access, created 2026-09-30). Deleted by CLI in the same
+// step, so the gate re-test proves the GROUP path alone.
 
 // --- Outputs: main.bicep's built-in authentication step needs the first two ----
 output resultsAppClientId string = resultsApp.appId
@@ -205,4 +226,6 @@ output tenantIssuer string = tenantIssuer
 output resultsAppObjectId string = resultsApp.id
 output resultsSpObjectId string = resultsSp.id
 output viewersGroupObjectId string = viewersGroup.id
+output viewersGroupAssignmentId string = viewersGroupAssignment.id
+output caTestUserObjectId string = caTestUser.id
 output redirectUri string = resultsApp.web.redirectUris[0]

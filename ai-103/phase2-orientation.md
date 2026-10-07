@@ -2,7 +2,7 @@
 
 ---
 
-> ## CURRENT MILESTONE: **M11** — The app
+> ## CURRENT MILESTONE: **M13** — Conditional Access
 >
 > **This line is the single source of truth for "where are we".** Nothing else
 > — not the project instructions, not a scheduled task, not the portfolio site
@@ -10,8 +10,10 @@
 > moves, change this line and the table's checkmark. That is the whole
 > update.**
 >
-> Last moved: 2026-09-23, M10 → M11 (Gerard). (M9 → M10 and M8 → M9 both
-> 2026-09-21.)
+> Last moved: 2026-10-07, M11 → **M13** (Gerard), passing over M12 on
+> purpose: M13 must finish inside the Entra ID P2 trial (ends 2026-11-06), and
+> M12 has no clock. M12 comes after M13. (M10 → M11 2026-09-23; M9 → M10 and
+> M8 → M9 both 2026-09-21.)
 >
 > **The rule that keeps this true:** a *dated* statement may name a milestone,
 > because it was correct on its date and reads as history — STATUS.md session
@@ -117,6 +119,12 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   remaining step for M11 is the "group member" in its done-when.** letter7 is
   on Entra Free and a group-to-app assignment needs P1/P2, so the group swap
   is the P2 trial's first step (STATUS.md Sep 30).
+- **M11 is COMPLETE (2026-10-07; Gerard moved the marker to M13).** On the P2
+  trial's first day the viewers group was assigned to the app, the interim
+  direct assignment was deleted by CLI, and the gate was re-tested with
+  `iip-ca-test`: refused with neither path (AADSTS50105), then through as a
+  group member. Every VERIFY row is recorded (the RBAC model's VERIFY ledger).
+  M12 waits behind M13, because only M13 runs on the trial clock.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID
@@ -142,6 +150,12 @@ project doc `claude/2026-09-16-phase2-plan-review.md`.
   2026-09-30: M11's own last step, assigning the viewers group to the app,
   needs P1/P2. So the trial starts once everything else in M11 is done, and
   the group swap is its first step. Found the day pass 2 was built.)*
+  *(Started 2026-10-07, from the Entra admin center → Billing → Trials →
+  Activate, which hands off to a Microsoft 365 checkout: 100 licences, a card
+  on file for identity only, $0. **Recurring billing was Off by default**,
+  with its edit control greyed out (Gerard's screenshot). It ends 2026-11-06
+  or -07: two portal pages disagree, so plan to the 6th. Todoist reminder due
+  Nov 2.)*
 - **RBAC:** D1–D7 all option (a); see the RBAC model.
 - **Conditional Access design:** C1–C9 all option (a), with one break-glass
   account and passkeys; see the spec.
@@ -182,7 +196,7 @@ Function must not use keys.
 | **M8** ✅ | **IaC baseline.** Bicep for what already exists in `rg-iip-dev-wus-01`: the Foundry account and project, the model deployments (with their current TPM), storage, Key Vault and AI Search. Adds the CAF tag set. | `az deployment group what-if` reports **no changes other than the documented provider-owned properties registered in `infrastructure/iip/README.md`**, and the Bicep is committed. | 1–2 sessions | — |
 | **M9** ✅ | **Identity foundation.** Managed identities `id-iip-dev-wus-01` and `-02`, plus the role assignments from the RBAC model, in Bicep. | The assignments exist and match the RBAC table, and Gerard's own data-plane roles (rows 2–3) are in place. | 1 session | M8 |
 | **M10** ✅ | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no **surveyed** script reads a key. **Amended 2026-09-22, by Gerard:** `m3_analyze.py`'s own Content Understanding pipeline is a STATED EXCEPTION. It reads two keys (`Ocp-Apim-Subscription-Key` at lines 183/206, and an account-key SAS via `get_storage_key()`), and `m10-prep.md` never surveyed it — it treated `m3_analyze.py` as the *home* of the key helper and never looked at the module's own `main()`. M3's migration is tracked separately: the REST auth swap is small, the account-key SAS → user-delegation SAS is a design change that amends the RBAC model. The exception is named here rather than left as a milestone that quietly stays open. **Exception CLOSED 2026-09-23:** `m3_analyze.py` migrated at `fcc55b6` (Entra ID bearer auth; user-delegation SAS for `--blob`, decision (A), Gerard) and verified live on both paths, so "no script reads a key" now holds without exception. | 1–2 sessions (includes the ~95 min run) | M9 |
-| **M11** | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the ~~blob trigger~~ **storage queue → queue trigger** → agent → results flow, the results page with built-in sign-in (via `id-iip-dev-wus-03` as a federated credential, no client secret), the app registration and the viewers group. *(Amended 2026-09-24: Gerard's D-M11-1 (b) and D-M11-2 (b), Sep 23 — see `m11-prep.md`.)* Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
+| **M11** ✅ | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the ~~blob trigger~~ **storage queue → queue trigger** → agent → results flow, the results page with built-in sign-in (via `id-iip-dev-wus-03` as a federated credential, no client secret), the app registration and the viewers group. *(Amended 2026-09-24: Gerard's D-M11-1 (b) and D-M11-2 (b), Sep 23 — see `m11-prep.md`.)* Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** | **Networking.** A VNet with an integration subnet, and private endpoints for Key Vault and storage. ~~Decides Event Grid delivery vs. inbound restrictions (Todoist task),~~ *(Amended 2026-09-24. D-M11-1 (b) removed the Function's inbound webhook, so the original question is gone and the Todoist task was closed Sep 23 — but the constraint **moved to the storage account**, it did not disappear. Microsoft Learn (Event Grid, storage queue handler): once `stiipdevwus01` has a firewall or network rule, Event Grid can deliver to its queue only with the system topic's **system-assigned** identity and only with *Allow Azure services on the trusted service list* enabled; a user-assigned identity is not supported at all. So M11 should give the system topic a system-assigned identity now, and M12 must keep the trusted-services exception on.)* Decides the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
 | **M14** | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |

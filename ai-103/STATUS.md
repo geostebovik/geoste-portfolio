@@ -66,9 +66,10 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** September 24, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 7, 2026. Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
-and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23). For
+and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
+M11 closed on Oct 7. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -85,50 +86,34 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action (Oct 7, first thing): start the Entra ID P2 trial and close M11
-with the group swap, in one sitting.** Replaced 2026-10-06 (Claude drafted at
-Gerard's request). The Oct 1 version's items are carried below or closed; see
-the Oct 6 session entry.
+**Next action (from Oct 7, after M11 closed): M13, Conditional Access, inside
+the Entra ID P2 trial (ends 2026-11-06).** Replaced 2026-10-07 (Claude drafted
+at Gerard's request). The Oct 6 version's six steps are done or carried below;
+see the Oct 7 session entry.
 
-1. **Start the trial.** Microsoft 365 admin center → Billing → Purchase
-   services → Microsoft Entra ID P2 → Details → Start free trial. Then **at
-   once**: Billing → Your products → Entra ID P2 → recurring billing **Off**.
-   Confirm `AAD_PREMIUM_P2` appears in `subscribedSkus` (it was empty on Sep
-   30). Assign P2 to `iip-ca-test` and `djeemunee` (set a usage location if
-   asked).
-2. **Deploy the group assignment.** `entra.bicep` is **already edited on disk,
-   uncommitted** (Claude, 2026-10-06): it assigns **IIP Results Viewers (dev)**
-   to the app and drops the INTERIM direct assignment from the template. Not
-   compiled by Claude (the Graph types restore from mcr.microsoft.com, which
-   Claude's workspace can't reach), so the deploy is the first compile.
-   Deploy as `m11-entra-20261007a`. Then list the app's `appRoleAssignedTo`,
-   **delete the User row by CLI** (removing it from Bicep doesn't delete it),
-   and list again: Group only.
-3. **Gate test 1** (new InPrivate window): `iip-ca-test`, now neither a member
-   nor directly assigned → expect **AADSTS50105**.
-4. **Add `iip-ca-test` to the group** (Claude edits `entra.bicep`), deploy,
-   then **gate test 2**: it reaches `/api/results`. One change per deploy, so
-   each test proves one path.
-5. **Close M11:** record the VERIFY rows in `phase2-rbac-model-draft.md`, flip
-   the M11 marker and row in `phase2-orientation.md`, and commit `entra.bicep`
-   with the docs.
-6. **Same day, while the trial is fresh:** re-run
+1. **Entra inventory with last sign-in** (M13 prep). Re-run
    `Get-EntraInventory.ps1` (OneDrive `Data\Claude\entra-inventory`) with a
-   last-sign-in section (Claude adds it; it needs P1/P2), then Gerard labels
-   each object keep / narrow / disable. **Before M13:** a break-glass account
-   (there is only one Global Administrator).
+   `signInActivity` section (Claude adds it; the tenant now has P2). Gerard
+   labels each object keep / narrow / disable. Disable before delete.
+2. **Break-glass account**, M13's first step: there is only one Global
+   Administrator (`djeemunee`), permanent, with no break-glass.
+3. **M13 per the CA spec:** the baseline policies, then security defaults off,
+   then CA001 in report-only mode and then on, test matrix T1-T6, evidence
+   exported, and the **rollback before 2026-11-06**.
+4. **Before the trial ends,** decide what row 10 does when P1/P2 lapses: an
+   existing group assignment without a licence is untested (Todoist, due Nov 2).
 
-**Carried from the Oct 1 list** (details in Todoist):
+**Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
   trim the Azure SDK's HTTP logging.
 - Gerard's steps: update the project instructions (`id-iip-dev-wus-03` is
-  deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev),
-  `iip-ca-test`, the results page, the custom role IIP Queue Trigger (dev),
-  soft delete 7 days). The question-tool decision: it worked for every
-  question on Oct 6.
+  deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev) with
+  `iip-ca-test` as its member, the results page, the custom role IIP Queue
+  Trigger (dev), soft delete 7 days, the P2 trial dates).
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
+- M12 (networking) follows M13; it has no clock.
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -164,9 +149,14 @@ Harmless so far; the instance-id follow-up would tell them apart.
   get no what-if, so they're verified by reading them back.
 - **The `main.bicep` register is 6 modify, 24 no change, 11 Unsupported, 2 to
   ignore** (Sep 30). `authsettingsV2` reports No change once deployed.
-- **The P2 trial starts Oct 7, not Oct 6** (Gerard, 2026-10-06): the day went
-  to the site and resume, and a 30-day clock shouldn't start on a day that
-  can't use it.
+- **Row 10 is the group, as designed** (2026-10-07). `iip-ca-test` is its
+  only member, declared in `entra.bicep` with **replace** semantics (Gerard):
+  the template is the whole member list.
+- **The P2 trial's recurring billing is Off by default** (Your products,
+  2026-10-07, edit control greyed out). Nothing to switch off. Re-check once,
+  on the Nov 2 Todoist reminder.
+- **Gate tests need every Incognito window closed first.** Chrome shares one
+  session across Incognito windows, so a leftover sign-in skips Entra.
 - **Bare-domain DNS is an ALIAS record** (Gerard, 2026-10-06, option A). Its
   Front Door certificate no longer auto-renews: a monthly Todoist task checks
   for "Pending Revalidation". Current cert expires 2027-03-18.
@@ -487,6 +477,55 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 7, 2026 — P2 trial started; M11 closed (group swap); marker to M13
+
+**Attribution:** Claude wrote the `entra.bicep` edits, the CLI commands and
+these doc edits. Gerard ran every command and portal step and made every
+decision named here.
+
+**Entra ID P2 trial, started:**
+- **The portal path has changed.** Microsoft 365 admin center → Purchase
+  services redirected to the **Entra admin center → Billing → Trials →
+  Activate** (Microsoft Entra ID P2), which hands off to a Microsoft 365
+  checkout: "One month free with payment details", 100 licences, $0, the card
+  on file "used to verify your identity".
+- **Recurring billing: Off by default**, with "Edit recurring billing" greyed
+  out (Billing → Your products, Gerard's screenshot). Claude's reading
+  wavered on the way: it first called the conversion risk smaller from the
+  Activate page's wording, then reversed that on the checkout's "with payment
+  details" and Microsoft Learn ("some self-service trials ... automatically
+  convert to a paid version"). The product page settled it: Off.
+- **Ends 2026-11-06 or -07.** Your products says 11/7; each user's licence
+  tab says 11/6 (probably UTC vs local time; unconfirmed). Plan to the 6th.
+  Todoist reminder due Nov 2.
+- P2 assigned to `djeemunee` and `iip-ca-test`. The usage location is set on
+  the user's **Licenses and apps** tab in the Microsoft 365 admin center.
+  `subscribedSkus`: `AAD_PREMIUM_P2`, 100 enabled, 2 used.
+
+**M11 closed: the group swap and both gate tests** (details:
+`infrastructure/iip/README.md`, "The group swap"):
+- `m11-entra-20261007a` assigned **IIP Results Viewers (dev)** to the app.
+  The direct `iip-ca-test` row was deleted by CLI. **The first gate test
+  caught a missed step:** the delete hadn't been run, and `iip-ca-test`
+  reached the page through the leftover row. Run again, the list showed the
+  Group only.
+- **Gate test 1:** AADSTS50105 (sign-in log 17:43:23Z, error 50105, Correlation ID `6a3aaa06-6190-441f-a6da-3f60416c8cdf`). `m11-entra-20261007b` made
+  `iip-ca-test` the group's only member. **Gate test 2:** the results page
+  (sign-in log 17:53:18Z, Correlation ID `f3e78331-3d8e-421d-95dd-14383249ccc5`). M11's done-when is met. RBAC row 10 is confirmed as designed; the
+  VERIFY ledger has no open or interim rows.
+
+**Decisions (Gerard):**
+- The viewers group's members use **replace** semantics (the template is the
+  whole list); owners stay on the default, append.
+- **The marker moves M11 → M13**, passing over M12. Claude's case, which
+  Gerard chose: only M13 runs on the trial clock, and M12's private endpoints
+  don't touch the sign-in path that CA protects.
+
+**How the work ran:** this session had no shell on the tower, only file read
+and write through the bridge, so the git checks were Gerard's. Every Claude
+file write went to a unique staging name and was read back from the device
+and compared byte for byte (the Oct 6 fix). All matched.
 
 ### Session — October 6, 2026 — site and resume fixed, Entra inventory, subscription risk sized (P2 trial moved to Oct 7)
 

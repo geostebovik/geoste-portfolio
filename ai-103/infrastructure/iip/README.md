@@ -140,7 +140,7 @@ deploy time), which makes 12 in total. Confirm against the next post-deploy
 
 This section becomes a register entry after the first deploy.
 
-## M11 pass 2 — sign-in (2026-09-30; steps A-C deployed, gate proven; results page to come)
+## M11 pass 2 — sign-in (2026-09-30 to 2026-10-07; built and proven; group swap done, M11 closed)
 
 Claude wrote it. Gerard made the decisions on 2026-09-30: Entra objects go in
 **Graph Bicep, in a separate file**; RBAC row 10 starts with a **user**
@@ -270,6 +270,48 @@ for `item4-key-cutting-FLAW-brand/20260924T191158Z` showed the facts, the
 three audit verdicts and the final drafted copy. **Qualifier:** the done-when
 says "a group member". The interim is a direct assignment until the P2 trial
 (see above).
+
+**The group swap, P2 trial day 1 (2026-10-07). M11 closed.** Claude edited
+`entra.bicep` and wrote the commands; Gerard ran every command and made both
+decisions named here.
+- **The deploy command**, recorded because no doc had it. From the repo root:
+  ```powershell
+  az deployment group create `
+    --resource-group rg-iip-dev-wus-01 `
+    --name <deployment-name> `
+    --template-file ai-103/infrastructure/iip/entra.bicep `
+    --parameters ai-103/infrastructure/iip/entra.bicepparam
+  ```
+- **`m11-entra-20261007a`: Succeeded.** It assigned **IIP Results Viewers
+  (dev)** to the app (Default Access; assignment ID `IWuSisJl…`).
+  `appRoleAssignedTo` then listed two rows: the Sep 30 User row and the new
+  Group row (created 17:31:42Z).
+- **The User row was deleted by CLI** (`az rest --method delete
+  …/servicePrincipals/{sp}/appRoleAssignedTo/{id}`), because removing a
+  resource from Graph Bicep never deletes it. **The test caught a missed
+  step:** on the first pass the delete command wasn't run, the list still
+  showed two rows, and `iip-ca-test` reached the page through the leftover
+  User row (sign-in log: Success at 17:37:17Z, Correlation ID
+  `9405e225-1618-4b63-8422-9ab5fa408aeb`). Run again, the list showed the
+  Group only.
+- **Gate test 1** (Incognito, with every Incognito window closed first, since
+  Chrome shares one session across them): **AADSTS50105**, *"not a direct
+  member of a group with access, nor had access directly assigned"*.
+  Sign-in log: 2026-10-07T17:43:23Z, error 50105,
+  Correlation ID `6a3aaa06-6190-441f-a6da-3f60416c8cdf`.
+- **`m11-entra-20261007b`: Succeeded**, with the same assignment ID (updated
+  in place). The group's `members` lists `iip-ca-test` with
+  **`relationshipSemantics: 'replace'`** (Gerard's decision): the template is
+  the whole membership, so a member added by hand is removed on the next
+  deploy. The Graph default, `append`, only ever adds (Microsoft Learn, "Model
+  relationships in Microsoft Graph Bicep types"). Owners stay on the default.
+  `az ad group member list` shows exactly `iip-ca-test`.
+- **Gate test 2:** `iip-ca-test` reached `/api/results` ("Signed in as IIP CA
+  Test User (dev)"). Sign-in log: 2026-10-07T17:53:18Z, Success,
+  Correlation ID `f3e78331-3d8e-421d-95dd-14383249ccc5`. **M11's done-when is met:** a group member can
+  sign in and see the results.
+- **Not tested:** what an existing group assignment does once P1/P2 lapses
+  (the trial ends 2026-11-06). Tracked in Todoist, due Nov 2.
 
 **Why a separate file:** Graph resources are extensible resources, and what-if
 does not support them. Inside `main.bicep` they would sit unanalysed in the one
