@@ -86,22 +86,27 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action (from Oct 7, after M11 closed): M13, Conditional Access, inside
-the Entra ID P2 trial (ends 2026-11-06).** Replaced 2026-10-07 (Claude drafted
-at Gerard's request). The Oct 6 version's six steps are done or carried below;
-see the Oct 7 session entry.
+**Next action: M13 deploy step 3, the baseline, then security defaults off.**
+Replaced 2026-10-07 at the end of the day (Claude drafted at Gerard's request);
+the morning's version (inventory, break-glass) is done, see the Oct 7 entry.
+The steps below are the CA spec's amended step 3
+(`phase2-conditional-access-spec-draft.md`); that file is the detail.
 
-1. **Entra inventory with last sign-in** (M13 prep). Re-run
-   `Get-EntraInventory.ps1` (OneDrive `Data\Claude\entra-inventory`) with a
-   `signInActivity` section (Claude adds it; the tenant now has P2). Gerard
-   labels each object keep / narrow / disable. Disable before delete.
-2. **Break-glass account**, M13's first step: there is only one Global
-   Administrator (`djeemunee`), permanent, with no break-glass.
-3. **M13 per the CA spec:** the baseline policies, then security defaults off,
-   then CA001 in report-only mode and then on, test matrix T1-T6, evidence
-   exported, and the **rollback before 2026-11-06**.
-4. **Before the trial ends,** decide what row 10 does when P1/P2 lapses: an
-   existing group assignment without a licence is untested (Todoist, due Nov 2).
+1. **Authentication methods first:** enable Microsoft Authenticator in the
+   methods policy and finish the legacy migration ("In progress"). Today
+   `djeemunee`'s MFA works only through the deprecated legacy settings.
+2. **Build the four baseline policies** from the "Secure foundation" templates
+   (C7, amended by Gerard on Oct 7), each excluding `bg-admin-01`, in
+   Report-only if the portal allows it while security defaults is on.
+3. **Security defaults off, then the baseline On.** Wait before testing (6-47
+   min lag seen on Oct 7), then check with What If and the sign-in logs.
+4. **Then CA001** per the spec. `iip-ca-test` needs a passkey first (C4).
+5. **AzSvcAdmin@ostebovik.net** (still Owner on MG Non-Prod and VSE): find what
+   refreshed its token at 03:00:05Z on Oct 7 (non-interactive sign-in log:
+   Application, IP), then keep, narrow or delete.
+6. **Before 2026-11-06:** C9, plus the open risk in the spec (managed
+   policies that can't be deleted), and decide what RBAC row 10's group
+   assignment does when P1/P2 lapses (untested). Todoist reminder due Nov 2.
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
@@ -114,6 +119,9 @@ see the Oct 7 session entry.
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
 - M12 (networking) follows M13; it has no clock.
+- New Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
+  lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
+  service-principal sections once the beta report resumes.
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -157,6 +165,16 @@ Harmless so far; the instance-id follow-up would tell them apart.
   on the Nov 2 Todoist reminder.
 - **Gate tests need every Incognito window closed first.** Chrome shares one
   session across Incognito windows, so a leftover sign-in skips Entra.
+- **The break-glass account exists and works** (2026-10-07):
+  `bg-admin-01@letter7.onmicrosoft.com`, Global Administrator, passkey in
+  Authenticator proven. Password on paper only; never in any file.
+- **Passkey (FIDO2) is on for All users**: device-bound, attestation enforced,
+  no key restrictions. The profile's edit pane shows Device-bound only; trust
+  it over the list column, which said "Device-bound, Synced".
+- **Authentication-policy changes take minutes to reach sign-in** (6-47 min on
+  Oct 7). Wait before testing; a failure in the first minutes proves nothing.
+- **Microsoft-managed CA policies don't exist while security defaults is on**
+  (Microsoft Learn; the list was empty on Oct 7). Baseline = templates, by hand.
 - **Bare-domain DNS is an ALIAS record** (Gerard, 2026-10-06, option A). Its
   Front Door certificate no longer auto-renews: a monthly Todoist task checks
   for "Pending Revalidation". Current cert expires 2027-03-18.
@@ -478,7 +496,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 7, 2026 — P2 trial started; M11 closed (group swap); marker to M13
+### Session — October 7, 2026 — P2 trial started; M11 closed (group swap); marker to M13; tenant cleanup; break-glass account
 
 **Attribution:** Claude wrote the `entra.bicep` edits, the CLI commands and
 these doc edits. Gerard ran every command and portal step and made every
@@ -525,7 +543,45 @@ decision named here.
 **How the work ran:** this session had no shell on the tower, only file read
 and write through the bridge, so the git checks were Gerard's. Every Claude
 file write went to a unique staging name and was read back from the device
-and compared byte for byte (the Oct 6 fix). All matched.
+and compared byte for byte (the Oct 6 fix). **One didn't:** at the end of the
+day, STATUS.md landed without two small fixes, because Claude had edited a
+staging file in place after first writing it, instead of writing a new name.
+The read-back caught it, and a rewrite under a fresh name matched. The rule is
+stricter than "a unique name per write": a staged file is never edited
+again.
+
+**Afternoon: M13 prep (tenant cleanup, break-glass), after the M11 commit
+`3f51098`.** Claude wrote the scripts and these notes; Gerard made every
+decision and ran every step.
+- **Inventory with last sign-in:** `Get-EntraInventory.ps1` gained sections
+  8-10. Section 8 (users) works but runs about a day behind. Sections 9-10
+  (beta service-principal and credential reports) are **unusable for now**:
+  the report's newest entry anywhere is 2026-01-13.
+- **Cleanup (`Remove-EntraRemnants.ps1`, dry run first):** Gerard identified
+  the unfamiliar objects as **AZ-900-era** leftovers (early Entra experiments
+  and an abandoned genealogy site). Removed: 9 users and 6 app registrations
+  (soft delete, restorable until about Nov 6), 4 empty security groups
+  (permanent), and 8 role assignments. Among them is `familytree-api-01881`'s
+  **Contributor on the whole VSE subscription with a live secret**, the
+  tenant's biggest standing risk. The dry run said 26 actions where Claude's
+  message had said 31: Claude's arithmetic, and Gerard stopped before
+  `-Apply` to ask. One delete hit the ReadOnly lock `Not4Deployment` on Legacy
+  PAYG 1 (Gerard's AZ-900 cost guard). It was lifted for that delete and
+  recreated exactly. Left: 3 users, 1 group, 2 app registrations. Record and
+  logs: OneDrive `Data\Claude\entra-inventory` (kept out of the repo: names
+  and object IDs).
+- **Break-glass (M13 deploy step 2):** `bg-admin-01`. Details and the known
+  gap are in the CA spec's "Progress, 2026-10-07".
+- **A diagnosis worth keeping:** the first passkey sign-in failed (135016,
+  "FIDO sign-in is disabled via policy"). Claude guessed twice and was wrong
+  twice: first a Google-synced passkey, then the profile's synced setting. The
+  sign-in log showed it was the Authenticator passkey on the default profile.
+  **Gerard retried before changing anything, and it worked:** propagation lag,
+  not configuration.
+- **M13 step 3 checked, not started:** Conditional Access list empty, security
+  defaults Enabled. C7 amended (templates, by hand). Step 3 moved to next
+  session (Gerard): it changes every sign-in, and with the lag it needs 60-90
+  minutes with nothing left half-done.
 
 ### Session — October 6, 2026 — site and resume fixed, Entra inventory, subscription risk sized (P2 trial moved to Oct 7)
 

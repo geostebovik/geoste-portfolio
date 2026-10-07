@@ -8,6 +8,27 @@ and added the two notes recorded under the decisions table. Nothing here is depl
 sign-in exist (Todoist task; turn recurring billing off right after
 signup).
 
+> **Progress, 2026-10-07 (Claude drafted; Gerard made every decision and ran
+> every step).**
+> - **Deploy step 1 done:** the P2 trial started 2026-10-07 (recurring billing
+>   Off by default; ends 2026-11-06).
+> - **Deploy step 2 done (C2):** `bg-admin-01@letter7.onmicrosoft.com`,
+>   cloud-only, Global Administrator (permanent, active, not PIM), password on
+>   paper only, one device-bound **passkey in Microsoft Authenticator**
+>   (Android). Proven: it signed in to the Entra admin center with the passkey
+>   alone. For that, **Passkey (FIDO2)** was enabled for All users; the
+>   default passkey profile is device-bound, attestation enforced, no key
+>   restrictions (Microsoft's suggestion for admin accounts).
+> - **Known gap in C2, accepted for now:** one method, on the same phone as
+>   djeemunee's Authenticator, and the tower has no Bluetooth, so the passkey
+>   only works on the phone itself. Fix: a USB FIDO2 key as a second method
+>   (Todoist, p2).
+> - **Found:** an authentication-methods change took **more than 6 and less
+>   than 47 minutes** to reach sign-in (error 135016 "FIDO sign-in is disabled
+>   via policy" at 12:33-12:34, success by about 13:15). Every policy change
+>   in M13 gets a wait before it is tested.
+> - **C7 amended**, and deploy step 3 reordered: see both, below.
+
 ## Read this first: this touches the whole tenant, not only the app
 
 1. **Conditional Access and security defaults cannot be on together.**
@@ -72,7 +93,7 @@ tenant weaker than it was for the length of the trial.
 | C4 | Authentication strength | (a) **Phishing-resistant MFA.** It's the strongest story, but the test user must register a passkey (for example in Microsoft Authenticator) or a FIDO2 key. (b) The built-in **MFA strength**, which is easiest to test. Fall back to (b) if registering a passkey blocks testing. |
 | C5 | Session controls | (a) **8-hour sign-in frequency, and sessions never persist in the browser.** (b) Leave the defaults. |
 | C6 | Report-only period | (a) **Until the test matrix below passes in report-only mode** (a few days, not a fixed number), then switch to On. (b) A fixed 7 days. |
-| C7 | Baseline | (a) **Turn on the Microsoft-managed policies** when security defaults goes off. (b) Write the four baseline policies by hand: more to show, more to maintain. |
+| C7 | Baseline | (a) **Turn on the Microsoft-managed policies** when security defaults goes off. (b) Write the four baseline policies by hand: more to show, more to maintain. **Amended 2026-10-07 (Gerard): build them by hand from the "Secure foundation" Conditional Access templates.** Found the same day (Microsoft Learn, "Microsoft-managed Conditional Access policies"): Microsoft creates its managed policies only in P1/P2 tenants *where security defaults aren't enabled*, on its own timetable, in report-only for 30+ days, and they **can't be deleted**. The tenant's policy list was empty on 2026-10-07. So (a) would leave no baseline at the moment security defaults goes off, and undeletable policies would complicate C9. The four to build are Microsoft's "upgrade from security defaults" set: block legacy authentication; MFA for Azure management; MFA for admins; MFA for all users. Each excludes `bg-admin-01`. |
 | C8 | Evidence for the write-up | (a) **Export each policy as JSON** (Microsoft Graph, read-only) into the repo, plus screenshots of the report-only results and of an enforced sign-in. (b) Screenshots only. |
 | C9 | When the trial ends | (a) **Export the policies, delete them, and turn security defaults back on,** so the tenant returns to a state that can be managed. (b) Leave them in place, enforced but frozen. |
 
@@ -116,11 +137,35 @@ logs' Conditional Access tab for T1–T5.
    credentials offline.
 3. Turn on the baseline (C7), **then** turn off security defaults. Keeping
    this order means the tenant is never without protection.
+   **Amended 2026-10-07 (Claude, after checking the live tenant; not yet run):**
+   - **3a. Authentication methods first.** On 2026-10-07 only Email OTP and
+     Passkey (FIDO2) were enabled in the Authentication methods policy, and the
+     legacy MFA/SSPR migration showed "In progress". `djeemunee`'s
+     Authenticator MFA works today only through the legacy settings. Enable
+     **Microsoft Authenticator** in the methods policy and finish the migration
+     before anything else, so no admin depends on a deprecated setting.
+   - **3b. Build the four baseline policies** (C7, amended) in **Report-only**,
+     each excluding `bg-admin-01`. **Unverified:** whether the portal allows
+     creating them while security defaults is still on. If it doesn't, turn
+     security defaults off and create them straight to **On**. For a tenant of
+     4 users that gap is minutes, and it is accepted.
+   - **3c.** Security defaults off, then the baseline On. **Wait** (see the lag
+     above), then check with What If and the sign-in logs: `djeemunee` is asked
+     for MFA, `bg-admin-01` is excluded, `iip-ca-test` is covered.
+   - **3d. Watch the policy list.** Microsoft-managed policies may appear once
+     security defaults is off. Exclude `bg-admin-01` from any that do, and set
+     them to Off if they duplicate the baseline.
 4. Create CA001 in report-only mode and run T1–T6 with What If and the
    sign-in logs.
 5. Turn CA001 on and run T1–T6 again.
 6. Export the evidence (C8).
 7. Before the trial end date, carry out C9.
+   **Open risk (2026-10-07):** C9 turns security defaults back on, which needs
+   the Conditional Access policies gone. Microsoft-managed policies can't be
+   deleted, only turned off, and Microsoft Learn doesn't say whether an Off
+   managed policy blocks re-enabling security defaults. If any managed policy
+   appears after 3c, test this well before 2026-11-06 (Todoist reminder, due
+   Nov 2).
 
 ## Sources (Microsoft Learn, 2026-09-16)
 
