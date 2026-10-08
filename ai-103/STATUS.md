@@ -87,26 +87,26 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M13 step 4, CA001 in Report-only, then the test matrix.**
-Replaced 2026-10-08 (Claude drafted at Gerard's request). Oct 7's version
-(deploy step 3: methods, baseline, security defaults off) is done; see the
-Oct 8 entry. The CA spec (`phase2-conditional-access-spec-draft.md`) is the
-detail: its decisions table, test matrix (T2 amended Oct 8) and steps 4-7.
+**Next action: M13 step 5, CA001's On pass (T1-T6), then the evidence.**
+Replaced 2026-10-08 late afternoon (Claude drafted at Gerard's request).
+Step 4 (CA001 built, Report-only pass) is done, and **CA001 has been On since
+2026-10-08 13:41 Phoenix**, so the propagation wait is already over. The CA
+spec (`phase2-conditional-access-spec-draft.md`) is the detail: its test
+matrix (T2 amended) and the Oct 8 afternoon progress block.
 
-1. **A passkey for `iip-ca-test` first (C4).** Decide where it lives before
-   registering it: the phone's Authenticator already holds `djeemunee` and
-   `bg-admin-01`, which is the single-phone concentration the USB FIDO2 key
-   task (Todoist, p2) exists to fix. Gerard's call.
-2. **Build CA001** per the spec's table: group IIP Results Viewers (dev),
-   exclude `bg-admin-01`, target IIP Results (dev) only, authentication
-   strength Phishing-resistant MFA, sign-in frequency 8 h, never persistent,
-   **Report-only**. A hand-built policy (not a template), so no creator
-   exclusion to fix, but check the exclusion list anyway.
-3. **T1-T6 in Report-only** (What If, then the sign-in logs' Conditional
-   Access tab). Then CA001 **On**, wait out the lag (up to 47 min), T1-T6
-   again.
+1. **T1, T2, T4, T5 again with CA001 On**, on the phone in Chrome Incognito
+   (the tower has no Bluetooth, so passkey tests run on the phone), at
+   `https://func-iip-dev-wus-01.azurewebsites.net/api/results`. Expected:
+   T1 passkey → the page, CA001 **Success**; **T2 password + Authenticator push
+   → blocked** until the passkey is used; T4 `bg-admin-01` → the page, CA001
+   Not applied; T5 mysignins → CA001 Not applied. Read each on the sign-in
+   log's **Conditional Access** tab (no longer the Report-only tab).
+2. **T6:** a regression upload, then the **Managed identity sign-ins** tab and
+   the result in `results/`: the Function's identity is unaffected.
+3. **T3 is covered by reference** (M11 gate test 1, Oct 7, AADSTS50105): every
+   account outside the group is an admin, and admins bypass assignment.
 4. **Evidence (C8):** export CA001 and CA900-CA903 as JSON (Graph, read-only)
-   into the repo, plus the screenshots.
+   into the repo, plus the screenshots. Claude writes the export commands.
 5. **Before 2026-11-06:** C9 (export, delete, security defaults back on), the
    managed-policy check, and what RBAC row 10's group assignment does when
    P1/P2 lapses (untested). Todoist reminder due Nov 2.
@@ -199,6 +199,12 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **`AzSvcAdmin@ostebovik.net`**: all four Azure roles removed, sign-in
   blocked, sessions revoked (2026-10-08). Its only use was an Edge profile on
   the home network. Delete on Oct 22 if quiet (Todoist).
+- **CA001 has no "Never persistent" control** (Gerard, C5 amended
+  2026-10-08): that control needs a policy targeting All cloud apps. CA001
+  keeps the 8-hour sign-in frequency.
+- **`iip-ca-test`'s passkey is in Authenticator on the phone** (2026-10-08).
+  Passkey tests run in the phone's Chrome: the tower has no Bluetooth, and
+  Edge on Android doesn't do same-device passkey sign-in yet.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -517,7 +523,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 8, 2026 — M13 deploy step 3 done: methods migrated, baseline CA900-CA903 live, security defaults off; AzSvcAdmin closed off
+### Session — October 8, 2026 — M13 steps 3-4 done: methods migrated, baseline CA900-CA903 live, security defaults off; CA001 built, Report-only pass, then On; AzSvcAdmin closed off
 
 **Attribution:** Claude wrote the steps (from Microsoft Learn), the CLI
 commands and these doc edits. Gerard ran every portal step and command and
@@ -580,6 +586,22 @@ blade's labels and required fields didn't match Claude's steps; Claude asked
 for a "Client app" column the non-interactive log doesn't show by default; and
 an "Undo" line read like an instruction. Doc writes followed the Oct 6/7 rule
 (a fresh staging name per write, read back from the device and compared).
+The morning's work was committed as `b4d80b0`.
+
+**Afternoon: M13 step 4, CA001** (details: the CA spec's "Progress, 2026-10-08
+afternoon"):
+- `iip-ca-test` got a device-bound passkey in Authenticator on the phone
+  (Gerard's choice; a test user, so the one-phone risk is accepted).
+- **C5 amended (Gerard):** CA001 keeps the 8-hour sign-in frequency and drops
+  "Never persistent", which Microsoft Learn says needs All cloud apps. Caught
+  by Claude checking the settings against Learn before the build, not after.
+- CA001 built by hand in Report-only. What If matched for all three users.
+  The Report-only pass (T1, T2, T4, T5) matched; T3 is covered by Oct 7's gate
+  test 1, since every non-member is an admin; T6 moves to the On pass.
+- **CA001 switched On at 13:41** (Gerard's choice), so the propagation wait
+  runs between sessions. Next session starts at the On-pass tests.
+- Claude's instruction error: step 3's What If was written so that it read
+  like a sign-in test on the phone. Gerard asked; corrected.
 
 ### Session — October 7, 2026 — P2 trial started; M11 closed (group swap); marker to M13; tenant cleanup; break-glass account
 

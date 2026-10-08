@@ -79,6 +79,38 @@ signup).
 >   "would require authentication strength"; On → blocked until the passkey is
 >   used. The test matrix is amended to match.
 
+> **Progress, 2026-10-08 afternoon (Claude wrote the steps; Gerard made every
+> decision and ran every step).**
+> - **`iip-ca-test`'s passkey (C4):** device-bound, in Microsoft Authenticator
+>   on the same Android phone (Gerard's choice). For a test user the
+>   single-phone risk is accepted; it is the *admins* on one phone that the USB
+>   key task fixes. The tower has no Bluetooth, so every passkey test runs in
+>   the phone's Chrome (Microsoft Learn: same-device passkey sign-in in Edge on
+>   Android isn't supported yet).
+> - **C5 amended (Gerard): CA001 keeps the 8-hour sign-in frequency and drops
+>   "Never persistent".** Microsoft Learn ("Configure adaptive session lifetime
+>   policies"): the persistent-browser-session control requires All cloud apps,
+>   because every tab in a browser shares one session token. CA001 targets one
+>   app. A separate tenant-wide policy was considered and declined (scope, and
+>   more to roll back in C9).
+> - **Deploy step 4 done.** CA001 built by hand (not a template) in
+>   Report-only: group IIP Results Viewers (dev), exclude `bg-admin-01`, target
+>   IIP Results (dev), Phishing-resistant MFA strength, sign-in frequency 8 h.
+>   What If (IIP Results (dev), Android, Browser): `iip-ca-test` CA001 + CA903;
+>   `bg-admin-01` not CA001; `djeemunee` CA903 only. All matched.
+> - **Report-only pass, from the sign-in logs' Report-only tab** (13:38), all
+>   as expected: **T1** passkey → Report-only: Success; **T2** password +
+>   Authenticator push → Report-only: Failure (strength not met); **T4**
+>   `bg-admin-01` → Not applied; **T5** `iip-ca-test` to mysignins → Not
+>   applied.
+> - **T3 not run, by design:** every account outside the group is a Global
+>   Administrator, and admins bypass "Assignment required". T3's evidence is
+>   M11's gate test 1 (2026-10-07, AADSTS50105, sign-in log 17:43:23Z,
+>   Correlation ID `6a3aaa06-6190-441f-a6da-3f60416c8cdf`). **T6** moves to the
+>   On pass.
+> - **Deploy step 5 started: CA001 On at 13:41 (Phoenix).** The On-pass tests
+>   wait for the next session, past the propagation window.
+
 ## Read this first: this touches the whole tenant, not only the app
 
 1. **Conditional Access and security defaults cannot be on together.**
@@ -110,7 +142,7 @@ signup).
 | **Target resources** | Enterprise app **IIP Results (dev)** only | — |
 | **Conditions** | None. It applies to every sign-in to the app. | C3 |
 | **Grant** | Require authentication strength: **Phishing-resistant MFA** | C4 |
-| **Session** | Sign-in frequency **8 hours**; persistent browser session **Never persistent** | C5 |
+| **Session** | Sign-in frequency **8 hours**. *(Amended 2026-10-08: "Never persistent" dropped; it requires All cloud apps. See C5.)* | C5 |
 | **State** | **Report-only**, then **On** after the tests pass | C6 |
 
 **Why this policy.** It protects the one thing a person reaches through
@@ -142,7 +174,7 @@ tenant weaker than it was for the length of the trial.
 | C2 | Emergency-access account | (a) **Create one** cloud-only Global Administrator account, used for nothing else. Give it a long random password stored offline and a phishing-resistant method (a passkey), and exclude it from *every* policy. Microsoft recommends two for organizations; one is reasonable for a single-admin lab, and the page should say so. (b) Exclude your own admin account instead. That is simpler, but it means your daily account is the one that bypasses policy. |
 | C3 | Conditions | (a) **None:** every sign-in to the app gets the control. (b) Location-based, with a named location for "home". That is weaker for a public demo and harder to test. (c) Sign-in risk (P2): shows Identity Protection, but a second condition makes the test matrix larger. It is a stretch goal, not the core. |
 | C4 | Authentication strength | (a) **Phishing-resistant MFA.** It's the strongest story, but the test user must register a passkey (for example in Microsoft Authenticator) or a FIDO2 key. (b) The built-in **MFA strength**, which is easiest to test. Fall back to (b) if registering a passkey blocks testing. |
-| C5 | Session controls | (a) **8-hour sign-in frequency, and sessions never persist in the browser.** (b) Leave the defaults. |
+| C5 | Session controls | (a) **8-hour sign-in frequency, and sessions never persist in the browser.** (b) Leave the defaults. **Amended 2026-10-08 (Gerard): 8 hours only.** The persistent-browser-session control works only when a policy targets All cloud apps (Microsoft Learn), and CA001 targets one app. |
 | C6 | Report-only period | (a) **Until the test matrix below passes in report-only mode** (a few days, not a fixed number), then switch to On. (b) A fixed 7 days. |
 | C7 | Baseline | (a) **Turn on the Microsoft-managed policies** when security defaults goes off. (b) Write the four baseline policies by hand: more to show, more to maintain. **Amended 2026-10-07 (Gerard): build them by hand from the "Secure foundation" Conditional Access templates.** Found the same day (Microsoft Learn, "Microsoft-managed Conditional Access policies"): Microsoft creates its managed policies only in P1/P2 tenants *where security defaults aren't enabled*, on its own timetable, in report-only for 30+ days, and they **can't be deleted**. The tenant's policy list was empty on 2026-10-07. So (a) would leave no baseline at the moment security defaults goes off, and undeletable policies would complicate C9. The four to build are Microsoft's "upgrade from security defaults" set: block legacy authentication; MFA for Azure management; MFA for admins; MFA for all users. Each excludes `bg-admin-01`. |
 | C8 | Evidence for the write-up | (a) **Export each policy as JSON** (Microsoft Graph, read-only) into the repo, plus screenshots of the report-only results and of an enforced sign-in. (b) Screenshots only. |
@@ -207,9 +239,11 @@ logs' Conditional Access tab for T1–T5.
    - **3d. Watch the policy list.** Microsoft-managed policies may appear once
      security defaults is off. Exclude `bg-admin-01` from any that do, and set
      them to Off if they duplicate the baseline.
-4. Create CA001 in report-only mode and run T1–T6 with What If and the
+4. **DONE 2026-10-08** (T3 by reference, T6 moved to step 5).
+   Create CA001 in report-only mode and run T1–T6 with What If and the
    sign-in logs.
-5. Turn CA001 on and run T1–T6 again.
+5. Turn CA001 on and run T1–T6 again. *(On since 2026-10-08 13:41; the
+   tests are next session's first step.)*
 6. Export the evidence (C8).
 7. Before the trial end date, carry out C9.
    **Open risk (2026-10-07):** C9 turns security defaults back on, which needs
