@@ -66,10 +66,11 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 7, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 8, 2026. Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
-M11 closed on Oct 7. For
+M11 closed on Oct 7. M13 is under way: since Oct 8 the tenant runs on the
+Conditional Access baseline with security defaults off; CA001 is next. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -86,27 +87,29 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M13 deploy step 3, the baseline, then security defaults off.**
-Replaced 2026-10-07 at the end of the day (Claude drafted at Gerard's request);
-the morning's version (inventory, break-glass) is done, see the Oct 7 entry.
-The steps below are the CA spec's amended step 3
-(`phase2-conditional-access-spec-draft.md`); that file is the detail.
+**Next action: M13 step 4, CA001 in Report-only, then the test matrix.**
+Replaced 2026-10-08 (Claude drafted at Gerard's request). Oct 7's version
+(deploy step 3: methods, baseline, security defaults off) is done; see the
+Oct 8 entry. The CA spec (`phase2-conditional-access-spec-draft.md`) is the
+detail: its decisions table, test matrix (T2 amended Oct 8) and steps 4-7.
 
-1. **Authentication methods first:** enable Microsoft Authenticator in the
-   methods policy and finish the legacy migration ("In progress"). Today
-   `djeemunee`'s MFA works only through the deprecated legacy settings.
-2. **Build the four baseline policies** from the "Secure foundation" templates
-   (C7, amended by Gerard on Oct 7), each excluding `bg-admin-01`, in
-   Report-only if the portal allows it while security defaults is on.
-3. **Security defaults off, then the baseline On.** Wait before testing (6-47
-   min lag seen on Oct 7), then check with What If and the sign-in logs.
-4. **Then CA001** per the spec. `iip-ca-test` needs a passkey first (C4).
-5. **AzSvcAdmin@ostebovik.net** (still Owner on MG Non-Prod and VSE): find what
-   refreshed its token at 03:00:05Z on Oct 7 (non-interactive sign-in log:
-   Application, IP), then keep, narrow or delete.
-6. **Before 2026-11-06:** C9, plus the open risk in the spec (managed
-   policies that can't be deleted), and decide what RBAC row 10's group
-   assignment does when P1/P2 lapses (untested). Todoist reminder due Nov 2.
+1. **A passkey for `iip-ca-test` first (C4).** Decide where it lives before
+   registering it: the phone's Authenticator already holds `djeemunee` and
+   `bg-admin-01`, which is the single-phone concentration the USB FIDO2 key
+   task (Todoist, p2) exists to fix. Gerard's call.
+2. **Build CA001** per the spec's table: group IIP Results Viewers (dev),
+   exclude `bg-admin-01`, target IIP Results (dev) only, authentication
+   strength Phishing-resistant MFA, sign-in frequency 8 h, never persistent,
+   **Report-only**. A hand-built policy (not a template), so no creator
+   exclusion to fix, but check the exclusion list anyway.
+3. **T1-T6 in Report-only** (What If, then the sign-in logs' Conditional
+   Access tab). Then CA001 **On**, wait out the lag (up to 47 min), T1-T6
+   again.
+4. **Evidence (C8):** export CA001 and CA900-CA903 as JSON (Graph, read-only)
+   into the repo, plus the screenshots.
+5. **Before 2026-11-06:** C9 (export, delete, security defaults back on), the
+   managed-policy check, and what RBAC row 10's group assignment does when
+   P1/P2 lapses (untested). Todoist reminder due Nov 2.
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
@@ -114,14 +117,19 @@ The steps below are the CA spec's amended step 3
 - Gerard's steps: update the project instructions (`id-iip-dev-wus-03` is
   deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev) with
   `iip-ca-test` as its member, the results page, the custom role IIP Queue
-  Trigger (dev), soft delete 7 days, the P2 trial dates).
+  Trigger (dev), soft delete 7 days, the P2 trial dates; **new Oct 8:**
+  security defaults off, the baseline CA900-CA903, `bg-admin-01`).
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
 - M12 (networking) follows M13; it has no clock.
-- New Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
+- Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
   lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
   service-principal sections once the beta report resumes.
+- **New Oct 8 (Todoist):** delete `AzSvcAdmin@ostebovik.net` on Oct 22 if
+  nothing complained; migrate off the **classic Foundry Agent Service APIs**
+  before 2027-03-31 (Microsoft's notice, tracking ID HYJP-QGZ; first step due
+  Dec 1).
 
 **Open observation, not chased:** every host start on Sep 29 logged its
 `QueuesOptions` trace **twice, about 30 s apart** (15:48:48/15:49:19Z and
@@ -178,6 +186,19 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Bare-domain DNS is an ALIAS record** (Gerard, 2026-10-06, option A). Its
   Front Door certificate no longer auto-renews: a monthly Todoist task checks
   for "Pending Revalidation". Current cert expires 2027-03-18.
+- **Security defaults is OFF; the baseline CA900-CA903 is ON** (2026-10-08,
+  11:14 Phoenix), each excluding `bg-admin-01` only. Verified by What If and by
+  real sign-ins for `djeemunee`, `bg-admin-01` and `iip-ca-test`.
+- **Authentication methods: Migration Complete** (2026-10-08). On: Passkey
+  (FIDO2), Microsoft Authenticator (All users, Any, OTP Yes), Email OTP. SMS and
+  Voice stay off. The legacy per-user MFA settings no longer apply.
+- **A CA template excludes the person who creates it**, and only them. Fix the
+  exclusions on every template-built policy (2026-10-08).
+- **CA policies can be created in Report-only while security defaults is on**;
+  only On is blocked (2026-10-08).
+- **`AzSvcAdmin@ostebovik.net`**: all four Azure roles removed, sign-in
+  blocked, sessions revoked (2026-10-08). Its only use was an Edge profile on
+  the home network. Delete on Oct 22 if quiet (Todoist).
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -495,6 +516,70 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 8, 2026 — M13 deploy step 3 done: methods migrated, baseline CA900-CA903 live, security defaults off; AzSvcAdmin closed off
+
+**Attribution:** Claude wrote the steps (from Microsoft Learn), the CLI
+commands and these doc edits. Gerard ran every portal step and command and
+made every decision named here. Times are Phoenix (UTC-7).
+
+**M13 deploy step 3, done** (details and the verification table: the CA
+spec's "Progress, 2026-10-08"):
+- **Methods first (3a).** Microsoft Authenticator enabled for All users, mode
+  Any, OTP Yes (09:50); the legacy methods unticked and the migration set to
+  **Complete** (10:12). `djeemunee`'s Authenticator sign-in at 11:07 (past the
+  lag) proved the new policy alone carries his MFA. SMS and Voice stay off.
+- **Baseline (3b).** `CA900-Baseline-AllUsers-BlockLegacyAuth`,
+  `CA901-Baseline-AllUsers-MFA-AzureMgmt`, `CA902-Baseline-Admins-MFA`,
+  `CA903-Baseline-AllUsers-MFA`, from the Secure foundation templates, in
+  Report-only. The 9xx names are Gerard's choice. Each template came out
+  excluding its creator, `djeemunee`; all four were fixed to exclude
+  `bg-admin-01` only, and What If confirmed it for three users.
+- **Switch (3c).** Security defaults Disabled, the four policies On (11:14).
+  From 12:01, real sign-ins for `djeemunee`, `bg-admin-01` and `iip-ca-test`
+  matched the expected Conditional Access results, every row.
+- **Managed policies (3d):** 0 right after the switch.
+
+**Found today (each is in the spec or the settled list):**
+- Report-only creation works while security defaults is on; only On is
+  blocked. This settled the spec's one "Unverified".
+- The per-user MFA page showed Microsoft's own forced migration in progress
+  (the legacy MFA/SSPR policies were deprecated 2025-09-30). It didn't block
+  anything.
+- The Azure management template targets **Azure Resource Manager**
+  (`797f4846-…`), the app older docs call "Windows Azure Service Management
+  API".
+- **T2 in the test matrix had to change:** with CA903 on, "password only" can't
+  reach the results page, so T2 is now an Authenticator push that CA001 must
+  refuse.
+- On Flex Consumption, `az functionapp show --query defaultHostName` returned
+  null; the runbook now has the `az resource show` form and the portal path.
+
+**`AzSvcAdmin@ostebovik.net` (item 5 of yesterday's next action), closed
+off.** Its only sign-ins (non-interactive, Oct 6 7:56-8:00 PM) were one Edge
+browser profile starting up, from the home network's IPv6 range (Cox). Gerard
+didn't recognize it; created 2026-01-10. It held **Owner on VSE, Owner and
+Contributor on MG Non-Prod, and Storage Blob Data Contributor on
+`stgeostewus301`** (the likely reason it existed: manual site uploads).
+Nothing in `geoste-portfolio` references it except STATUS.md. No Entra roles.
+Gerard chose: all four roles removed (list confirmed empty), sign-in blocked,
+sessions revoked; **delete on Oct 22** if nothing complains (Todoist).
+
+**Two Microsoft emails (Oct 7), read through Chrome:** the Azure Resource
+Graph CVE schema change doesn't affect this project. **The classic Foundry
+Agent Service APIs retire on 2027-03-31**, and Microsoft says this
+subscription uses them, so the M7 orchestrator and the Function's agent path
+need checking. Todoist, first step due Dec 1.
+
+**How the work ran:** no shell on the tower again, only file read and write
+through the bridge. Early on, the Chrome extension wasn't connected and
+screenshots wouldn't attach in chat; Gerard signed in to the extension, and
+screenshots went through a connected folder instead. About 40 minutes lost to
+this. Claude's instruction errors today, each caught by Gerard: the What If
+blade's labels and required fields didn't match Claude's steps; Claude asked
+for a "Client app" column the non-interactive log doesn't show by default; and
+an "Undo" line read like an instruction. Doc writes followed the Oct 6/7 rule
+(a fresh staging name per write, read back from the device and compared).
 
 ### Session — October 7, 2026 — P2 trial started; M11 closed (group swap); marker to M13; tenant cleanup; break-glass account
 

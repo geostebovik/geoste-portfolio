@@ -202,6 +202,20 @@ account surviving as soft-deleted, still counted against quota). Worth
 running after any `az group delete` that included a Cognitive
 Services/Foundry account.
 
+## Get the Function app's hostname (the results page)
+
+The results page is `https://<hostname>/api/results`. On the Flex Consumption
+plan, `az functionapp show ... --query defaultHostName` returned **null**
+(2026-10-08), so read the property off the resource itself. (Claude's
+suggestion that day; the hostname was found, but whether by this command or the
+portal wasn't recorded. Confirm on first use, then delete this sentence.)
+
+```bash
+az resource show -g rg-iip-dev-wus-01 -n func-iip-dev-wus-01 --resource-type Microsoft.Web/sites --query "properties.defaultHostName" -o tsv
+```
+
+Portal fallback: func-iip-dev-wus-01 → Overview → Default domain.
+
 ---
 
 *Log new entries here as they come up. First real entries above date to

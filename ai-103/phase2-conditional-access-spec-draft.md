@@ -3,7 +3,8 @@
 **Status: DESIGN AGREED ON PAPER, 2026-09-16.** This is the second item on
 the Phase 2 entry checklist. Claude drafted the structure and options from
 Microsoft Learn. **Gerard chose option (a) for all nine decisions (C1–C9)**,
-and added the two notes recorded under the decisions table. Nothing here is deployed. Deployment happens during the
+and added the two notes recorded under the decisions table. *(2026-10-08: deploy steps 1-3 are done — the baseline is
+live; CA001 is not built yet. See the progress notes below.)* Deployment happens during the
 30-day Entra ID P2 trial, which starts only once the results page and its
 sign-in exist (Todoist task; turn recurring billing off right after
 signup).
@@ -28,6 +29,55 @@ signup).
 >   via policy" at 12:33-12:34, success by about 13:15). Every policy change
 >   in M13 gets a wait before it is tested.
 > - **C7 amended**, and deploy step 3 reordered: see both, below.
+
+> **Progress, 2026-10-08 (Claude wrote the steps from Microsoft Learn; Gerard
+> ran every portal step and made every decision).** Times are Phoenix (UTC-7).
+> - **Deploy step 3 done: security defaults is OFF and the baseline is ON**
+>   (11:14). All four policies were verified with What If and with real
+>   sign-ins (table below).
+> - **3a, methods:** legacy MFA had all four methods ticked (call, text, app
+>   notification, app code); self-service password reset was None. Microsoft
+>   Authenticator was enabled for All users, mode Any, Authenticator OTP Yes
+>   (09:50). The legacy methods were unticked and the migration set to
+>   **Migration Complete** (10:12). `djeemunee` signed in with Authenticator at
+>   11:07, past the lag window, so the new policy alone carries his MFA. SMS
+>   and Voice stay **off**: weaker, and the portal says users enabled for them
+>   get an unrestricted system-managed passkey profile.
+> - **Found:** the per-user MFA page showed Microsoft's own forced migration
+>   "in progress" ("may take up to one hour"; the legacy policies were
+>   deprecated 2025-09-30). It didn't block the Authenticator save.
+> - **3b, the baseline:** built from the Secure foundation templates, created
+>   in Report-only while security defaults was still on. **That works:** the
+>   portal blocks only the On state ("You must first disable security
+>   defaults"). This settles the "Unverified" in step 3b below.
+> - **Found: a template excludes the person who creates it** (Microsoft Learn,
+>   "Conditional Access policy templates"). Each policy came out excluding
+>   `djeemunee`, the daily admin account it most needs to cover. Fixed on all
+>   four by hand: `djeemunee` removed, `bg-admin-01` added.
+> - **Found: the Azure management template targets "Azure Resource Manager"**,
+>   app ID `797f4846-ba00-4fd7-ba43-dac1f8f63013`, the app older docs call
+>   "Windows Azure Service Management API". Same app, new display name.
+> - **3c:** security defaults Disabled, then the four policies On (last save
+>   11:14). Verified from 12:01 (past the 47-minute lag), sign-in log →
+>   Conditional Access tab, every row as expected:
+>
+>   | Sign-in | CA900 | CA901 | CA902 | CA903 |
+>   |---|---|---|---|---|
+>   | `djeemunee`, portal.azure.com | Not applied | Success | Success | Success |
+>   | `bg-admin-01`, entra.microsoft.com, passkey (phone) | Not applied | Not applied | Not applied | Not applied |
+>   | `iip-ca-test`, the results page (Authenticator prompt) | Not applied | Not applied | Not applied | Success |
+>
+>   What If (Azure Resource Manager, Windows, Browser) agreed beforehand:
+>   `bg-admin-01` none; `djeemunee` CA901-CA903; `iip-ca-test` CA901 and CA903.
+> - **3d:** Microsoft-managed policies **0** right after security defaults went
+>   off (11:14). Microsoft creates them on its own schedule; check again before
+>   C9 (Todoist, Nov 2).
+> - **Design change for step 4, T2 (Claude, not yet run):** with CA903 on, a
+>   password-only sign-in can't reach the results page whatever CA001 says, so
+>   T2 as written can't happen. T2 becomes: `iip-ca-test` with an
+>   **Authenticator push** (MFA, but not phishing-resistant) → Report-only
+>   "would require authentication strength"; On → blocked until the passkey is
+>   used. The test matrix is amended to match.
 
 ## Read this first: this touches the whole tenant, not only the app
 
@@ -79,6 +129,7 @@ management.
 | Name | What it covers | Decision |
 |---|---|---|
 | `CA000-Baseline-*` (a Microsoft-managed set) | Security defaults' protections, now as policies | C7 |
+| **As built, 2026-10-08:** `CA900-Baseline-AllUsers-BlockLegacyAuth`, `CA901-Baseline-AllUsers-MFA-AzureMgmt`, `CA902-Baseline-Admins-MFA`, `CA903-Baseline-AllUsers-MFA` | Hand-built from templates (C7 amended); a 9xx band keeps them unique and sorted after the app policies (Gerard's choice) | C1, C7 |
 
 With these in place, turning off security defaults does not leave the
 tenant weaker than it was for the length of the trial.
@@ -121,7 +172,7 @@ nothing needs to be decided now.
 | # | Who | Signs in to | Expected result |
 |---|---|---|---|
 | T1 | Test user, in the group, with a phishing-resistant method | Results page | Granted |
-| T2 | Test user, in the group, password only | Results page | Report-only: "would require authentication strength". On: blocked until a strong method is used |
+| T2 | Test user, in the group, **Authenticator push** (MFA, not phishing-resistant). *Amended 2026-10-08: was "password only", which CA903 now makes impossible.* | Results page | Report-only: "would require authentication strength". On: blocked until the passkey is used |
 | T3 | A user not in the group | Results page | Blocked by app assignment, before Conditional Access applies (this is the RBAC model's row 10) |
 | T4 | Break-glass account | Results page | Not in scope of the policy |
 | T5 | Test user | Any other app | Not in scope of the app policy; the baseline MFA applies |
@@ -137,7 +188,8 @@ logs' Conditional Access tab for T1–T5.
    credentials offline.
 3. Turn on the baseline (C7), **then** turn off security defaults. Keeping
    this order means the tenant is never without protection.
-   **Amended 2026-10-07 (Claude, after checking the live tenant; not yet run):**
+   **DONE 2026-10-08** (3a-3d all run; results in "Progress, 2026-10-08").
+   **Amended 2026-10-07 (Claude, after checking the live tenant):**
    - **3a. Authentication methods first.** On 2026-10-07 only Email OTP and
      Passkey (FIDO2) were enabled in the Authentication methods policy, and the
      legacy MFA/SSPR migration showed "In progress". `djeemunee`'s
@@ -179,3 +231,8 @@ logs' Conditional Access tab for T1–T5.
   report-only mode)
 - Manage emergency access accounts; Microsoft cloud security benchmark
   PA-5
+- Added 2026-10-08: Conditional Access policy templates (templates exclude
+  only the creating user; created in Report-only); How to migrate MFA and SSPR
+  policy settings to the Authentication methods policy; Set up multifactor
+  authentication for Microsoft 365 ("If security defaults are turned on, you
+  can create new Conditional Access policies, but you can't turn them on")
