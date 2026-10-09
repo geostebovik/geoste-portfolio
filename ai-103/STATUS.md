@@ -88,16 +88,18 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12 (networking), step 1: the cost estimate, before anything
-is built.** Replaced 2026-10-09 (Claude drafted; choosing M12 for the next
-session is Claude's proposal, and Gerard may redirect at session start).
-M12's done-when requires the estimate (Azure pricing calculator) **before**
-the build: a VNet with an integration subnet, private endpoints for Key Vault
-and storage, and what the Flex Consumption plan's VNet integration adds. The
-constraint carried from M11: once `stiipdevwus01` has a network rule, Event
-Grid delivers to its queue only with the system topic's system-assigned
-identity and the trusted-services exception on (`phase2-orientation.md`, M12
-row).
+**Next action: M12 step 2, the design** (Claude drafts, Gerard decides).
+Replaced 2026-10-09 afternoon. Step 1, the cost estimate, is done:
+`m12-prep.md` has it and decisions D-M12-1 to -3 (scope A: endpoints on
+`stiipdevwus01` blob + queue only; an evidence window, then delete; the retail
+price list instead of the calculator). Step 2 settles the four items in
+`m12-prep.md`'s "Still to decide": the storage firewall (`defaultAction`,
+`bypass` to `AzureServices` for Event Grid, an IP rule so Gerard's own uploads
+keep working), names and address space, the verification plan, the teardown.
+**The one open item that could change the cost:** whether the Function still
+reaches Foundry once all its traffic goes through the VNet, or needs a NAT
+gateway. The build answers it with one regression upload right after
+integration.
 
 **M13 is waiting only on C9, the rollback, planned for the week of
 2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
@@ -574,7 +576,20 @@ the test steps were spread across several long messages and referred to by
 matrix codes (T1-T6) defined only at the start, so he couldn't tell what was
 done or still open. Corrected mid-session with one plain-words status list.
 Doc writes followed the Oct 6/7 rule (written, then read back from the
-device and compared).
+device and compared). The morning's work was committed as `0d845cc`.
+
+**Afternoon: M12 step 1, the cost estimate (done).** Claude priced it from
+Azure's retail price list and Microsoft Learn; Gerard made three decisions
+(`m12-prep.md`): **D-M12-1** endpoints on `stiipdevwus01` blob + queue only,
+none on the empty Key Vault; **D-M12-2** an evidence window, then delete,
+keeping the Bicep; **D-M12-3** the retail price list stands in for the
+calculator (done-when amended). Result: **$15.60/month** running, **about
+$3.60** for a week. Found: on Flex Consumption all outbound traffic goes
+through the VNet, and new VNets default to private subnets, so the Function
+may need a NAT gateway to reach Foundry (about $33/month, unverified; the build
+tests it with one upload). Also found: the endpoints need their own subnet,
+and `storage.bicep`'s `bypass: 'None'` must become `AzureServices` for Event
+Grid.
 
 ### Session — October 8, 2026 — M13 steps 3-4 done: methods migrated, baseline CA900-CA903 live, security defaults off; CA001 built, Report-only pass, then On; AzSvcAdmin closed off
 
