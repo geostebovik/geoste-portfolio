@@ -88,18 +88,17 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12 step 2, the design** (Claude drafts, Gerard decides).
-Replaced 2026-10-09 afternoon. Step 1, the cost estimate, is done:
-`m12-prep.md` has it and decisions D-M12-1 to -3 (scope A: endpoints on
-`stiipdevwus01` blob + queue only; an evidence window, then delete; the retail
-price list instead of the calculator). Step 2 settles the four items in
-`m12-prep.md`'s "Still to decide": the storage firewall (`defaultAction`,
-`bypass` to `AzureServices` for Event Grid, an IP rule so Gerard's own uploads
-keep working), names and address space, the verification plan, the teardown.
-**The one open item that could change the cost:** whether the Function still
-reaches Foundry once all its traffic goes through the VNet, or needs a NAT
-gateway. The build answers it with one regression upload right after
-integration.
+**Next action: M12 step 3, the build, stage 1** (Claude writes the Bicep and
+walks Gerard through it; Gerard runs `what-if`, the deploy and the checks).
+Replaced 2026-10-09 afternoon. Steps 1 (cost) and 2 (design) are done:
+`m12-prep.md` has the estimate, the design and decisions D-M12-1 to -7. The
+build runs in three stages, each tested alone (`m12-prep.md`, "Build order and
+verification"): **1** VNet, subnets, NSGs, DNS zones, the two endpoints;
+**2** the Function joins the VNet, then one regression upload, which also
+answers whether a NAT gateway is needed; **3** the firewall (Deny + the home
+IP from an untracked local file + AzureServices), then the tests including the
+Cloud Shell negative control. The cost clock starts at stage 1 (about $0.48 a
+day).
 
 **M13 is waiting only on C9, the rollback, planned for the week of
 2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
@@ -589,7 +588,18 @@ through the VNet, and new VNets default to private subnets, so the Function
 may need a NAT gateway to reach Foundry (about $33/month, unverified; the build
 tests it with one upload). Also found: the endpoints need their own subnet,
 and `storage.bicep`'s `bypass: 'None'` must become `AzureServices` for Event
-Grid.
+Grid. Committed as `6a02521`.
+
+**Then M12 step 2, the design (done).** Claude drafted; Gerard decided:
+**D-M12-4** the home IP lives in an untracked local file, not the public repo;
+**D-M12-5** endpoints named after their target (`pep-stiipdevwus01-blob`,
+`-queue`); **D-M12-6** one NSG per subnet; **D-M12-7** after the window, keep
+the free VNet, subnets and NSGs. Checked: the storage account has only an IPv4
+address (`A` record only), so the firewall rule is IPv4; no VNets exist in the
+subscription (Gerard), so `10.20.0.0/24` is free. Design, build order, tests
+and teardown are in `m12-prep.md`. Gerard asked why IPv4 rather than IPv6;
+Claude's answer (the service decides the family; IPv6 rules would need a
+prefix, since Windows rotates its IPv6 addresses) shaped the IPv4 note there.
 
 ### Session — October 8, 2026 — M13 steps 3-4 done: methods migrated, baseline CA900-CA903 live, security defaults off; CA001 built, Report-only pass, then On; AzSvcAdmin closed off
 

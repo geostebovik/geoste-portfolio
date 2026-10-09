@@ -1,6 +1,6 @@
-# M12 prep: networking (cost estimate and scope)
+# M12 prep: networking (cost estimate, scope and design)
 
-Written by Claude, 2026-10-09. Gerard made the three decisions below. The
+Written by Claude, 2026-10-09. Gerard made every decision below. The
 plan is `phase2-orientation.md`'s M12 row; this file holds the working detail,
 the way `m11-prep.md` did for M11.
 
@@ -57,6 +57,9 @@ gateways, or whether they keep their own way out. Learn doesn't say.
 
 ## Design facts found while costing
 
+*(Kept as found during step 1; the design section that follows settles each
+one.)*
+
 - **Two subnets.** The integration subnet (/27 minimum for one app, delegated to
   `Microsoft.App/environments`, no underscore in its name) can't hold private
   endpoints, so the endpoints get a subnet of their own.
@@ -73,13 +76,84 @@ gateways, or whether they keep their own way out. Learn doesn't say.
   check which address family the tower uses to reach storage before writing
   the rule.
 
-## Still to decide (M12 step 2, the design)
+## The design (M12 step 2, done 2026-10-09)
 
-1. The storage firewall: `defaultAction`, `bypass`, the IP rule (the two
-   "flagged at provisioning" items get decided here).
-2. Names and address space: VNet, the two subnets, the endpoints and the DNS
-   zones (CAF: `vnet-iip-dev-wus-01`, `snet-…`, `pe-…`).
-3. The verification plan: what "the private paths verified" means (DNS
-   resolving to private IPs from inside the VNet, a regression upload, the
-   results page).
-4. The teardown: what's deleted at the end of the window, and in what order.
+Claude drafted it; Gerard decided D-M12-4 to -7.
+
+### 1. The storage firewall on `stiipdevwus01`
+
+| Setting | Today | M12 | Why |
+|---|---|---|---|
+| `defaultAction` | Allow | **Deny** | A guest list instead of an open door. |
+| `ipRules` | none | **Gerard's home IPv4** | His uploads, scripts and the portal's blob browser keep working from home. |
+| `bypass` | None | **AzureServices** | Event Grid delivers to the queue only as a trusted service; Learn offers nothing narrower. |
+| `publicNetworkAccess` | unset (on) | **Enabled, written out** | An IP rule needs the public endpoint; Deny makes it a guest list. |
+| `resourceAccessRules` | (Defender's) | **still not declared** | Defender for Storage injects its own rule there (`storage.bicep`'s comment). |
+
+This settles the two "flagged at provisioning" items for this account
+(`IIP-revised-project-plan.md`): `defaultAction` Deny, `publicNetworkAccess`
+Enabled, both on purpose.
+
+- **IPv4, checked 2026-10-09:** `stiipdevwus01.blob.core.windows.net` has only
+  an `A` record (IPv4), so the tower always reaches it over IPv4, whatever
+  Entra's logs show (Entra has IPv6 endpoints; the tower prefers IPv6 where it
+  exists). A home rule admits the whole household, not just the tower; that's
+  acceptable because every request still needs an Entra sign-in and a data
+  role.
+- **D-M12-4 (Gerard): the home IP stays out of the public repo.** It lives in
+  an untracked local file on the tower and reaches the deployment at deploy
+  time. Implementation (Claude's plan for the build): `dev.bicepparam` reads it
+  with `readEnvironmentVariable('IIP_HOME_IP')`, and the parameter has a
+  minimum length, so a deploy without it **fails** instead of deploying Deny
+  with no IP rule (which would lock Gerard out).
+- **Known effects while it's on:** Cloud Shell can't reach this account (a
+  different IP); M3's `--blob` path probably fails (Content Understanding
+  fetches the blob from Microsoft's network through a signed link, and it's not
+  clear "trusted services" covers that); if Cox changes the home address,
+  uploads get a 403 until the rule is updated.
+
+### 2. Names and address space
+
+No VNets exist in the subscription (Gerard, 2026-10-09: the AZ-104 hub-spoke
+was torn down after the exam).
+
+| Item | Name | Address / setting |
+|---|---|---|
+| VNet | `vnet-iip-dev-wus-01` | `10.20.0.0/24` |
+| Function subnet | `snet-func-iip-dev-wus-01` | `10.20.0.0/27`, delegated to `Microsoft.App/environments` |
+| Endpoint subnet | `snet-pep-iip-dev-wus-01` | `10.20.0.32/27` |
+| NSGs (**D-M12-6**, Gerard: one per subnet) | `nsg-func-iip-dev-wus-01`, `nsg-pep-iip-dev-wus-01` | Azure's default rules |
+| Endpoints (**D-M12-5**, Gerard: named after the target) | `pep-stiipdevwus01-blob`, `pep-stiipdevwus01-queue` | in `snet-pep-…` |
+| DNS zones (names fixed by Azure) | `privatelink.blob.core.windows.net`, `privatelink.queue.core.windows.net` | each linked to the VNet |
+
+Also needed: register the `Microsoft.App` resource provider before stage 2.
+
+### 3. Build order and verification
+
+Three stages, so each change is tested alone.
+
+| Stage | What's added | Test | What it proves |
+|---|---|---|---|
+| 1 | VNet, subnets, NSGs, DNS zones and links, the two endpoints | `what-if`; then the endpoints show "Approved" and each zone has an `A` record in `10.20.0.32/27` | The private path exists. No traffic changes yet. |
+| 2 | The Function joins the VNet | One regression upload; the results page loads | **The NAT question.** If Foundry calls fail here, this is the cause and nothing else changed. |
+| 3 | The firewall: Deny + home IP + AzureServices | (a) a regression upload from the tower; (b) the results page; (c) **negative control:** a blob list from Cloud Shell gets 403; (d) one M3 `--blob` run, recorded either way | With the account closed to everyone but home, a working Function can only be using the private endpoints. (c) proves it's closed. |
+
+The cost clock starts at stage 1 (2 endpoints: about $0.48 a day).
+
+### 4. Teardown at the end of the window
+
+In Azure's default deployment mode, a template only adds and changes; setting
+a condition to false doesn't delete anything. So:
+
+1. **Bicep with the isolation switch off:** the firewall goes back exactly to
+   today's values, and the Function leaves the VNet.
+2. **CLI deletes:** the two endpoints, then the DNS zone links, then the zones.
+3. **D-M12-7 (Gerard): keep the free skeleton.** The VNet, both subnets and
+   both NSGs stay ($0), so a redeploy for a demo is only the endpoints, zones,
+   integration and firewall (about 10 minutes).
+
+## Next: M12 step 3, the build
+
+Claude writes the Bicep (a network module, the endpoints, the firewall
+change behind one switch, the local-IP mechanism) and walks Gerard through it;
+Gerard runs `what-if` and each stage's deploy and tests.
