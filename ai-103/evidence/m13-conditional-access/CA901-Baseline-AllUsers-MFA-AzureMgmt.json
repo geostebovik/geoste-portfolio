@@ -1,0 +1,57 @@
+{
+  "id": "c000eecc-3b46-4437-ade0-995724500267",
+  "templateId": "d8c51a9a-e6b1-454d-86af-554e7872e2c1",
+  "displayName": "CA901-Baseline-AllUsers-MFA-AzureMgmt",
+  "createdDateTime": "2026-10-08T16:59:11.1080637Z",
+  "modifiedDateTime": "2026-10-08T18:13:38.3669257Z",
+  "state": "enabled",
+  "deletedDateTime": null,
+  "sessionControls": null,
+  "conditions": {
+    "userRiskLevels": [],
+    "signInRiskLevels": [],
+    "clientAppTypes": [
+      "all"
+    ],
+    "servicePrincipalRiskLevels": [],
+    "insiderRiskLevels": null,
+    "platforms": null,
+    "locations": null,
+    "devices": null,
+    "clientApplications": null,
+    "authenticationFlows": null,
+    "applications": {
+      "includeApplications": [
+        "797f4846-ba00-4fd7-ba43-dac1f8f63013"
+      ],
+      "excludeApplications": [],
+      "includeUserActions": [],
+      "includeAuthenticationContextClassReferences": [],
+      "applicationFilter": null
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "6fc71916-d22a-477b-b3df-c8e6e4956a48"
+      ],
+      "includeGroups": [],
+      "excludeGroups": [],
+      "includeRoles": [],
+      "excludeRoles": [],
+      "includeGuestsOrExternalUsers": null,
+      "excludeGuestsOrExternalUsers": null
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ],
+    "customAuthenticationFactors": [],
+    "termsOfUse": [],
+    "authenticationStrength@odata.context": "https://graph.microsoft.com/v1.0/$metadata#identity/conditionalAccess/policies('c000eecc-3b46-4437-ade0-995724500267')/grantControls/authenticationStrength/$entity",
+    "authenticationStrength": null
+  }
+}

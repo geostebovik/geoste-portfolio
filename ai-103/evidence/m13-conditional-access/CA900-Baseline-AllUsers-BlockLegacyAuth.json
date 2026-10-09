@@ -1,0 +1,58 @@
+{
+  "id": "27c89608-ff85-44fd-97f8-b15b96c233f0",
+  "templateId": "0b2282f9-2862-4178-88b5-d79340b36cb8",
+  "displayName": "CA900-Baseline-AllUsers-BlockLegacyAuth",
+  "createdDateTime": "2026-10-08T16:58:27.9434524Z",
+  "modifiedDateTime": "2026-10-08T18:13:18.4821627Z",
+  "state": "enabled",
+  "deletedDateTime": null,
+  "sessionControls": null,
+  "conditions": {
+    "userRiskLevels": [],
+    "signInRiskLevels": [],
+    "clientAppTypes": [
+      "exchangeActiveSync",
+      "other"
+    ],
+    "servicePrincipalRiskLevels": [],
+    "insiderRiskLevels": null,
+    "platforms": null,
+    "locations": null,
+    "devices": null,
+    "clientApplications": null,
+    "authenticationFlows": null,
+    "applications": {
+      "includeApplications": [
+        "All"
+      ],
+      "excludeApplications": [],
+      "includeUserActions": [],
+      "includeAuthenticationContextClassReferences": [],
+      "applicationFilter": null
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "6fc71916-d22a-477b-b3df-c8e6e4956a48"
+      ],
+      "includeGroups": [],
+      "excludeGroups": [],
+      "includeRoles": [],
+      "excludeRoles": [],
+      "includeGuestsOrExternalUsers": null,
+      "excludeGuestsOrExternalUsers": null
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ],
+    "customAuthenticationFactors": [],
+    "termsOfUse": [],
+    "authenticationStrength@odata.context": "https://graph.microsoft.com/v1.0/$metadata#identity/conditionalAccess/policies('27c89608-ff85-44fd-97f8-b15b96c233f0')/grantControls/authenticationStrength/$entity",
+    "authenticationStrength": null
+  }
+}

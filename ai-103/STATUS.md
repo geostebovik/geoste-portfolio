@@ -66,11 +66,12 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 8, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 9, 2026. Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
-M11 closed on Oct 7. M13 is under way: since Oct 8 the tenant runs on the
-Conditional Access baseline with security defaults off; CA001 is next. For
+M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
+and the policies are exported; only the rollback (C9) remains, planned for the
+week of Oct 26. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -87,29 +88,25 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M13 step 5, CA001's On pass (T1-T6), then the evidence.**
-Replaced 2026-10-08 late afternoon (Claude drafted at Gerard's request).
-Step 4 (CA001 built, Report-only pass) is done, and **CA001 has been On since
-2026-10-08 13:41 Phoenix**, so the propagation wait is already over. The CA
-spec (`phase2-conditional-access-spec-draft.md`) is the detail: its test
-matrix (T2 amended) and the Oct 8 afternoon progress block.
+**Next action: M12 (networking), step 1: the cost estimate, before anything
+is built.** Replaced 2026-10-09 (Claude drafted; choosing M12 for the next
+session is Claude's proposal, and Gerard may redirect at session start).
+M12's done-when requires the estimate (Azure pricing calculator) **before**
+the build: a VNet with an integration subnet, private endpoints for Key Vault
+and storage, and what the Flex Consumption plan's VNet integration adds. The
+constraint carried from M11: once `stiipdevwus01` has a network rule, Event
+Grid delivers to its queue only with the system topic's system-assigned
+identity and the trusted-services exception on (`phase2-orientation.md`, M12
+row).
 
-1. **T1, T2, T4, T5 again with CA001 On**, on the phone in Chrome Incognito
-   (the tower has no Bluetooth, so passkey tests run on the phone), at
-   `https://func-iip-dev-wus-01.azurewebsites.net/api/results`. Expected:
-   T1 passkey → the page, CA001 **Success**; **T2 password + Authenticator push
-   → blocked** until the passkey is used; T4 `bg-admin-01` → the page, CA001
-   Not applied; T5 mysignins → CA001 Not applied. Read each on the sign-in
-   log's **Conditional Access** tab (no longer the Report-only tab).
-2. **T6:** a regression upload, then the **Managed identity sign-ins** tab and
-   the result in `results/`: the Function's identity is unaffected.
-3. **T3 is covered by reference** (M11 gate test 1, Oct 7, AADSTS50105): every
-   account outside the group is an admin, and admins bypass assignment.
-4. **Evidence (C8):** export CA001 and CA900-CA903 as JSON (Graph, read-only)
-   into the repo, plus the screenshots. Claude writes the export commands.
-5. **Before 2026-11-06:** C9 (export, delete, security defaults back on), the
-   managed-policy check, and what RBAC row 10's group assignment does when
-   P1/P2 lapses (untested). Todoist reminder due Nov 2.
+**M13 is waiting only on C9, the rollback, planned for the week of
+2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
+policies are exported (Oct 9 session entry). C9 = delete CA001 and
+CA900-CA903, then turn security defaults back on. Before that, the same
+session: (a) check for Microsoft-managed policies (0 on Oct 8; if any exist,
+test whether one that's Off blocks security defaults), (b) recurring billing
+still Off, (c) decide what happens to RBAC row 10's group assignment when
+P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
@@ -122,7 +119,7 @@ matrix (T2 amended) and the Oct 8 afternoon progress block.
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
-- M12 (networking) follows M13; it has no clock.
+- M12 (networking) has no clock; it starts while M13 waits on C9.
 - Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
   lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
   service-principal sections once the beta report resumes.
@@ -205,6 +202,13 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **`iip-ca-test`'s passkey is in Authenticator on the phone** (2026-10-08).
   Passkey tests run in the phone's Chrome: the tower has no Bluetooth, and
   Edge on Android doesn't do same-device passkey sign-in yet.
+- **CA001 On passes T1-T6** (2026-10-09). With CA001 applying, Entra offers
+  **only the passkey** after the password; the Authenticator push is never
+  shown. The Function's identity is unaffected (T6 result).
+- **The CA policies are exported** to `evidence/m13-conditional-access/`
+  (2026-10-09); the IDs in them were confirmed by name.
+- **Chrome on Android blocks screenshots in Incognito.** The sign-in log is
+  the record for phone tests.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -522,6 +526,55 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 9, 2026 — M13 steps 5-6 done: CA001 On passes T1-T6; policies exported; C9 set for the week of Oct 26
+
+**Attribution:** Claude wrote the steps, the commands, the split of the
+export into per-policy files, the folder README and these doc edits. Gerard
+ran every test and command and made every decision named here. Times are
+Phoenix (UTC-7). Details: the CA spec's "Progress, 2026-10-09".
+
+**Deploy step 5, CA001 On: all six tests pass** (sign-in log, Conditional
+Access tab):
+- **T6 first:** `item4-t6-ca001-on-20261009.png` uploaded at 09:47:35; the
+  Function wrote its result at 09:48:15 (40 s). Claude read the saved copy
+  (`scripts/results/20261009-164815_function_item4_t6.json`): status ok, run
+  completed, copy passed first time (0 redrafts), audit legible/brand
+  FAIL/info accurate, item4's answer key. No managed-identity sign-in row
+  appeared; not chased (the result is the proof; tokens are cached).
+- **T2 (10:17):** after the password, Entra offered only "Face, fingerprint,
+  PIN or security key", no Authenticator push. CA001 Success with the
+  requirement "Phishing-resistant MFA". Stronger than the amended matrix
+  expected: the push is never offered, so it can't be approved. The first T2
+  attempt (09:53: password, then the passkey when asked) proved only the
+  passkey path; the 10:17 re-run looked at the method list on purpose.
+- **T4** `bg-admin-01` (about 10:00): page loaded, every policy Not applied.
+- **T5** `iip-ca-test` at My Sign-ins (10:02:40): CA001 Not applied.
+- **T1** passkey (10:04:48): CA001 Success; the page listed the T6 upload.
+- **T3** by reference (Oct 7, AADSTS50105), as planned.
+
+**Deploy step 6, evidence (C8):** the five policies exported read-only with
+`az rest` (Graph v1.0) to `evidence/m13-conditional-access/`. Claude split it
+per policy, read every file back from the tower (byte-identical) and checked
+all five against the spec: all match. Gerard confirmed the IDs by name
+(`bg-admin-01`, IIP Results Viewers (dev), IIP Results (dev)). **Found:**
+CA903 also excludes the role Directory Synchronization Accounts, from the
+template; harmless (no sync). Phone screenshots aren't possible (Incognito
+blocks them), and the portal log screenshots show home IP addresses, so none
+went into the public repo.
+
+**Gerard's decision:** C9 in the week of 2026-10-26, not today and not Nov 2.
+CA001 stays live as a demo, with about 10 days of buffer for the
+managed-policy risk. The Todoist trial task moved to Oct 26.
+
+**How the work ran:** no shell on the tower again (file read and write
+through the bridge only); Gmail reachable through Chrome, Drive and Calendar
+through their connectors. **Claude's process error, called out by Gerard:**
+the test steps were spread across several long messages and referred to by
+matrix codes (T1-T6) defined only at the start, so he couldn't tell what was
+done or still open. Corrected mid-session with one plain-words status list.
+Doc writes followed the Oct 6/7 rule (written, then read back from the
+device and compared).
 
 ### Session — October 8, 2026 — M13 steps 3-4 done: methods migrated, baseline CA900-CA903 live, security defaults off; CA001 built, Report-only pass, then On; AzSvcAdmin closed off
 

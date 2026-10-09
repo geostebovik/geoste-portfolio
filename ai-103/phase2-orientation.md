@@ -125,6 +125,12 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   `iip-ca-test`: refused with neither path (AADSTS50105), then through as a
   group member. Every VERIFY row is recorded (the RBAC model's VERIFY ledger).
   M12 waits behind M13, because only M13 runs on the trial clock.
+- **M13: T1-T6 pass with CA001 On, and the evidence is exported
+  (2026-10-09).** Two of the three done-when clauses are met; the export is in
+  `evidence/m13-conditional-access/`, the results in the CA spec's "Progress,
+  2026-10-09". **The rollback (C9) is the only step left**, planned for the
+  week of 2026-10-26 (Gerard), about 10 days before the trial ends
+  (2026-11-06). The marker stays on M13 until C9 is done.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID

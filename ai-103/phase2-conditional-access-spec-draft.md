@@ -3,8 +3,11 @@
 **Status: DESIGN AGREED ON PAPER, 2026-09-16.** This is the second item on
 the Phase 2 entry checklist. Claude drafted the structure and options from
 Microsoft Learn. **Gerard chose option (a) for all nine decisions (C1–C9)**,
-and added the two notes recorded under the decisions table. *(2026-10-08: deploy steps 1-3 are done — the baseline is
-live; CA001 is not built yet. See the progress notes below.)* Deployment happens during the
+and added the two notes recorded under the decisions table. *(2026-10-09: deploy steps 1-6 are done — the baseline is
+live, CA001 is On and passed T1-T6, and the policies are exported. Only C9,
+the rollback, remains: planned for the week of 2026-10-26. See the progress
+notes below. The 2026-10-08 version of this line, "CA001 is not built yet",
+was stale by that afternoon.)* Deployment happens during the
 30-day Entra ID P2 trial, which starts only once the results page and its
 sign-in exist (Todoist task; turn recurring billing off right after
 signup).
@@ -111,6 +114,53 @@ signup).
 > - **Deploy step 5 started: CA001 On at 13:41 (Phoenix).** The On-pass tests
 >   wait for the next session, past the propagation window.
 
+> **Progress, 2026-10-09 (Claude wrote the steps and the export split;
+> Gerard ran every test and command and made every decision).** Times are
+> Phoenix (UTC-7). CA001 had been On for about 20 hours.
+> - **Deploy step 5 done: T1-T6 pass with CA001 On.** Read from the sign-in
+>   logs' Conditional Access tab:
+>
+>   | Test | What was done (phone, Chrome Incognito) | Sign-in log | Result |
+>   |---|---|---|---|
+>   | T1 | `iip-ca-test`, passkey, the results page | 10:04:48, CA001 Success, CA903 Success | Page loaded and listed the T6 upload |
+>   | T2 | `iip-ca-test`, password first | 10:17:43 / 10:17:50, CA001 Success (SignInFrequency), CA903 Success; Authentication details: requirement "Phishing-resistant MFA" for both factors | After the password, Entra offered **only** "Face, fingerprint, PIN or security key" plus Cancel. **No Authenticator push was offered at all.** |
+>   | T3 | (by reference) | M11 gate test 1, 2026-10-07, AADSTS50105 | Every non-member is an admin, and admins bypass assignment |
+>   | T4 | `bg-admin-01`, passkey, the results page | about 10:00, **every policy Not applied** | Page loaded |
+>   | T5 | `iip-ca-test`, `mysignins.microsoft.com` | 10:02:40, CA001 **Not applied** | Signed in |
+>   | T6 | Upload `item4-t6-ca001-on-20261009.png` (09:47:35) | The result: status ok, run completed, copy passed first time, audit = item4's answer key | The Function's identity is unaffected |
+>
+> - **T2, as observed, is stronger than the amended matrix predicted.** The
+>   matrix expected an Authenticator push that CA001 would refuse. In fact
+>   Entra never offered a method that can't meet the strength: Conditional
+>   Access is evaluated after the first factor, and with CA001 and CA903 both
+>   applying, the only second-factor choice shown was the passkey (Microsoft
+>   Learn, "How Conditional Access authentication strengths work": the user
+>   must satisfy every applicable strength). So the push is refused at the
+>   method picker, before anything is sent to the phone. The 09:52:53 row
+>   (Failure, CA Not applied) is the first T2 attempt's interrupted first
+>   step, before the passkey (Claude's reading of the row).
+> - **T6 has no managed-identity sign-in row**, filtered on
+>   `id-iip-dev-wus-01` (last 24 hours). Not chased: the successful result
+>   needed the identity's tokens for storage and Foundry, which is the proof.
+>   Entra logs a managed-identity sign-in only when it issues a new token, and
+>   those are cached; the filter also used the user-principal-name field,
+>   which may not match managed-identity rows (Claude's reading, untested).
+> - **No screenshots from the phone:** Chrome blocks screenshots in Incognito
+>   on Android. The sign-in log rows above are the record. Screenshots of the
+>   portal sign-in log show home IP addresses, so they stay out of the public
+>   repo unless cropped.
+> - **Deploy step 6 done (C8):** all five policies exported read-only from
+>   Microsoft Graph (`az rest`, v1.0 `identity/conditionalAccess/policies`)
+>   to `evidence/m13-conditional-access/` (its README has the details). Claude
+>   checked every policy against this spec: all match. The excluded user,
+>   group and app IDs were confirmed by name with `az ad`.
+> - **Found in the export:** CA903 also excludes the directory role
+>   **Directory Synchronization Accounts** (`d29b2b05-…`). It came with the
+>   template; harmless here, since the tenant has no directory sync.
+> - **C9 scheduled (Gerard): the week of 2026-10-26**, about 10 days before the
+>   trial ends. That keeps CA001 live as a demo, and leaves time for the open
+>   risk in step 7 if a Microsoft-managed policy appears.
+
 ## Read this first: this touches the whole tenant, not only the app
 
 1. **Conditional Access and security defaults cannot be on together.**
@@ -204,7 +254,7 @@ nothing needs to be decided now.
 | # | Who | Signs in to | Expected result |
 |---|---|---|---|
 | T1 | Test user, in the group, with a phishing-resistant method | Results page | Granted |
-| T2 | Test user, in the group, **Authenticator push** (MFA, not phishing-resistant). *Amended 2026-10-08: was "password only", which CA903 now makes impossible.* | Results page | Report-only: "would require authentication strength". On: blocked until the passkey is used |
+| T2 | Test user, in the group, **Authenticator push** (MFA, not phishing-resistant). *Amended 2026-10-08: was "password only", which CA903 now makes impossible.* | Results page | Report-only: "would require authentication strength". On: blocked until the passkey is used. *Observed On, 2026-10-09: after the password the push is not offered at all; the passkey is the only choice.* |
 | T3 | A user not in the group | Results page | Blocked by app assignment, before Conditional Access applies (this is the RBAC model's row 10) |
 | T4 | Break-glass account | Results page | Not in scope of the policy |
 | T5 | Test user | Any other app | Not in scope of the app policy; the baseline MFA applies |
@@ -242,10 +292,12 @@ logs' Conditional Access tab for T1–T5.
 4. **DONE 2026-10-08** (T3 by reference, T6 moved to step 5).
    Create CA001 in report-only mode and run T1–T6 with What If and the
    sign-in logs.
-5. Turn CA001 on and run T1–T6 again. *(On since 2026-10-08 13:41; the
-   tests are next session's first step.)*
-6. Export the evidence (C8).
-7. Before the trial end date, carry out C9.
+5. Turn CA001 on and run T1–T6 again. *(On since 2026-10-08 13:41.)*
+   **DONE 2026-10-09:** all six pass ("Progress, 2026-10-09").
+6. Export the evidence (C8). **DONE 2026-10-09:**
+   `evidence/m13-conditional-access/`.
+7. Before the trial end date, carry out C9. **Planned for the week of
+   2026-10-26** (Gerard, 2026-10-09).
    **Open risk (2026-10-07):** C9 turns security defaults back on, which needs
    the Conditional Access policies gone. Microsoft-managed policies can't be
    deleted, only turned off, and Microsoft Learn doesn't say whether an Off
