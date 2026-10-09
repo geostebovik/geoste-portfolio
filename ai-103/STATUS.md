@@ -71,7 +71,8 @@ passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
 and the policies are exported; only the rollback (C9) remains, planned for the
-week of Oct 26. For
+week of Oct 26. M12 runs alongside it: stages 1 and 2 of 3 are built and
+tested (Oct 9). For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -88,17 +89,37 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12 step 3, the build, stage 1** (Claude writes the Bicep and
-walks Gerard through it; Gerard runs `what-if`, the deploy and the checks).
-Replaced 2026-10-09 afternoon. Steps 1 (cost) and 2 (design) are done:
-`m12-prep.md` has the estimate, the design and decisions D-M12-1 to -7. The
-build runs in three stages, each tested alone (`m12-prep.md`, "Build order and
-verification"): **1** VNet, subnets, NSGs, DNS zones, the two endpoints;
-**2** the Function joins the VNet, then one regression upload, which also
-answers whether a NAT gateway is needed; **3** the firewall (Deny + the home
-IP from an untracked local file + AzureServices), then the tests including the
-Cloud Shell negative control. The cost clock starts at stage 1 (about $0.48 a
-day).
+**Next action: M12 stage 3, the storage firewall** (Claude writes the Bicep
+and walks Gerard through it; Gerard runs `what-if`, the deploy and the tests).
+Replaced 2026-10-09, end of session. **Stages 1 and 2 are deployed and
+tested** (Oct 9 session entry; README "M12"; `m12-prep.md` "progress").
+`networkStage` is **2** in `dev.bicepparam`.
+
+**Already done and settled, so don't re-check:** both endpoints Approved; DNS
+zones hold `10.20.0.36` (blob) and `.37` (queue); the tower resolves the public
+`57.150.229.161`; storage is IPv4-only (`A` record only), so the firewall rule
+is the home **IPv4** (`curl.exe -4 -s https://api.ipify.org` prints it; per
+D-M12-4 it is never written into this public repo); the Function works inside the VNet with
+**no NAT gateway** (stage 2 upload, 42 s, all tools ran); the what-if register
+is **10 modify, 31 no change, 11 Unsupported, 4 to ignore**.
+
+**Stage 3, in order:**
+1. **Claude writes:** the firewall values in `storage.bicep` behind
+   `networkStage >= 3` (Deny, the home IP, `bypass: AzureServices`,
+   `publicNetworkAccess: Enabled`); a `homeIpAddress` parameter with a minimum
+   length, read in `dev.bicepparam` with `readEnvironmentVariable('IIP_HOME_IP')`
+   so a deploy without it fails rather than locking Gerard out; a small
+   untracked script that sets the variable, plus its `.gitignore` entry (D-M12-4:
+   the home IP stays out of the public repo).
+2. **What-if:** expected, one new Modify on `stiipdevwus01` (`networkAcls`,
+   `publicNetworkAccess`).
+3. **Deploy**, then tests: (a) a regression upload from the tower; (b) the
+   results page on the phone; (c) **negative control:** a blob list from Cloud
+   Shell must get a 403; (d) one M3 `--blob` run, recorded either way (it
+   probably fails: Content Understanding fetches through a signed link from
+   Microsoft's network).
+4. **Then:** the evidence for the write-up, and the teardown date. The evidence
+   window began Oct 9; the Todoist teardown task is due Oct 16.
 
 **M13 is waiting only on C9, the rollback, planned for the week of
 2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
@@ -210,6 +231,14 @@ Harmless so far; the instance-id follow-up would tell them apart.
   (2026-10-09); the IDs in them were confirmed by name.
 - **Chrome on Android blocks screenshots in Incognito.** The sign-in log is
   the record for phone tests.
+- **M12: no NAT gateway is needed** (2026-10-09). The Function, inside the VNet
+  on a subnet with `defaultOutboundAccess: false`, still reaches Foundry, Entra
+  and its host storage (stage 2 upload test).
+- **`stiipdevwus01` is reachable over IPv4 only** (`A` record, no `AAAA`), so
+  storage firewall rules are IPv4 (2026-10-09).
+- **Device file writes: always from a fresh staging name, then read back.**
+  On Oct 9, re-using a staging path left STATUS.md with old content twice,
+  while the write reported success; the read-back caught both.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -600,6 +629,26 @@ subscription (Gerard), so `10.20.0.0/24` is free. Design, build order, tests
 and teardown are in `m12-prep.md`. Gerard asked why IPv4 rather than IPv6;
 Claude's answer (the service decides the family; IPv6 rules would need a
 prefix, since Windows rotates its IPv6 addresses) shaped the IPv4 note there.
+Committed as `c802ebe`.
+
+**Then M12 build, stages 1 and 2 (done).** Claude wrote `network.bicep`,
+`privatelink.bicep`, the `networkStage` switch and the stage 2 change to
+`app.bicep`, and compiled each before handing it over; Gerard ran every
+what-if, deploy and test.
+- **Stage 1** (`m12-stage1-20261009`): what-if exactly as predicted (11 to
+  create). Endpoints Approved; zones `10.20.0.36` / `.37`; the tower still
+  resolves the public IP.
+- **Stage 2** (`m12-stage2-20261009`): the first what-if, saved as JSON and
+  read line by line by Claude, showed 7 diffs on the new resources. **Two were
+  writable properties the template had dropped** (`privateEndpointVNetPolicies`,
+  `resolutionPolicy`), now declared; the rest are registered noise. The re-run
+  matched (10 modify, 31 no change). Upload test: a complete, correct result
+  in 42 s. **No NAT gateway needed.**
+- **Process:** Claude's writes to the tower failed silently twice (old content
+  under a new timestamp) until each write used a fresh staging name; every
+  write was read back and compared before Gerard was told it was done.
+- **Stopped before stage 3** (Gerard, 14:08): about 75 minutes of work left
+  against 80 minutes of session, so stage 3 starts fresh on Oct 10.
 
 ### Session — October 8, 2026 — M13 steps 3-4 done: methods migrated, baseline CA900-CA903 live, security defaults off; CA001 built, Report-only pass, then On; AzSvcAdmin closed off
 

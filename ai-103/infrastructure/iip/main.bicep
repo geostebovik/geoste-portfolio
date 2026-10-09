@@ -56,6 +56,32 @@ param chatApiVersion string
 @description('Same value as scripts/.env PF_WORKER_COUNT (caps evaluate() concurrency).')
 param pfWorkerCount string
 
+// --- M12: networking (2026-10-09; design and decisions in m12-prep.md) ---------
+@description('''Which M12 stage is deployed. 0 = the free skeleton only (VNet,
+subnets, NSGs): the state after the evidence window's teardown. 1 = plus the
+private endpoints and DNS zones (billed). 2 = plus the Function joined to the
+VNet. 3 = plus the storage firewall. Stage 3 is not written yet; this file
+accepts it now so the switch never changes shape.''')
+@allowed([
+  0
+  1
+  2
+  3
+])
+param networkStage int
+
+param vnetName string
+param vnetAddressPrefix string
+param funcSubnetName string
+param funcSubnetPrefix string
+param funcNsgName string
+param pepSubnetName string
+param pepSubnetPrefix string
+param pepNsgName string
+
+@description('The storage services on stiipdevwus01 that get private endpoints (D-M12-1).')
+param privateStorageServices array
+
 // The settings the M7 code reads, under the names scripts/.env uses. Endpoints
 // are DERIVED from the pinned custom subdomain, never typed: that subdomain is
 // the load-bearing name (README "Load-bearing lines").
@@ -159,9 +185,13 @@ module app 'modules/app.bicep' = {
     m7Settings: m7Settings
     maximumInstanceCount: maximumInstanceCount
     logDailyCapGb: logDailyCapGb
+    // M12 stage 2: join the Function to the VNet. resourceId(), not a module
+    // output, for the same what-if reason as the private-link module.
+    virtualNetworkSubnetId: networkStage >= 2 ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, funcSubnetName) : ''
   }
   dependsOn: [
     identity
+    network
   ]
 }
 
@@ -208,6 +238,52 @@ module eventsub 'modules/eventsub.bicep' = {
 }
 
 // =============================================================================
+// MODULE: Network skeleton (M12) -- free, and stays after the window (D-M12-7)
+// =============================================================================
+module network 'modules/network.bicep' = {
+  name: 'deploy-iip-network'
+  params: {
+    location: location
+    tags: tags
+    vnetName: vnetName
+    vnetAddressPrefix: vnetAddressPrefix
+    funcSubnetName: funcSubnetName
+    funcSubnetPrefix: funcSubnetPrefix
+    funcNsgName: funcNsgName
+    pepSubnetName: pepSubnetName
+    pepSubnetPrefix: pepSubnetPrefix
+    pepNsgName: pepNsgName
+  }
+}
+
+// =============================================================================
+// MODULE: Private endpoints + DNS (M12) -- billed, so only from stage 1 on.
+// At stage 0 this module is skipped. Skipping does NOT delete anything already
+// deployed: the teardown deletes the endpoints and zones by CLI (m12-prep.md).
+// =============================================================================
+// The IDs are computed with resourceId() here rather than read from the
+// network module's outputs. A module output is a runtime reference() to that
+// module's deployment, and the network deployment doesn't exist yet on the
+// first run, so what-if would mark everything downstream "Unsupported"
+// (the same limitation as the role assignments in README's register).
+module privatelink 'modules/privatelink.bicep' = if (networkStage >= 1) {
+  name: 'deploy-iip-privatelink'
+  params: {
+    location: location
+    tags: tags
+    vnetId: resourceId('Microsoft.Network/virtualNetworks', vnetName)
+    pepSubnetId: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, pepSubnetName)
+    storageAccountId: resourceId('Microsoft.Storage/storageAccounts', storageAccountName)
+    storageAccountName: storageAccountName
+    storageServices: privateStorageServices
+  }
+  dependsOn: [
+    network
+    storage
+  ]
+}
+
+// =============================================================================
 // OUTPUTS
 // M9 consumes the two principal IDs when it writes the role assignments.
 // =============================================================================
@@ -230,3 +306,6 @@ output signInIdentityClientId string = identity.outputs.signInIdentityClientId
 // M11
 output functionAppName string = app.outputs.functionAppName
 output systemTopicPrincipalId string = app.outputs.systemTopicPrincipalId
+
+// M12 -- stage 2 attaches the Function to this subnet
+output funcSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, funcSubnetName)

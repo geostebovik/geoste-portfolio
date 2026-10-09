@@ -328,6 +328,97 @@ app's client ID as a parameter (an `entra.bicep` output) rather than referencing
 a Graph resource from `main.bicep`, which would drag an unsupported type into
 the registered what-if.
 
+## M12 — networking (stage 1 written 2026-10-09)
+
+Claude wrote the Bicep to the design in `../../m12-prep.md`; Gerard made the
+decisions (D-M12-1 to -7) and runs every what-if and deploy.
+
+**One switch, `networkStage` in `dev.bicepparam`:** 0 = the free skeleton
+(VNet, two subnets, two NSGs); 1 = + the private endpoints and DNS zones
+(billed); 2 = + the Function in the VNet; 3 = + the storage firewall. Only 0
+and 1 are written so far. Setting it lower never deletes anything (the default
+deployment mode only adds and changes), so the teardown deletes the endpoints
+and zones by CLI.
+
+**New files:** `modules/network.bicep` (skeleton, always deployed) and
+`modules/privatelink.bicep` (endpoints, zones, VNet links, zone groups; only
+when `networkStage >= 1`). `main.bicep` passes the private-link module IDs
+built with `resourceId()`, not module outputs, so what-if can analyse them on
+the first run.
+
+**Before the first deploy, once:** the Function subnet is delegated to
+`Microsoft.App/environments`, so the `Microsoft.App` resource provider should
+be registered in the subscription:
+```powershell
+az provider show --namespace Microsoft.App --query registrationState -o tsv
+# only if that doesn't print Registered:
+az provider register --namespace Microsoft.App --wait
+```
+
+**Expected stage 1 what-if** (written before the run): **11 to create**, and
+the register otherwise unchanged (6 modify, 24 no change, 11 Unsupported, 2 to
+ignore, per the Sep 30 totals):
+- `nsg-func-iip-dev-wus-01`, `nsg-pep-iip-dev-wus-01`
+- `vnet-iip-dev-wus-01` (both subnets inline, `defaultOutboundAccess: false`)
+- `privatelink.blob.core.windows.net`, `privatelink.queue.core.windows.net`
+- `…/link-vnet-iip-dev-wus-01` on each zone
+- `pep-stiipdevwus01-blob`, `pep-stiipdevwus01-queue`
+- `…/default` zone group on each endpoint
+
+Any line not in that list or in the register is a finding, not noise.
+
+**Stage 1, DEPLOYED 2026-10-09 (`m12-stage1-20261009`, Succeeded).** The
+what-if matched exactly: 11 to create, 6 modify, 24 no change, 11 Unsupported,
+2 to ignore. Checks (Gerard ran them): both endpoint connections **Approved**
+on `stiipdevwus01`; `privatelink.blob…` holds `stiipdevwus01 → 10.20.0.36`,
+`privatelink.queue…` holds `stiipdevwus01 → 10.20.0.37`; from the tower,
+`stiipdevwus01.blob.core.windows.net` now resolves through
+`stiipdevwus01.privatelink.blob.core.windows.net` but still to the public
+`57.150.229.161`, so nothing changed outside the VNet. The cost clock started
+here.
+
+**Stage 2 (written 2026-10-09): the Function joins the VNet.** `app.bicep`
+takes `virtualNetworkSubnetId`; `main.bicep` passes the Function subnet when
+`networkStage >= 2`. **Expected what-if:** `func-iip-dev-wus-01` (already one
+of the 6 modify) gains `+ properties.virtualNetworkSubnetId`. The 11 stage 1
+resources are compared against live for the first time, so any read-back
+noise on them is new and gets checked against the schema before it's
+registered. **First stage 2 what-if (2026-10-09), read as data by Claude:** 13 modify,
+28 no change, 11 Unsupported, 4 to ignore. The function app showed exactly
+the registered lines plus `+ virtualNetworkSubnetId`. The 11 new resources:
+- **Fixed, not accepted:** `- properties.privateEndpointVNetPolicies:
+  "Disabled"` on the VNet and `- properties.resolutionPolicy: "Default"` on
+  both zone links. Both writable (they compile in the schema), so now declared
+  as found.
+- **Registered:** `- properties.isIPv6EnabledPrivateEndpoint: false` on both
+  endpoints. Not in the `2024-05-01` schema or any newer version this Bicep
+  knows (BCP037/BCP081), so no template can declare it.
+- **Registered:** on both zone groups, `- etag`, `- id`, `-
+  properties.provisioningState`, `- type` inside `privateDnsZoneConfigs[0]`.
+  All read-only.
+- **2 new "to ignore":** `nic-pep-stiipdevwus01-blob` and `-queue`, the
+  network cards Azure creates for the endpoints. Not in the template.
+- **Expected after the fix:** 10 modify, 31 no change, 11 Unsupported, 4 to
+  ignore.
+
+**If the upload test fails after the deploy**, the quick way back
+is `az functionapp vnet-integration remove -g rg-iip-dev-wus-01 -n
+func-iip-dev-wus-01`.
+
+**Stage 2, DEPLOYED 2026-10-09 (`m12-stage2-20261009`, Succeeded).** The
+re-run what-if matched the prediction exactly: **10 modify, 31 no change, 11
+Unsupported, 4 to ignore**. That is the register from now on. **Upload test:**
+`item4-m12-stage2-20261009.png` → result `20261009T205847Z.json` in 42 s,
+first delivery; status ok, run completed, all three tools ran (fact sheet,
+evaluator, vision audit), copy passed first time, audit = item4's answer key
+(saved as `scripts/results/20261009-205847_function_item4_m12_stage2.json`).
+**So no NAT gateway is needed:** with all its traffic forced through a subnet
+with `defaultOutboundAccess: false`, the Function still reaches Foundry, Entra
+and its host storage. That's measured; the mechanism (Flex's platform
+gateways keep their own way out) is Claude's inference. **Not yet proven:**
+that its storage calls use the private endpoints. Stage 3's firewall proves
+that.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).

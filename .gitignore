@@ -59,6 +59,9 @@ ai-103/scripts/results/*
 # 2026-10-09: M13's T6 evidence (the Function's run with CA001 On), cited in
 # the CA spec and STATUS.md.
 !ai-103/scripts/results/20261009-164815_function_item4_t6.json
+# 2026-10-09: M12 stage 2's upload test (the Function inside the VNet), cited
+# in infrastructure/iip/README.md and m12-prep.md.
+!ai-103/scripts/results/20261009-205847_function_item4_m12_stage2.json
 ai-103/scripts/m6_eval_input.jsonl
 
 # Working notes and session files

@@ -36,6 +36,9 @@ charge of their own.
 
 ## Open question that could change the cost: outbound internet
 
+**CLOSED 2026-10-09 by stage 2's upload test: no NAT gateway needed.** The
+analysis below is kept as written before the test.
+
 **On Flex Consumption, all of the Function's outbound traffic goes through the
 VNet once it's integrated** (Microsoft Learn, "Azure Functions networking
 options": "For Flex Consumption, all traffic is already routed through the
@@ -152,8 +155,23 @@ a condition to false doesn't delete anything. So:
    both NSGs stay ($0), so a redeploy for a demo is only the endpoints, zones,
    integration and firewall (about 10 minutes).
 
-## Next: M12 step 3, the build
+## M12 step 3, the build: progress
 
-Claude writes the Bicep (a network module, the endpoints, the firewall
-change behind one switch, the local-IP mechanism) and walks Gerard through it;
-Gerard runs `what-if` and each stage's deploy and tests.
+Claude writes the Bicep and walks Gerard through it; Gerard runs every
+what-if, deploy and test. Details and the what-if register:
+`infrastructure/iip/README.md`, "M12".
+
+| Stage | Status | Result |
+|---|---|---|
+| 1 | **DONE 2026-10-09** (`m12-stage1-20261009`) | What-if exactly as predicted (11 to create). Both endpoints Approved; zones hold `stiipdevwus01 → 10.20.0.36` (blob) and `→ 10.20.0.37` (queue); the tower still resolves the public `57.150.229.161`. **The evidence window and its cost started here.** |
+| 2 | **DONE 2026-10-09** (`m12-stage2-20261009`) | First what-if found 2 writable properties the template had dropped (now declared) and 2 noise lines (registered). Upload test: a full, correct result in 42 s. **The open NAT question is closed: no NAT gateway is needed.** |
+| 3 | **Next** (planned 2026-10-10) | The firewall, then tests (a)-(d) from "Build order and verification". |
+
+**Stage 3, what Claude writes first:** `storage.bicep` gets the firewall values
+behind `networkStage >= 3` (stages 0-2 keep today's exact values, so the
+register doesn't move); `main.bicep` gets a `homeIpAddress` parameter with a
+minimum length; `dev.bicepparam` reads it with
+`readEnvironmentVariable('IIP_HOME_IP')`; a small untracked script on the
+tower sets that variable, and `.gitignore` gets an entry for it. Then the
+what-if: expected, one Modify on `stiipdevwus01`'s `networkAcls` and
+`publicNetworkAccess`.

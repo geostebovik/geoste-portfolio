@@ -66,6 +66,31 @@ param logDailyCapGb = 1
 // m11-entra-20260930b and read back with `az ad app list`. Not a secret.
 param resultsAppClientId = '16565c24-5afd-4581-8430-c615ded0291a'
 
+// --- M12, networking (2026-10-09; m12-prep.md) ----------------------------------
+// The switch. 0 = skeleton only; 1 = + private endpoints and DNS zones (billed,
+// about $0.48 a day); 2 = + the Function in the VNet; 3 = + the storage
+// firewall. The evidence window runs at 3; the teardown sets 0 and deletes the
+// endpoints and zones by CLI.
+param networkStage = 2
+
+// No VNets existed in the subscription (Gerard, 2026-10-09), so any private
+// range was free. /24 leaves room for more subnets without renumbering.
+param vnetName = 'vnet-iip-dev-wus-01'
+param vnetAddressPrefix = '10.20.0.0/24'
+param funcSubnetName = 'snet-func-iip-dev-wus-01'
+param funcSubnetPrefix = '10.20.0.0/27'
+param funcNsgName = 'nsg-func-iip-dev-wus-01'
+param pepSubnetName = 'snet-pep-iip-dev-wus-01'
+param pepSubnetPrefix = '10.20.0.32/27'
+param pepNsgName = 'nsg-pep-iip-dev-wus-01'
+
+// D-M12-1: blob (uploads, results) and queue (upload-events). Not table or
+// file: the app uses neither on this account.
+param privateStorageServices = [
+  'blob'
+  'queue'
+]
+
 // Copied from scripts/.env, where M10 measured them.
 param chatApiVersion = '2024-06-01'
 param pfWorkerCount = '2'

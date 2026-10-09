@@ -131,6 +131,11 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   2026-10-09". **The rollback (C9) is the only step left**, planned for the
   week of 2026-10-26 (Gerard), about 10 days before the trial ends
   (2026-11-06). The marker stays on M13 until C9 is done.
+- **M12 is under way while M13 waits (2026-10-09).** Cost estimate and design
+  done (`m12-prep.md`, decisions D-M12-1 to -7). Build stages 1 (VNet,
+  private endpoints, DNS) and 2 (the Function in the VNet) are deployed and
+  tested; no NAT gateway is needed. Stage 3, the storage firewall, is next. The
+  marker is not moved: that is Gerard's call once M13 closes.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID

@@ -56,6 +56,14 @@ param maximumInstanceCount int
 @description('Log Analytics daily ingestion cap in GB -- a cost guard, not a retention setting.')
 param logDailyCapGb int
 
+// --- M12, stage 2 (Claude, 2026-10-09) -------------------------------------------
+@description('''The subnet the Function joins (M12 stage 2+), or empty to leave it
+out of any VNet. Once joined, ALL of the Function's outbound traffic goes through
+the VNet (Flex Consumption has no "route all" switch: it always does). Setting
+this back to empty may not detach an app that's already joined; the M12
+teardown uses `az functionapp vnet-integration remove` (m12-prep.md).''')
+param virtualNetworkSubnetId string = ''
+
 // host.json-independent names the code expects
 var deploymentContainerName = 'app-package-${functionAppName}'
 var uploadEventsQueueName = 'upload-events'
@@ -187,6 +195,9 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   }
   properties: {
     serverFarmId: plan.id
+    // M12 stage 2. null leaves the property out of the request entirely, so
+    // stages 0-1 send exactly what M11 sent.
+    virtualNetworkSubnetId: empty(virtualNetworkSubnetId) ? null : virtualNetworkSubnetId
     httpsOnly: true
     siteConfig: {
       minTlsVersion: '1.2'
