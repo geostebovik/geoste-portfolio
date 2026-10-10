@@ -23,6 +23,44 @@
 
 ---
 
+## Road to done (snapshot dated 2026-10-10)
+
+*Added 2026-10-10 at Gerard's request, after he lost track of where the work
+stood. This is a dated snapshot, so by the rule above it may name milestones.
+**The marker at the top stays the single source of truth for "where are
+we".** Update this table in the same edit that moves the marker, so the two
+can't drift. Claude drafted it from the Oct 10 recap; Gerard asked for it to be added here.*
+
+**The finished product:** you upload a thumbnail and topic. An Azure Function
+runs the M7 agent with no keys and saves the result. The result shows on a page
+behind an Entra sign-in that Conditional Access protects. All of it is in Bicep,
+monitored, and deployed from GitHub. After that come the write-up, the site
+update and the AI-103 exam.
+
+| Step | What it is | State on 2026-10-10 |
+|---|---|---|
+| M1-M7 (Phase 1) | Documents, search, RAG, evaluation, the M7 agent | Done (acceptance test passed 2026-09-15) |
+| M8 | Everything in Bicep | Done 2026-09-21 |
+| M9 | Managed identities and roles | Done 2026-09-21 |
+| M10 | No keys anywhere | Done 2026-09-23 |
+| M11 | The app: upload → Function → result → sign-in page | Done 2026-10-07 |
+| M12 | Networking: private endpoints, storage firewall | Built and proven 2026-10-10; **teardown by 2026-10-16** |
+| M13 | Conditional Access | Tested 2026-10-09; **rollback in the week of 2026-10-26, before 2026-11-06** |
+| M14 | Operate: tracing, alerts, GitHub deploys over OIDC | Not started. No deadline, and doesn't depend on M13 |
+| Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | M7's is waiting on outside readers (Gerard) |
+| Site | ostebovik.net's AI page updated to match | After the push |
+| Exam | AI-103 | No date set (Gerard, 2026-10-10) |
+
+**Why the marker and the work can differ:** the marker stays on M13 until its
+rollback, while M12 and M14 can run in the gap, because neither depends on the
+trial clock.
+
+**Planned but off the critical path:** the classic-agent migration (before
+2027-03-31; first step due Dec 1), which now includes the agent-isolation build
+(D-M12-8). Everything else is parked in Todoist or the Phase 2 Backlog.
+
+---
+
 **What this page is:** a snapshot of where things stand now. It isn't a log
 (that's `STATUS.md`). It answers two questions: what Phase 2 is building,
 and which step comes next. Update it whenever a milestone moves from
