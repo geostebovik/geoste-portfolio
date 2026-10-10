@@ -109,11 +109,19 @@ Enabled, both on purpose.
   with `readEnvironmentVariable('IIP_HOME_IP')`, and the parameter has a
   minimum length, so a deploy without it **fails** instead of deploying Deny
   with no IP rule (which would lock Gerard out).
+  *(Amended 2026-10-10, Gerard: no file holds the IP at all. A tracked script,
+  `infrastructure/iip/set-home-ip.ps1`, looks it up live each time; and the
+  variable is required at every stage, not only 3. Also found: the lockout is
+  data-plane only. Azure Resource Manager ignores the storage firewall, so a
+  redeploy at stage 2 always undoes a wrong rule. Details: README "M12".)*
 - **Known effects while it's on:** Cloud Shell can't reach this account (a
   different IP); M3's `--blob` path probably fails (Content Understanding
   fetches the blob from Microsoft's network through a signed link, and it's not
   clear "trusted services" covers that); if Cox changes the home address,
   uploads get a 403 until the rule is updated.
+  *(Confirmed 2026-10-10: Cloud Shell refused; `--blob` fails with
+  `ContentSourceNotAccessible`, `--file` works. To update the rule after an
+  address change: `.\set-home-ip.ps1`, then a what-if and a deploy.)*
 
 ### 2. Names and address space
 
@@ -165,7 +173,7 @@ what-if, deploy and test. Details and the what-if register:
 |---|---|---|
 | 1 | **DONE 2026-10-09** (`m12-stage1-20261009`) | What-if exactly as predicted (11 to create). Both endpoints Approved; zones hold `stiipdevwus01 → 10.20.0.36` (blob) and `→ 10.20.0.37` (queue); the tower still resolves the public `57.150.229.161`. **The evidence window and its cost started here.** |
 | 2 | **DONE 2026-10-09** (`m12-stage2-20261009`) | First what-if found 2 writable properties the template had dropped (now declared) and 2 noise lines (registered). Upload test: a full, correct result in 42 s. **The open NAT question is closed: no NAT gateway is needed.** |
-| 3 | **Next** (planned 2026-10-10) | The firewall, then tests (a)-(d) from "Build order and verification". |
+| 3 | **DONE 2026-10-10** (`m12-stage3-20261010`) | What-if exactly as predicted (one new Modify on `stiipdevwus01`; 11 modify, 30 no change). (a) upload: full, correct result in 46 s; (b) results page on the phone: works; (c) Cloud Shell list: refused by the firewall; (d) M3 `--blob`: fails, `ContentSourceNotAccessible`, as predicted (`--file` works). **The private paths are verified.** |
 
 **Stage 3, what Claude writes first:** `storage.bicep` gets the firewall values
 behind `networkStage >= 3` (stages 0-2 keep today's exact values, so the
@@ -175,3 +183,6 @@ minimum length; `dev.bicepparam` reads it with
 tower sets that variable, and `.gitignore` gets an entry for it. Then the
 what-if: expected, one Modify on `stiipdevwus01`'s `networkAcls` and
 `publicNetworkAccess`.
+*(Written 2026-10-10, as planned except: no `.gitignore` entry, because the
+script stores nothing (D-M12-4 amended); and `publicNetworkAccess` is declared
+at every stage, not only 3. README "M12" has the reasons.)*

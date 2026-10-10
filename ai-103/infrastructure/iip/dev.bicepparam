@@ -71,7 +71,14 @@ param resultsAppClientId = '16565c24-5afd-4581-8430-c615ded0291a'
 // about $0.48 a day); 2 = + the Function in the VNet; 3 = + the storage
 // firewall. The evidence window runs at 3; the teardown sets 0 and deletes the
 // endpoints and zones by CLI.
-param networkStage = 2
+param networkStage = 3
+
+// Stage 3's firewall rule (2026-10-10). The home IPv4 never goes into this
+// public repo (D-M12-4): run .\set-home-ip.ps1 in the terminal first. It
+// fetches the current address and sets IIP_HOME_IP for that terminal. No
+// default on purpose (Gerard): without it, every what-if and deploy fails at
+// compile time, at every stage.
+param homeIpAddress = readEnvironmentVariable('IIP_HOME_IP')
 
 // No VNets existed in the subscription (Gerard, 2026-10-09), so any private
 // range was free. /24 leaves room for more subnets without renumbering.

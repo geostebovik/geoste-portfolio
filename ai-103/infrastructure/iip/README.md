@@ -328,15 +328,15 @@ app's client ID as a parameter (an `entra.bicep` output) rather than referencing
 a Graph resource from `main.bicep`, which would drag an unsupported type into
 the registered what-if.
 
-## M12 — networking (stage 1 written 2026-10-09)
+## M12 — networking (written 2026-10-09 and 2026-10-10)
 
 Claude wrote the Bicep to the design in `../../m12-prep.md`; Gerard made the
 decisions (D-M12-1 to -7) and runs every what-if and deploy.
 
 **One switch, `networkStage` in `dev.bicepparam`:** 0 = the free skeleton
 (VNet, two subnets, two NSGs); 1 = + the private endpoints and DNS zones
-(billed); 2 = + the Function in the VNet; 3 = + the storage firewall. Only 0
-and 1 are written so far. Setting it lower never deletes anything (the default
+(billed); 2 = + the Function in the VNet; 3 = + the storage firewall. All
+four are written (stage 3 on 2026-10-10). Setting it lower never deletes anything (the default
 deployment mode only adds and changes), so the teardown deletes the endpoints
 and zones by CLI.
 
@@ -418,6 +418,73 @@ and its host storage. That's measured; the mechanism (Flex's platform
 gateways keep their own way out) is Claude's inference. **Not yet proven:**
 that its storage calls use the private endpoints. Stage 3's firewall proves
 that.
+
+**Stage 3 (written 2026-10-10): the storage firewall.** Claude wrote it;
+Gerard made the two choices marked. `storage.bicep` takes `firewallEnabled`
+(`main.bicep` passes `networkStage >= 3`) and `homeIpAddress`. At stage 3,
+`networkAcls` becomes `defaultAction: Deny`, one `ipRules` entry for the home
+IPv4 and `bypass: AzureServices` (Event Grid's delivery to `upload-events`).
+Below stage 3 it keeps the M8 values exactly. `publicNetworkAccess: 'Enabled'`
+is now declared at **every** stage: unset, its value since M8, behaves the
+same, and adding it only at stage 3 with `union()` would have switched off
+Bicep's type checking for the whole properties block (tested).
+- **The home IP never enters the repo (D-M12-4).** `homeIpAddress` (7-15
+  characters) is read from `IIP_HOME_IP` by `readEnvironmentVariable()` with no
+  default, so it's **required at every stage** (Gerard): in a window where
+  `.\set-home-ip.ps1` hasn't run, what-if and deploy fail at compile time and
+  nothing reaches Azure. The script looks the address up live (`curl.exe -4`,
+  api.ipify.org), checks it's IPv4, prints it and sets the variable for that
+  window; **nothing is stored** (Gerard, amending D-M12-4's "untracked file").
+  Tested by Claude with Bicep 0.48.1: unset → BCP427, empty → BCP333, an IPv6
+  address → BCP332. Bicep evaluates `readEnvironmentVariable()` even inside an
+  untaken ternary branch, which is why "required only at stage 3" would have
+  needed a placeholder value.
+- **Lockout is bounded.** The firewall gates data (blob, queue), not Azure
+  Resource Manager, so a wrong IP never blocks a what-if or a redeploy at
+  stage 2.
+- **Expected what-if** (written before the run): `stiipdevwus01` moves from No
+  change to **Modify**: `~ networkAcls.bypass: "None" => "AzureServices"`,
+  `~ networkAcls.defaultAction: "Allow" => "Deny"`, `networkAcls.ipRules` gains
+  one entry (the home IP), and `+ publicNetworkAccess: "Enabled"` (missing if the
+  live account already reports it). Totals **11 modify, 30 no change, 11
+  Unsupported, 4 to ignore**. Any other line is a finding.
+- **The what-if output contains the home IP.** Save it outside the repo
+  (`$env:TEMP`), and redact the address before quoting it in any doc.
+
+**Stage 3, DEPLOYED 2026-10-10 (`m12-stage3-20261010`, Succeeded).** The
+what-if (saved as JSON outside the repo, read entry by entry by Claude) matched
+the prediction exactly: **11 modify, 30 no change, 11 Unsupported, 4 to
+ignore**, 0 diagnostics. `stiipdevwus01` showed only bypass, defaultAction,
+`+ ipRules` (one entry) and `+ publicNetworkAccess: "Enabled"`, so the live
+account had not reported it; every other line was already registered. **That
+is the register from now on.** Tests (Gerard ran them; Claude read the results):
+- **(a) Regression upload, PASS.** `item4-m12-stage3-20261010.png`, uploaded
+  from the tower at 17:25:25Z → result `20261010T172611Z.json` in 46 s, first
+  delivery; status ok, run completed, all three tools ran, copy passed first
+  time, audit = item4's answer key, the same contrast figures as stage 2 (saved
+  as `scripts/results/20261010-172611_function_item4_m12_stage3.json`).
+- **(b) Results page on the phone, PASS** (`iip-ca-test`, passkey): the new
+  result is listed and opens.
+- **(c) Negative control, PASS.** From Azure Cloud Shell (outbound IP not the
+  home address), `az storage blob list ... --container-name uploads` was
+  refused, and the CLI blamed the account's network rules. The same command
+  with the same identity from the tower listed the container (a first run
+  went to Git Bash on the tower by mistake, and became the positive control).
+- **(d) M3 `--blob`, FAILS, as predicted.** `400 InvalidRequest`, inner
+  `ContentSourceNotAccessible`: "Error occurred while trying to read from the
+  content source." Content Understanding fetches the user-delegation SAS link
+  from Microsoft's network, which the firewall refuses; a SAS link isn't a
+  trusted-service path. **Control:** `--file` (the same PDF sent inline) passed
+  all 5 steps (`20261010-105147`). **While the firewall is on, use `--file`.**
+- **Found on the way (Claude):** `m3_analyze.py` printed only "400 Bad
+  Request". Its comment said `raise_for_status()` "raises with the real error
+  body"; it doesn't. `_raise_with_body()` now carries the body in the error.
+
+**What stage 3 proves:** with the account closed to everyone but the home IPv4
+and trusted services, the Function still reads and writes `uploads`, `results`
+and `upload-events`. It isn't the home IP and it isn't a trusted service, so
+it can only be using the private endpoints. Event Grid's delivery (trusted
+service, system-assigned identity) also works.
 
 ## Load-bearing lines — do not edit casually
 

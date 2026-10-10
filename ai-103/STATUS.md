@@ -66,13 +66,14 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 9, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 10, 2026. Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
 and the policies are exported; only the rollback (C9) remains, planned for the
-week of Oct 26. M12 runs alongside it: stages 1 and 2 of 3 are built and
-tested (Oct 9). For
+week of Oct 26. M12 runs alongside it: all three stages are built and tested
+(Oct 9-10), and its done-when is met; the agent-isolation write-up and the
+teardown (by Oct 16) remain. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -89,37 +90,33 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12 stage 3, the storage firewall** (Claude writes the Bicep
-and walks Gerard through it; Gerard runs `what-if`, the deploy and the tests).
-Replaced 2026-10-09, end of session. **Stages 1 and 2 are deployed and
-tested** (Oct 9 session entry; README "M12"; `m12-prep.md` "progress").
-`networkStage` is **2** in `dev.bicepparam`.
+**Next action: M12's remaining scope, the agent-isolation write-up, then
+the teardown** (Claude drafts the write-up; Gerard decides and runs the
+teardown). Replaced 2026-10-10. **Stage 3 is deployed and tested** (Oct 10
+session entry; README "M12"); `networkStage` is **3**, and both of M12's
+done-when clauses are met (the app works end to end with the private paths
+verified; the cost was estimated before the build).
 
-**Already done and settled, so don't re-check:** both endpoints Approved; DNS
-zones hold `10.20.0.36` (blob) and `.37` (queue); the tower resolves the public
-`57.150.229.161`; storage is IPv4-only (`A` record only), so the firewall rule
-is the home **IPv4** (`curl.exe -4 -s https://api.ipify.org` prints it; per
-D-M12-4 it is never written into this public repo); the Function works inside the VNet with
-**no NAT gateway** (stage 2 upload, 42 s, all tools ran); the what-if register
-is **10 modify, 31 no change, 11 Unsupported, 4 to ignore**.
+**Already done and settled, so don't re-check:** stage 3's what-if matched
+exactly and is the register now (**11 modify, 30 no change, 11 Unsupported, 4
+to ignore**); tests (a) upload, (b) results page, (c) Cloud Shell refused and
+(d) `--blob` fails with `ContentSourceNotAccessible` while `--file` works.
 
-**Stage 3, in order:**
-1. **Claude writes:** the firewall values in `storage.bicep` behind
-   `networkStage >= 3` (Deny, the home IP, `bypass: AzureServices`,
-   `publicNetworkAccess: Enabled`); a `homeIpAddress` parameter with a minimum
-   length, read in `dev.bicepparam` with `readEnvironmentVariable('IIP_HOME_IP')`
-   so a deploy without it fails rather than locking Gerard out; a small
-   untracked script that sets the variable, plus its `.gitignore` entry (D-M12-4:
-   the home IP stays out of the public repo).
-2. **What-if:** expected, one new Modify on `stiipdevwus01` (`networkAcls`,
-   `publicNetworkAccess`).
-3. **Deploy**, then tests: (a) a regression upload from the tower; (b) the
-   results page on the phone; (c) **negative control:** a blob list from Cloud
-   Shell must get a 403; (d) one M3 `--blob` run, recorded either way (it
-   probably fails: Content Understanding fetches through a signed link from
-   Microsoft's network).
-4. **Then:** the evidence for the write-up, and the teardown date. The evidence
-   window began Oct 9; the Todoist teardown task is due Oct 16.
+**Remaining, in order:**
+1. **Agent isolation, written up as designed-not-deployed, with its cost** (the
+   M12 row's scope in `phase2-orientation.md`). Claude drafts from Microsoft
+   Learn; nothing is deployed.
+2. **Any evidence for the write-up** while stage 3 is live. Portal screenshots
+   show the home IP: redact it, or leave them out of the public repo.
+3. **Teardown by 2026-10-16** (Todoist; `m12-prep.md` "Teardown"):
+   `networkStage = 0`, what-if, deploy; detach the Function from the VNet by
+   CLI; delete the endpoints, then the zone links, then the zones; keep the
+   VNet, subnets and NSGs; a regression upload.
+
+**Every what-if and deploy of `main.bicep` now needs `IIP_HOME_IP`, teardown
+included:** run `.\set-home-ip.ps1` once in each new PowerShell window
+(Gerard's choice, Oct 10). **If uploads start getting 403s**, the home
+address has probably changed: run the script, then a what-if and a deploy.
 
 **M13 is waiting only on C9, the rollback, planned for the week of
 2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
@@ -137,11 +134,15 @@ P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
   deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev) with
   `iip-ca-test` as its member, the results page, the custom role IIP Queue
   Trigger (dev), soft delete 7 days, the P2 trial dates; **new Oct 8:**
-  security defaults off, the baseline CA900-CA903, `bg-admin-01`).
+  security defaults off, the baseline CA900-CA903, `bg-admin-01`; **new Oct
+  10:** the M12 network resources (VNet, 2 subnets, 2 NSGs, 2 endpoints, 2
+  private DNS zones, until the teardown), the firewall on `stiipdevwus01`, and
+  `set-home-ip.ps1` before any `main.bicep` what-if).
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
-- M12 (networking) has no clock; it starts while M13 waits on C9.
+- ~~M12 (networking) has no clock; it starts while M13 waits on C9.~~ M12 is
+  the current next action (Oct 10).
 - Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
   lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
   service-principal sections once the beta report resumes.
@@ -236,6 +237,18 @@ Harmless so far; the instance-id follow-up would tell them apart.
   and its host storage (stage 2 upload test).
 - **`stiipdevwus01` is reachable over IPv4 only** (`A` record, no `AAAA`), so
   storage firewall rules are IPv4 (2026-10-09).
+- **M12 stage 3's firewall works** (2026-10-10): Deny, the home IPv4,
+  `bypass: AzureServices`. The Function reaches `stiipdevwus01` only through
+  the private endpoints; Event Grid still delivers to the queue; Cloud Shell
+  is refused.
+- **M3 `--blob` can't work while the firewall is on** (2026-10-10):
+  Content Understanding fetches the SAS link from Microsoft's network
+  (`ContentSourceNotAccessible`). Use `--file`.
+- **Cloud Shell means Azure Cloud Shell** (shell.azure.com), not a Bash window
+  on the tower. Check its outbound IP before trusting a network test.
+- **`publicNetworkAccess: 'Enabled'` is declared at every stage**
+  (2026-10-10): unset behaves the same, and `union()` would have switched off
+  Bicep's type checking.
 - **Device file writes: always from a fresh staging name, then read back.**
   On Oct 9, re-using a staging path left STATUS.md with old content twice,
   while the write reported success; the read-back caught both.
@@ -556,6 +569,46 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 10, 2026 — M12 stage 3 done: the storage firewall is on and the private paths are verified
+
+**Attribution:** Claude wrote the Bicep, `set-home-ip.ps1`, the
+`m3_analyze.py` fix, the commands and these doc edits, and read every result.
+Gerard made the two design choices below, and ran every what-if, deploy and
+test. Times are Phoenix (UTC-7) unless marked Z.
+
+**Design choices (Gerard), from tests Claude ran with the Bicep CLI first:**
+- `readEnvironmentVariable()` with no default fails at compile time even
+  inside a ternary branch that isn't taken, so "require the IP only at stage
+  3" needs a placeholder value. **Chosen: required at every stage**, with no
+  default and no placeholder.
+- **Chosen: a tracked script that looks the IP up live** (`curl.exe -4`,
+  api.ipify.org) instead of an untracked file holding it. Nothing on disk
+  holds the address, and an address change is picked up on the next run.
+  Amends D-M12-4's wording; its intent (no IP in the public repo) stands.
+- Claude's own change: `publicNetworkAccess: 'Enabled'` at every stage,
+  because adding it only at stage 3 with `union()` switches off Bicep's type
+  checking (tested: a misspelled property compiled silently).
+
+**Build and tests** (details: README "M12"):
+- What-if, saved as JSON outside the repo and read entry by entry: exactly as
+  predicted, 11 modify, 30 no change, 11 Unsupported, 4 to ignore. Deployed as
+  `m12-stage3-20261010`.
+- (a) Upload 17:25:25Z → result 17:26:11Z (46 s), complete and correct. (b)
+  Results page on the phone: works. (c) Cloud Shell: refused by the firewall.
+  (d) `--blob`: `ContentSourceNotAccessible`, as predicted; `--file` passed.
+- **Found:** `m3_analyze.py`'s comment said `raise_for_status()` "raises with
+  the real error body"; it doesn't, so (d) first failed with a bare 400.
+  `_raise_with_body()` fixed it.
+
+**Claude's error, caught by Gerard's paste:** step (c) said "Cloud Shell
+(Bash)", and "Bash" read as any Bash window, so the first run went to Git Bash
+on the tower and succeeded from the home IP. The `curl` line put first in the
+step showed it. The run became the positive control; the redo in Azure Cloud
+Shell was refused. **Also called out by Gerard:** Claude's messages were
+printed twice (a mid-task message plus a final reply repeating it), which
+risks acting on the first copy. Agreed: one copy per message; Gerard asks for
+"actions with steps only" if a message is unclear.
 
 ### Session — October 9, 2026 — M13 steps 5-6 done: CA001 On passes T1-T6; policies exported; C9 set for the week of Oct 26
 

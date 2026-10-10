@@ -8,6 +8,25 @@ param storageAccountName string
 param location string
 param tags object
 
+// --- M12 stage 3: the storage firewall (2026-10-10, Claude; m12-prep.md) ----
+@description('True from networkStage 3: Deny by default, the home IPv4 allowed, trusted Azure services allowed.')
+param firewallEnabled bool
+
+@description('Gerard\'s home IPv4. Used only when firewallEnabled is true. Never written into the repo (D-M12-4).')
+param homeIpAddress string
+
+// networkAcls (below): stages 0-2 keep the values this account has had since
+// M8, exactly. Stage 3 changes three things:
+// - defaultAction Deny: a guest list instead of an open door.
+// - ipRules: the home IPv4, so uploads, scripts and the portal's blob browser
+//   keep working from the tower. A single address, not CIDR: the storage
+//   firewall rejects /31 and /32 prefixes.
+// - bypass AzureServices: Event Grid delivers BlobCreated to upload-events as a
+//   trusted service, with the system topic's own identity (row 14). Learn
+//   offers nothing narrower for that path.
+// publicNetworkAccess is written out at every stage: see the property below.
+// The Function needs none of these: it reaches blob and queue through the
+// private endpoints, which a storage firewall doesn't filter.
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
   location: location
@@ -38,13 +57,36 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     // networkAcls.resourceAccessRules is deliberately NOT declared here.
     // Defender for Storage injects its own storageDataScanner rule into that
     // array. Declaring the array would make this template fight the security
-    // provider on every deployment. M12 revisits defaultAction.
-    networkAcls: {
-      bypass: 'None'
-      defaultAction: 'Allow'
-      ipRules: []
-      virtualNetworkRules: []
-    }
+    // provider on every deployment. M12 stage 3 sets the rest (the comment
+    // above this resource says what and why).
+    networkAcls: firewallEnabled
+      ? {
+          bypass: 'AzureServices'
+          defaultAction: 'Deny'
+          ipRules: [
+            {
+              value: homeIpAddress
+              action: 'Allow'
+            }
+          ]
+          virtualNetworkRules: []
+        }
+      : {
+          bypass: 'None'
+          defaultAction: 'Allow'
+          ipRules: []
+          virtualNetworkRules: []
+        }
+    // M12 stage 3 (2026-10-10): written out at EVERY stage, not only 3. An IP
+    // rule needs the public endpoint, and Deny turns it into a guest list.
+    // Unset (the value since M8) behaves exactly like Enabled, so stages 0-2
+    // are unchanged in effect; the first deploy after this records it. Declared
+    // flat rather than added at stage 3 with union(), because union() switches
+    // off Bicep's type checking for this whole properties block. (Tested
+    // 2026-10-10 with Bicep 0.48: a misspelled property compiled silently. The
+    // ternary on networkAcls has the same blind spot for its own two objects,
+    // so the what-if, which prints them in full, is their check.)
+    publicNetworkAccess: 'Enabled'
   }
 }
 

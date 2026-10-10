@@ -60,8 +60,7 @@ param pfWorkerCount string
 @description('''Which M12 stage is deployed. 0 = the free skeleton only (VNet,
 subnets, NSGs): the state after the evidence window's teardown. 1 = plus the
 private endpoints and DNS zones (billed). 2 = plus the Function joined to the
-VNet. 3 = plus the storage firewall. Stage 3 is not written yet; this file
-accepts it now so the switch never changes shape.''')
+VNet. 3 = plus the storage firewall (written 2026-10-10).''')
 @allowed([
   0
   1
@@ -81,6 +80,17 @@ param pepNsgName string
 
 @description('The storage services on stiipdevwus01 that get private endpoints (D-M12-1).')
 param privateStorageServices array
+
+// M12 stage 3 (2026-10-10). Required at EVERY stage, by Gerard's choice: one
+// rule, no placeholder value. dev.bicepparam reads it from IIP_HOME_IP with no
+// default, so a what-if or deploy in a terminal where set-home-ip.ps1 hasn't
+// run fails at compile time (BCP427) and nothing reaches Azure. The lengths
+// reject an empty value (BCP333) and anything longer than an IPv4 address
+// (an IPv6 address, say). The script checks the format itself.
+@description('Gerard\'s home IPv4, from set-home-ip.ps1. Kept out of the public repo (D-M12-4). Used only at networkStage 3.')
+@minLength(7)
+@maxLength(15)
+param homeIpAddress string
 
 // The settings the M7 code reads, under the names scripts/.env uses. Endpoints
 // are DERIVED from the pinned custom subdomain, never typed: that subdomain is
@@ -105,6 +115,9 @@ module storage 'modules/storage.bicep' = {
     storageAccountName: storageAccountName
     location: location
     tags: tags
+    // M12 stage 3: the firewall. Below stage 3 the module ignores the IP.
+    firewallEnabled: networkStage >= 3
+    homeIpAddress: homeIpAddress
   }
 }
 
