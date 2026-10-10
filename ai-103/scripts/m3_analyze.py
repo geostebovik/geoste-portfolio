@@ -192,6 +192,25 @@ def _auth_header(token_provider) -> dict:
     return {"Authorization": f"Bearer {token_provider()}"}
 
 
+def _raise_with_body(resp: requests.Response) -> None:
+    """Raise on 4xx/5xx WITH the service's error body.
+
+    ADDED 2026-10-10 (Claude). submit_analyze() used to call
+    resp.raise_for_status() under a comment saying it "raises with the real
+    error body". It doesn't: requests puts only the status line and URL in the
+    message, so M12 stage 3's --blob test failed with a bare "400 Bad Request"
+    and no reason. The body is where Content Understanding says why.
+    The body may echo the input URL, SAS token included (read-only, one blob,
+    30 minutes): fine on the console, but redact `sig=` before quoting it.
+    """
+    if resp.ok:
+        return
+    raise requests.HTTPError(
+        f"{resp.status_code} {resp.reason} for {resp.url}\nbody: {resp.text[:2000]}",
+        response=resp,
+    )
+
+
 def submit_analyze(endpoint: str, token_provider, analyzer_id: str, api_version: str, analysis_input: dict) -> str:
     # Matches: POST {endpoint}contentunderstanding/analyzers/{analyzerId}:analyze
     #   ?api-version=2025-11-01
@@ -208,7 +227,7 @@ def submit_analyze(endpoint: str, token_provider, analyzer_id: str, api_version:
         json={"inputs": [analysis_input]},
         timeout=60,
     )
-    resp.raise_for_status()  # 4xx/5xx -> raises with the real error body
+    _raise_with_body(resp)
     op_location = resp.headers.get("Operation-Location")
     if not op_location:
         raise RuntimeError(
@@ -228,7 +247,7 @@ def poll_result(op_location: str, token_provider, interval_s: int = 2, timeout_s
             headers=_auth_header(token_provider),
             timeout=30,
         )
-        resp.raise_for_status()
+        _raise_with_body(resp)
         body = resp.json()
         status = body.get("status")
         if status == "Succeeded":
