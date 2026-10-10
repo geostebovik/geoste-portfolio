@@ -139,10 +139,10 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   app works end to end with the account closed to all but the home IP, so the
   private paths are verified, and the two provisioning flags are decided
   (`defaultAction` Deny, `publicNetworkAccess` Enabled). **Both done-when
-  clauses are met.** Still owed from the M12 row's scope: the agent-isolation
-  write-up (designed, not deployed, with its cost). Then the teardown (Todoist,
-  due 2026-10-16). The marker is not moved: that is Gerard's call once M13
-  closes.
+  clauses are met**, and the agent-isolation write-up is done the same day
+  (`m12-prep.md`; to be built inside the classic-API migration, D-M12-8). Only
+  the teardown remains (Todoist, due 2026-10-16). The marker is not moved:
+  that is Gerard's call once M13 closes.
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID

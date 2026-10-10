@@ -186,3 +186,86 @@ what-if: expected, one Modify on `stiipdevwus01`'s `networkAcls` and
 *(Written 2026-10-10, as planned except: no `.gitignore` entry, because the
 script stores nothing (D-M12-4 amended); and `publicNetworkAccess` is declared
 at every stage, not only 3. README "M12" has the reasons.)*
+
+## Agent isolation: designed, not deployed (2026-10-10)
+
+Claude drafted this from Microsoft Learn and the Azure retail price list;
+**Gerard decided (D-M12-8, D-M12-9 below).** It answers the M12 row's scope
+line "Agent isolation is written up as designed-not-deployed, with the cost
+stated" (`phase2-orientation.md`).
+
+### What "isolation" means for Foundry
+
+Learn ("Configure network isolation for Microsoft Foundry") separates three
+things:
+1. **Inbound to the Foundry account:** who can call it. A private endpoint,
+   with public access Disabled or "Enabled from selected IP addresses". **This
+   can be added to an existing account.**
+2. **Outbound from the account** to other Azure services: Private Link.
+3. **Outbound from the agent runtime** (the "Agent client"): VNet injection
+   into a subnet delegated to `Microsoft.App/environments` (/27 or larger).
+   That needs the Standard setup with private networking, which brings your own
+   Storage, AI Search and Cosmos DB, or the Basic VNet template.
+
+### Four facts that decide it for the IIP
+
+- **VNet injection can't be added to `aif-dev-wus-01`.** Learn: "You cannot
+  take your existing Foundry deployment and add outbound virtual network
+  injection. You must redeploy Foundry." A new account means a new custom
+  subdomain, and `aif-iip-dev-wus-01` is load-bearing (README "Load-bearing
+  lines"): every script's endpoint moves, the model deployments are recreated,
+  and the acceptance test is re-run (about 95 minutes).
+- **Learn's tool-support table for isolated agents covers only the new
+  Responses API agents, "not agents created in the classic Foundry portal
+  experience".** The orchestrator uses the classic Agent Service APIs, which
+  retire on 2027-03-31 (Todoist, first step due Dec 1). So isolation belongs
+  with that migration, not before it.
+- **The IIP agent uses only function calling.** The agent asks for a tool, and
+  the Function runs it with its own identity. Learn lists Function Calling's
+  traffic as "Microsoft backbone network", with no private endpoint needed.
+  The agent never touches `stiipdevwus01`; the Function does, and stage 3
+  proved that path is private. **So injection would protect little here
+  today.**
+- **The free AI Search tier can't take a private endpoint** (README
+  "Load-bearing lines"). The Standard setup needs Basic or higher.
+
+### The options, costed
+
+Prices: Azure retail price list, westus, read 2026-10-10. A month = 730 hours.
+
+| | A. Inbound only, existing account | B. Full network-secured Standard setup (Learn template `15-private-network-standard-agent-setup`) |
+|---|---|---|
+| What changes | A private endpoint on `aif-dev-wus-01`; public access set to "selected IP addresses" (the home IPv4, as for storage) | A **new** Foundry account with VNet injection on its own delegated subnet; BYO Cosmos DB, AI Search and Storage (`stiipdevwus01` reused), each behind a private endpoint |
+| Private endpoints | 1 × $7.30 = **$7.30** | Foundry, Search, Cosmos DB: 3 × $7.30 = **$21.90** (the blob endpoint already exists) |
+| Private DNS zones | `privatelink.cognitiveservices…`, `…openai…`, `…services.ai…`: 3 × $0.50 = **$1.50** | Those 3, plus `privatelink.search.windows.net` and `privatelink.documents.azure.com`: 5 × $0.50 = **$2.50** |
+| AI Search | none | Basic, $0.101/hour = **$73.73** |
+| Cosmos DB | none | Serverless: pay per request; near $0 at the IIP's volume *(Claude, from memory; not checked against the price list)* |
+| **Per month** | **$8.80** | **about $98** |
+| One-off work | One stage, about an hour; the tower's scripts keep working through the IP rule | New account and subdomain, model deployments, every script's endpoint, the acceptance test re-run; tied to the classic-API migration |
+
+For scale: B is about 65% of the ~$150 monthly credit, and AI Search Basic is
+three quarters of B. **But everything in B bills by the hour**, like this
+week's endpoints: about **$3.25 a day**, so a one-week proof of concept would
+be about $23. Money isn't the real cost; the work is. *(Added after Gerard
+asked whether it was "worth a month's credits": Claude's first framing, a
+monthly figure, overstated the barrier.)*
+
+### Decisions (Gerard, 2026-10-10)
+
+| # | Question | Decision |
+|---|---|---|
+| D-M12-8 | Build B? | **Not now. Build it inside the classic-API migration** (due before 2027-03-31; Todoist). That migration rebuilds the agent on the Responses API anyway, which is what Learn's isolated tool support covers, so isolation adds roughly one session to work already planned. Rejected: replacing the IIP's account now (3+ sessions: scripts, Function and acceptance test all move); a separate proof-of-concept account now (about 2 sessions, partly redone at the migration). Session counts are Claude's estimates. |
+| D-M12-9 | Build A in this window? | **No, design only.** It would be torn down on Oct 16, it repeats this week's storage lesson on another resource, and B includes it once built. |
+
+**Why B is still worth building once (Claude):** agent VNet injection,
+bring-your-own Cosmos DB and AI Search, and Foundry's own private DNS zones
+are the parts M12 hasn't taught. The endpoint-and-DNS pattern itself it has.
+
+**Sources:** Microsoft Learn: "Configure network isolation for Microsoft
+Foundry" (`/azure/foundry/how-to/configure-private-link`); "Networking
+options for Foundry Agent Service"
+(`/azure/foundry/agents/concepts/networking-options`); "Set up private
+networking for Foundry Agent Service" (`/azure/foundry/agents/how-to/virtual-networks`);
+"Set up standard agent resources". Prices: `prices.azure.com`, "Azure
+Cognitive Search" (Basic Unit $0.101/hour, westus); the endpoint and DNS-zone
+prices are the ones in "The estimate" (2026-10-09).

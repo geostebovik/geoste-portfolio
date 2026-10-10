@@ -90,9 +90,10 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12's remaining scope, the agent-isolation write-up, then
-the teardown** (Claude drafts the write-up; Gerard decides and runs the
-teardown). Replaced 2026-10-10. **Stage 3 is deployed and tested** (Oct 10
+**Next action: M12's teardown, by 2026-10-16** (Gerard runs it; Claude
+writes the steps). Replaced 2026-10-10. *(Updated the same day: the
+agent-isolation write-up is done, so only the evidence and the teardown
+remain.)* **Stage 3 is deployed and tested** (Oct 10
 session entry; README "M12"); `networkStage` is **3**, and both of M12's
 done-when clauses are met (the app works end to end with the private paths
 verified; the cost was estimated before the build).
@@ -103,9 +104,11 @@ to ignore**); tests (a) upload, (b) results page, (c) Cloud Shell refused and
 (d) `--blob` fails with `ContentSourceNotAccessible` while `--file` works.
 
 **Remaining, in order:**
-1. **Agent isolation, written up as designed-not-deployed, with its cost** (the
-   M12 row's scope in `phase2-orientation.md`). Claude drafts from Microsoft
-   Learn; nothing is deployed.
+1. ~~**Agent isolation, written up as designed-not-deployed, with its
+   cost.**~~ **Done 2026-10-10** (`m12-prep.md`, "Agent isolation"): option B,
+   the full network-secured setup, is about $98/month or $3.25/day; Gerard
+   decided to build it inside the classic-API migration (D-M12-8), and option
+   A stays design-only (D-M12-9).
 2. **Any evidence for the write-up** while stage 3 is live. Portal screenshots
    show the home IP: redact it, or leave them out of the public repo.
 3. **Teardown by 2026-10-16** (Todoist; `m12-prep.md` "Teardown"):
@@ -600,6 +603,17 @@ test. Times are Phoenix (UTC-7) unless marked Z.
 - **Found:** `m3_analyze.py`'s comment said `raise_for_status()` "raises with
   the real error body"; it doesn't, so (d) first failed with a bare 400.
   `_raise_with_body()` fixed it.
+
+**Agent isolation, written up (M12's last scope item).** Claude drafted it in
+`m12-prep.md` from Microsoft Learn and the retail price list. Key facts: VNet
+injection can't be added to an existing Foundry account; Learn's isolated tool
+support covers only the new Responses API agents; the IIP agent only calls
+functions, which Learn routes over Microsoft's backbone. Options: A, inbound
+lockdown of today's account, $8.80/month; B, the full network-secured
+Standard setup, about $98/month. Gerard asked whether B was "worth a month's
+credits"; Claude corrected its own framing (it bills hourly, about $3.25/day,
+so time is the real cost). **Gerard decided:** build B inside the classic-API
+migration (D-M12-8); A stays design-only (D-M12-9).
 
 **Claude's error, caught by Gerard's paste:** step (c) said "Cloud Shell
 (Bash)", and "Bash" read as any Bash window, so the first run went to Git Bash
