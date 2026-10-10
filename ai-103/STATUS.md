@@ -111,7 +111,9 @@ to ignore**); tests (a) upload, (b) results page, (c) Cloud Shell refused and
    A stays design-only (D-M12-9).
 2. **Any evidence for the write-up** while stage 3 is live. Portal screenshots
    show the home IP: redact it, or leave them out of the public repo.
-3. **Teardown by 2026-10-16** (Todoist; `m12-prep.md` "Teardown"):
+3. **Teardown by 2026-10-16** (Todoist). **Commands and the predicted
+   what-ifs are written:** `m12-prep.md`, "Teardown runbook and prediction"
+   (Oct 10). In short:
    `networkStage = 0`, what-if, deploy; detach the Function from the VNet by
    CLI; delete the endpoints, then the zone links, then the zones; keep the
    VNet, subnets and NSGs; a regression upload.
@@ -614,6 +616,11 @@ Standard setup, about $98/month. Gerard asked whether B was "worth a month's
 credits"; Claude corrected its own framing (it bills hourly, about $3.25/day,
 so time is the real cost). **Gerard decided:** build B inside the classic-API
 migration (D-M12-8); A stays design-only (D-M12-9).
+
+**Stopped at about 11:20 (Gerard's choice)** with ~75 minutes left, rather
+than start a 60-75 minute teardown with no margin. Claude wrote the teardown
+runbook and its predicted what-ifs into `m12-prep.md` instead. Commits:
+`m3_analyze.py` fix, then `adfc13c` (stage 3), `306e0da` (agent isolation).
 
 **Claude's error, caught by Gerard's paste:** step (c) said "Cloud Shell
 (Bash)", and "Bash" read as any Bash window, so the first run went to Git Bash

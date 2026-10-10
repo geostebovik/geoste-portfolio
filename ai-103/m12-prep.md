@@ -163,6 +163,69 @@ a condition to false doesn't delete anything. So:
    both NSGs stay ($0), so a redeploy for a demo is only the endpoints, zones,
    integration and firewall (about 10 minutes).
 
+### 5. Teardown runbook and prediction (Claude, written 2026-10-10, before the run)
+
+*(Not yet run. Written at the end of the Oct 10 session so the teardown
+session starts from commands, not research. "Predicted" lines are Claude's
+reading of the templates, to be checked against the real what-if.)*
+
+**What stage 0 changes, read from the templates:**
+- `storage.bicep`: `networkAcls` returns to the M8 values (bypass None, Allow,
+  no IP rule). `publicNetworkAccess` stays `Enabled` (declared at every stage).
+- `app.bicep`: `virtualNetworkSubnetId` becomes `null`, which leaves the
+  property **out** of the request. Whether that detaches the Function is
+  unknown (step 2 does it explicitly either way).
+- `privatelink.bicep` is skipped. Its 8 resources (2 endpoints, 2 zone groups,
+  2 zones, 2 zone links) stay in Azure, because the default mode never deletes.
+
+**Predicted first what-if (stage 0, before the deletes): 7 modify, 26 no
+change, 11 Unsupported, 12 to ignore.**
+- `stiipdevwus01` Modify: bypass `AzureServices => None`, defaultAction
+  `Deny => Allow`, `- ipRules` (the home entry).
+- `func-iip-dev-wus-01`: the 4 registered lines, plus
+  `- properties.virtualNetworkSubnetId`.
+- The 8 private-link resources move to **Ignore** (in Azure, not in the
+  template), joining the 2 NICs and the 2 App Insights items.
+- Everything else as the register.
+
+**Predicted final what-if (after the deletes and the detach): 6 modify, 27
+no change, 11 Unsupported, 2 to ignore.** That's the Sep 30 register (6 / 24 /
+11 / 2) plus the 3 skeleton resources (VNet, 2 NSGs) as No change.
+
+**Steps** (PowerShell on the tower; `IIP_HOME_IP` is still required):
+1. `dev.bicepparam`: `networkStage = 0` (Claude writes it). Then:
+   ```powershell
+   cd C:\Users\gerar\geoste-portfolio\ai-103\infrastructure\iip
+   .\set-home-ip.ps1
+   $d = "C:\Users\gerar\OneDrive\Documents\Data\Claude\m12"
+   az bicep build --file main.bicep --stdout | Out-Null
+   az deployment group what-if `
+     --resource-group rg-iip-dev-wus-01 `
+     --template-file main.bicep `
+     --parameters dev.bicepparam `
+     --no-pretty-print > "$d\whatif-m12-teardown-1.json"
+   ```
+   After Claude reads it, deploy as `m12-teardown-<date>`. **No uploads during
+   the deploy:** if the Function left the VNet before the firewall opened, an
+   upload in between would fail its first delivery and retry.
+2. Detach the Function, then confirm (expected: empty output):
+   ```powershell
+   az functionapp vnet-integration remove -g rg-iip-dev-wus-01 -n func-iip-dev-wus-01
+   az resource show -g rg-iip-dev-wus-01 -n func-iip-dev-wus-01 --resource-type Microsoft.Web/sites --query "properties.virtualNetworkSubnetId" -o tsv
+   ```
+3. Delete in order: endpoints (each takes its zone group and NIC with it),
+   then the zone links, then the zones:
+   ```powershell
+   az network private-endpoint delete -g rg-iip-dev-wus-01 -n pep-stiipdevwus01-blob
+   az network private-endpoint delete -g rg-iip-dev-wus-01 -n pep-stiipdevwus01-queue
+   az network private-dns link vnet delete -g rg-iip-dev-wus-01 -z privatelink.blob.core.windows.net -n link-vnet-iip-dev-wus-01 --yes
+   az network private-dns link vnet delete -g rg-iip-dev-wus-01 -z privatelink.queue.core.windows.net -n link-vnet-iip-dev-wus-01 --yes
+   az network private-dns zone delete -g rg-iip-dev-wus-01 -n privatelink.blob.core.windows.net --yes
+   az network private-dns zone delete -g rg-iip-dev-wus-01 -n privatelink.queue.core.windows.net --yes
+   ```
+4. A regression upload (`item4-m12-teardown-<date>.png`, as on Oct 10), then
+   the final what-if to `whatif-m12-teardown-2.json` and the register check.
+
 ## M12 step 3, the build: progress
 
 Claude writes the Bicep and walks Gerard through it; Gerard runs every
