@@ -90,18 +90,23 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M14 part 3, tracing** (`m14-prep.md`, "Part 3" and "Next
-step"). Replaced 2026-10-12 (afternoon, after part 2). First step: in the
-local venv, add `azure-monitor-opentelemetry` and see what it pulls in; decide
-the pins before changing code. Then a regression upload. It's the last
-done-when item ("a trace can be shown").
+**Next action: M14 part 3, tracing, with the lean set** (`m14-prep.md`,
+"Part 3", D-M14-6, and "Next step"). Replaced 2026-10-12 (end of session).
+**Already done, don't redo:** the package resolution (6 new packages, no pin
+changes). Steps: install, pin, then Claude writes the setup; deploy via the
+workflow; regression upload; show the trace. It's the last done-when item
+("a trace can be shown").
 
 **M14 part 2 is DONE (2026-10-12). Settled, don't re-check:** the budget
 `Credits_low` emails Gerard's backup inbox with no action group (left as is,
 Gerard); the alert is a log search alert on the poison line, every 15 minutes,
 looking back 30; the address is in `IIP_ALERT_EMAIL` (persistent user
-variable); proven by a deliberate poisoned upload (poison line 19:18:39Z,
-email not received for the first fire (re-check pending)).
+variable); proven by deliberate poisoned uploads that fired it (19:22:56Z and
+20:37:57Z). **Open item:** 3 real notifications (two fires and a resolve)
+reached the action group but no email arrived, while a portal test email
+did. Learn's checklist is ruled out, item by item (`m14-prep.md`, Part 2).
+Next: the ARM-role receiver cross-check (Todoist). **Don't redo:** the
+mailbox searches, the filter check, the receiver status, or the OTP.
 
 **M14 part 1 is DONE (2026-10-12). Settled, don't re-check:** the federated
 credential on `-02` (main branch only); the workflow deploys on a push and by
@@ -725,7 +730,13 @@ register plus 2 creates, exactly.
   misremembered reading of Sep 29. The handler treats that as the uploader's
   mistake (error result, no retry), so nothing was parked. The redo used Sep
   29's real method (pause, upload, delete the blob, un-pause): poison line at
-  19:18:39Z, alert email not received for the first fire (re-check pending).
+  19:18:39Z, fired 19:22:56Z; a re-fire at 20:37:57Z. **No real alert email
+  arrived** (3 handoffs), though the portal test email did; open item in
+  Todoist.
+- **Part 3 started:** the packages are resolved (the distro adds 25, the lean
+  set adds 6, and neither moves a pin). Gerard chose the lean set (D-M14-6).
+  Closed out at about 13:45 by choice (Gerard), rather than start the tracing
+  code with no time for its regression run.
 
 ### Session — October 10, 2026 — M12 stage 3 done: the storage firewall is on and the private paths are verified
 

@@ -216,14 +216,34 @@ history shows "Action group ag-iip-dev-wus-01 executed" 0.2 s later. **But
 the email for that firing never arrived** (Gerard searched every folder for
 all three sender addresses Learn lists). The delivery path itself works: the
 portal's action-group **Test** (Log search alerts V2 sample, at about 19:55Z)
-reported Success and its email arrived. Open question: why the first real
-alert's email didn't arrive. The likeliest cause, not yet proven, is that the
-OTP verification hadn't fully taken effect 18 minutes in. Re-check: a stateful
-log alert also emails when it **resolves** (after the condition isn't met
-for 3 × 15 minutes; Learn, "Alerts and state"), so the same alert's
-"Resolved" email is a second real-path test, then a re-fire if needed.
-**Done-when "an alert can be shown" is met by the fired alert and its
-history; the email half is pending.**
+reported Success and its email arrived (sender `azure-noreply@microsoft.com`).
+
+**Two more real notifications, also not delivered:**
+- **The resolve, 20:23:57Z.** A stateful log alert at a 15-minute frequency
+  resolves after **3 quiet checks** (Learn, "Alerts and state"). The rule
+  checks at :08/:23/:38/:53; the line left the 30-minute look-back at
+  19:48:39, so the quiet checks were 19:53, 20:08 and 20:23. It resolved on
+  the third, and the action group executed again. No "Resolved" email.
+  (Claude first predicted 20:34-20:50 by adding slack instead of working out
+  the rhythm.)
+- **A re-fire, 20:37:57Z** (the same pause/delete method, line about 20:35):
+  fired on the 20:38 check exactly as predicted, the action group executed,
+  and no email.
+
+**Ruled out, against Learn's "Missing email notification" checklist:** an
+alert processing rule (`isSuppressed: false`; the history says "executed");
+an ARM-role receiver (it's a plain email receiver); a mailbox that blocks
+external mail (the test from the same sender arrived); inbox rules or spam
+(`in:anywhere` searches for all three senders, and Gmail filters checked);
+unsubscribed (receiver `Enabled`, OTP verified correctly, Gerard). Also
+ruled out: verification still settling (80 minutes later at the resolve).
+
+**So: 3 real notifications handed to the action group, 0 delivered; 1 test
+delivered.** The cause is past what Learn documents. **Done-when "an alert
+can be shown" is met** by the fired alerts and their history. **Open item
+(Todoist):** a cross-check with a second receiver of type "Email Azure
+Resource Manager role" (Owner), which needs no OTP and takes a different
+delivery path, plus one re-fire. About 20 minutes.
 
 ## Part 3: Foundry tracing (third)
 
@@ -259,6 +279,20 @@ with timings and token counts, under one trace ID.
 **A side benefit:** model-call spans count tokens independently of
 `run.usage`, which may settle the M7 backlog's "token count ~40% low" item.
 
+**Packages, resolved 2026-10-12** (Claude, `pip install --dry-run` against the
+pinned `requirements.txt` for CPython 3.14 on manylinux, wheels only):
+- **The distro** (`azure-monitor-opentelemetry` 1.8.11): **25 new packages**,
+  13 of them instrumentation for frameworks the Function doesn't use (Django,
+  Flask, FastAPI, psycopg2, DB-API, ASGI/WSGI and more).
+- **The lean set:** `azure-monitor-opentelemetry-exporter` 1.0.0b58,
+  `opentelemetry-sdk` and `-api` 1.45.1, `opentelemetry-semantic-conventions`
+  0.66b1, `azure-core-tracing-opentelemetry` 1.0.0b13 (the bridge that makes
+  Azure SDK calls emit spans) and `psutil` 7.2.2: **6 new packages.**
+- **Neither changes any of the 61 existing pins.** Several are pre-release
+  (b-versions), which is normal for this ecosystem.
+- **D-M14-6 (Gerard): the lean set.** Claude writes the setup code that
+  `configure_azure_monitor()` would have done.
+
 **Cost:** ingestion goes to `log-iip-dev-wus-01` (1 GB/day cap, 30 days).
 Expected volume is small. Measure it after the first traced runs.
 
@@ -270,6 +304,10 @@ That fits the plan's "1–2 sessions" only if Part 2 stays small.
 
 ## Next step
 
-**Part 3, tracing** (D-M14-3: now, on the classic API). First step: in the
-local venv, add `azure-monitor-opentelemetry` and see what it pulls in, then
-decide the pins before any code changes (Part 3, point 3).
+**Part 3, tracing**, with the lean set (D-M14-6). The packages are already
+resolved, so don't redo that. Steps: install the 6 in the local venv, pin them
+in `function/requirements.txt`, then Claude writes the tracing setup (exporter
+with the Function's managed identity, the Azure SDK bridge, trace context from
+the invocation, and no duplicate logs). Deploy goes through the workflow (a
+push to `function/`), then a regression upload, then show the trace in App
+Insights. **Separately, the email open item (Todoist).**

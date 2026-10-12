@@ -554,7 +554,9 @@ from `IIP_ALERT_EMAIL`** (D-M14-5): set it once as a persistent user
 environment variable, or every `main.bicep` what-if and deploy fails at
 compile time (BCP427), the same guard as `IIP_HOME_IP`. What-if: the register
 plus 2 creates, exactly. Proven by a deliberate poisoned upload (poison line
-19:18:39Z, email not received for the first fire (re-check pending)). **Register now: 6 modify, 32 no change, 11
+19:18:39Z, fired 19:22:56Z; re-fired 20:37:57Z). The alert fires and the
+action group executes every time; **the emails for real alerts haven't
+arrived** while a portal test email did (open item; `m14-prep.md`, Part 2). **Register now: 6 modify, 32 no change, 11
 Unsupported, 2 to ignore**, confirmed by a what-if after the deploy.
 
 ## Load-bearing lines — do not edit casually
