@@ -13,6 +13,9 @@ param functionIdentityName string
 param cicdIdentityName string
 param signInIdentityName string
 
+@description('M14 (D-M14-2): the GitHub Actions token subject that id-iip-dev-wus-02 trusts, e.g. repo:owner/name:ref:refs/heads/main.')
+param githubOidcSubject string
+
 // The RBAC model requires a `purpose` tag on every new resource, because two
 // resources of the same type are told apart by instance number alone.
 resource functionIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -29,6 +32,24 @@ resource cicdIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-
   tags: union(tags, {
     purpose: 'github-deploy'
   })
+}
+
+// M14 part 1 (2026-10-12, Claude; D-M14-2, Gerard). GitHub Actions signs in as
+// this identity over OIDC: GitHub issues the workflow run a short-lived token,
+// and Entra swaps it for an Azure token ONLY if issuer, subject and audience
+// all match this credential exactly. No secret exists anywhere. The identity's
+// only role is Website Contributor on the Function (M9, RBAC model), so a
+// matching run can deploy the Function and do nothing else.
+resource githubDeployCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
+  parent: cicdIdentity
+  name: 'fic-gh-geoste-portfolio-main'
+  properties: {
+    issuer: 'https://token.actions.githubusercontent.com'
+    subject: githubOidcSubject
+    audiences: [
+      'api://AzureADTokenExchange'
+    ]
+  }
 }
 
 // M11 pass 2 (2026-09-30), D-M11-2 (b), RBAC row 17. Built-in authentication

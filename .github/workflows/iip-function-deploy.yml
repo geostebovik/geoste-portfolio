@@ -1,0 +1,98 @@
+# IIP Function deploy (M14 part 1). Written by Claude, 2026-10-12.
+# Decisions: D-M14-1 (CI/CD first) and D-M14-2 (trust branch main only), Gerard.
+# Design and sources: ai-103/m14-prep.md, "Part 1".
+#
+# Signs in to Azure as id-iip-dev-wus-02 over OIDC: GitHub gives this run a
+# short-lived token, and Entra exchanges it only because the federated
+# credential fic-gh-geoste-portfolio-main trusts exactly
+# repo:geostebovik/geoste-portfolio:ref:refs/heads/main. No password or key is
+# stored anywhere; the three secrets below are identifiers. The identity's only
+# role is Website Contributor on the Function.
+#
+# The package is built exactly as it is by hand: build_package.py, then a
+# REMOTE build on Azure, so Linux installs the pinned requirements.txt.
+
+name: IIP Function deploy
+
+on:
+  push:
+    branches: [main]
+    # Everything build_package.py puts in the package, plus this file.
+    # The first step checks the scripts list against SCRIPT_MODULES.
+    paths:
+      - 'ai-103/function/**'
+      - 'ai-103/scripts/m7_orchestrator.py'
+      - 'ai-103/scripts/m7_cv_audit_tool.py'
+      - 'ai-103/scripts/m7_evaluator_tool.py'
+      - 'ai-103/scripts/m7_fact_sheet_tool.py'
+      - 'ai-103/scripts/m7_legibility_check.py'
+      - 'ai-103/scripts/m7_vision_test.py'
+      - 'ai-103/scripts/m3_analyze.py'
+      - 'ai-103/scripts/provenance.py'
+      - 'ai-103/iip-docs/m7-riverside-hardware/fact-sheet.md'
+      - '.github/workflows/iip-function-deploy.yml'
+  # A deploy by hand from the Actions tab. Run it from main: any other branch
+  # presents a different subject, and Entra refuses the sign-in.
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # lets the run ask GitHub for its OIDC token
+  contents: read
+
+# One deploy at a time; a second push waits instead of overlapping.
+concurrency:
+  group: iip-function-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python (to run build_package.py)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Check the path filter matches build_package.py
+        run: |
+          python - <<'PY'
+          import ast, re, sys
+          from pathlib import Path
+          src = Path("ai-103/function/build_package.py").read_text(encoding="utf-8")
+          modules = None
+          for node in ast.walk(ast.parse(src)):
+              if isinstance(node, ast.Assign) and any(
+                  isinstance(t, ast.Name) and t.id == "SCRIPT_MODULES" for t in node.targets
+              ):
+                  modules = set(ast.literal_eval(node.value))
+          wf = Path(".github/workflows/iip-function-deploy.yml").read_text(encoding="utf-8")
+          watched = set(re.findall(r"- 'ai-103/scripts/([^']+\.py)'", wf))
+          if modules is None:
+              sys.exit("SCRIPT_MODULES not found in build_package.py")
+          if modules != watched:
+              print("Path filter and SCRIPT_MODULES disagree:")
+              print("  packaged but not watched:", sorted(modules - watched))
+              print("  watched but not packaged:", sorted(watched - modules))
+              sys.exit(1)
+          print(f"OK: the path filter watches all {len(modules)} packaged modules.")
+          PY
+
+      - name: Build the package
+        run: python ai-103/function/build_package.py
+
+      - name: Sign in to Azure (OIDC, no secret)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.IIP_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.IIP_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.IIP_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to func-iip-dev-wus-01 (remote build)
+        uses: Azure/functions-action@v1
+        with:
+          app-name: func-iip-dev-wus-01
+          package: ai-103/function/.build
+          remote-build: true

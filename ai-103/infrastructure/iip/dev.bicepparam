@@ -37,6 +37,11 @@ param functionIdentityName = 'id-iip-dev-wus-01'
 param cicdIdentityName = 'id-iip-dev-wus-02'
 // M11 pass 2 (2026-09-30): sign-in identity, purpose tag 'easyauth-fic' (row 17).
 param signInIdentityName = 'id-iip-dev-wus-03'
+// M14 (2026-10-12, D-M14-2, Gerard): GitHub Actions deploys may sign in as
+// id-iip-dev-wus-02 only from a run on branch main of this repo. A run from any
+// other branch, a fork or a pull request presents a different subject and is
+// refused by Entra.
+param githubOidcSubject = 'repo:geostebovik/geoste-portfolio:ref:refs/heads/main'
 
 // Gerard's Entra object ID, read from `az ad signed-in-user show` on 2026-09-21.
 param adminPrincipalId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'

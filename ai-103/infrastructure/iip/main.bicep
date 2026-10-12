@@ -33,6 +33,9 @@ param cicdIdentityName string
 @description('M11 pass 2: the sign-in identity (row 17). Created here; trusted by entra.bicep.')
 param signInIdentityName string
 
+@description('M14: the GitHub Actions OIDC subject that id-iip-dev-wus-02 trusts (D-M14-2).')
+param githubOidcSubject string
+
 @description('Gerard\'s Entra object ID, from `az ad signed-in-user show --query id`.')
 param adminPrincipalId string
 
@@ -173,6 +176,7 @@ module identity 'modules/identity.bicep' = {
     functionIdentityName: functionIdentityName
     cicdIdentityName: cicdIdentityName
     signInIdentityName: signInIdentityName
+    githubOidcSubject: githubOidcSubject
   }
 }
 
