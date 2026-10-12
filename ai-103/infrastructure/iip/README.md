@@ -519,6 +519,31 @@ captured first, read-only, in `../../evidence/m12-networking/`.
   in the VNet, stage 3 the firewall). The teardown then needs the CLI steps
   again, because the default deployment mode never deletes.
 
+## M14 — operate (part 1, CI/CD over OIDC: DONE 2026-10-12)
+
+Design and decisions: `../../m14-prep.md` (D-M14-1 to -3, Gerard). Claude wrote
+the Bicep and the workflow; Gerard ran every what-if, deploy and push.
+- **`identity.bicep`:** federated credential `fic-gh-geoste-portfolio-main`
+  on `id-iip-dev-wus-02`. Issuer `https://token.actions.githubusercontent.com`,
+  subject `repo:geostebovik/geoste-portfolio:ref:refs/heads/main` (D-M14-2,
+  from `dev.bicepparam`), audience `api://AzureADTokenExchange`. Deployed as
+  `m14-oidc-fic-20261012`. What-if: the register plus 1 create, exactly.
+  No new permission: `-02` still holds only Website Contributor on the
+  Function (M9).
+- **`.github/workflows/iip-function-deploy.yml`** (repo root): runs
+  `build_package.py`, signs in with `azure/login` over OIDC, deploys with
+  `Azure/functions-action@v1` and `remote-build: true`. It triggers on pushes
+  that touch the package's sources, and its first step fails if the path
+  filter and `SCRIPT_MODULES` disagree. First run: the push of `fd02de9`,
+  green; the activity log's `publishxml` caller is `-02`.
+- **`app.bicep`: basic publishing credentials OFF** (`scm` and `ftp`,
+  `allow: false`). Found ON (ARM's default), which left a password in the
+  publish profile. Deployed as `m14-basicauth-off-20261012`; a later
+  `workflow_dispatch` deploy stayed green.
+- **Register after M14 part 1: 6 modify, 30 no change, 11 Unsupported, 2 to
+  ignore** (the M12 teardown's 6 / 27 / 11 / 2, plus the credential and the
+  two policies as No change). Confirmed by a what-if after the deploy.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).

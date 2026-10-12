@@ -298,6 +298,28 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       }
     }
   }
+
+  // --- M14 part 1 (2026-10-12): basic publishing credentials OFF ---------------
+  // Found 2026-10-12 (Gerard ran the check): both policies read allow: true, the
+  // default for an app created by ARM. So the publish profile that
+  // Website Contributor can fetch (publishxml) held a working username and
+  // password for the deploy endpoints, a secret that sidestepped the
+  // secretless OIDC deploy. Nothing here uses them: the GitHub workflow and
+  // config-zip both deploy with Entra tokens, and Microsoft Learn says SCM
+  // basic auth doesn't apply to Flex Consumption package deployments.
+  resource scmBasicAuth 'basicPublishingCredentialsPolicies' = {
+    name: 'scm'
+    properties: {
+      allow: false
+    }
+  }
+
+  resource ftpBasicAuth 'basicPublishingCredentialsPolicies' = {
+    name: 'ftp'
+    properties: {
+      allow: false
+    }
+  }
 }
 
 // --- Event Grid system topic on the APP DATA account ---------------------------

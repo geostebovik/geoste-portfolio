@@ -1,7 +1,8 @@
 # M14 prep: operate (CI/CD over OIDC, alerts, tracing)
 
 *Drafted by Claude, 2026-10-12, from Microsoft Learn and the repo. Gerard made
-the decisions marked D-M14. Nothing here is built yet.*
+the decisions marked D-M14.* **Part 1 is DONE (2026-10-12)**: see "Part 1,
+the run". Parts 2 and 3 are not started.
 
 **M14's done-when** (`phase2-orientation.md`, Milestones table): *a push
 deploys the Function, and a trace and an alert can each be shown.* No
@@ -83,6 +84,51 @@ that the workflow used no secret except the three IDs.
 **Cost:** $0 in Azure (a federated credential and a role that already
 exists). GitHub Actions minutes are free for a public repo.
 
+### Part 1, the run (2026-10-12)
+
+Claude wrote the Bicep and the workflow and read every result; Gerard added
+the GitHub secrets, placed the workflow file, and ran every command and push.
+1. **The federated credential**, `m14-oidc-fic-20261012`. The what-if was the
+   register plus 1 create, exactly as predicted; read back with
+   `az identity federated-credential list` (one entry, the main-branch
+   subject).
+2. **The workflow.** The remote tools may not write under `.github/workflows`
+   (a protected location), so Claude left the file in Gerard's working folder
+   and Gerard copied it into place. A person places every CI file, which is
+   the right default anyway.
+3. **First deploy: the push of `fd02de9` itself** (it touches the workflow
+   file, which is in the path filter). Both workflows ran green (the SWA one
+   runs on every push). The check step printed "OK: the path filter watches
+   all 8 packaged modules", and the deploy step reported a remote build and a
+   successful deployment (Gerard read both in the Actions log).
+   **Who deployed:** the Function's activity log shows
+   `Microsoft.Web/sites/publishxml/action` at 18:14:00Z with caller
+   `3a770f3a-…`, which is `id-iip-dev-wus-02`'s principal ID, not Gerard.
+4. **Regression upload, PASS.** `item4-m14-oidc-20261012.png` at 18:23:03Z →
+   result in 49 s, first delivery; the same three tools; copy passed first
+   time; audit = item4's answer key
+   (`scripts/results/20261012-182352_function_item4_m14_oidc.json`).
+   **Done-when clause 1, "a push deploys the Function", is met.**
+
+**Found on the way: basic auth was ON** (Gerard ran the check, prompted by the
+`publishxml` line). `basicPublishingCredentialsPolicies` `scm` and `ftp` both
+read `allow: true`, the default for an app created by ARM. So the publish
+profile that Website Contributor can fetch held a working username and
+password for the deploy endpoint: a secret that sidestepped the secretless
+deploy. **Fixed in `app.bicep`** (both `allow: false`), `m14-basicauth-off-20261012`;
+what-if exactly as predicted (2 Modify, `true => false`); read back `false`
+and `false`. **The OIDC deploy still works without it:** a `workflow_dispatch`
+run went green. The register is now **6 modify, 30 no change, 11 Unsupported,
+2 to ignore** (confirmed by a what-if after the deploy).
+
+**Also found, and closed:** two `Microsoft.Web/sites/write` events under
+Gerard's account that he hadn't run (17:25:11Z and 18:13:13Z). Claude
+predicted, and the activity log confirmed, that each shares its correlation ID
+with one of the day's CLI deploys (teardown `ea85e94d…`, credential
+`213563d6…`), ten minutes later. They're the late completion records of
+those deploys, not separate actions. All writes that day came from the Azure
+CLI's app ID (`04b07795-…`).
+
 ## Part 2: alerts (second)
 
 **Done-when:** "an alert can be shown". **The plan says: reuse the $90 budget
@@ -158,5 +204,7 @@ That fits the plan's "1–2 sessions" only if Part 2 stays small.
 
 ## Next step
 
-**Part 1, step 1:** Claude writes the federated credential into
-`identity.bicep` and predicts the what-if; Gerard runs it.
+**Part 2, the alerts survey:** read the $90 budget (Cost Management →
+Budgets) and whether it has an action group, then pick the alert, cost it,
+and find the log line that marks a message moving to the poison queue from a
+real failure (the Sep 29 failure-path test makes one on purpose).

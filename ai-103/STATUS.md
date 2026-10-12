@@ -90,13 +90,19 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M14 prep** (Gerard's choice, 2026-10-12). Replaced
-2026-10-12. M14 is Foundry tracing into Application Insights, alerts and an
-action group (reusing the $90 budget alert), and GitHub Actions deploys of the
-Function over OIDC with `id-iip-dev-wus-02` (`phase2-orientation.md`,
-Milestones table). It has no deadline and doesn't depend on M13. Start it the
-way M11 and M12 started: a survey and a cost/design note (`m14-prep.md`,
-Claude drafts; Gerard decides) before anything is built.
+**Next action: M14 part 2, alerts: the survey first** (`m14-prep.md`, "Part
+2" and "Next step"). Replaced 2026-10-12 (afternoon). Read the $90 budget and
+whether it has an action group; then choose the alert and cost it. **Already
+known, don't re-check:** a storage *metric* alert can't watch the poison
+queue (`QueueMessageCount` has no per-queue dimension and is refreshed daily),
+so it has to be a log search alert in App Insights. Tracing (part 3) comes
+after (D-M14-1).
+
+**M14 part 1 is DONE (2026-10-12). Settled, don't re-check:** the federated
+credential on `-02` (main branch only); the workflow deploys on a push and by
+hand (`workflow_dispatch`); the activity log shows `-02` as the deployer; the
+regression upload passed; basic auth is off and the OIDC deploy still works.
+Register: **6 modify, 30 no change, 11 Unsupported, 2 to ignore**.
 
 **M12 is COMPLETE (2026-10-12; Gerard ticked it). Already done and settled,
 so don't re-check:**
@@ -182,9 +188,10 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Entra objects live in `entra.bicep`** (Graph Bicep types `1.0.0`: `owners`
   take plain IDs, and a federated credential's name is `parent/child`). They
   get no what-if, so they're verified by reading them back.
-- **The `main.bicep` register is 6 modify, 27 no change, 11 Unsupported, 2 to
-  ignore** (2026-10-12, after the M12 teardown: the Sep 30 register's 6 / 24 /
-  11 / 2 plus the VNet and 2 NSGs as No change). `authsettingsV2` reports No
+- **The `main.bicep` register is 6 modify, 30 no change, 11 Unsupported, 2 to
+  ignore** (2026-10-12, after M14 part 1: the Sep 30 register's 6 / 24 / 11 /
+  2, plus the VNet and 2 NSGs (M12 skeleton), the federated credential and the
+  two basic-auth policies as No change). `authsettingsV2` reports No
   change once deployed.
 - **Row 10 is the group, as designed** (2026-10-07). `iip-ca-test` is its
   only member, declared in `entra.bicep` with **replace** semantics (Gerard):
@@ -261,6 +268,17 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Flex Consumption's `outboundVnetRouting` reads all `false`, and that's
   expected** (Microsoft Learn: on Flex, all traffic already goes through the
   VNet). Not a misconfiguration (`evidence/m12-networking/README.md`).
+- **Basic publishing credentials are OFF on the Function** (2026-10-12,
+  `app.bicep`). They were on by ARM's default, which put a password in the
+  publish profile. Deploys use Entra tokens only (OIDC workflow,
+  `config-zip`).
+- **Workflow files can't be written by the remote tools** (`.github/workflows`
+  is protected). Claude leaves the file in the working folder; Gerard copies it
+  into place.
+- **An ARM deploy can log a second `sites/write` "Succeeded" about 10 minutes
+  later, with the same correlation ID** (2026-10-12, seen twice). It's the
+  same deploy finishing, not a new action. Check the correlation ID before
+  chasing one.
 - **The Sunday punch-list task is cloud-only** (2026-10-12, Gerard). It needs
   no computer: it clones the repo and reads Todoist. Don't tie it to a device
   again.
@@ -582,7 +600,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 12, 2026 — M12 closed: evidence captured, teardown done; the Sunday punch-list task rebuilt cloud-only
+### Session — October 12, 2026 — M12 closed (evidence, teardown); M14 part 1 done (deploys over OIDC); the Sunday punch-list task rebuilt cloud-only
 
 **Attribution:** Claude diagnosed the scheduled task, drafted the new prompt,
 wrote the evidence script, the `dev.bicepparam` edit, every command and these
@@ -651,6 +669,28 @@ paths are history and stay as written.
 edit and its copy to the tower went out at the same time, so the tower got the
 pre-edit file. It was re-copied from a fresh staging name and confirmed by
 hash. The lesson is in "Settled".
+
+**M14 part 1, CI/CD over OIDC, done the same afternoon** (`m14-prep.md`,
+"Part 1, the run"; README "M14"). Gerard asked for briefings on GitHub OIDC and
+Foundry tracing (alerts familiar) and decided D-M14-1 (order: OIDC, alerts,
+tracing), D-M14-2 (trust branch `main` only) and D-M14-3 (trace now, on the
+classic API). Claude wrote `m14-prep.md`, the federated credential and the
+workflow; Gerard added the 3 GitHub secrets, copied the workflow into place
+(the remote tools can't write there) and pushed `fd02de9`. That push was the
+first deploy. The activity log shows `-02` (`3a770f3a-…`) calling
+`publishxml`, and the regression upload passed in 49 s.
+- **Found, by asking what `publishxml` returns:** basic auth was ON for `scm`
+  and `ftp` (ARM's default), so the publish profile held a deploy password.
+  Switched off in `app.bicep`; a `workflow_dispatch` deploy stayed green.
+- **Found and closed:** the two `sites/write` events Gerard hadn't run were
+  the 10-minute-late completion records of his own deploys, matched by
+  correlation ID. Claude's hypothesis, which the log confirmed.
+- **Corrected before it was built:** `m14-prep.md` first named a poison-queue
+  *metric* alert; Learn shows `QueueMessageCount` can't single out a queue and
+  updates daily.
+- **Unchanged and not done:** the Sunday task's notification test (Todoist,
+  Oct 19). The project instructions block was pasted by Gerard (Todoist
+  closed).
 
 ### Session — October 10, 2026 — M12 stage 3 done: the storage firewall is on and the private paths are verified
 
