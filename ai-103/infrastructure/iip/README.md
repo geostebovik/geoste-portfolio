@@ -544,6 +544,19 @@ the Bicep and the workflow; Gerard ran every what-if, deploy and push.
   ignore** (the M12 teardown's 6 / 27 / 11 / 2, plus the credential and the
   two policies as No change). Confirmed by a what-if after the deploy.
 
+**Part 2, alerts: DONE 2026-10-12** (`m14-alerts-20261012`). New module
+`modules/alerts.bicep`: action group `ag-iip-dev-wus-01` (one email receiver)
+and log search alert `alert-iip-poison-dev-wus-01`. It fires on the host's
+"Moving message to queue 'upload-events-poison'" line in `AppTraces`, checks
+every 15 minutes (D-M14-4, $0.50/month) and looks back 30. `app.bicep` gains
+the output `logAnalyticsId`, which is the rule's scope. **The address comes
+from `IIP_ALERT_EMAIL`** (D-M14-5): set it once as a persistent user
+environment variable, or every `main.bicep` what-if and deploy fails at
+compile time (BCP427), the same guard as `IIP_HOME_IP`. What-if: the register
+plus 2 creates, exactly. Proven by a deliberate poisoned upload (poison line
+19:18:39Z, email not received for the first fire (re-check pending)). **Register now: 6 modify, 32 no change, 11
+Unsupported, 2 to ignore**, confirmed by a what-if after the deploy.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).

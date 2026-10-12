@@ -36,6 +36,14 @@ param signInIdentityName string
 @description('M14: the GitHub Actions OIDC subject that id-iip-dev-wus-02 trusts (D-M14-2).')
 param githubOidcSubject string
 
+// --- M14, part 2: alerts (2026-10-12) -----------------------------------------
+param actionGroupName string
+param poisonAlertName string
+
+@description('M14 part 2: where alerts are emailed. From IIP_ALERT_EMAIL; never in the repo.')
+@minLength(6)
+param alertEmail string
+
 @description('Gerard\'s Entra object ID, from `az ad signed-in-user show --query id`.')
 param adminPrincipalId string
 
@@ -257,6 +265,19 @@ module eventsub 'modules/eventsub.bicep' = {
 // =============================================================================
 // MODULE: Network skeleton (M12) -- free, and stays after the window (D-M12-7)
 // =============================================================================
+// M14 part 2: one action group and the poison-queue log alert.
+module alerts 'modules/alerts.bicep' = {
+  name: 'deploy-iip-alerts'
+  params: {
+    location: location
+    tags: tags
+    actionGroupName: actionGroupName
+    alertRuleName: poisonAlertName
+    alertEmail: alertEmail
+    logAnalyticsId: app.outputs.logAnalyticsId
+  }
+}
+
 module network 'modules/network.bicep' = {
   name: 'deploy-iip-network'
   params: {

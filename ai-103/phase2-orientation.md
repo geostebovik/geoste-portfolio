@@ -46,7 +46,7 @@ update and the AI-103 exam.
 | M11 | The app: upload → Function → result → sign-in page | Done 2026-10-07 |
 | M12 | Networking: private endpoints, storage firewall | **Done 2026-10-12**: built and proven 2026-10-10; evidence captured and torn down 2026-10-12 (Bicep and the free VNet skeleton kept) |
 | M13 | Conditional Access | Tested 2026-10-09; **rollback in the week of 2026-10-26, before 2026-11-06** |
-| M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **Part 1 done 2026-10-12**: a push deploys the Function over OIDC. Alerts next, then tracing (D-M14-1). No deadline, and doesn't depend on M13 |
+| M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **Parts 1-2 done 2026-10-12**: a push deploys the Function over OIDC, and a parked upload fires an alert (the email half is being re-checked). Tracing next (D-M14-1). No deadline, and doesn't depend on M13 |
 | Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | M7's is waiting on outside readers (Gerard) |
 | Site | ostebovik.net's AI page updated to match | After the push |
 | Exam | AI-103 | No date set (Gerard, 2026-10-10) |
@@ -188,7 +188,11 @@ write-up is waiting for outside readers and a joint push with Phase 2.
 - **M14 part 1 is done (2026-10-12):** GitHub Actions deploys the Function over
   OIDC as `id-iip-dev-wus-02`, so done-when clause 1 ("a push deploys the
   Function") is met. Basic publishing credentials were found on and switched
-  off. Next: alerts, then tracing (`m14-prep.md`, D-M14-1 to -3).
+  off. **Part 2, alerts, done the same day:** an upload parked in the poison
+  queue fires an alert, proven by a deliberate failure (the first firing's
+  email didn't arrive; a test email did; re-check pending). Two of the three
+  done-when items are shown (deploy, alert); **only "a trace can be shown"
+  remains** (`m14-prep.md`, D-M14-1 to -5).
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID

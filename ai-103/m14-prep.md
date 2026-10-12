@@ -1,8 +1,9 @@
 # M14 prep: operate (CI/CD over OIDC, alerts, tracing)
 
 *Drafted by Claude, 2026-10-12, from Microsoft Learn and the repo. Gerard made
-the decisions marked D-M14.* **Part 1 is DONE (2026-10-12)**: see "Part 1,
-the run". Parts 2 and 3 are not started.
+the decisions marked D-M14.* **Parts 1 and 2 are DONE (2026-10-12)**: see
+"Part 1, the run" and "Part 2, the survey and the run". Part 3 (tracing) is
+not started.
 
 **M14's done-when** (`phase2-orientation.md`, Milestones table): *a push
 deploys the Function, and a trace and an alert can each be shown.* No
@@ -153,11 +154,76 @@ an alert rule points at.
 - The budget threshold itself.
 
 **Proof for the done-when:** a fired alert. The poison alert can be fired on
-purpose with Sep 29's failure-path test (an upload without `topic`).
+purpose with Sep 29's failure-path test. *(Corrected 2026-10-12: that test's
+failure comes from deleting the blob while the trigger is paused, not from
+the missing `topic`. See the run below.)*
 
 **Cost:** an email action group is free at this volume. A log search alert
 is billed per rule by how often it runs, and costs more than a metric alert,
 so check the retail price list before choosing the frequency.
+
+### Part 2, the survey and the run (2026-10-12)
+
+**Survey** (read-only; Gerard ran the commands, Claude read the results):
+- **The budget `Credits_low`:** $90 a billing month; it emails at 75% actual
+  and 111% forecast **straight to an address, with no action group**
+  (`contactGroups` empty). The address is Gerard's backup inbox, which he uses
+  for low-priority mail (Gerard, Oct 12). It's left as it is. Claude's note,
+  not a decision: this is the only warning before credit exhaustion disables
+  the subscription that also hosts ostebovik.net (spending limit on), so a
+  second address costs nothing.
+- **No metric alerts, and one action group:** the auto-created "Application
+  Insights Smart Detection", with 0 email receivers. Before today, nothing
+  would have told anyone the app was broken.
+- **The poison line is exact:** `Message has reached MaxDequeueCount of 2.
+  Moving message to queue 'upload-events-poison'.` (AppTraces, severity 2),
+  7 times since Sep 25.
+- **14 of 24 `process_upload` runs failed in 20 days, and every one is
+  explained:** 7 poisoned messages × 2 tries each, all from the deliberate
+  Sep 25 and Sep 29 failure-path tests. So the alert keys on the poison line,
+  not on failed runs. A failed try that a retry fixes isn't an outage.
+- **Prices** (Azure retail price list, westus, per rule per month): log search
+  alert $3.00 at 1 minute, $1.50 at 5, $1.00 at 10, **$0.50 at 15**.
+
+**Decisions (Gerard):** **D-M14-4**, check every 15 minutes ($0.50 a month).
+**D-M14-5**, the alert address lives in a persistent user environment
+variable (`IIP_ALERT_EMAIL`), never in the public repo; like the home IP,
+`main.bicep` fails at compile time without it.
+
+**Built** (`modules/alerts.bicep`, Claude): `ag-iip-dev-wus-01` (one email
+receiver, common alert schema) and `alert-iip-poison-dev-wus-01` (no CAF
+abbreviation exists for a log alert rule, so the name is descriptive). The
+rule checks every 15 minutes but **looks back 30**
+(`overrideQueryTimeRange`), so a line ingested a few minutes late isn't
+missed. That's free, because the price follows the frequency. It's
+stateful, so one parked upload sends one email. Deployed as
+`m14-alerts-20261012`; the what-if was the register plus 2 creates, exactly as
+predicted. Gerard confirmed the action group's opt-in email.
+
+**Proof** (Sep 29's method; Gerard ran it): `m14-alert-test-20261012.png`
+uploaded at 19:05:29Z **with no `topic`**.
+**The first attempt didn't fail, and that's by design:** a missing `topic`
+makes the handler write an error result and return normally (no exception,
+so no retry and no poison). That's correct behaviour, because a missing topic
+is the uploader's mistake, not an outage. The test was Claude's error: Sep
+29's failure came from **deleting the blob while the trigger was paused**,
+not from the missing topic. **Redone that way:** paused `process_upload`
+(confirmed with `appsettings list`), uploaded `m14-alert-test2-20261012.png`,
+peeked it at `dequeueCount` 0 (19:14:41Z), deleted the blob, un-paused. Both
+tries failed (blob not found), and the poison line landed at
+**19:18:39Z**. **The alert fired at 19:22:56Z** (about 4 minutes after the line), and its
+history shows "Action group ag-iip-dev-wus-01 executed" 0.2 s later. **But
+the email for that firing never arrived** (Gerard searched every folder for
+all three sender addresses Learn lists). The delivery path itself works: the
+portal's action-group **Test** (Log search alerts V2 sample, at about 19:55Z)
+reported Success and its email arrived. Open question: why the first real
+alert's email didn't arrive. The likeliest cause, not yet proven, is that the
+OTP verification hadn't fully taken effect 18 minutes in. Re-check: a stateful
+log alert also emails when it **resolves** (after the condition isn't met
+for 3 × 15 minutes; Learn, "Alerts and state"), so the same alert's
+"Resolved" email is a second real-path test, then a re-fire if needed.
+**Done-when "an alert can be shown" is met by the fired alert and its
+history; the email half is pending.**
 
 ## Part 3: Foundry tracing (third)
 
@@ -204,7 +270,6 @@ That fits the plan's "1–2 sessions" only if Part 2 stays small.
 
 ## Next step
 
-**Part 2, the alerts survey:** read the $90 budget (Cost Management →
-Budgets) and whether it has an action group, then pick the alert, cost it,
-and find the log line that marks a message moving to the poison queue from a
-real failure (the Sep 29 failure-path test makes one on purpose).
+**Part 3, tracing** (D-M14-3: now, on the classic API). First step: in the
+local venv, add `azure-monitor-opentelemetry` and see what it pulls in, then
+decide the pins before any code changes (Part 3, point 3).

@@ -90,13 +90,18 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M14 part 2, alerts: the survey first** (`m14-prep.md`, "Part
-2" and "Next step"). Replaced 2026-10-12 (afternoon). Read the $90 budget and
-whether it has an action group; then choose the alert and cost it. **Already
-known, don't re-check:** a storage *metric* alert can't watch the poison
-queue (`QueueMessageCount` has no per-queue dimension and is refreshed daily),
-so it has to be a log search alert in App Insights. Tracing (part 3) comes
-after (D-M14-1).
+**Next action: M14 part 3, tracing** (`m14-prep.md`, "Part 3" and "Next
+step"). Replaced 2026-10-12 (afternoon, after part 2). First step: in the
+local venv, add `azure-monitor-opentelemetry` and see what it pulls in; decide
+the pins before changing code. Then a regression upload. It's the last
+done-when item ("a trace can be shown").
+
+**M14 part 2 is DONE (2026-10-12). Settled, don't re-check:** the budget
+`Credits_low` emails Gerard's backup inbox with no action group (left as is,
+Gerard); the alert is a log search alert on the poison line, every 15 minutes,
+looking back 30; the address is in `IIP_ALERT_EMAIL` (persistent user
+variable); proven by a deliberate poisoned upload (poison line 19:18:39Z,
+email not received for the first fire (re-check pending)).
 
 **M14 part 1 is DONE (2026-10-12). Settled, don't re-check:** the federated
 credential on `-02` (main branch only); the workflow deploys on a push and by
@@ -188,10 +193,14 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Entra objects live in `entra.bicep`** (Graph Bicep types `1.0.0`: `owners`
   take plain IDs, and a federated credential's name is `parent/child`). They
   get no what-if, so they're verified by reading them back.
-- **The `main.bicep` register is 6 modify, 30 no change, 11 Unsupported, 2 to
-  ignore** (2026-10-12, after M14 part 1: the Sep 30 register's 6 / 24 / 11 /
-  2, plus the VNet and 2 NSGs (M12 skeleton), the federated credential and the
-  two basic-auth policies as No change). `authsettingsV2` reports No
+- **The `main.bicep` register is 6 modify, 32 no change, 11 Unsupported, 2 to
+  ignore** (2026-10-12, after M14 part 2: the Sep 30 register's 6 / 24 / 11 /
+  2, plus the VNet and 2 NSGs (M12 skeleton), the federated credential, the
+  two basic-auth policies, the action group and the alert rule as No change).
+  Confirmed by a what-if after the deploy.
+- **Every `main.bicep` what-if and deploy also needs `IIP_ALERT_EMAIL`**
+  (2026-10-12, D-M14-5). Set once as a persistent user variable; a new window
+  inherits it (unlike `IIP_HOME_IP`, which `set-home-ip.ps1` sets per window). `authsettingsV2` reports No
   change once deployed.
 - **Row 10 is the group, as designed** (2026-10-07). `iip-ca-test` is its
   only member, declared in `entra.bicep` with **replace** semantics (Gerard):
@@ -272,6 +281,19 @@ Harmless so far; the instance-id follow-up would tell them apart.
   `app.bicep`). They were on by ARM's default, which put a password in the
   publish profile. Deploys use Entra tokens only (OIDC workflow,
   `config-zip`).
+- **A stateful log alert at a 15-minute frequency resolves only after 45
+  quiet minutes** (3 periods; Learn, "Alerts and state"), counted from when
+  the line leaves the 30-minute look-back. While it's Fired, a new match sends
+  nothing. It emails again when it resolves.
+- **In PowerShell, `az rest` URLs must not contain `&`**: `az` is a `.cmd`, so
+  `cmd` splits the line there (and drops `--query` with it). Pass query
+  parameters with `--url-parameters` (2026-10-12).
+- **Action group email receivers need a one-time passcode** within 30 minutes
+  of saving the group (Learn); verified once per address, tenant-wide.
+- **A missing `topic` does NOT fail an upload**: the handler writes an error
+  result and returns, so there's no retry and no poison (by design). To force
+  the poison path: pause `process_upload`, upload, delete the blob, un-pause
+  (Sep 29's method; `m14-prep.md`, Part 2).
 - **Workflow files can't be written by the remote tools** (`.github/workflows`
   is protected). Claude leaves the file in the working folder; Gerard copies it
   into place.
@@ -600,7 +622,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 12, 2026 — M12 closed (evidence, teardown); M14 part 1 done (deploys over OIDC); the Sunday punch-list task rebuilt cloud-only
+### Session — October 12, 2026 — M12 closed (evidence, teardown); M14 parts 1-2 done (deploys over OIDC, alerts); the Sunday punch-list task rebuilt cloud-only
 
 **Attribution:** Claude diagnosed the scheduled task, drafted the new prompt,
 wrote the evidence script, the `dev.bicepparam` edit, every command and these
@@ -691,6 +713,19 @@ first deploy. The activity log shows `-02` (`3a770f3a-…`) calling
 - **Unchanged and not done:** the Sunday task's notification test (Todoist,
   Oct 19). The project instructions block was pasted by Gerard (Todoist
   closed).
+
+**M14 part 2, alerts, done the same afternoon** (`m14-prep.md`, "Part 2, the
+survey and the run"). The survey: the budget emails Gerard's backup inbox with
+no action group; there were no alert rules; the poison line is exact; all 14
+failed runs in 20 days were deliberate tests (7 × 2 tries). Gerard decided
+D-M14-4 (15-minute checks, $0.50/month) and D-M14-5 (address in an
+environment variable). Claude wrote `alerts.bicep`; the what-if was the
+register plus 2 creates, exactly.
+- **Claude's error:** the first proof upload left out `topic`, from a
+  misremembered reading of Sep 29. The handler treats that as the uploader's
+  mistake (error result, no retry), so nothing was parked. The redo used Sep
+  29's real method (pause, upload, delete the blob, un-pause): poison line at
+  19:18:39Z, alert email not received for the first fire (re-check pending).
 
 ### Session — October 10, 2026 — M12 stage 3 done: the storage firewall is on and the private paths are verified
 

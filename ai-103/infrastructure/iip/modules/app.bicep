@@ -341,6 +341,8 @@ resource systemTopic 'Microsoft.EventGrid/systemTopics@2025-02-15' = {
 }
 
 output functionAppName string = functionApp.name
+// M14 part 2: the alert rule's scope.
+output logAnalyticsId string = logAnalytics.id
 output functionAppId string = functionApp.id
 output hostStorageAccountName string = hostStorage.name
 output appInsightsName string = appInsights.name

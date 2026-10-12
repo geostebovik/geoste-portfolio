@@ -43,6 +43,18 @@ param signInIdentityName = 'id-iip-dev-wus-03'
 // refused by Entra.
 param githubOidcSubject = 'repo:geostebovik/geoste-portfolio:ref:refs/heads/main'
 
+// --- M14 part 2, alerts (2026-10-12) --------------------------------------------
+// CAF has 'ag' for action groups and no abbreviation for a log search alert
+// rule, so the rule's name is descriptive (Claude's choice).
+param actionGroupName = 'ag-iip-dev-wus-01'
+param poisonAlertName = 'alert-iip-poison-dev-wus-01'
+// The address is read from the environment, like the home IP (Gerard, Oct 12),
+// so it never enters this public repo. Set it once as a persistent USER
+// variable (new windows inherit it); m14-prep.md, "Part 2", has the command.
+// No default on purpose: without it, every what-if and deploy fails at compile
+// time instead of deploying an action group with no address.
+param alertEmail = readEnvironmentVariable('IIP_ALERT_EMAIL')
+
 // Gerard's Entra object ID, read from `az ad signed-in-user show` on 2026-09-21.
 param adminPrincipalId = 'fdc0b6bb-4bcd-4aee-b8d9-7f7c9156ed59'
 
