@@ -10,6 +10,7 @@ day** by M9, which is what moved this from a prediction to a tested description.
 
 ```powershell
 cd C:\Users\gerar\geoste-portfolio\ai-103\infrastructure\iip
+.\set-home-ip.ps1   # required at every stage since 2026-10-10 (README "M12")
 az bicep build --file main.bicep --stdout | Out-Null
 az deployment group what-if `
   --resource-group rg-iip-dev-wus-01 `
@@ -328,7 +329,7 @@ app's client ID as a parameter (an `entra.bicep` output) rather than referencing
 a Graph resource from `main.bicep`, which would drag an unsupported type into
 the registered what-if.
 
-## M12 — networking (written 2026-10-09 and 2026-10-10)
+## M12 — networking (written 2026-10-09 and 2026-10-10; torn down 2026-10-12)
 
 Claude wrote the Bicep to the design in `../../m12-prep.md`; Gerard made the
 decisions (D-M12-1 to -7) and runs every what-if and deploy.
@@ -485,6 +486,38 @@ and trusted services, the Function still reads and writes `uploads`, `results`
 and `upload-events`. It isn't the home IP and it isn't a trusted service, so
 it can only be using the private endpoints. Event Grid's delivery (trusted
 service, system-assigned identity) also works.
+
+**Teardown, DONE 2026-10-12 (`m12-teardown-20261012`, Succeeded).** Claude
+wrote the commands and read every result; Gerard ran them. The runbook and its
+predictions are in `../../m12-prep.md`, section 5. The built state was
+captured first, read-only, in `../../evidence/m12-networking/`.
+- **What-if #1** (stage 0, before the deletes): **7 modify, 26 no change, 11
+  Unsupported, 10 to ignore**, 0 diagnostics (12 to ignore predicted).
+  `stiipdevwus01` showed exactly bypass `AzureServices => None`,
+  defaultAction `Deny => Allow` and `- ipRules`; every other line was
+  registered. **Two misses in Claude's prediction:** the 2
+  `privateDnsZoneGroups` don't appear as Ignore (child resources of the
+  endpoints aren't listed once they leave the template), and the Function
+  showed **no** `- virtualNetworkSubnetId`. With the value `null`, Bicep
+  leaves the property out of the request, so **a stage-0 deploy does not
+  detach the Function.** The CLI detach is required.
+- **Deployed 17:16Z.** Then `az functionapp vnet-integration remove`, and
+  `virtualNetworkSubnetId` read back empty. Then the CLI deletes: both
+  endpoints (their NICs and zone groups went with them), both zone links, both
+  zones. Left in the group: `vnet-iip-dev-wus-01`, `nsg-func-iip-dev-wus-01`,
+  `nsg-pep-iip-dev-wus-01` (D-M12-7, $0).
+- **Regression upload, PASS.** `item4-m12-teardown-20261012.png` at 17:26:05Z
+  → result `20261012T172649Z.json` in 44 s, first delivery (dequeue count 1);
+  status ok, run completed, the same three tools, copy passed first time,
+  audit = item4's answer key (saved as
+  `scripts/results/20261012-172649_function_item4_m12_teardown.json`).
+- **What-if #2: 6 modify, 27 no change, 11 Unsupported, 2 to ignore**, exactly
+  as predicted: the Sep 30 register plus the 3 skeleton resources as No
+  change. **That is the register from now on.**
+- **To rebuild for a demo:** set `networkStage` back to 1, 2 or 3 and deploy
+  (stage 1 recreates the endpoints and zones, stage 2 puts the Function back
+  in the VNet, stage 3 the firewall). The teardown then needs the CLI steps
+  again, because the default deployment mode never deletes.
 
 ## Load-bearing lines — do not edit casually
 

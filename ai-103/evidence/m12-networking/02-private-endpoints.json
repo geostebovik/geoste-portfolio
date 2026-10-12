@@ -1,0 +1,22 @@
+[
+  {
+    "groupIds": [
+      "blob"
+    ],
+    "name": "pep-stiipdevwus01-blob",
+    "provisioningState": "Succeeded",
+    "status": "Approved",
+    "subnet": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/virtualNetworks/vnet-iip-dev-wus-01/subnets/snet-pep-iip-dev-wus-01",
+    "target": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Storage/storageAccounts/stiipdevwus01"
+  },
+  {
+    "groupIds": [
+      "queue"
+    ],
+    "name": "pep-stiipdevwus01-queue",
+    "provisioningState": "Succeeded",
+    "status": "Approved",
+    "subnet": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/virtualNetworks/vnet-iip-dev-wus-01/subnets/snet-pep-iip-dev-wus-01",
+    "target": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Storage/storageAccounts/stiipdevwus01"
+  }
+]

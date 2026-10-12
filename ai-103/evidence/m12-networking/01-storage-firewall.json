@@ -1,0 +1,6 @@
+{
+  "bypass": "AzureServices",
+  "defaultAction": "Deny",
+  "ipRuleCount": 1,
+  "publicNetworkAccess": "Enabled"
+}

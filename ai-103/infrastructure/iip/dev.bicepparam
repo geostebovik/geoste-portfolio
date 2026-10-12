@@ -69,9 +69,9 @@ param resultsAppClientId = '16565c24-5afd-4581-8430-c615ded0291a'
 // --- M12, networking (2026-10-09; m12-prep.md) ----------------------------------
 // The switch. 0 = skeleton only; 1 = + private endpoints and DNS zones (billed,
 // about $0.48 a day); 2 = + the Function in the VNet; 3 = + the storage
-// firewall. The evidence window runs at 3; the teardown sets 0 and deletes the
-// endpoints and zones by CLI.
-param networkStage = 3
+// firewall. The evidence window ran at 3 (2026-10-10 to 2026-10-12); the
+// teardown set 0 (2026-10-12) and deletes the endpoints and zones by CLI.
+param networkStage = 0
 
 // Stage 3's firewall rule (2026-10-10). The home IPv4 never goes into this
 // public repo (D-M12-4): run .\set-home-ip.ps1 in the terminal first. It

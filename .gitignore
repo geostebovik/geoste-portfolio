@@ -65,6 +65,7 @@ ai-103/scripts/results/*
 # 2026-10-10: M12 stage 3's upload test (the storage firewall on), cited in
 # infrastructure/iip/README.md and m12-prep.md.
 !ai-103/scripts/results/20261010-172611_function_item4_m12_stage3.json
+!ai-103/scripts/results/20261012-172649_function_item4_m12_teardown.json
 # 2026-10-10: the --file control for stage 3's --blob test (README "M12").
 !ai-103/scripts/results/20261010-105147_loan-agreement-promissory-note.json
 ai-103/scripts/m6_eval_input.jsonl

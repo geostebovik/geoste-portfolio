@@ -1,0 +1,24 @@
+{
+  "addressSpace": [
+    "10.20.0.0/24"
+  ],
+  "name": "vnet-iip-dev-wus-01",
+  "subnets": [
+    {
+      "defaultOutboundAccess": false,
+      "delegations": [
+        "Microsoft.App/environments"
+      ],
+      "name": "snet-func-iip-dev-wus-01",
+      "nsg": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/networkSecurityGroups/nsg-func-iip-dev-wus-01",
+      "prefix": "10.20.0.0/27"
+    },
+    {
+      "defaultOutboundAccess": false,
+      "delegations": [],
+      "name": "snet-pep-iip-dev-wus-01",
+      "nsg": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/networkSecurityGroups/nsg-pep-iip-dev-wus-01",
+      "prefix": "10.20.0.32/27"
+    }
+  ]
+}

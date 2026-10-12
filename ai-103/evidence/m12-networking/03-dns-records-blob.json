@@ -1,0 +1,9 @@
+[
+  {
+    "fqdn": "stiipdevwus01.privatelink.blob.core.windows.net.",
+    "ips": [
+      "10.20.0.36"
+    ],
+    "name": "stiipdevwus01"
+  }
+]

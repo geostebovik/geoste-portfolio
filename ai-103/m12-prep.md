@@ -165,9 +165,11 @@ a condition to false doesn't delete anything. So:
 
 ### 5. Teardown runbook and prediction (Claude, written 2026-10-10, before the run)
 
-*(Not yet run. Written at the end of the Oct 10 session so the teardown
-session starts from commands, not research. "Predicted" lines are Claude's
-reading of the templates, to be checked against the real what-if.)*
+*(Written at the end of the Oct 10 session so the teardown session starts
+from commands, not research. "Predicted" lines are Claude's reading of the
+templates, to be checked against the real what-if.)* **Run 2026-10-12:** see
+"The run, 2026-10-12" at the end of this section. Two predictions were wrong,
+and both are marked where they stand.
 
 **What stage 0 changes, read from the templates:**
 - `storage.bicep`: `networkAcls` returns to the M8 values (bypass None, Allow,
@@ -179,11 +181,13 @@ reading of the templates, to be checked against the real what-if.)*
   2 zones, 2 zone links) stay in Azure, because the default mode never deletes.
 
 **Predicted first what-if (stage 0, before the deletes): 7 modify, 26 no
-change, 11 Unsupported, 12 to ignore.**
+change, 11 Unsupported, 12 to ignore.** *(Actual: 10 to ignore; the rest as
+predicted. See the run.)*
 - `stiipdevwus01` Modify: bypass `AzureServices => None`, defaultAction
   `Deny => Allow`, `- ipRules` (the home entry).
 - `func-iip-dev-wus-01`: the 4 registered lines, plus
-  `- properties.virtualNetworkSubnetId`.
+  `- properties.virtualNetworkSubnetId`. *(Actual: no such line, so the deploy
+  leaves the Function in the VNet. See the run.)*
 - The 8 private-link resources move to **Ignore** (in Azure, not in the
   template), joining the 2 NICs and the 2 App Insights items.
 - Everything else as the register.
@@ -197,7 +201,7 @@ no change, 11 Unsupported, 2 to ignore.** That's the Sep 30 register (6 / 24 /
    ```powershell
    cd C:\Users\gerar\geoste-portfolio\ai-103\infrastructure\iip
    .\set-home-ip.ps1
-   $d = "C:\Users\gerar\OneDrive\Documents\Data\Claude\m12"
+   $d = "C:\Users\gerar\Documents\Data\Claude\m12"   # not OneDrive: off on the tower (Gerard, 2026-10-12)
    az bicep build --file main.bicep --stdout | Out-Null
    az deployment group what-if `
      --resource-group rg-iip-dev-wus-01 `
@@ -226,6 +230,22 @@ no change, 11 Unsupported, 2 to ignore.** That's the Sep 30 register (6 / 24 /
 4. A regression upload (`item4-m12-teardown-<date>.png`, as on Oct 10), then
    the final what-if to `whatif-m12-teardown-2.json` and the register check.
 
+**The run, 2026-10-12** (`m12-teardown-20261012`; Gerard ran every command,
+Claude read every result; details in `infrastructure/iip/README.md`, "M12"):
+- The built state was captured first, read-only: `evidence/m12-networking/`.
+- What-if #1: **7 modify, 26 no change, 11 Unsupported, 10 to ignore.** Two
+  misses in the prediction above (Claude's): the 2 zone groups never appear
+  as Ignore, because child resources of the endpoints aren't listed once they
+  leave the template; and the Function showed **no**
+  `- virtualNetworkSubnetId`. With `null`, the property is left out of the
+  request, so **the deploy doesn't detach the Function: step 2 is required.**
+  That also made the order safe: the firewall opened while the Function was
+  still in the VNet.
+- Steps 2-3 as written; only the skeleton remains (D-M12-7).
+- Regression upload: result in 44 s, first delivery, item4's answer key.
+- What-if #2: **6 modify, 27 no change, 11 Unsupported, 2 to ignore**, exactly
+  as predicted. That is the register now.
+
 ## M12 step 3, the build: progress
 
 Claude writes the Bicep and walks Gerard through it; Gerard runs every
@@ -237,6 +257,7 @@ what-if, deploy and test. Details and the what-if register:
 | 1 | **DONE 2026-10-09** (`m12-stage1-20261009`) | What-if exactly as predicted (11 to create). Both endpoints Approved; zones hold `stiipdevwus01 → 10.20.0.36` (blob) and `→ 10.20.0.37` (queue); the tower still resolves the public `57.150.229.161`. **The evidence window and its cost started here.** |
 | 2 | **DONE 2026-10-09** (`m12-stage2-20261009`) | First what-if found 2 writable properties the template had dropped (now declared) and 2 noise lines (registered). Upload test: a full, correct result in 42 s. **The open NAT question is closed: no NAT gateway is needed.** |
 | 3 | **DONE 2026-10-10** (`m12-stage3-20261010`) | What-if exactly as predicted (one new Modify on `stiipdevwus01`; 11 modify, 30 no change). (a) upload: full, correct result in 46 s; (b) results page on the phone: works; (c) Cloud Shell list: refused by the firewall; (d) M3 `--blob`: fails, `ContentSourceNotAccessible`, as predicted (`--file` works). **The private paths are verified.** |
+| Teardown | **DONE 2026-10-12** (`m12-teardown-20261012`) | Evidence captured first (`evidence/m12-networking/`). What-if #1 7 / 26 / 11 / 10 (12 Ignore predicted; see section 5); Function detached by CLI; endpoints, zone links and zones deleted; skeleton kept. Regression upload: correct result in 44 s. Final what-if 6 / 27 / 11 / 2, exactly as predicted. **M12 is complete** (Gerard ticked it, 2026-10-12). |
 
 **Stage 3, what Claude writes first:** `storage.bicep` gets the firewall values
 behind `networkStage >= 3` (stages 0-2 keep today's exact values, so the

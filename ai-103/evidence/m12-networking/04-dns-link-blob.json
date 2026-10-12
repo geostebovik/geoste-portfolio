@@ -1,0 +1,8 @@
+[
+  {
+    "name": "link-vnet-iip-dev-wus-01",
+    "registrationEnabled": false,
+    "state": "Completed",
+    "vnet": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/virtualNetworks/vnet-iip-dev-wus-01"
+  }
+]

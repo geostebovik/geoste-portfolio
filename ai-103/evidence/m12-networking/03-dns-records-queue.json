@@ -1,0 +1,9 @@
+[
+  {
+    "fqdn": "stiipdevwus01.privatelink.queue.core.windows.net.",
+    "ips": [
+      "10.20.0.37"
+    ],
+    "name": "stiipdevwus01"
+  }
+]

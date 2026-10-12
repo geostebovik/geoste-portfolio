@@ -1,0 +1,12 @@
+{
+  "name": "func-iip-dev-wus-01",
+  "outboundVnetRouting": {
+    "allTraffic": false,
+    "applicationTraffic": false,
+    "backupRestoreTraffic": false,
+    "contentShareTraffic": false,
+    "imagePullTraffic": false,
+    "managedIdentityTraffic": false
+  },
+  "virtualNetworkSubnetId": "/subscriptions/<subscription-id>/resourceGroups/rg-iip-dev-wus-01/providers/Microsoft.Network/virtualNetworks/vnet-iip-dev-wus-01/subnets/snet-func-iip-dev-wus-01"
+}

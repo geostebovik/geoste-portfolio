@@ -90,38 +90,31 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M12's teardown, by 2026-10-16** (Gerard runs it; Claude
-writes the steps). Replaced 2026-10-10. *(Updated the same day: the
-agent-isolation write-up is done, so only the evidence and the teardown
-remain.)* **Stage 3 is deployed and tested** (Oct 10
-session entry; README "M12"); `networkStage` is **3**, and both of M12's
-done-when clauses are met (the app works end to end with the private paths
-verified; the cost was estimated before the build).
+**Next action: M14 prep** (Gerard's choice, 2026-10-12). Replaced
+2026-10-12. M14 is Foundry tracing into Application Insights, alerts and an
+action group (reusing the $90 budget alert), and GitHub Actions deploys of the
+Function over OIDC with `id-iip-dev-wus-02` (`phase2-orientation.md`,
+Milestones table). It has no deadline and doesn't depend on M13. Start it the
+way M11 and M12 started: a survey and a cost/design note (`m14-prep.md`,
+Claude drafts; Gerard decides) before anything is built.
 
-**Already done and settled, so don't re-check:** stage 3's what-if matched
-exactly and is the register now (**11 modify, 30 no change, 11 Unsupported, 4
-to ignore**); tests (a) upload, (b) results page, (c) Cloud Shell refused and
-(d) `--blob` fails with `ContentSourceNotAccessible` while `--file` works.
+**M12 is COMPLETE (2026-10-12; Gerard ticked it). Already done and settled,
+so don't re-check:**
+- Evidence of the built state: `evidence/m12-networking/` (8 read-only JSON
+  captures; home IP counted, never listed; subscription ID replaced).
+- Teardown `m12-teardown-20261012`: Function detached (subnet ID read back
+  empty), both endpoints, both zone links and both zones deleted; only
+  `vnet-iip-dev-wus-01` and the 2 NSGs remain (D-M12-7).
+- Regression upload: correct result in 44 s, first delivery.
+- Final what-if: **6 modify, 27 no change, 11 Unsupported, 2 to ignore**,
+  the register now. `networkStage` is **0**; the firewall is back to the M8
+  values (Allow, bypass None, no IP rule).
 
-**Remaining, in order:**
-1. ~~**Agent isolation, written up as designed-not-deployed, with its
-   cost.**~~ **Done 2026-10-10** (`m12-prep.md`, "Agent isolation"): option B,
-   the full network-secured setup, is about $98/month or $3.25/day; Gerard
-   decided to build it inside the classic-API migration (D-M12-8), and option
-   A stays design-only (D-M12-9).
-2. **Any evidence for the write-up** while stage 3 is live. Portal screenshots
-   show the home IP: redact it, or leave them out of the public repo.
-3. **Teardown by 2026-10-16** (Todoist). **Commands and the predicted
-   what-ifs are written:** `m12-prep.md`, "Teardown runbook and prediction"
-   (Oct 10). In short:
-   `networkStage = 0`, what-if, deploy; detach the Function from the VNet by
-   CLI; delete the endpoints, then the zone links, then the zones; keep the
-   VNet, subnets and NSGs; a regression upload.
-
-**Every what-if and deploy of `main.bicep` now needs `IIP_HOME_IP`, teardown
-included:** run `.\set-home-ip.ps1` once in each new PowerShell window
-(Gerard's choice, Oct 10). **If uploads start getting 403s**, the home
-address has probably changed: run the script, then a what-if and a deploy.
+**Every what-if and deploy of `main.bicep` still needs `IIP_HOME_IP`, at
+every stage:** run `.\set-home-ip.ps1` once in each new PowerShell window
+(Gerard's choice, Oct 10). At stage 0 the address isn't used by any rule, so
+a changed home IP no longer causes 403s; it matters again only if stage 3 is
+rebuilt.
 
 **M13 is waiting only on C9, the rollback, planned for the week of
 2026-10-26** (Gerard, Oct 9; Todoist). T1-T6 passed with CA001 On and the
@@ -140,14 +133,15 @@ P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
   `iip-ca-test` as its member, the results page, the custom role IIP Queue
   Trigger (dev), soft delete 7 days, the P2 trial dates; **new Oct 8:**
   security defaults off, the baseline CA900-CA903, `bg-admin-01`; **new Oct
-  10:** the M12 network resources (VNet, 2 subnets, 2 NSGs, 2 endpoints, 2
-  private DNS zones, until the teardown), the firewall on `stiipdevwus01`, and
-  `set-home-ip.ps1` before any `main.bicep` what-if).
+  10, updated Oct 12:** the M12 skeleton that stays (VNet, 2 subnets, 2
+  NSGs; the endpoints and private DNS zones were deleted Oct 12, and the
+  firewall on `stiipdevwus01` is open again), and `set-home-ip.ps1` before any
+  `main.bicep` what-if).
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
-- ~~M12 (networking) has no clock; it starts while M13 waits on C9.~~ M12 is
-  the current next action (Oct 10).
+- ~~M12 (networking) has no clock; it starts while M13 waits on C9.~~ ~~M12 is
+  the current next action (Oct 10).~~ M12 is complete (Oct 12).
 - Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
   lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
   service-principal sections once the beta report resumes.
@@ -188,8 +182,10 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Entra objects live in `entra.bicep`** (Graph Bicep types `1.0.0`: `owners`
   take plain IDs, and a federated credential's name is `parent/child`). They
   get no what-if, so they're verified by reading them back.
-- **The `main.bicep` register is 6 modify, 24 no change, 11 Unsupported, 2 to
-  ignore** (Sep 30). `authsettingsV2` reports No change once deployed.
+- **The `main.bicep` register is 6 modify, 27 no change, 11 Unsupported, 2 to
+  ignore** (2026-10-12, after the M12 teardown: the Sep 30 register's 6 / 24 /
+  11 / 2 plus the VNet and 2 NSGs as No change). `authsettingsV2` reports No
+  change once deployed.
 - **Row 10 is the group, as designed** (2026-10-07). `iip-ca-test` is its
   only member, declared in `entra.bicep` with **replace** semantics (Gerard):
   the template is the whole member list.
@@ -256,7 +252,18 @@ Harmless so far; the instance-id follow-up would tell them apart.
   Bicep's type checking.
 - **Device file writes: always from a fresh staging name, then read back.**
   On Oct 9, re-using a staging path left STATUS.md with old content twice,
-  while the write reported success; the read-back caught both.
+  while the write reported success; the read-back caught both. **Oct 12, a
+  second way to fail:** an edit and the copy to the tower sent at the same
+  time, so the tower got the pre-edit file. Never edit and copy in parallel.
+- **A stage-0 deploy does not detach the Function from the VNet**
+  (2026-10-12): `virtualNetworkSubnetId: null` leaves the property out of the
+  request. Detach by CLI (`m12-prep.md`, section 5).
+- **Flex Consumption's `outboundVnetRouting` reads all `false`, and that's
+  expected** (Microsoft Learn: on Flex, all traffic already goes through the
+  VNet). Not a misconfiguration (`evidence/m12-networking/README.md`).
+- **The Sunday punch-list task is cloud-only** (2026-10-12, Gerard). It needs
+  no computer: it clones the repo and reads Todoist. Don't tie it to a device
+  again.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -574,6 +581,76 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 12, 2026 — M12 closed: evidence captured, teardown done; the Sunday punch-list task rebuilt cloud-only
+
+**Attribution:** Claude diagnosed the scheduled task, drafted the new prompt,
+wrote the evidence script, the `dev.bicepparam` edit, every command and these
+doc edits, and read every result. Gerard made the decisions marked below and
+ran every Azure command. Times are Phoenix (UTC-7) unless marked Z.
+
+**The Sunday punch-list task, rebuilt.** It hadn't run since Oct 4 ("The
+computer this routine runs on isn't connected"), even enabled and run by hand.
+**Gerard's diagnosis was right:** the task was approved on serenity and was
+tied to it; the folder path is the same on the tower, but it's a different
+computer. **Correction:** the Oct 1 entry's "no device binding on record"
+(Claude) was wrong. Recreated as **IIP Sunday punch list, cloud-only**
+(Gerard's choice: it needs only GitHub and Todoist, so it runs whatever state
+the tower is in), Sundays 16:56, email and push on. Prompt changes, each
+approved by Gerard:
+1. Read the repo with `git clone`; the cache-busted raw URLs are only the
+   fallback. A clone is the exact pushed commit, so the Sep 14 stale-cache
+   failure can't recur.
+2. Core tasks come from "Current next action" and the Road to done table,
+   checked against the Milestones table. The marker can sit on a milestone
+   that is waiting (today M13, idle until the week of Oct 26), and the old
+   wording would have planned a week of M13 tasks.
+3. Any task due in the next 7 days is a core item.
+4. The closing message reaches Gerard by email and push.
+5. **A soft freshness gate on a clone read** (Gerard): if Todoist is newer
+   than the commit, it still writes the week but doesn't close or reword
+   tasks added after the commit. The hard stop stays for the fallback read.
+   Claude's first proposal (compare against the commit date) wouldn't have
+   stopped the false stops from tasks added on the phone; Claude corrected it
+   before anything was built.
+
+The old task is **disabled, not deleted** (deleting removes its run history).
+Delete it once the new one has a clean run. The new one was fired by hand today
+for the Week of 2026-10-12. The Friday check-in isn't in the scheduled-task
+list (Sep 21 entry: "doesn't exist"; Oct 1: "paused"); left alone.
+
+**M12 evidence, before the teardown (Gerard: "take a few now").** Claude chose
+read-only CLI captures over portal screenshots: text, nothing to redact, and
+committable like the M13 export. 8 JSON files in `evidence/m12-networking/`;
+the home IP is counted, never listed, and the subscription ID is replaced
+(Gerard). **Found:** the Function's `outboundVnetRouting` reads all `false`;
+Microsoft Learn says Flex routes all traffic through the VNet regardless. It
+also makes the Oct 9 "no NAT gateway needed" result more surprising: measured,
+mechanism unknown, and the README says so.
+
+**Teardown** (`m12-prep.md`, "The run, 2026-10-12"; README "M12"). Gerard ran
+the errand between the evidence and the teardown, so the deploy wasn't split
+by a break.
+- What-if #1: **7 / 26 / 11 / 10** against a predicted 12 to ignore (the zone
+  groups aren't listed). The Function showed no `- virtualNetworkSubnetId`, so
+  the deploy left it in the VNet and the CLI detach was required. That made
+  the order safe as well.
+- Deployed 17:16Z; detached; the 6 deletes; only the skeleton is left.
+- Regression upload: 17:26:05Z → 17:26:49Z (44 s), item4's answer key.
+- What-if #2: **6 / 27 / 11 / 2**, exactly as predicted. The register now.
+- **M12 ticked** in `phase2-orientation.md` (Gerard). The marker stays on M13.
+  **Next action: M14 prep** (Gerard).
+
+**Found:** OneDrive is off on the tower (Gerard; local backups go to D: and
+Google Drive once the project is at a stable point, already in Todoist). The
+runbook's `$d` pointed at `OneDrive\Documents\Data\Claude\m12`; it now points
+at `C:\Users\gerar\Documents\Data\Claude\m12`. Older entries naming OneDrive
+paths are history and stay as written.
+
+**Claude's error, caught by its own read-back:** the evidence script's last
+edit and its copy to the tower went out at the same time, so the tower got the
+pre-edit file. It was re-copied from a fresh staging name and confirmed by
+hash. The lesson is in "Settled".
 
 ### Session — October 10, 2026 — M12 stage 3 done: the storage firewall is on and the private paths are verified
 
