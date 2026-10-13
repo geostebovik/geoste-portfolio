@@ -195,6 +195,11 @@ def process(body: str, dequeue_count: int | None = None) -> dict:
 
         _add_scripts_to_path()
         import m7_orchestrator as orch  # lazy on purpose -- see module docstring
+        import tracing
+        # Names each tool call in the trace (M14 part 3, D-M14-7). Must run
+        # before build_toolset(), whose schema check then proves the wrapping
+        # left the agent's tools unchanged. A no-op on the laptop.
+        tracing.instrument_tools(orch)
 
         provenance = orch.run_provenance(script="function/upload_handler.py")
         provenance["host"] = {

@@ -34,6 +34,18 @@ pillow==12.3.0
 requests==2.34.2
 python-dotenv==1.2.2
 
+# --- direct: tracing (M14 part 3, D-M14-6, the lean set) ---
+# Resolved 2026-10-12 (pip --dry-run) and installed 2026-10-13 against every
+# pin in this file on CPython 3.14: 6 new packages, no existing pin moved.
+# psutil is the exporter's own requirement. Several are pre-release (b), which
+# is normal for these packages.
+azure-monitor-opentelemetry-exporter==1.0.0b58
+azure-core-tracing-opentelemetry==1.0.0b13
+opentelemetry-api==1.45.1
+opentelemetry-sdk==1.45.1
+opentelemetry-semantic-conventions==0.66b1
+psutil==7.2.2
+
 # --- transitive, pinned to the measured venv ---
 aiohappyeyeballs==2.7.1
 aiohttp==3.14.3

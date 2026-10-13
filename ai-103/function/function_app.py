@@ -1,7 +1,8 @@
 """
 function_app.py -- M11's Function entry point (Python v2 programming model).
 
-Written by Claude, 2026-09-24; results page added 2026-09-30. A thin adapter:
+Written by Claude, 2026-09-24; results page added 2026-09-30; tracing
+(M14 part 3, see tracing.py) added 2026-10-13. A thin adapter:
 the decisions live in upload_handler.py and results_page.py, which run without
 the Functions host (see local_run.py).
 
@@ -29,13 +30,28 @@ app = func.FunctionApp()
 
 @app.queue_trigger(arg_name="msg", queue_name="upload-events",
                    connection="UploadEvents")
-def process_upload(msg: func.QueueMessage) -> None:
+def process_upload(msg: func.QueueMessage, context: func.Context) -> None:
     # Imported here, not at the top: keeps the orchestrator's ~4.6 s of imports
     # (probe 2) out of the host's 30-second start window.
     from upload_handler import process
+    import tracing
 
-    summary = process(msg.get_body().decode("utf-8"),
-                      dequeue_count=msg.dequeue_count)
+    # M14 part 3: one span per try, parented to the host's request so the whole
+    # upload shows as one end-to-end transaction. A no-op without App Insights
+    # (the laptop) or with IIP_TRACING=off. See tracing.py.
+    trace_context = context.trace_context
+    with tracing.invocation_span(
+        "iip.process_upload",
+        trace_parent=trace_context.trace_parent if trace_context else None,
+        trace_state=trace_context.trace_state if trace_context else None,
+        attributes={
+            "faas.invocation_id": context.invocation_id,
+            "messaging.message.id": msg.id,
+            "iip.dequeue_count": msg.dequeue_count or 0,
+        },
+    ):
+        summary = process(msg.get_body().decode("utf-8"),
+                          dequeue_count=msg.dequeue_count)
     logging.info("process_upload: %s", json.dumps(summary, default=str))
 
 
