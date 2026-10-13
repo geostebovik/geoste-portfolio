@@ -1095,10 +1095,11 @@
                   propagate automatically to all resources via <code>inherit-tag-*</code> policy assignments. Manual
                   tagging is inconsistent and breaks. Policy-enforced inheritance is the only reliable approach at
                   scale.</li>
-                <li><strong>Policy definition IDs — never hardcode</strong> — Policy definition GUIDs change between CLI
-                  versions. Always query:
-                  <code>az policy definition list --query "[?displayName=='Allowed locations'].name" -o tsv</code>. One
-                  character difference caused significant debugging time.
+                <li><strong>Policy definition IDs — look them up, then pin them</strong> — Built-in definition IDs are
+                  stable: a definition keeps the same ID across versions, while its display name and other strings can
+                  change in a patch release (Microsoft Learn). So find the ID once by display name with
+                  <code>az policy definition list --query "[?displayName=='Allowed locations'].name" -o tsv</code>, then
+                  use the ID, never the name, in code. One character difference caused significant debugging time.
                 </li>
                 <li><strong>Forecast alert over actual spend alert</strong> — A 100% actual spend alert tells you money
                   has already been spent. A 100% forecast alert fires before you hit the limit and leaves time to react.
