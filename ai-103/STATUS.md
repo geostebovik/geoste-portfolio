@@ -66,18 +66,21 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 10, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 13, 2026. Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
 and the policies are exported; only the rollback (C9) remains, planned for the
-week of Oct 26. M12 runs alongside it: all three stages are built and tested
-(Oct 9-10), and its done-when is met; the agent-isolation write-up and the
-teardown (by Oct 16) remain. For
+week of Oct 26. M12 is complete (Oct 12). M14's parts 1 and 2 are done
+(Oct 12; the alert-email fault closed Oct 13), and part 3, tracing, is next. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
 2 write-up.
+*(Updated 2026-10-13, Claude: the Oct 10 text said M12's agent-isolation
+write-up and its teardown "(by Oct 16)" remained. Both were done by Oct 12,
+and the stale date had also been carried into Claude's suggested session
+prompt.)*
 *(Corrected 2026-09-30: this paragraph also listed "the two stale
 ostebovik.net lines" for that push. Both were fixed on Sep 21 in `5fccd4a`,
 per the Todoist write-up task's Sep 28 correction.)*
@@ -102,11 +105,13 @@ workflow; regression upload; show the trace. It's the last done-when item
 Gerard); the alert is a log search alert on the poison line, every 15 minutes,
 looking back 30; the address is in `IIP_ALERT_EMAIL` (persistent user
 variable); proven by deliberate poisoned uploads that fired it (19:22:56Z and
-20:37:57Z). **Open item:** 3 real notifications (two fires and a resolve)
-reached the action group but no email arrived, while a portal test email
-did. Learn's checklist is ruled out, item by item (`m14-prep.md`, Part 2).
-Next: the ARM-role receiver cross-check (Todoist). **Don't redo:** the
-mailbox searches, the filter check, the receiver status, or the OTP.
+20:37:57Z). **The alert-email fault is closed (2026-10-13):** the
+troubleshooter showed the first 3 real notifications as "empty after
+resolution", so no email was ever sent. After the action group was re-saved
+(Oct 12, 14:27), a Resolved email (Oct 12) and a Fired email (Oct 13, 10:07)
+both arrived (`m14-prep.md`, Part 2, "the delivery fault"). **Don't redo:**
+the mailbox searches, the filter check, the receiver status, the OTP, or the
+ARM-role cross-check (dropped, no longer needed).
 
 **M14 part 1 is DONE (2026-10-12). Settled, don't re-check:** the federated
 credential on `-02` (main branch only); the workflow deploys on a push and by
@@ -203,6 +208,10 @@ Harmless so far; the instance-id follow-up would tell them apart.
   2, plus the VNet and 2 NSGs (M12 skeleton), the federated credential, the
   two basic-auth policies, the action group and the alert rule as No change).
   Confirmed by a what-if after the deploy.
+- **Real alert emails are delivered** (2026-10-13: a deliberate re-fire, then
+  the Fired email at 10:07). The portal's action-group Test is **not** proof of
+  that: it skips the resolution step that failed on Oct 12. Prove a new
+  action group with one real fire.
 - **Every `main.bicep` what-if and deploy also needs `IIP_ALERT_EMAIL`**
   (2026-10-12, D-M14-5). Set once as a persistent user variable; a new window
   inherits it (unlike `IIP_HOME_IP`, which `set-home-ip.ps1` sets per window). `authsettingsV2` reports No
@@ -626,6 +635,50 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 13, 2026 — M14 alert-email fault closed: a real Fired email delivered
+
+**Attribution:** Claude read the evidence, wrote every command, the log query
+and test image (both kept outside the repo, in `D:\claude\iip`) and these
+doc edits. Gerard ran every Azure command and checked the inbox and the alert
+history. Times are Phoenix (UTC-7) unless marked Z.
+
+**Overnight:** no Fired email arrived, and the alert history showed nothing
+after 13:37 on Oct 12 (Gerard).
+
+**Found (Claude, from a log query Gerard ran): Oct 12's last re-fire never
+poisoned anything, so the alert had nothing to fire on.** The cause was two of
+Claude's errors:
+1. The test file was a `.txt`, which the handler skips (Succeeded,
+   22:05:46Z).
+2. The pause hadn't reached the running host: a host started at 22:05:45Z and
+   took the message 1 second later.
+Both queues confirmed it: `upload-events` was empty, and the poison queue held
+only Oct 12's two test messages.
+
+**Re-fire, done right** (`m14-prep.md`, Part 2, "the method now"): paused,
+waited 5 minutes, uploaded a 1-pixel `.png`, then peeked at 09:53 and 09:56
+(still there, `dequeueCount` 0 both times). Deleted the blob, un-paused at
+09:57. The message was poisoned at 16:59:35Z, the alert **fired at 10:07**,
+and the **Fired email arrived by 10:09**.
+
+**Closed:** the Todoist alert-email item. 0 of 3 notifications were delivered
+before the action group was re-saved, and 2 of 2 after. The re-save can't be
+separated from the time that passed (`m14-prep.md`). The ARM-role cross-check
+was dropped.
+
+**Also corrected:** the status paragraph's "teardown (by Oct 16)". The
+teardown was done on Oct 12, and Claude had carried the date into its
+suggested session prompt.
+
+**Lesson:** pass KQL to the CLI from a file
+(`az monitor log-analytics query -w $ws --analytics-query "@D:\path\q.kql"`).
+`az` on Windows runs through cmd, which breaks on the parentheses in a query
+typed inline. This worked first time today.
+
+**Left in place:** 3 test messages in `upload-events-poison` (Oct 12 19:18Z
+and 20:34Z, Oct 13 16:59Z; they expire with the queue's default TTL), and the
+soft-deleted blob `uploads/m14-alert-refire-20261013.png` (7 days).
 
 ### Session — October 12, 2026 — M12 closed (evidence, teardown); M14 parts 1-2 done (deploys over OIDC, alerts); the Sunday punch-list task rebuilt cloud-only
 

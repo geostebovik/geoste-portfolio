@@ -240,10 +240,60 @@ ruled out: verification still settling (80 minutes later at the resolve).
 
 **So: 3 real notifications handed to the action group, 0 delivered; 1 test
 delivered.** The cause is past what Learn documents. **Done-when "an alert
-can be shown" is met** by the fired alerts and their history. **Open item
-(Todoist):** a cross-check with a second receiver of type "Email Azure
-Resource Manager role" (Owner), which needs no OTP and takes a different
-delivery path, plus one re-fire. About 20 minutes.
+can be shown" is met** by the fired alerts and their history. *(The open
+item this paragraph named, an ARM-role receiver cross-check, was dropped on
+2026-10-13: the fault was found and fixed first. See the next section.)*
+
+### Part 2, the delivery fault: found and closed (2026-10-12 to -13)
+
+**Cause, from the action group's troubleshooter** (Gerard ran "Diagnose and
+solve problems", 14:16 Phoenix, Oct 12): all 3 real notifications failed
+with *"The group receiver AZURENOTIFICATIONGROUP:…/ag-iip-dev-wus-01 was
+found to be empty after resolution"*. **No email was ever sent**, so the
+mailbox checks above couldn't have found anything. The portal **Test** sends
+to the receivers directly, without that resolution step, which is why it
+arrived. Learn has no page for this message.
+
+**Ruled out:** an unverified receiver. The portal shows `owner-email` as
+"Email verification: Verified" (14:21).
+
+**The fix: re-saving the action group** (14:27; `az monitor action-group
+update --set enabled=true`; no property changed, so no Bicep drift).
+Afterwards:
+- **21:39Z, Oct 12:** the Resolved email for the 20:37:57Z alert arrived.
+  This was the first real alert email ever delivered.
+- **Oct 13, a deliberate re-fire:** the message reached `upload-events-poison`
+  at 16:59:35Z, the alert fired at 17:07Z (10:07 Phoenix), and the email
+  "Fired:Sev2 Azure Monitor Alert IIP: …" arrived by 10:09 Phoenix.
+
+**0 of 3 delivered before the re-save, 2 of 2 after.** What this doesn't
+prove: the re-save can't be separated from the time that passed, because
+background propagation would look the same. Separating them would mean
+breaking a working group on purpose. That isn't worth doing; the action
+below is the same either way.
+
+**Oct 12's first re-fire didn't fire, and that wasn't the alert's fault**
+(Claude's errors, both found in AppTraces on Oct 13):
+1. The upload was `m14-alert-refire-20261012.txt`. The handler skips anything
+   that isn't `.png`/`.jpg`/`.jpeg` and returns normally, so nothing was
+   retried and nothing was poisoned (`"skipped", "not an image"`, Succeeded,
+   22:05:46Z).
+2. The pause hadn't reached the running host. A host started at 22:05:45Z
+   took the message 1 second later, and its queue listener only stopped at
+   22:07:23Z. Seeing the setting in `appsettings list` proves it was saved,
+   not that the host is obeying it.
+
+**The method now** (Oct 13): pause; wait 5 minutes; upload a real `.png`
+(`m14-alert-refire-20261013.png`); **peek twice, at least 2 minutes apart**,
+and delete the blob only if the message is still there at `dequeueCount` 0
+(09:53 and 09:56 Phoenix, both 0). Un-paused at 09:57; the message was
+poisoned at 16:59:35Z, about 2.5 minutes later. The host checks the queue at
+least once a minute, so a message that sits untouched for 2 minutes proves
+the pause is holding.
+
+**Lesson for any future action group:** the portal's Test doesn't prove that
+real alerts are delivered. Prove it with one real fire. If the troubleshooter
+reports "empty after resolution", re-save the group and fire again.
 
 ## Part 3: Foundry tracing (third)
 
@@ -310,4 +360,5 @@ in `function/requirements.txt`, then Claude writes the tracing setup (exporter
 with the Function's managed identity, the Azure SDK bridge, trace context from
 the invocation, and no duplicate logs). Deploy goes through the workflow (a
 push to `function/`), then a regression upload, then show the trace in App
-Insights. **Separately, the email open item (Todoist).**
+Insights. *(The email open item is closed, 2026-10-13: see Part 2, "the
+delivery fault".)*
