@@ -94,11 +94,12 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: draft the Phase 2 write-up** (`phase2-orientation.md`, "After
-M14"; Gerard, 2026-10-13). Replaced 2026-10-13. M13's rollback (the week of
-Oct 26) adds only a closing line, so drafting can start now. The M7 write-up
-(`m7-writeup-draft.md`) waits on outside readers, and the two go out in one
-joint push. The structure isn't decided yet: settle it with Gerard at the start.
+**Next action: Gerard's edit pass on `phase2-writeup-draft.md`** (first draft
+written by Claude, 2026-10-13). Replaced 2026-10-13. **Already decided, don't
+re-ask:** the shape is case studies, "symptom -> evidence -> root cause ->
+fix" (six of them), at about the M7 page's length (Gerard). M13's rollback
+(the week of Oct 26) adds one closing line, marked in the draft. After the
+edit pass come outside readers, then the joint push with the M7 write-up.
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -716,6 +717,15 @@ the build and the run").
 
 **M14:** all three done-when items are shown, and **Gerard ticks it**. The
 marker stays on M13. **Next action: draft the Phase 2 write-up** (Gerard).
+
+**Phase 2 write-up, first draft** (`phase2-writeup-draft.md`, Claude). Gerard
+chose the shape (case studies) and the length (like M7's, about 4,700 words).
+Claude drafted it from the record, then checked every figure, date and
+attribution against its source. That pass fixed 14 lines before the draft
+was written to the repo. The worst of them overclaimed: "each milestone was
+shown" (M13 isn't finished), "all of it in Bicep" (the CA policies were built
+by hand) and "M10's result didn't change" (one item scored lower, traced to
+variance).
 
 **Gerard asked what a span is.** Claude explained it as a stopwatch entry with
 a parent, nested like an outline, using the run's own rows. Worth a glossary
