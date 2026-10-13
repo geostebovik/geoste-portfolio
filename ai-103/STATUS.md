@@ -71,8 +71,9 @@ passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
 and the policies are exported; only the rollback (C9) remains, planned for the
-week of Oct 26. M12 is complete (Oct 12). M14's parts 1 and 2 are done
-(Oct 12; the alert-email fault closed Oct 13), and part 3, tracing, is next. For
+week of Oct 26. M12 is complete (Oct 12). M14's three done-when items are all
+shown (deploys and alerts on Oct 12, tracing on Oct 13), and the Phase 2
+write-up is next. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 write-up waits on outside readers and goes out in one group push with the Phase
@@ -93,12 +94,21 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: M14 part 3, tracing, with the lean set** (`m14-prep.md`,
-"Part 3", D-M14-6, and "Next step"). Replaced 2026-10-12 (end of session).
-**Already done, don't redo:** the package resolution (6 new packages, no pin
-changes). Steps: install, pin, then Claude writes the setup; deploy via the
-workflow; regression upload; show the trace. It's the last done-when item
-("a trace can be shown").
+**Next action: draft the Phase 2 write-up** (`phase2-orientation.md`, "After
+M14"; Gerard, 2026-10-13). Replaced 2026-10-13. M13's rollback (the week of
+Oct 26) adds only a closing line, so drafting can start now. The M7 write-up
+(`m7-writeup-draft.md`) waits on outside readers, and the two go out in one
+joint push. The structure isn't decided yet: settle it with Gerard at the start.
+
+**M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
+Gerard ticks M14. Settled, don't re-check:**
+- `function/tracing.py` is deployed (`8b4dce6`). A traced item4 upload
+  matched the answer key, and its trace shows 61 spans under one operation,
+  including the three tools by name (D-M14-7).
+- Evidence: `evidence/m14-tracing/`.
+- About 200 KB of ingestion per upload, of which the spans are 76 KB.
+- The judge's model call isn't traced (it uses the `openai` package), so
+  tracing doesn't settle the token undercount (`m14-prep.md`, Part 3).
 
 **M14 part 2 is DONE (2026-10-12). Settled, don't re-check:** the budget
 `Credits_low` emails Gerard's backup inbox with no action group (left as is,
@@ -148,7 +158,9 @@ P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
-  trim the Azure SDK's HTTP logging.
+  trim the Azure SDK's HTTP logging (sized Oct 13: about 99 AppTraces rows,
+  122 KB, per upload, larger than the trace itself; not yet checked against a
+  pre-tracing run).
 - Gerard's steps: update the project instructions (`id-iip-dev-wus-03` is
   deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev) with
   `iip-ca-test` as its member, the results page, the custom role IIP Queue
@@ -636,12 +648,14 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 13, 2026 — M14 alert-email fault closed: a real Fired email delivered
+### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 
-**Attribution:** Claude read the evidence, wrote every command, the log query
-and test image (both kept outside the repo, in `D:\claude\iip`) and these
-doc edits. Gerard ran every Azure command and checked the inbox and the alert
-history. Times are Phoenix (UTC-7) unless marked Z.
+**Attribution:** Claude read the evidence, wrote every command, the log
+queries and test image (kept outside the repo, in `D:\claude\iip`),
+`function/tracing.py` and its wiring, the offline tests and these doc edits.
+Gerard made the decisions marked below, ran every Azure command, git command
+and install, and checked the inbox and the alert history. Times are Phoenix
+(UTC-7) unless marked Z.
 
 **Overnight:** no Fired email arrived, and the alert history showed nothing
 after 13:37 on Oct 12 (Gerard).
@@ -679,6 +693,33 @@ typed inline. This worked first time today.
 **Left in place:** 3 test messages in `upload-events-poison` (Oct 12 19:18Z
 and 20:34Z, Oct 13 16:59Z; they expire with the queue's default TTL), and the
 soft-deleted blob `uploads/m14-alert-refire-20261013.png` (7 days).
+Committed `933f18c`.
+
+**M14 part 3, tracing: built, deployed and shown** (`m14-prep.md`, "Part 3,
+the build and the run").
+- **Found before building** (Claude, from the installed SDK's source): the
+  Agents SDK 1.1.0 never emits its own tool spans, and with content recording
+  off the tool names aren't recorded at all. **D-M14-7 (Gerard):** a span
+  around the orchestrator's `logged()` helper, patched at runtime. No certified
+  file changed, and `build_toolset()`'s schema check guards it.
+- **Offline:** 19/19 tests, plus a negative control on the schema guard
+  (Claude, CPython 3.14 with every pin). One of Claude's test assertions was
+  too strict (`_MS.sampleRate`, the sampler's own attribute); the test was
+  fixed, not the code.
+- **Gerard installed** the 6 pins in the venv (`pip check` clean), then
+  committed and pushed `8b4dce6`. The workflow went green.
+- **Traced item4 upload:** 17:37:22Z, `process_upload` 31.9 s, item4's answer
+  key. 61 spans under one operation, all succeeded, the three tools by name.
+- **Ingestion:** about 200 KB per upload, of which the spans are 76 KB.
+- **Not settled by tracing:** the token undercount. The judge uses the
+  `openai` package, which isn't traced.
+
+**M14:** all three done-when items are shown, and **Gerard ticks it**. The
+marker stays on M13. **Next action: draft the Phase 2 write-up** (Gerard).
+
+**Gerard asked what a span is.** Claude explained it as a stopwatch entry with
+a parent, nested like an outline, using the run's own rows. Worth a glossary
+line in the write-up.
 
 ### Session — October 12, 2026 — M12 closed (evidence, teardown); M14 parts 1-2 done (deploys over OIDC, alerts); the Sunday punch-list task rebuilt cloud-only
 

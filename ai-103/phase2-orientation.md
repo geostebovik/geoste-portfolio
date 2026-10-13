@@ -23,7 +23,7 @@
 
 ---
 
-## Road to done (snapshot dated 2026-10-10; M12 and M14 rows updated 2026-10-12)
+## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13)
 
 *Added 2026-10-10 at Gerard's request, after he lost track of where the work
 stood. This is a dated snapshot, so by the rule above it may name milestones.
@@ -46,7 +46,7 @@ update and the AI-103 exam.
 | M11 | The app: upload → Function → result → sign-in page | Done 2026-10-07 |
 | M12 | Networking: private endpoints, storage firewall | **Done 2026-10-12**: built and proven 2026-10-10; evidence captured and torn down 2026-10-12 (Bicep and the free VNet skeleton kept) |
 | M13 | Conditional Access | Tested 2026-10-09; **rollback in the week of 2026-10-26, before 2026-11-06** |
-| M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **Parts 1-2 done 2026-10-12**: a push deploys the Function over OIDC, and a parked upload fires an alert (real-alert email delivery is an open item). Tracing next (D-M14-1). No deadline, and doesn't depend on M13 |
+| M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **All three done-when items shown, 2026-10-13**: a push deploys the Function over OIDC (Oct 12); a parked upload fires an alert, and its email arrives (Oct 12; email fixed Oct 13); a traced upload shows every step, the three tools by name (Oct 13). Gerard ticks it |
 | Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | M7's is waiting on outside readers (Gerard) |
 | Site | ostebovik.net's AI page updated to match | After the push |
 | Exam | AI-103 | No date set (Gerard, 2026-10-10) |
@@ -193,7 +193,10 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   email of a real alert has yet to arrive, though a test email did; open
   item in Todoist). Two of the three
   done-when items are shown (deploy, alert); **only "a trace can be shown"
-  remains** (`m14-prep.md`, D-M14-1 to -5).
+  remains** (`m14-prep.md`, D-M14-1 to -5). **Update 2026-10-13: the alert
+  email is fixed (a real Fired email arrived), and part 3 is done: a traced
+  item4 upload shows 61 spans, the three tools by name (D-M14-7). All three
+  done-when items are shown** (`m14-prep.md`, Parts 2 and 3).
 - **Current milestone: see the marker at the top of this file.**
 - ~~**Nothing is keyless yet.**~~ **Superseded 2026-09-22:** all twelve call
   sites across the nine tracked scripts now authenticate with Entra ID
@@ -268,7 +271,7 @@ Function must not use keys.
 | **M11** ✅ | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the ~~blob trigger~~ **storage queue → queue trigger** → agent → results flow, the results page with built-in sign-in (via `id-iip-dev-wus-03` as a federated credential, no client secret), the app registration and the viewers group. *(Amended 2026-09-24: Gerard's D-M11-1 (b) and D-M11-2 (b), Sep 23 — see `m11-prep.md`.)* Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** ✅ | **Networking.** A VNet with an integration subnet, and private endpoints for ~~Key Vault and~~ storage. *(Amended 2026-10-09, Gerard, D-M12-1: endpoints on `stiipdevwus01` blob + queue only; Key Vault is empty on purpose, so it gets none. Built for an evidence window, then deleted, Bicep kept (D-M12-2). See `m12-prep.md`.)* ~~Decides Event Grid delivery vs. inbound restrictions (Todoist task),~~ *(Amended 2026-09-24. D-M11-1 (b) removed the Function's inbound webhook, so the original question is gone and the Todoist task was closed Sep 23 — but the constraint **moved to the storage account**, it did not disappear. Microsoft Learn (Event Grid, storage queue handler): once `stiipdevwus01` has a firewall or network rule, Event Grid can deliver to its queue only with the system topic's **system-assigned** identity and only with *Allow Azure services on the trusted service list* enabled; a user-assigned identity is not supported at all. So M11 should give the system topic a system-assigned identity now, and M12 must keep the trusted-services exception on.)* Decides the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. *(Amended 2026-10-09, Gerard, D-M12-3: estimated from Azure's retail price list, the calculator's own source. **Done 2026-10-09:** $15.60/month running, about $3.60 for a one-week window; one open item, outbound internet through the VNet, in `m12-prep.md`.)* | 1–2 sessions | M11 |
 | **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
-| **M14** | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
+| **M14** ✅ | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
 
 **M8's done-when — amended Sep 21, by Gerard.** It originally read
 "`what-if` shows **no changes**". Azure will not produce that against this

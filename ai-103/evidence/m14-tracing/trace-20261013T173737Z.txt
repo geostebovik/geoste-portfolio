@@ -1,0 +1,96 @@
+M14 part 3 evidence: one traced upload, end to end (2026-10-13)
+================================================================
+
+Captured by Gerard with the read-only query D:\claude\iip\m14-trace-check.kql
+(Claude wrote it; it's kept outside the repo), run against log-iip-dev-wus-01:
+
+    az monitor log-analytics query -w $ws --analytics-query "@D:\claude\iip\m14-trace-check.kql" -t PT3H -o table
+
+The upload: m14-trace-20261013.png (item4's fixture, topic "Key Cutting While
+You Wait") at 17:37:22Z. Result: results/m14-trace-20261013/20261013T173808Z.json,
+saved as scripts/results/20261013-173808_function_item4_m14_trace.json. It
+matches item4's answer key: run completed, copy passed first time (0 redrafts),
+audit legible PASS / brand FAIL / info accurate PASS.
+
+How to read it: every row shares one OperationId, which is the trace. The first
+row is the Functions host's request. Every row after it is a span the Function
+sent through tracing.py (AppDependencies), nested beneath that request. The
+three "execute_tool" rows are the agent's tool calls, named by D-M14-7. Each
+Azure SDK step also appears with its HTTP request (e.g. create_thread with
+POST .../threads). The evaluator's own model call is not traced (it goes
+through the openai package, which the lean set doesn't instrument); its time
+is inside "execute_tool evaluate_draft".
+
+Nothing here is a secret: thread, run and agent IDs are per-upload and the
+agent was deleted at the end of the run (the DELETE row).
+
+--- query output, verbatim ---
+DurationMs    Name                                                                                                                                  OperationId                       Success    TableName      TimeGenerated                 Type
+------------  ------------------------------------------------------------------------------------------------------------------------------------  --------------------------------  ---------  -------------  ----------------------------  ---------------
+31861.7874    process_upload                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:37.0771753Z  AppRequests
+30876         iip.process_upload                                                                                                                    aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:37.966586Z   AppDependencies
+86            BlobClient.get_blob_properties                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:38.397523Z   AppDependencies
+40            GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:38.398367Z   AppDependencies
+43            Azure blob: stiipdevwus01/uploads                                                                                                     aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:38.439965Z   AppDependencies
+9             BlobClient.download_blob                                                                                                              aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:38.484548Z   AppDependencies
+7             Azure blob: stiipdevwus01/uploads                                                                                                     aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:38.485146Z   AppDependencies
+0             AgentsClient.enable_auto_function_calls                                                                                               aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:42.132253Z   AppDependencies
+1511          create_agent riverside-content-agent                                                                                                  aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:42.132473Z   AppDependencies
+150           GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:42.134315Z   AppDependencies
+1357          POST /api/projects/proj-iip-dev-wus-01/assistants                                                                                     aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:42.28512Z    AppDependencies
+413           create_thread                                                                                                                         aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:43.643228Z   AppDependencies
+412           POST /api/projects/proj-iip-dev-wus-01/threads                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:43.643727Z   AppDependencies
+512           create_message                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:44.056291Z   AppDependencies
+510           POST /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/messages                                               aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:44.056918Z   AppDependencies
+22527         start_thread_run                                                                                                                      aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:44.568853Z   AppDependencies
+1031          start_thread_run                                                                                                                      aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:44.568966Z   AppDependencies
+1028          POST /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs                                                   aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:44.56947Z    AppDependencies
+668           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:46.599917Z   AppDependencies
+666           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:46.600621Z   AppDependencies
+0             execute_tool get_fact_sheet                                                                                                           aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:47.26781Z    AppDependencies
+721           submit_tool_outputs                                                                                                                   aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:47.268366Z   AppDependencies
+719           POST /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4/submit_tool_outputs  aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:47.269021Z   AppDependencies
+241           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:48.989661Z   AppDependencies
+239           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:48.99032Z    AppDependencies
+252           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:50.230851Z   AppDependencies
+250           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:50.231496Z   AppDependencies
+7108          execute_tool evaluate_draft                                                                                                           aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:50.482614Z   AppDependencies
+4             GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:51.598285Z   AppDependencies
+4             GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:55.480806Z   AppDependencies
+574           submit_tool_outputs                                                                                                                   aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:57.591014Z   AppDependencies
+573           POST /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4/submit_tool_outputs  aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:57.591883Z   AppDependencies
+222           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.165678Z   AppDependencies
+221           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.166276Z   AppDependencies
+3068          execute_tool audit_thumbnail                                                                                                          aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.388266Z   AppDependencies
+31            GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.391086Z   AppDependencies
+223           POST /computervision/imageanalysis:analyze                                                                                            aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.422226Z   AppDependencies
+4             GET /msi/token                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:37:59.766828Z   AppDependencies
+618           submit_tool_outputs                                                                                                                   aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:02.456439Z   AppDependencies
+617           POST /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4/submit_tool_outputs  aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:02.457127Z   AppDependencies
+350           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:04.074814Z   AppDependencies
+348           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:04.075417Z   AppDependencies
+242           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:05.425268Z   AppDependencies
+241           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:05.425902Z   AppDependencies
+428           get_thread_run                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:06.668072Z   AppDependencies
+426           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4                       aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:06.668953Z   AppDependencies
+0             RunStepsOperations.list                                                                                                               aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.096551Z   AppDependencies
+401           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4/steps                 aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.097153Z   AppDependencies
+0             list_run_steps                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.501205Z   AppDependencies
+0             list_run_steps                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.501694Z   AppDependencies
+0             list_run_steps                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.501886Z   AppDependencies
+0             list_run_steps                                                                                                                        aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.502017Z   AppDependencies
+256           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/runs/run_MgDuhRDz3Fkh7oUC9elkgnF4/steps                 aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.502531Z   AppDependencies
+345           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/messages                                                aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:07.759459Z   AppDependencies
+0             list_messages                                                                                                                         aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.104843Z   AppDependencies
+0             list_messages                                                                                                                         aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.105034Z   AppDependencies
+252           GET /api/projects/proj-iip-dev-wus-01/threads/thread_UtEzJloswMX8Kzdl1qRdPwmt/messages                                                aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.105629Z   AppDependencies
+465           AgentsClient.delete_agent                                                                                                             aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.358113Z   AppDependencies
+464           DELETE /api/projects/proj-iip-dev-wus-01/assistants/asst_t9yGdmi6Z7dro3z5zgrPLUEK                                                     aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.358651Z   AppDependencies
+15            BlobClient.upload_blob                                                                                                                aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.824651Z   AppDependencies
+15            Azure blob: stiipdevwus01/results                                                                                                     aa2eb4106ebae7f05bd96f8ba6814867  True       PrimaryResult  2026-10-13T17:38:08.825205Z   AppDependencies
+--- ingestion cost of this one upload (D:\claude\iip\m14-trace-size.kql), verbatim ---
+BilledBytes    Rows    SourceTable      TableName
+-------------  ------  ---------------  -------------
+122445         99      AppTraces        PrimaryResult
+1100           1       AppRequests      PrimaryResult
+76158          60      AppDependencies  PrimaryResult

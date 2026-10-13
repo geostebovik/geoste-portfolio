@@ -22,6 +22,11 @@ deadline, and it doesn't depend on M13.
   ("a trace can be shown") without waiting for the classic-API migration. The
   exporter and the Function-level spans survive the migration; the agent-level
   spans get redone with it.
+- *(D-M14-4 to -6 are recorded where they were made: Part 2 and Part 3.)*
+- **D-M14-7 (2026-10-13), name each tool call with a span around the
+  orchestrator's `logged()` helper**, patched at runtime, rather than
+  settling for the SDK's spans, which don't name tools. See "Part 3, the
+  build and the run".
 
 ## Part 1: CI/CD over OIDC (first)
 
@@ -328,6 +333,11 @@ with timings and token counts, under one trace ID.
 
 **A side benefit:** model-call spans count tokens independently of
 `run.usage`, which may settle the M7 backlog's "token count ~40% low" item.
+*(Corrected 2026-10-13, Claude: it doesn't. The undercount is the judge's
+tokens, and the judge reaches its model through the `openai` package, which
+the lean set doesn't instrument. Confirmed in the run: inside `execute_tool
+evaluate_draft` only token requests appear. The agent's own spans read the same
+service-side usage as `run.usage`, so they add nothing independent.)*
 
 **Packages, resolved 2026-10-12** (Claude, `pip install --dry-run` against the
 pinned `requirements.txt` for CPython 3.14 on manylinux, wheels only):
@@ -346,6 +356,69 @@ pinned `requirements.txt` for CPython 3.14 on manylinux, wheels only):
 **Cost:** ingestion goes to `log-iip-dev-wus-01` (1 GB/day cap, 30 days).
 Expected volume is small. Measure it after the first traced runs.
 
+### Part 3, the build and the run (2026-10-13)
+
+**Found before building** (Claude, from the installed SDK's source, not the
+docs): `azure-ai-agents` 1.1.0 has an `execute_tool` span helper that nothing
+calls. With content recording off, the tool names aren't recorded anywhere
+else either, so the three tools wouldn't have appeared by name.
+**D-M14-7 (Gerard):** put a span around each tool by wrapping the
+orchestrator's own `logged()` helper at runtime. No certified file changes, and
+`build_toolset()`'s schema check proves the agent's tools didn't move.
+
+**Built** (Claude): `function/tracing.py` (new), with one span per try in
+`function_app.py` and one line in `upload_handler.py`. `build_package.py`
+packages it, and `requirements.txt` gains the 6 pins.
+- **Authentication:** the exporter's credential comes from
+  `APPLICATIONINSIGHTS_AUTHENTICATION_STRING` (`id-iip-dev-wus-01`, RBAC row
+  8). No new role or setting.
+- **No log exporter**, so no duplicate log rows. Content recording is off in
+  code, not by app setting.
+- **Off switches:** no connection string (the laptop), or `IIP_TRACING=off`.
+
+**Tested offline first** (Claude; CPython 3.14 with every pin plus the 6):
+19/19 passed, covering:
+- the spans join the host's trace under its span;
+- tool spans carry names only;
+- the certified `logged()` still records every call;
+- a failure marks the span failed and still re-raises;
+- the exporter builds a `ManagedIdentityCredential` from the auth string;
+- the off switch works.
+
+**A negative control:** a wrapper without `functools.wraps` is refused by
+`build_toolset()`. Gerard installed the 6 in the local venv first (`pip
+check`: no broken requirements).
+
+**The run** (Gerard; commit `8b4dce6`, deployed by the workflow, green):
+- **The upload:** `m14-trace-20261013.png` (item4) at 17:37:22Z. Result
+  17:38:08Z (`process_upload` 31.9 s), first delivery, **item4's answer key**:
+  copy passed first time, audit legible PASS / brand FAIL / info accurate PASS
+  (`scripts/results/20261013-173808_function_item4_m14_trace.json`).
+- **The trace:** 61 rows under one operation ID, all succeeded: the host's
+  request, `iip.process_upload` (30.9 s), the agent's steps, and **`execute_tool
+  get_fact_sheet` (0 ms), `evaluate_draft` (7.1 s) and `audit_thumbnail`
+  (3.1 s)** in that order. Verbatim in
+  `evidence/m14-tracing/trace-20261013T173737Z.txt`.
+- **Done-when "a trace can be shown" is met. All three M14 done-when items
+  are shown.**
+
+**What the trace showed that the logs couldn't:**
+- About 10 s of the 22.5 s agent run was our tools. Inside the audit's 3.1 s,
+  the Vision call itself took 0.2 s.
+- The judge's model call is invisible, as expected (see the corrected side
+  benefit).
+
+**Ingestion, measured** (one upload; Gerard ran Claude's query):
+- **About 200 KB in total** (199,703 billed bytes): AppDependencies 76 KB
+  (60 rows; these are the new spans), AppTraces 122 KB (99 rows), AppRequests
+  1 KB.
+- The 1 GB/day cap would take about **5,000 uploads a day** (10^9 / 199,703).
+  The spans alone would take about 13,000.
+- **The AppTraces rows are the bigger cost, not the tracing.** Claude's
+  reading, not yet checked against a pre-tracing run: they're mostly the
+  Azure SDK's HTTP logging. That's the existing "trim SDK HTTP logging"
+  follow-up, now sized.
+
 ## Size
 
 Claude's estimate: Part 1, about one session; Part 2, half a session (most of
@@ -353,6 +426,10 @@ it the survey); Part 3, about one session including the regression upload.
 That fits the plan's "1–2 sessions" only if Part 2 stays small.
 
 ## Next step
+
+**M14's three done-when items are all shown (2026-10-13).** Next, per the
+plan: the Phase 2 write-up. *(The text below was the step before Part 3, kept
+as history.)*
 
 **Part 3, tracing**, with the lean set (D-M14-6). The packages are already
 resolved, so don't redo that. Steps: install the 6 in the local venv, pin them
