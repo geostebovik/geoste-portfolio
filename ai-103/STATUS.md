@@ -94,12 +94,16 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: Gerard's edit pass on `phase2-writeup-draft.md`** (first draft
-written by Claude, 2026-10-13). Replaced 2026-10-13. **Already decided, don't
-re-ask:** the shape is case studies, "symptom -> evidence -> root cause ->
-fix" (six of them), at about the M7 page's length (Gerard). M13's rollback
-(the week of Oct 26) adds one closing line, marked in the draft. After the
-edit pass come outside readers, then the joint push with the M7 write-up.
+**Next action: outside readers for `phase2-writeup-draft.md`** (Gerard's
+step). Replaced 2026-10-13. **Gerard's edit pass is DONE** (2026-10-13,
+section by section, every change approved by him). His rules are recorded in
+the draft's header: no Claude-only wrong turns, no clock times or day-level
+dates, no operational details about the live tenant. **Don't re-ask:** the
+shape, length, the AI-103 table rows, or the "After Phase 2" section. Still
+open in the draft: M13's C9 closing line (week of Oct 26), then the joint push
+with the M7 write-up. **Settled the same day (Gerard):** the M7 page now
+matches Phase 2. Claude-only errors are cut, and the one Gerard helped catch
+is kept, credited to him (header of `m7-writeup-draft.md`).
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -726,6 +730,32 @@ was written to the repo. The worst of them overclaimed: "each milestone was
 shown" (M13 isn't finished), "all of it in Bicep" (the CA policies were built
 by hand) and "M10's result didn't change" (one item scored lower, traced to
 variance).
+
+**Site: the Identity page gets the AI-103 identity work** (`773fac6`, Gerard's
+idea; Claude wrote it). It's a cross-reference card labelled "From the AI-103
+build", not an AZ-104 project (Gerard, after Claude raised it). It covers the
+four identities, keyless code versus key access, the custom role, Event
+Grid's scope, the group gate, Conditional Access worded as a trial, and
+secretless deploys. It went live now rather than with the joint push (Gerard).
+The card's Conditional Access line changes at C9 (Todoist, on the C9 task).
+- **Found while rendering it (Claude):** every "Key Design Decisions" list on
+  all five domain pages split into side-by-side columns, because
+  `.decision-list li` was a flex container. That was live on the site. Gerard
+  chose to fix all five pages, with one CSS rule each. All 69 items were
+  checked at 1440 and 390 px, and Gerard confirmed desktop and phone live.
+- **Not fixed** (Gerard didn't pick it): Project 2's "policy definition GUIDs
+  change between CLI versions" claim, which Claude believes is backwards.
+  It's in Todoist, to verify against Microsoft Learn.
+
+**The edit pass, after the site work (Gerard, with Claude applying and
+re-checking each change):** six case studies tightened, and three security
+cuts made (the break-glass password's location, the storage firewall's state,
+how the subscription is funded). One factual fix: "the exam's largest-weighted
+area" was wrong. Two AI-103 table rows were cut, and "After Phase 2" was added.
+Gerard also caught that "subscription" read as an Azure subscription, where
+it meant an Event Grid event subscription. That was fixed in the draft and on
+the live Identity card. Claude's own error: the date-stripping pattern left
+two broken fragments, caught on the final read and fixed.
 
 **Gerard asked what a span is.** Claude explained it as a stopwatch entry with
 a parent, nested like an outline, using the run's own rows. Worth a glossary

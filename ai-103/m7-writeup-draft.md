@@ -58,6 +58,12 @@ GERARD'S REVIEW, Sep 16 (Claude applied the edits):
 - "In short" bullets 2-4 are approved as written (Gerard). Bullet 2's
   "certifying pass" became "full acceptance test" under the renaming above.
 
+GERARD'S EDIT, 2026-10-13 (Claude applied it): to match the Phase 2 page,
+Claude-only errors are cut. Kept, and reworded to credit him, the one error
+Gerard helped catch (the 15-run analysis error, exposed by his 45-run
+decision). Cut: decision 3's "both of its bugs were Claude's", the
+"regressed on Claude's bugs" clause, and the three-item errors list.
+
 STILL OPEN BEFORE PUBLISHING:
 - Outside readers for "In short".
 - At publish time: an "On this page" link list at the top, and the evidence
@@ -235,8 +241,7 @@ The second version of the agent's instructions scored worse (12/15) than
 the first. The instructions told the agent to support every claim with the
 fact sheet, but only the judge and the image audit had the fact sheet. The
 agent never did. Like an open-book exam where only the grader has the book,
-it cut every specific claim until the copy said nothing. (Claude wrote that
-version. Both of its bugs were Claude's.)
+it cut every specific claim until the copy said nothing.
 
 **Decision (Sep 7, Gerard's call):** add a third tool, `get_fact_sheet`,
 instead of pasting the facts into the instructions. The next version scored
@@ -428,8 +433,9 @@ audit's notes (see "Known limits").
   colour in 11 of 45. The two results don't actually conflict: the 15-run
   result's 95% interval reached 30%. The mistake was reading the number and
   not the interval. A measurement that makes a fix look worse gets re-run.
-  One that makes it look better gets written up. (This was Claude's analysis
-  error, caught by the pre-registered bands.)
+  One that makes it look better gets written up. (Claude's analysis error.
+  It surfaced because Gerard raised the runs to 45, against bands set in
+  advance.)
 - **A tidy explanation makes a noisy result more convincing, not more
   true.** The same 15-run pass showed a regression, and an explanation for
   it was found at p = 0.001. At 45 runs, both disappeared.
@@ -479,14 +485,8 @@ Sep 15 and 16 he made these calls:
 
 **Claude** wrote the Python: the orchestrator, the tool wrappers, the probe
 scripts, the provenance modules, the hang guards and the analysis scripts.
-Claude drafted the agent instructions, whose second version regressed on
-Claude's bugs, and did the results analysis and statistics. Claude also made
-these errors:
-- the two Sep 14 analysis errors described above;
-- writing the schema-docstring notes that decision 7 removed, and missing
-  them in a Sep 15 review;
-- on Sep 15, giving a colour figure that counted only one line of the
-  audit's notes.
+Claude drafted the agent instructions, and did the results analysis and
+statistics.
 
 Where the project log doesn't record who did something, this page doesn't
 say.

@@ -18,8 +18,33 @@ CONVENTIONS CARRIED OVER FROM THE M7 PAGE:
 - "Acceptance test" means the project's own definition of done, never a
   Microsoft certification.
 - Attribution only where the log records it. Where it's silent, this page is
-  silent. Claude's errors are named.
-- Times are UTC (Z) unless marked Phoenix.
+  silent.
+- Wrong turns (Gerard, 2026-10-13): kept only where Gerard took part in
+  catching or resolving them; cut where they were Claude's alone.
+- Dates and times (Gerard, 2026-10-13): no clock times or day-level dates
+  in the body. Durations stay where they are the finding (10 minutes vs 1,
+  65+ minutes, 14 minutes 42 seconds). Month-level dates in the milestone
+  table. The session log has the exact times.
+
+GERARD'S EDITS, 2026-10-13 (Claude applied them):
+- "In short", bullet 1: "a developer's laptop" became "a developer's machine";
+  "You upload a thumbnail…" became "Upload a thumbnail… An Azure Function
+  then runs…" (Gerard's wording; Claude fixed one typo).
+- Accepted Claude's critique items: "In short" 1-4 (unmeasured "most of the
+  time"; the case-study order wording; "every change" became "each major
+  change"; the Bicep sentence cut from bullet 1). "What was built" 1-3 (the
+  diagram's Bicep line; "each major change"; the exam-weight error, since
+  "Plan and manage" is not the largest area).
+- Cut from the AI-103 table (Gerard): the CI/CD row (the pipeline deploys the
+  Function, not the Foundry project) and the quotas/cost row (pricing infra
+  isn't managing model workloads).
+- Added to Terms (Gerard): OIDC; federated credential.
+- Edit pass completed the same day, section by section (Gerard approved each
+  change; Claude applied and re-checked them). Gerard's rules for the page:
+  no Claude-only wrong turns, no clock times or day-level dates, and no
+  operational details about the live tenant (where the break-glass password
+  is kept, the storage firewall's state, how the subscription is funded).
+- Added (Gerard's idea): "After Phase 2", undated intent only.
 
 STILL OPEN BEFORE PUBLISHING:
 - M13's rollback (C9, the week of 2026-10-26): add one closing line to the
@@ -32,25 +57,23 @@ STILL OPEN BEFORE PUBLISHING:
 ## In short
 
 - **What it is:** the second phase of the IIP lab build for AI-103. Phase 1
-  ended with an AI agent that worked on a developer's laptop: it drafts
+  ended with an AI agent that worked on a developer's machine: it drafts
   marketing copy for a fictional hardware store, checks the draft, and audits
   the thumbnail image. Phase 2 turned that into an app that runs in Azure.
-  You upload a thumbnail and a topic. An Azure Function runs the agent with no
+  Upload a thumbnail and a topic. An Azure Function then runs the agent with no
   keys and saves the result. The result shows on a web page behind an Entra
-  ID sign-in. Almost all of it is defined in Bicep (the Conditional Access
-  policies were built by hand and exported), and it's monitored and deployed
-  from GitHub.
+  ID sign-in.
 - **What it proves:** each of the seven milestones (M8-M14) has a written
   definition of done, shown rather than asserted. Six are complete; M13's
   last step, a scheduled rollback, is still ahead. The same test
-  upload, with a known correct answer, was re-run after every change that
-  could break it. It gave the right answer every time.
-- **What it's really about:** troubleshooting. Most of the time in this phase
-  went into things that looked right and weren't: a role that matched
+  upload, with a known correct answer, was re-run after each major change
+  and gave the right answer each time.
+- **What it's really about:** troubleshooting. Much of the work went into
+  things that looked right and weren't: a role that matched
   Microsoft's documented minimum and still failed, an alert that fired but
   never emailed, a deployment preview whose "noise" would have wiped real
-  settings. Six of those are written up below as case studies, in the order a
-  support engineer would work them.
+  settings. Six of those are written up below as case studies, each written the way a
+  support engineer works a ticket: symptom, evidence, root cause, fix.
 - **What it doesn't do yet:** some of what was built is deliberately not left
   running. The private networking was built, proven and then torn down to
   save cost, and the Conditional Access policies are deleted when a free
@@ -67,6 +90,13 @@ STILL OPEN BEFORE PUBLISHING:
   applies to: a whole subscription, one storage account, or one queue.
 - **Keyless:** every service call signs in with Entra ID instead of a shared
   key.
+- **OIDC:** an open sign-in standard. Here, GitHub Actions uses it to prove to
+  Entra ID which repository and branch a deploy is coming from, with a
+  short-lived token instead of a stored password or secret.
+- **Federated credential:** an entry on an identity in Entra ID that says
+  "trust tokens from this issuer, for this subject". It's what lets GitHub's
+  token, or the sign-in page's managed identity, stand in for a client
+  secret, so no secret is stored anywhere.
 - **Queue, poison queue:** each upload becomes a message in a queue. A message
   that fails every allowed try is moved to a second, "poison" queue, so it
   stops retrying and someone can look at it.
@@ -85,13 +115,13 @@ STILL OPEN BEFORE PUBLISHING:
 
 | Milestone | What it is | Shown by |
 |---|---|---|
-| **M8** (Sep 21) | Everything that already existed, described in Bicep | A `what-if` that lists only diffs written down and justified one by one in a register |
-| **M9** (Sep 21) | Two managed identities and their roles, from a written RBAC model | The role assignments exist and match the model, row by row |
-| **M10** (Sep 23) | No keys: every tracked script moved to Entra ID sign-in | The M7 agent's acceptance test re-run on the keyless code, and no surveyed script reading a key |
-| **M11** (Oct 7) | The app: upload, Event Grid, queue, Function, agent, result, and a sign-in page | An upload produces a correct result, and a member of the viewers group can sign in and see it |
-| **M12** (Oct 12) | Private networking: private endpoints and a storage firewall | The app still worked end to end with the private paths verified. Then torn down, Bicep kept |
-| **M13** (tested Oct 9) | Conditional Access: phishing-resistant sign-in for the results page | Six sign-in tests passed with the policy On, and the policies are exported. Rollback due before the licence trial ends |
-| **M14** (Oct 13) | Operate: deploys from GitHub, alerts, tracing | A push deploys the Function; a failed upload emails an alert; one upload's trace shows every step |
+| **M8** (Sep 2026) | Everything that already existed, described in Bicep | A `what-if` that lists only diffs written down and justified one by one in a register |
+| **M9** (Sep 2026) | Two managed identities and their roles, from a written RBAC model | The role assignments exist and match the model, row by row |
+| **M10** (Sep 2026) | No keys: every tracked script moved to Entra ID sign-in | The M7 agent's acceptance test re-run on the keyless code, and no surveyed script reading a key |
+| **M11** (Oct 2026) | The app: upload, Event Grid, queue, Function, agent, result, and a sign-in page | An upload produces a correct result, and a member of the viewers group can sign in and see it |
+| **M12** (Oct 2026) | Private networking: private endpoints and a storage firewall | The app still worked end to end with the private paths verified. Then torn down, Bicep kept |
+| **M13** (tested Oct 2026) | Conditional Access: phishing-resistant sign-in for the results page | Six sign-in tests passed with the policy On, and the policies are exported. Rollback due before the licence trial ends |
+| **M14** (Oct 2026) | Operate: deploys from GitHub, alerts, tracing | A push deploys the Function; a failed upload emails an alert; one upload's trace shows every step |
 
 ```
  you ──upload (thumbnail + topic)──► stiipdevwus01 / uploads
@@ -114,27 +144,26 @@ STILL OPEN BEFORE PUBLISHING:
           results page /api/results ◄── Entra sign-in: app assignment (group)
                                          + Conditional Access (phishing-resistant)
 
- Around it: Bicep for all of it · App Insights + Log Analytics (Entra-only ingestion)
+ Around it: Bicep for the Azure resources and Entra objects
+            App Insights + Log Analytics (Entra-only ingestion)
             GitHub Actions deploys over OIDC (a second managed identity, no secret)
 ```
 
 Mapped against Microsoft's AI-103 study guide (skills measured as of April 16,
-2026), Phase 2 covers the operational half of the exam's largest-weighted
-area:
+2026), Phase 2 covers much of the exam's "Plan and manage an Azure AI
+solution" area, plus its observability skills:
 
 | Exam skill area (weight) | Skill named in the study guide | Where Phase 2 does it |
 |---|---|---|
 | Plan and manage an Azure AI solution (25-30%) | Design Azure infrastructure for AI apps and agent-based solutions | M8, M11 (the architecture above) |
-| Plan and manage an Azure AI solution (25-30%) | Integrate Foundry projects with continuous integration and continuous deployment (CI/CD) pipelines | M14: GitHub Actions over OIDC. Strictly, the pipeline deploys the Function that calls the Foundry project, not the project itself |
 | Plan and manage an Azure AI solution (25-30%) | Configure security, including managed identity, private networking, keyless credentials, and role policies | M9, M10, M12; case studies 2, 3 and 5 |
-| Plan and manage an Azure AI solution (25-30%) | Manage quotas, scaling, rate limits, and cost footprints for model and agent workloads | Every build priced first from Azure's retail price list (M11, M12, M14) |
 | Implement generative AI and agentic solutions (30-35%) | Set up observability by implementing tracing, token analytics, safety signals, and latency breakdowns | M14: case study 6 |
 | Implement generative AI and agentic solutions (30-35%) | Integrate monitoring into deployed agents, evaluate agent behavior, and perform error analysis | M14: case studies 1 and 6 |
 
 M13, Conditional Access, isn't an AI-103 skill. It's the identity work an app
 with a sign-in page needs either way.
 
-**One rule held across the phase.** After every change that could affect the
+**One rule held across the phase.** After each major change to the
 app, the same test image (item4 from the M7 answer key, with one planted brand
 flaw) was uploaded again. The correct answer is: copy passes first time; the
 audit says legible PASS, brand FAIL, accurate PASS. It came back correct with
@@ -153,11 +182,10 @@ because that's part of the record.
 **Symptom.** An alert was built to email when an upload fails every try and
 lands in the poison queue. That's the one signal that means "the app is
 broken". To prove it, a failure was caused on purpose: pause the Function,
-upload, delete the image, un-pause. That's Gerard's method from Sep 25, with
-the pause added by Claude. The alert fired at 19:22:56Z on Oct 12,
-and its history said "Action group executed" 0.2 seconds later. No email
-arrived. Neither did one for the alert resolving at 20:23:57Z, or for a second
-firing at 20:37:57Z.
+upload, delete the image, un-pause. That's Gerard's method, with a pause
+Claude added. The alert fired, and its history said "Action group executed"
+0.2 seconds later. No email arrived. Neither did one for the alert resolving,
+or for a second firing about an hour later.
 
 **Evidence, and what it ruled out.** The action group's portal **Test** email
 *did* arrive, from the same sender. So the mailbox could receive it. Microsoft
@@ -178,28 +206,20 @@ and solve problems"). It reported all three real notifications as failed:
 had ever been sent.** The portal Test sends straight to the receiver, so it
 skips the step that was failing. Real alerts resolve the group's receivers
 first, and that came back empty. The portal also showed the receiver as
-Verified, which retired the obvious theory, an unverified address. Learn has
-no page for this message.
+Verified, which retired the obvious theory, an unverified address. Unable to
+verify this message through Microsoft Learn documentation.
 
 **Fix.** The action group was re-saved with no change to any property, which
-causes no drift from the Bicep. Twelve minutes later, at 21:39Z, the Resolved
-email for the second alert arrived: the first real alert email ever
+causes no drift from the Bicep. About twelve minutes later, the Resolved
+email for the second alert arrived: the first email this alert ever
 delivered. The next day a deliberate re-fire produced a Fired email within two
-minutes of the alert (10:07 Phoenix). That's 0 of 3 delivered before the
-re-save, and 2 of 2 after.
+minutes of the alert. That's 0 of 3 delivered before the re-save, and 2 of 2
+after.
 
 **What it doesn't prove.** The re-save can't be separated from the time that
 passed. Background propagation would look the same. Separating them would
 mean breaking a working group on purpose, and the lesson is the same either
 way.
-
-**A wrong turn on the way (Claude's errors).** The first overnight re-fire
-never fired, and the alert wasn't at fault. The test file was a `.txt`, which
-the Function deliberately skips, so nothing failed. Also, the pause hadn't
-reached the running Function yet: the log showed it taking the message one
-second after a restart. The re-fire that worked used a real image, and
-checked twice, two minutes apart, that the message was still waiting before
-deleting the image.
 
 **Lesson.** A portal "Test" button proves the last step of a path, not the
 path. Prove a new action group with one real alert.
@@ -208,7 +228,9 @@ path. Prove a new action group with one real alert.
 
 **Symptom.** A failed upload should be retried after one minute
 (`visibilityTimeout`), and after two failed tries move to the poison queue.
-On Sep 25, failed tries retried after **10 minutes, not 1**.
+In practice, failed tries retried after **10 minutes, not 1**. It surfaced
+while testing the poison path with Gerard's method: upload, then delete the
+image so the Function must fail.
 
 **Evidence.** Each retry was preceded by a 403
 `AuthorizationPermissionMismatch` from the queue service. The stack trace
@@ -231,13 +253,13 @@ stages, so each test changed one thing. The custom role, **IIP Queue Trigger
 
 **Where it got harder.** The first re-test still got a 403, 65 minutes after
 the role was assigned. A temporary built-in Contributor fixed it within about
-20 minutes, which pointed at the custom role. So the custom role was tested on
-its own, on Gerard's identity, with a negative control: the update was allowed
+20 minutes, which pointed at the custom role. Gerard chose to test the custom
+role on its own, on his identity, with a negative control: the update was allowed
 with it and refused without it. With Contributor removed, the Function then
-passed cleanly (no 403, retry after about 100 seconds). On Sep 29 the custom
+passed cleanly (no 403, retry after about 100 seconds). Later the custom
 role was verified alone, about 24 hours after the old roles were deleted:
-retry at +103 seconds, then the poison move, with zero permission errors
-in the Function's logs.
+the retry, then the poison move, with zero permission errors in the
+Function's logs.
 
 **Still open.** Why the first assignment took more than 65 minutes. It was
 either a slow custom-role assignment for a managed identity, or a permission
@@ -250,8 +272,8 @@ to be tested by making something go wrong.
 
 ### 3. The right role at the wrong scope (M11)
 
-**Symptom.** On Sep 24, creating the Event Grid subscription that turns "a
-blob was uploaded" into a queue message failed three times in about 20
+**Symptom.** Creating the Event Grid **event subscription**, the rule that
+sends each "a blob was uploaded" event to the queue as a message, failed three times in about 20
 minutes: *"Managed Identity Authorization Error."*
 
 **Evidence.** The role was there. Gerard confirmed with `az role assignment
@@ -259,8 +281,9 @@ list` that the topic's identity held Storage Queue Data Message Sender on the
 queue. Least privilege says to grant that on the one queue it writes to, and
 that's what had been granted.
 
-**Root cause.** Claude's hypothesis, which the next deploy confirmed: Event
-Grid checks the identity's permission **when it creates the subscription**,
+**Root cause.** Claude's hypothesis, which the next deploy supported: Event
+Grid checks the identity's permission **when it creates the event
+subscription**,
 and checks it against the destination's resource ID, which is the storage
 account, not the queue. Microsoft Learn's steps also say "on the storage
 account".
@@ -270,14 +293,11 @@ succeeded first time, and the orphaned queue-level grant was deleted. The
 trade-off is written into the RBAC model: the topic can now add messages to
 any queue on the account (there are two), but it can't read or delete them.
 
-**A wrong turn:** the queue-scoped version was Claude's, and cost three failed
-deploys and about 20 minutes.
-
 **It mattered again in M12.** Once a storage account has a firewall, Event
 Grid can deliver to it only with a system-assigned identity and the "trusted
 Microsoft services" exception (Microsoft Learn). The topic was given a
 system-assigned identity in M11 for that reason. With the firewall on in M12,
-the test upload still produced a correct result in 46 seconds.
+the test upload still produced a correct result.
 
 **Lesson.** Scope is part of the role. When the role is clearly present and
 access still fails, ask *what the service checks against*, and *when* it
@@ -286,7 +306,7 @@ checks.
 ### 4. The deployment preview whose "noise" would have wiped real settings (M8)
 
 **Symptom.** M8 described the existing resources in Bicep. The first
-`what-if` on Sep 21 reported 7 resources to modify, where the goal was none.
+`what-if` reported 7 resources to modify, where the goal was none.
 Azure labels `what-if` output with a banner saying it "may contain false
 positive predictions (noise)", and most of the lines looked like noise: a `-`
 on a property that reads like a status field, on a resource nobody meant to
@@ -304,23 +324,19 @@ the template had left out**, and a deployment would have cleared them:
 | `currentCapacity` (×4 model deployments) | a status field | cleared the tokens-per-minute settings (300K, 30K, 10K) |
 | `computeType` (AI Search) | a status field | cleared the Default vs confidential-compute choice |
 
-A sixth, `networkRuleSet.bypass` on Search, had first been dropped as
-"preview only". It isn't: it's in the GA API version. The module was pinned
-to an old API version, and the missing property had been explained away.
-Updating the API version fixed it.
+Another, `networkRuleSet.bypass` on Search, was missing because the module
+was pinned to an old API version. Updating the API version fixed it.
 
 **Fix.** Every writable property was declared as it was found. Every remaining
 diff, a property no template can set, went into a **register** with a written
 reason. Gerard then amended M8's definition of done from "what-if shows no
 changes", which Azure can't produce for these resources, to "no changes
 other than the registered ones". That's stricter than it sounds: any line
-not in the register is treated as a real change. The register has been
-checked at each what-if since. The latest is 6 modify, 32 no change,
-11 Unsupported and 2 to ignore (Oct 12), every line accounted for. M12's
+not in the register is treated as a real change. Every what-if since is
+read against the register, and any new line is investigated before anything
+deploys. Gerard caught a set of eight unregistered lines that way during
+M11. M12's
 build found two more dropped writable properties the same way.
-
-**Also found:** the `managed-by: bicep` tag had been on four resources since
-July, while nothing was in Bicep. M8 is what made the tag true.
 
 **Lesson.** "May contain noise" is a reason to check each line, not to skip
 them. The test is the provider schema's `ReadOnly` flag, not how the line
@@ -328,31 +344,23 @@ looks.
 
 ### 5. "No keys": what the code does versus what the account still allows (M10)
 
-**Symptom.** On Sep 16, before M10, the Foundry account's activity log showed
+**Symptom.** Before M10, the Foundry account's activity log showed
 about ten `listKeys` calls under Gerard's account while the portal was open.
 That's expected portal behaviour, but it confirmed key access was still
 switched on. M10's goal was that no script reads a key.
 
 **The migration.** All 12 call sites across the nine tracked scripts moved to
 Entra ID sign-in. The M7 acceptance test was re-run on the keyless code and
-passed (Gerard's call). One item's lower score was traced to known variance
+passed, and Gerard certified it. One item's lower score was traced to known variance
 in its model-judged scoring, not to the migration. Two things surfaced along the way.
 
-**A script the survey missed.** The M10 survey treated `m3_analyze.py` only as
-the place a key helper lived. It never looked at the script's own pipeline,
-which read two keys: a subscription key, and a storage SAS signed with the
+**A script that still read keys.** One script, `m3_analyze.py`, still read two
+keys in its own pipeline: an API key (the service's "subscription key"), and a
+storage SAS signed with the
 account key. Gerard chose to name it as a stated exception in M10's
 definition of done rather than leave the milestone quietly open. It was
-closed on Sep 23. The REST calls now use bearer tokens, and the SAS is signed
+closed the next day. The REST calls now use bearer tokens, and the SAS is signed
 with a user delegation key, which is decision (A), Gerard's.
-
-**A test that couldn't have failed the right way.** One planned M10 test said
-a 401 or 403 from AI Search would mean "the free tier doesn't support keyless
-sign-in". But the RBAC model deliberately gave no role on Search, so the test
-would have returned 403 for a missing role. That would have been read as a
-tier limit, pointing toward recreating Search on a paid tier: a one-way
-change with a monthly bill. The role was assigned first, and keyless Search
-then worked on the free tier.
 
 **Who was still reading the keys.** After the migration, `listKeys` calls
 kept arriving. The activity log showed why:
@@ -390,7 +398,7 @@ the agent's run and each of its three tools: `get_fact_sheet`,
 tracing on.
 
 **Evidence.** Before writing anything, the exact package set was installed
-offline, and the SDK's tracing code was read. It has a helper that creates an
+in a separate test environment, and the SDK's tracing code was read. It has a helper that creates an
 `execute_tool` span, **and nothing in the SDK calls it.** With message content
 recording off (it stays off, because the prompts carry the store's fact
 sheet), the tool names weren't recorded anywhere else either. Following the
@@ -398,19 +406,19 @@ docs would have produced a trace with every agent step and no named tools.
 
 **Fix.** The M7 orchestrator already wraps each tool in a helper, `logged()`,
 that records its inputs and outputs. It refuses to run if the wrapper changes
-the tool definitions the model sees. **Gerard decided (D-M14-7)** to add one
+the tool definitions the model sees. **Gerard decided** to add one
 span around that helper at startup, rather than accept unnamed tools. No
 certified file changed, and the orchestrator's own check proves the agent's
 tools didn't move. An offline negative control confirmed the check is live:
 a wrapper that hides the tool's signature is refused.
 
-**Result.** One traced upload on Oct 13 gave the correct item4 result, and 61
+**Result.** One traced upload gave the correct item4 result, and 61
 spans under a single operation ID. That's the host's request, the agent's
-steps, and `execute_tool get_fact_sheet` (0 ms), `evaluate_draft` (7.1 s) and
-`audit_thumbnail` (3.1 s), in that order. The trace answered a question the
-logs couldn't: about 10 of the 22.5 seconds the agent spent working were our
-own tools. Inside the 3.1-second image audit, the Vision call itself took 0.2
-seconds. One upload costs about 200 KB of log ingestion, 76 KB of it the new
+steps, and `execute_tool` spans for `get_fact_sheet`, `evaluate_draft` and
+`audit_thumbnail`, in that order. The trace answered a question the logs
+couldn't: about 10 of the 22.5 seconds the agent spent working were our own
+tools (7.1 seconds for the judge, 3.1 for the image audit). In that run, the
+Vision call itself took 0.2 seconds of the audit's 3.1. One upload costs about 200 KB of log ingestion, 76 KB of it the new
 spans.
 
 **What it still can't see.** The judge inside `evaluate_draft` reaches its
@@ -420,13 +428,13 @@ known gap from M7: token counts read from the agent leave out the judge's
 tokens (and the image audit's own vision calls).
 
 **Lesson.** When the docs and the installed code might disagree, read the
-code. It took minutes, and it changed what got built.
+code. Reading it changed what got built.
 
 ## Smaller findings worth recording
 
 - **Global Administrators bypass "assignment required."** An app set so
   only assigned users can sign in still lets a Global Admin through
-  (Microsoft's AADSTS50105 page). The sign-in gate was tested with a
+  (Microsoft documents this under sign-in error AADSTS50105). The sign-in gate was tested with a
   non-admin test user for that reason.
 - **Basic publishing credentials were on by default.** While checking which
   identity performed the first GitHub deploy, Gerard checked the Function's
@@ -437,11 +445,14 @@ code. It took minutes, and it changed what got built.
 - **Conditional Access and security defaults can't both be on.** Testing one
   app policy meant turning off the tenant-wide defaults first. Four baseline
   policies replaced them for the trial, and a break-glass Global Admin
-  account was created first. That account is excluded from every policy, and
-  its password is kept on paper.
-- **Private endpoints needed no NAT gateway.** With the Function inside the
-  VNet, outbound calls kept working. That was measured, and the mechanism
-  wasn't established.
+  account was created first. That account is excluded from every policy.
+- **A test that couldn't have failed the right way (M10).** One planned test
+  said a 401 or 403 from AI Search would mean "the free tier doesn't support
+  keyless sign-in". But the RBAC model deliberately gave no role on Search, so
+  the test would have returned 403 for a missing role, and been read as a tier
+  limit, pointing toward recreating Search on a paid tier: a one-way change
+  with a monthly bill. The role was assigned first, and keyless Search then
+  worked on the free tier.
 - **A queue metric couldn't drive the poison alert.** `QueueMessageCount` has
   no per-queue breakdown and refreshes daily (Microsoft Learn). So the alert
   is a log search on the host's own "moving message to the poison queue" line,
@@ -450,13 +461,13 @@ code. It took minutes, and it changed what got built.
 ## Known limits, stated plainly
 
 - **The private networking isn't running.** M12's private endpoints and
-  storage firewall were built, tested and torn down on Oct 12 to save cost
+  storage firewall were built, tested and torn down to save cost
   ($15.60 a month running, from Azure's retail price list). The VNet and its
   security groups stay, at $0. One Bicep parameter rebuilds the rest for a
-  demo. Today the storage firewall is open again.
-- **Conditional Access is temporary.** The Entra ID P2 trial ends on Nov 6.
-  The policies are deleted and security defaults turned back on before then
-  (C9, the week of Oct 26), and the exported policy files become the record.
+  demo. Today the storage account is back to its pre-M12 network settings.
+- **Conditional Access is temporary.** It runs on a 30-day Entra ID P2
+  trial. The policies are deleted and security defaults turned back on before
+  the trial ends, and the exported policy files become the record.
   *[Add the C9 result here.]*
 - **Key access is still on for the Foundry account** (case study 5).
   `disableLocalAuth` is in the backlog.
@@ -467,15 +478,13 @@ code. It took minutes, and it changed what got built.
   recorded as an accepted trade-off.
 - **AI Search is on the free tier.** It can't take a private endpoint, and its
   tier can't be changed after creation.
-- **The agent uses the classic Agents API, which retires on 2027-03-31.** The
+- **The agent uses the classic Agents API, which retires in March 2027.** The
   migration is planned and will rebuild the agent-level tracing and the
   agent's network isolation. The isolation design is costed (about $98 a
   month as a full private setup) and written up, not built.
 - **Two open questions are recorded, not answered:** why the alert email
   started working (case study 1), and why the first custom-role assignment
   took more than 65 minutes (case study 2).
-- **Dev and the public portfolio site share one subscription and one
-  credit,** with a spending limit as the brake.
 
 ## Lessons worth keeping
 
@@ -483,19 +492,26 @@ code. It took minutes, and it changed what got built.
   retry, poison and alert paths all looked fine until a failure was caused on
   purpose (case studies 1 and 2).
 - **A test has to be able to fail for the reason it's looking for.** The
-  Search test would have read a missing role as a tier limit. The `.txt`
-  re-fire couldn't fail at all.
-- **Saved isn't applied.** A setting confirmed in a list proves it was saved,
-  not that the running service obeys it. Check the effect (case study 1).
+  Search test would have read a missing role as a tier limit (Smaller
+  findings).
 - **Present isn't sufficient.** The right role at the wrong scope fails
   exactly like no role (case study 3).
 - **Treat "noise" as a list to check** (case study 4).
 - **Check what the identity can do, not just what the code does** (case study
   5).
 - **Read the code when the docs might be wrong** (case study 6).
-- **Price it before building it.** Every build in this phase was costed from
-  Azure's retail price list first, and the cost of tearing down and
+- **Price it before building it.** Every build that added cost was priced
+  first, from Azure's retail price list, and the cost of tearing down and
   rebuilding was part of the networking decision.
+
+## After Phase 2
+
+- **The AI-103 exam.**
+- **Moving the agent to Microsoft's new Agents API,** before the classic API
+  retires. The agent's network isolation, designed and costed in M12, gets
+  built as part of that move.
+- **Turning key authentication off on the Foundry account,** the open step
+  from case study 5.
 
 ## How this was built
 
@@ -505,40 +521,33 @@ divided on purpose, as in Phase 1.
 **Gerard** made the design decisions, often choosing among options Claude laid
 out, and did all of the Azure, CLI, portal and git work: every what-if,
 deploy, test, upload and query. Recorded decisions include:
-- amending M8's definition of done to the register standard (Sep 21);
-- naming M3's key use as a stated exception rather than leaving M10 open
-  (Sep 22), then decision (A), a user delegation SAS (Sep 23);
-- the queue design (Sep 23), and the M11 build choices: remote build, Python
-  3.14, the topic as blob metadata, one agent per upload (Sep 24);
-- widening the Event Grid grant to the account (Sep 24);
+- amending M8's definition of done to the register standard;
+- naming M3's key use as a stated exception rather than leaving M10 open,
+  then decision (A), a user delegation SAS;
+- the queue design, and the M11 build choices: remote build, Python
+  3.14, the topic as blob metadata, one agent per upload;
+- widening the Event Grid grant to the account;
 - a custom queue role reached in two stages, rather than the broader built-in
-  role (Sep 25);
-- 7-day soft delete for blobs and containers (Sep 29);
-- the group-based sign-in gate, and starting the P2 trial (Oct 7);
+  role;
+- 7-day soft delete for blobs and containers;
+- the group-based sign-in gate, and starting the P2 trial;
 - which private endpoints to build, and to tear them down after the evidence
-  window (Oct 9);
+  window;
 - building the agent's network isolation inside the API migration rather than
-  now (Oct 10);
+  now;
 - the order of M14's parts, trusting only the `main` branch for deploys, the
-  alert frequency, the lean tracing packages, and naming each tool call
-  (Oct 12-13).
+  alert frequency, the lean tracing packages, and naming each tool call.
 
 He also caught problems himself:
-- unregistered what-if diffs and an empty queue check (Sep 25);
-- a deprecated role that Claude had wrong (Sep 22);
-- a session handoff that never reached the repo (Sep 23);
-- the reason the weekly scheduled task had stopped running (Oct 12).
+- unregistered what-if diffs and an empty queue check;
+- a deprecated role that Claude had wrong.
 
-He also pushed back on certifying data whose history was in question (Sep
-22), which surfaced two provenance gaps.
+He also pushed back on certifying data whose history was in question, which
+surfaced two provenance gaps.
 
 **Claude** wrote the Bicep, the Function code, the tracing setup, the probe
 and test scripts, the commands Gerard ran, and the documentation drafts,
-including this page. Claude also made these errors, among others:
-- the queue-scoped Event Grid grant (case study 3);
-- the first alert proof upload, which left out the topic and so couldn't fail;
-- the `.txt` re-fire (case study 1);
-- several wrong "expected output" lines in commands on Sep 25.
+including this page.
 
 Where the project log doesn't record who did something, this page doesn't
 say.
@@ -559,4 +568,4 @@ say.
 | Regression uploads (item4) | `scripts/results/*_function_item4_*.json` (CA001 On; M12 stages 2 and 3; teardown; OIDC; tracing) |
 | Case study 1 (alerts) | `m14-prep.md`, Part 2 and "the delivery fault" |
 | Case study 6 (tracing) | `m14-prep.md`, Part 3, "the build and the run" |
-| Full session log | `STATUS.md` (Sep 21 - Oct 13) |
+| Full session log | `STATUS.md` (the Phase 2 entries) |
