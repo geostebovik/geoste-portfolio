@@ -1,4 +1,4 @@
-# M7 — An Azure AI Foundry agent that checks its own work
+# An Azure AI Foundry agent that checks its own work
 
 <!--
 DRAFT, NOT FOR PUBLICATION. Written 2026-09-15, reworked 2026-09-16.
@@ -64,6 +64,13 @@ Gerard helped catch (the 15-run analysis error, exposed by his 45-run
 decision). Cut: decision 3's "both of its bugs were Claude's", the
 "regressed on Claude's bugs" clause, and the three-item errors list.
 
+GERARD'S EDIT, 2026-10-13 (2): "In short" bullet 4, "Most of the work" became
+"Much of the work" (unmeasured; matches the Phase 2 page). The outside-reader
+email draft was updated to match.
+
+GERARD'S EDIT, 2026-10-13 (3): title drops "M7", which means nothing
+outside the project. Phase 2's title changed the same day.
+
 STILL OPEN BEFORE PUBLISHING:
 - Outside readers for "In short".
 - At publish time: an "On this page" link list at the top, and the evidence
@@ -97,7 +104,7 @@ bullets 2 to 4 because their figures changed; he approved them the same day.
   remove it from the line where the audit explains its brand verdict (40 of
   45, then 34 of 45). The verdicts are right, the word is wrong, and the agent repeats
   it in its summary. It is an open flaw, and this page says so.
-- **What it's really about:** deciding what to trust. Most of the work on
+- **What it's really about:** deciding what to trust. Much of the work on
   this milestone went into finding out when a result could be believed,
   including several times when a good-looking number turned out to be wrong.
 

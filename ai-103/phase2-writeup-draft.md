@@ -1,4 +1,4 @@
-# Phase 2: taking the M7 agent from a laptop to an operated Azure app
+# Taking the agent from a developer's machine to an app running in Azure
 
 <!--
 DRAFT, NOT FOR PUBLICATION. First draft written 2026-10-13.
@@ -45,6 +45,8 @@ GERARD'S EDITS, 2026-10-13 (Claude applied them):
   operational details about the live tenant (where the break-glass password
   is kept, the storage firewall's state, how the subscription is funded).
 - Added (Gerard's idea): "After Phase 2", undated intent only.
+- Title (Gerard): no "M7"; "laptop" became "a developer's machine" to
+  match bullet 1. M7's title dropped "M7" the same day.
 
 STILL OPEN BEFORE PUBLISHING:
 - M13's rollback (C9, the week of 2026-10-26): add one closing line to the
