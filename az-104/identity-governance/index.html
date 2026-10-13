@@ -306,6 +306,12 @@
       border: 1px solid rgba(167, 139, 250, 0.2)
     }
 
+    .tag-xref {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--teal);
+      border: 1px solid rgba(45, 212, 191, 0.2)
+    }
+
     .project-title {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 1.3rem;
@@ -382,9 +388,12 @@
       gap: 0.75rem
     }
 
+    /* Block, not flex: as a flex container every child (bold lead, text,
+       code) became its own column. Fixed 2026-10-13. */
     .decision-list li {
-      display: flex;
-      gap: 0.75rem;
+      display: block;
+      position: relative;
+      padding-left: 1.5rem;
       font-size: 0.85rem;
       font-weight: 400;
       color: var(--text-secondary);
@@ -393,10 +402,11 @@
 
     .decision-list li::before {
       content: '→';
+      position: absolute;
+      left: 0;
+      top: 0.05rem;
       font-family: 'IBM Plex Mono', monospace;
-      color: var(--orange);
-      flex-shrink: 0;
-      margin-top: 0.05rem
+      color: var(--orange)
     }
 
     .tech-list {
@@ -1171,6 +1181,118 @@
                     alt="Delete lock blocking deletion" loading="lazy" />
                   <div class="screenshot-caption">Delete lock — deletion blocked</div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IIP — identity work from the AI-103 build (cross-reference, added 2026-10-13) -->
+      <div class="project-card reveal" id="p-iip">
+        <div class="project-header" onclick="toggleCard('p-iip')">
+          <div class="project-num">IIP</div>
+          <div class="project-meta">
+            <span class="project-tag tag-xref">From the AI-103 build</span>
+            <div class="project-title">Identity for a Production-Shaped AI App</div>
+            <div class="project-subtitle">Three managed identities · keyless sign-in · custom role · secretless deploys
+              and sign-in · group-gated app · Conditional Access under a trial licence</div>
+          </div>
+          <span class="project-toggle">▾</span>
+        </div>
+        <div class="project-body">
+          <div class="project-body-inner">
+            <div>
+              <div class="body-section-label">Overview</div>
+              <p class="body-text">
+                Not an AZ-104 lab: this is the identity layer of Phase 2 of the AI-103 build, the Intelligent
+                Insights Platform (IIP). An upload triggers an Azure Function that runs an AI agent, and the result
+                appears on a web page behind Entra ID sign-in. Nothing in it uses a password, an account key or a
+                client secret. Every identity has a written job, and every role is a row in a written RBAC model
+                (18 rows) that was tested rather than assumed.
+              </p>
+
+              <div class="body-section-label">Identities and what they can do</div>
+              <table class="policy-table">
+                <thead>
+                  <tr>
+                    <th>Identity</th>
+                    <th>Job</th>
+                    <th>Access</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>id-iip-dev-wus-01</td>
+                    <td>The Function's runtime identity</td>
+                    <td>The upload queues (one custom role), its storage, Foundry, telemetry</td>
+                  </tr>
+                  <tr>
+                    <td>id-iip-dev-wus-02</td>
+                    <td>GitHub Actions deploys, over OIDC</td>
+                    <td>Website Contributor on the Function only; trusts branch <code>main</code> only</td>
+                  </tr>
+                  <tr>
+                    <td>id-iip-dev-wus-03</td>
+                    <td>The results page's sign-in</td>
+                    <td>A federated credential on the app registration, in place of a client secret; no Azure roles</td>
+                  </tr>
+                  <tr>
+                    <td>Event Grid system topic</td>
+                    <td>Turns uploads into queue messages</td>
+                    <td>Queue Data Message Sender, at account scope (see Key Design Decisions)</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="info" style="margin-top:1.25rem;">
+                <div class="info-label">Keyless code isn't the same as a keyless account</div>
+                <p>Every script and the Function sign in with Entra ID, with 12 call sites moved off keys. But the
+                  Function's Foundry role still includes the permission to <em>list</em> the account keys, and a
+                  Visual Studio Code was found fetching them, in pairs, every 14 minutes 42 seconds. The step that
+                  makes a fetched key useless is turning key authentication off on the account. That's logged as
+                  the next step, not claimed as done.</p>
+              </div>
+
+              <a class="diagram-link" href="/ai-foundry/">
+                <span class="diagram-link-icon">⬡</span>
+                The full build, on the AI page
+              </a>
+            </div>
+
+            <div>
+              <div class="body-section-label">Key Design Decisions</div>
+              <ul class="decision-list">
+                <li><strong>A custom role, because the documented minimum failed</strong>. With Microsoft's documented
+                  roles for a queue trigger, failed uploads retried after 10 minutes instead of 1. The stack trace
+                  showed a 403 on Update Message, which needs a permission neither role has. A custom role holding
+                  just what the trigger needs fixed it, instead of the broader built-in Contributor, and a test with
+                  and without it proved it.</li>
+                <li><strong>Scope is where the service checks</strong>. Event Grid failed three times with the correct
+                  role on the right queue. It checks the identity against the storage <em>account</em> when it creates
+                  the subscription, so the grant moved to the account, and the trade-off is written down.</li>
+                <li><strong>Group-gated, tested with a non-admin</strong>. Only members of one security group can sign
+                  in to the results app. Global Administrators bypass "assignment required", so the gate was tested
+                  with an ordinary test user.</li>
+                <li><strong>Conditional Access, under a 30-day Entra ID P2 trial</strong>. One app policy requires
+                  phishing-resistant MFA (an authentication strength) for the results page. Turning off security
+                  defaults meant replacing them with four baseline policies, and creating a break-glass Global Admin
+                  first, excluded from every policy. Six sign-in tests passed with the policy On, and the policies were
+                  exported. They're scheduled to be rolled back, with security defaults restored, before the trial ends.</li>
+                <li><strong>Secretless deploys</strong>. GitHub Actions signs in over OIDC, so no secret is stored
+                  anywhere. Checking the first deploy turned up basic publishing credentials still on by default; they
+                  were switched off.</li>
+              </ul>
+
+              <div class="body-section-label" style="margin-top:1.25rem;">Technologies</div>
+              <div class="tech-list">
+                <span class="tech-pill">Managed Identity</span>
+                <span class="tech-pill">Workload Identity Federation</span>
+                <span class="tech-pill">Custom Roles</span>
+                <span class="tech-pill">Conditional Access</span>
+                <span class="tech-pill">Authentication Strength</span>
+                <span class="tech-pill">Break-glass Account</span>
+                <span class="tech-pill">App Registration</span>
+                <span class="tech-pill">Least Privilege</span>
               </div>
             </div>
           </div>
