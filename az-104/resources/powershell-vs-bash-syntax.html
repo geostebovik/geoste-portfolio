@@ -342,6 +342,36 @@
     }
     .back-link:hover, footer a:hover { color: var(--text); }
     footer a { color: inherit; text-decoration: none; }
+
+    /* Phones (2026-10-14): both tables were wider than the screen (824px and
+       685px on a 390px phone), so the whole page scrolled sideways. Below
+       700px each row becomes a card: the cells stack, the header row is
+       hidden, and in the comparison table each code cell is labelled with
+       its shell, in that shell's colour. Desktop is unchanged. */
+    @media (max-width: 700px) {
+      .ref-table, .ref-table tbody, .ref-table tr, .ref-table td { display: block; width: 100% !important; }
+      .ref-table thead { display: none; }
+      .ref-table tr { border-bottom: 1px solid var(--border); }
+      .ref-table tr:last-child { border-bottom: none; }
+      .ref-table td { border-bottom: none; padding: 6px 14px; }
+      .ref-table td:first-child { padding-top: 14px; }
+      .ref-table td:last-child { padding-bottom: 14px; }
+      .ref-table td.section-label { padding: 12px 14px; }
+      .ref-table code { white-space: normal; overflow-wrap: anywhere; }
+      .ref-table.compare td.ps-code::before,
+      .ref-table.compare td.bash-code::before {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .ref-table.compare td.ps-code::before { content: "PowerShell"; color: var(--ps-accent); }
+      .ref-table.compare td.bash-code::before { content: "Bash"; color: var(--bash-accent); }
+      /* the two pipeline cards were side by side, 19px too wide at 360px */
+      .pipeline-box { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 
@@ -369,7 +399,7 @@
     </div>
 
     <!-- Core table -->
-    <table class="ref-table">
+    <table class="ref-table compare">
       <thead>
         <tr>
           <th style="width:13%">Frequency</th>

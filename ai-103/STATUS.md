@@ -741,9 +741,17 @@ Expected, or the step says it's unsure.
   was out of date. Instead, 4 dead-end pages now link back to the site: the
   Phase 2, 3 and 4 guides (header links to home and to their section) and
   PowerShell vs Bash (a link to Resources at the top and bottom). Rendered at
-  360, 390 and 1280px with no overflow. **Found, not fixed:** PowerShell vs
-  Bash is 848px wide on a phone. It already was before today. Logged in
-  Todoist.
+  360, 390 and 1280px with no overflow.
+- **Portal Steps (found by Gerard on his phone):** in all 3 guides each step
+  row was laid out as columns (`display: flex`), so text was cut off on
+  phones, and on desktop in Phase 3 and 4. Fixed with CSS only (`ccffe72`).
+  Test of all 92 steps at 360, 390 and 1280px: 0 clipped. **Lesson
+  (Claude's):** the first test only checked whether the page scrolled
+  sideways, not whether content was cut off inside a box. Test for both.
+- **PowerShell vs Bash** was 848px wide on a phone (its two tables, plus the
+  pipeline cards at 360px). Below 700px the table rows now stack as cards,
+  with each code cell labelled PowerShell or Bash. Fits at 360 and 390px.
+  Desktop is pixel-identical to before.
 
 ### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 
