@@ -174,9 +174,8 @@ so check the retail price list before choosing the frequency.
   and 111% forecast **straight to an address, with no action group**
   (`contactGroups` empty). The address is Gerard's backup inbox, which he uses
   for low-priority mail (Gerard, Oct 12). It's left as it is. Claude's note,
-  not a decision: this is the only warning before credit exhaustion disables
-  the subscription that also hosts ostebovik.net (spending limit on), so a
-  second address costs nothing.
+  not a decision: this is the only cost warning for the subscription that
+  also hosts ostebovik.net, so a second address costs nothing.
 - **No metric alerts, and one action group:** the auto-created "Application
   Insights Smart Detection", with 0 email receivers. Before today, nothing
   would have told anyone the app was broken.

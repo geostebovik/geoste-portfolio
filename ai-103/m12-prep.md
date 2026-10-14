@@ -26,7 +26,7 @@ the way `m11-prep.md` did for M11.
 
 For comparison, the scopes not chosen: A + Key Vault $23.40/month; A + Key
 Vault + host storage (blob, queue, table) $45.80/month. The last full billing
-cycle (Aug 18 - Sep 17) was $69.16 of the ~$150 credit.
+cycle (Aug 18 - Sep 17) was $69.16.
 
 **Sources:** `prices.azure.com` retail API: "Virtual Network Private Link"
 (Standard Private Endpoint $0.01/hour; data processed $0.01/GB, first tier)
@@ -327,7 +327,7 @@ Prices: Azure retail price list, westus, read 2026-10-10. A month = 730 hours.
 | **Per month** | **$8.80** | **about $98** |
 | One-off work | One stage, about an hour; the tower's scripts keep working through the IP rule | New account and subdomain, model deployments, every script's endpoint, the acceptance test re-run; tied to the classic-API migration |
 
-For scale: B is about 65% of the ~$150 monthly credit, and AI Search Basic is
+For scale: B is about $98 a month, and AI Search Basic is
 three quarters of B. **But everything in B bills by the hour**, like this
 week's endpoints: about **$3.25 a day**, so a one-week proof of concept would
 be about $23. Money isn't the real cost; the work is. *(Added after Gerard

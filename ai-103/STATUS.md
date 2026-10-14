@@ -355,6 +355,12 @@ Harmless so far; the instance-id follow-up would tell them apart.
   regression upload and `probe_keyless_smoke.py` 9/9. **Don't re-test.** The
   register is unchanged: 6 modify, 32 no change, 11 Unsupported, 2 to ignore.
   Record: `infrastructure/iip/README.md`, "Keys off".
+- **Public repo rule** (Gerard, 2026-10-14): the repo and the site are public,
+  so no tracked file or site page names the subscription's offer type, its
+  billing details or its full ID. Say "the lab subscription" and "cost
+  controls". The details live in Todoist and in
+  `docs/MASTER-REFERENCE.md` (gitignored). Git history still holds the old
+  text; rewriting history was not chosen.
 - **Device file writes, a third way to fail** (2026-10-14): one of three files
   in a single commit call came back unchanged, although the call reported it
   written. The staging path had never been used before, so a fresh path alone
@@ -771,6 +777,15 @@ Expected, or the step says it's unsure.
   every card.
 - **Found, not fixed (Todoist):** the compute comparison reference is 515px
   wide on a phone, and one table in the Phase 4 guide is cut off.
+- **Subscription offer details taken out of the public repo and site**
+  (Gerard asked; Claude searched and reworded). A search of 177 tracked text
+  files found them in 2 live pages (the offer type in a scope label on
+  Identity & Governance; the full ID in the Phase 4 guide's bootstrap script,
+  now `"<your-subscription-id>"`), an offer-specific line on Compute &
+  Storage, and 7 docs (billing details). All reworded. Kept
+  on purpose: the truncated `343a8a7e-...` on the IaC page, its Project 11
+  write-up and the RBAC model (an 8-character prefix that names no offer).
+  Git history is unchanged (Gerard's choice). The rule is under "Settled".
 
 ### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 
@@ -1181,7 +1196,7 @@ spec's "Progress, 2026-10-08"):
 **`AzSvcAdmin@ostebovik.net` (item 5 of yesterday's next action), closed
 off.** Its only sign-ins (non-interactive, Oct 6 7:56-8:00 PM) were one Edge
 browser profile starting up, from the home network's IPv6 range (Cox). Gerard
-didn't recognize it; created 2026-01-10. It held **Owner on VSE, Owner and
+didn't recognize it; created 2026-01-10. It held **Owner on the lab subscription, Owner and
 Contributor on MG Non-Prod, and Storage Blob Data Contributor on
 `stgeostewus301`** (the likely reason it existed: manual site uploads).
 Nothing in `geoste-portfolio` references it except STATUS.md. No Entra roles.
@@ -1286,7 +1301,7 @@ decision and ran every step.
   and an abandoned genealogy site). Removed: 9 users and 6 app registrations
   (soft delete, restorable until about Nov 6), 4 empty security groups
   (permanent), and 8 role assignments. Among them is `familytree-api-01881`'s
-  **Contributor on the whole VSE subscription with a live secret**, the
+  **Contributor on the whole lab subscription with a live secret**, the
   tenant's biggest standing risk. The dry run said 26 actions where Claude's
   message had said 31: Claude's arithmetic, and Gerard stopped before
   `-Apply` to ask. One delete hit the ReadOnly lock `Not4Deployment` on Legacy
@@ -1313,12 +1328,13 @@ decision and ran every step.
 diagnoses below; Gerard ran every command, made every decision named here,
 and reworked the resume himself (`bcf7858`, in his job-search work).
 
-**VS Enterprise subscription risk, sized** (read-only; Gerard ran it):
-- The **whole ostebovik.net prod stack** is on `343a8a7e` (quotaId
-  `MSDN_2014-09-01`, spending limit On), so the public site depends on the
-  benefit.
-- Last cycle (Aug 18 - Sep 17) cost **$69.16** of the ~$150 credit. Front
-  Door is ~$32 of each cycle, so the site on pay-as-you-go would be ~$35-40/mo.
+**Subscription risk, sized** (read-only; Gerard ran it):
+- The **whole ostebovik.net prod stack** is on the same subscription as the
+  labs, so the public site depends on that subscription staying available.
+- Last cycle (Aug 18 - Sep 17) cost **$69.16**. Front Door is ~$32 of each
+  cycle, so the site on a subscription of its own would be ~$35-40/mo.
+*(Reworded 2026-10-14: the offer details are kept out of the public repo.
+The full record is in the Todoist task on this risk.)*
 - Three pay-as-you-go subscriptions exist in the tenant, **all empty**.
   Fallback plan and the move-or-wait decision: Todoist.
 
@@ -1377,7 +1393,7 @@ the repo: it names users and object IDs.
 - **Every IIP identity and assignment maps to an RBAC model row.**
 - **Only one Global Administrator**, with a permanent assignment and no
   break-glass account. Fix before M13.
-- `familytree-api-01881` has **Contributor on the whole VSE subscription** and
+- `familytree-api-01881` has **Contributor on the whole lab subscription** and
   a live client secret. It's the largest standing risk in the tenant.
 - letter7.net is a **verified** domain with 4 users on it, so the
   registration matters.
@@ -1492,8 +1508,8 @@ SSH key.
 - **`az` identity: correct.** Gerard thought he had picked the wrong account at
   `az login`. The check showed `djeemunee@letter7.onmicrosoft.com`, tenant
   `e0249b00-…`, object ID `fdc0b6bb-…`. Both IDs match `dev.bicepparam`.
-  "VSE Sandbox" is simply the subscription's display name. No re-login was
-  needed.
+  The unfamiliar subscription name was simply its display name. No re-login
+  was needed.
 - **Noticed, not chased:** the full role list shows **Foundry User at the
   account scope** (`aif-dev-wus-01`), where the D1 correction table says
   subscription. It also shows **Search Index Data Reader and Contributor** on

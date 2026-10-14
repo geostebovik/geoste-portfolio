@@ -197,8 +197,8 @@ Gerard.
 - **Raised `gpt-5-4` and `gpt-5-4-mini` to 300K TPM** in the portal. He
   checked the dialog's range first and verified each step with the CLI. He
   also challenged the two-step plan ("why set a task to do this a second
-  time?"), after confirming that the spending limit and a $90 budget alert
-  are in place.
+  time?"), after confirming that the subscription's cost controls, including
+  a $90 budget alert, are in place.
 - **Accepted the `[content]` colour flaw as a stated limit** rather than
   fixing it ("perfect is the enemy of good"). Revisit only if an outside
   reader flags it, or if certification reopens for another reason. This
@@ -270,9 +270,9 @@ live test.
   - **Why the second raise.** Gerard asked why the quota should be set twice
     when parallel runs would need about 300K anyway. The only thing given
     up is the TPM ceiling as a brake on a runaway loop. The subscription
-    already has a hard brake: its spending limit is on (Gerard confirmed
-    this), and a $90 budget alert is set. The credit resets on the 17th of
-    each month, and subscription-wide spend stood at $63.64 on Sep 16.
+    already has a hard brake: its cost controls are on (Gerard confirmed
+    this), and a $90 budget alert is set. The billing cycle resets on the
+    17th of each month, and subscription-wide spend stood at $63.64 on Sep 16.
   - **Activity log:** the `gpt-5-4` write succeeded at 18:19:31 UTC, made by
     Gerard's account.
   - **Dialog range:** it offered up to 1000K.
@@ -333,11 +333,11 @@ review is in the Claude project doc `claude/2026-09-16-phase2-plan-review.md`.
 - **Conditional Access** will be deployed through a timed 30-day Entra ID P2
   trial in the real tenant. Gerard pointed Claude to the M365 Developer
   Program FAQ, which confirms that the E5 sandbox includes Entra ID P1 and P2
-  and that Visual Studio Enterprise subscribers qualify. The sandbox was
+  and that Gerard's subscription type qualifies. The sandbox was
   still rejected:
   - it is a separate tenant;
   - it requires a Microsoft Customer Agreement billing account;
-  - any linked Azure subscription must have its spending limit removed;
+  - it would have required changing the lab subscription's cost controls;
   - it is licensed for development only.
 
 **Findings:**
@@ -375,8 +375,8 @@ entry-checklist item.
   - the 30-day clock starts at signup;
   - it auto-converts to a paid one-year subscription ($10.50 per user per
     month);
-  - the charge is billed through Microsoft 365, so the Azure spending limit
-    won't stop it.
+  - the charge is billed through Microsoft 365, so the Azure subscription's
+    cost controls won't stop it.
 
   Turn recurring billing off immediately after signup. There is a Todoist
   task for this.

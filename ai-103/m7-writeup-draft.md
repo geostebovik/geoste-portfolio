@@ -71,6 +71,12 @@ email draft was updated to match.
 GERARD'S EDIT, 2026-10-13 (3): title drops "M7", which means nothing
 outside the project. Phase 2's title changed the same day.
 
+CLAUDE'S EDIT, 2026-10-14 (Gerard approved the rule): three mentions of a
+billing-specific term became "cost controls" (the skills table, Operator
+notes, How this was built). The term only exists on some subscription
+offers, so it said how the lab is funded, which this public page leaves
+out.
+
 STILL OPEN BEFORE PUBLISHING:
 - Outside readers for "In short". Requests went out 2026-10-13, and one reply
   is in. The full record, and Gerard's decision on how to handle it, is in
@@ -153,7 +159,7 @@ AI-103 study guide (skills measured as of April 16, 2026):
 | Generative AI and agentic solutions (30–35%) | Build agents that integrate function-calling; implement self-critique loops | The orchestrator agent, its three tools, and its check-and-redraft loop (Architecture; decision 5) |
 | Generative AI and agentic solutions (30–35%) | Evaluate models and apps, including detecting fabrications | The groundedness and relevance judge (decisions 4 and 5) |
 | Computer vision (10–15%) | Enforce visual policy rules, such as upholding brand usage requirements | The thumbnail audit's brand check (decisions 1 and 6) |
-| Plan and manage an Azure AI solution (25–30%) | Manage quotas, scaling, rate limits and cost footprints | Model quota sized against measured load, with a spending limit as the cost brake (Operator notes) |
+| Plan and manage an Azure AI solution (25–30%) | Manage quotas, scaling, rate limits and cost footprints | Model quota sized against measured load, with the subscription's cost controls as the brake (Operator notes) |
 
 ## Architecture
 
@@ -206,8 +212,8 @@ missing RBAC role on the project would show up there first.
   itself; it is now 300K for the two models M7 uses. That leaves room to
   run test items in parallel, and it costs nothing extra per token. What a
   ceiling also does is limit how fast a runaway loop can spend, so the
-  raise was made only because the subscription already has a spending
-  limit and a budget alert.
+  raise was made only because the subscription already has cost controls
+  in place, including a budget alert.
 
 ## Seven decisions worth showing
 
@@ -494,7 +500,7 @@ Sep 15 and 16 he made these calls:
 - to approve the one-change docstring test and the hang guards;
 - to measure the colour question again before writing about it;
 - to raise the model quota in one step rather than two, relying on the
-  subscription's spending limit as the cost brake.
+  subscription's cost controls as the brake.
 
 **Claude** wrote the Python: the orchestrator, the tool wrappers, the probe
 scripts, the provenance modules, the hang guards and the analysis scripts.

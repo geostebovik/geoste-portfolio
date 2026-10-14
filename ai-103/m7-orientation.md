@@ -1433,9 +1433,9 @@ session's narrative paragraph in `STATUS.md`.
   hour. The CLI shows capacity 300 for both. `gpt-5-2` (30K) and
   `text-embedding-3-small` (10K) are unchanged. 300K is this entry's own
   recommended value, set now so parallelising needs no second quota change.
-  **Why the brake can go:** the subscription's spending limit is on, and a
-  $90 budget alert is set (Gerard, Sep 16), so a runaway loop is capped by
-  the credit rather than by TPM. **Resolved:** the 1M pool is per model.
+  **Why the brake can go:** the subscription's cost controls are on,
+  including a $90 budget alert (Gerard, Sep 16), so a runaway loop is capped
+  by those rather than by TPM. **Resolved:** the 1M pool is per model.
   Each model's pane showed its own 1M with only its own allocation
   deducted, which matches Microsoft's per-region, per-model,
   per-deployment-type quota. **Still true:** the raise alone does not speed
