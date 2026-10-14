@@ -214,6 +214,16 @@ pre.cli { background: #0d1117; border: 1px solid var(--border); border-radius: 0
 /* On a phone the header ran out of room and wrapped to three lines (it
    already wrapped before the links were added). Keep the links on one line
    and drop the minor text; the phase badge stays. Tested at 390px. */
+/* Portal steps (2026-10-14): each .step-item was display:flex, so every run of
+   text and every .code box became its own column. On a phone the last column
+   ran off the edge and was unreadable. The step text now flows as one
+   paragraph, with the number pinned on the left. Long resource names may wrap
+   on phones instead of pushing past the edge. */
+.step-item { display: block; position: relative; padding-left: 52px; }
+.step-item .step-num { position: absolute; left: 16px; top: 14px; margin-top: 0; }
+@media (max-width: 600px) {
+  .step-item .code { white-space: normal; overflow-wrap: anywhere; }
+}
 @media (max-width: 600px) {
   .site-header { padding: 0 1rem; gap: 12px; }
   .logo { white-space: nowrap; font-size: 11px; }
