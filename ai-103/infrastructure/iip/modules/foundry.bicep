@@ -43,6 +43,17 @@ resource foundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   }
   properties: {
     customSubDomainName: customSubDomainName
+    // KEYS OFF (2026-10-14, Gerard's decision; Claude wrote it). Entra ID is
+    // the only way in: a key fetched with listKeys is refused (HTTP 401). M10
+    // took keys out of the code; this takes them out of the account, which is
+    // what makes "keyless" true for anyone holding Foundry User (its actions
+    // include accounts/listkeys/action). Consumers checked first: no tracked
+    // script or Function code reads a key (grep, 2026-10-14). The known
+    // casualty is VS Code's 14m42s listKeys poll, which is intended.
+    // Undo: set false and redeploy. The gateway can take minutes to hours to
+    // pick up a change either way (Microsoft Learn, "Disable local
+    // authentication in Foundry Tools").
+    disableLocalAuth: true
     allowProjectManagement: true
     publicNetworkAccess: 'Enabled'
     // defaultProject and associatedProjects are WRITABLE in the 2025-06-01
@@ -106,8 +117,9 @@ resource deployments 'Microsoft.CognitiveServices/accounts/deployments@2025-06-0
   }
 ]
 
-// NOT declared, deliberately: disableLocalAuth. Unset on the live account,
-// so keys still work. M10 owns that switch.
+// disableLocalAuth: DECLARED since 2026-10-14 (true; see the account above).
+// Until then it was deliberately left undeclared, with keys still working,
+// pending the decision recorded in phase2-orientation.md's Phase 2 Backlog.
 //
 // NOT declarable at all: properties.armFeatures on the account (the RAI legal
 // terms record) and kind / agentIdentity / internalId / isDefault / endpoints

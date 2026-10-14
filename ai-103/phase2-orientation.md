@@ -342,8 +342,15 @@ closed.)*
   permissions change — the access is reasonable for a single-admin lab, but the
   RBAC model is resume material and currently understates the privilege it is
   meant to disclose.
-- **`disableLocalAuth` on the Foundry account — this is what makes M10 mean
-  something.** Found 2026-09-22 while reading the Foundry User role definition
+- ~~**`disableLocalAuth` on the Foundry account — this is what makes M10 mean
+  something.**~~ **DONE 2026-10-14** (`p2-keysoff-20261014`; Gerard decided
+  and ran it, Claude wrote it). The old key was refused (HTTP 403
+  `AuthenticationTypeDisabled`), `listKeys` now fails, and the regression upload
+  plus `probe_keyless_smoke.py` (9/9) passed. Record:
+  `infrastructure/iip/README.md`, "Keys off". **Still open, separately:**
+  shared-key access on `stiipdevwus01` (`allowSharedKeyAccess`, unset) and key
+  access on AI Search. Each is its own decision and test. The original note
+  follows. Found 2026-09-22 while reading the Foundry User role definition
   (`53ca6127-db72-4b80-b1b0-d745d6d5456d`). Its `actions` include
   `Microsoft.CognitiveServices/accounts/listkeys/action`, so an identity
   granted Foundry User *for keyless operation* can still retrieve the account

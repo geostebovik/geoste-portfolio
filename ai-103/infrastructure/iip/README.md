@@ -558,6 +558,47 @@ plus 2 creates, exactly. Proven by a deliberate poisoned upload (poison line
 action group executes every time; **the emails for real alerts haven't
 arrived** while a portal test email did (open item; `m14-prep.md`, Part 2). **Register now: 6 modify, 32 no change, 11
 Unsupported, 2 to ignore**, confirmed by a what-if after the deploy.
+*(Note added 2026-10-14: the alert-email fault was closed on 2026-10-13, see
+`../../m14-prep.md`, "the delivery fault". Real alert emails now arrive.)*
+
+## Keys off — `disableLocalAuth` on the Foundry account (2026-10-14)
+
+Gerard decided it and ran every command; Claude wrote the Bicep and the
+commands and read every result. Deployment `p2-keysoff-20261014`.
+- **Change:** `modules/foundry.bicep` declares `disableLocalAuth: true` on
+  `aif-dev-wus-01`. That's one property, and nothing else changed.
+- **Before the change:** no tracked script or Function code reads a key (a
+  grep by Claude). The account and the project have no connections at all
+  (`az rest … /connections`, `[]` for both). A key fetched before the deploy
+  returned HTTP 200 from `/openai/models`.
+- **What-if:** the register's totals unchanged, **6 modify, 32 no change, 11
+  Unsupported, 2 to ignore**, as predicted. The account was already a Modify
+  (its registered `- properties.armFeatures`), so the new `+
+  properties.disableLocalAuth: true` line couldn't change the count. Only the
+  totals were recorded, not the line itself. The read-back below confirms the
+  change.
+- **Read back:** `properties.disableLocalAuth` = `true`.
+- **Negative control:** the same key was refused with **HTTP 403**
+  `{"error":{"code":"AuthenticationTypeDisabled","message":"Key based
+  authentication is disabled for this resource."}}`. It was refused at the
+  first check after the deploy, with no propagation wait seen. **Learn's "Disable
+  local authentication" page says 401. The service returns 403.** Gerard
+  stopped on the mismatch, and the error text settled it.
+- **`listKeys` now fails:** `(BadRequest) Failed to list key. disableLocalAuth
+  is set to be true`. VS Code's 14m42s poll now gets an error instead of a
+  key, and any `listKeys` in the activity log from now on is a failed
+  attempt.
+- **Positive controls:** a regression upload,
+  `item4-keysoff-20261014.png` → `20261014-171536_function_item4_keysoff.json`,
+  first delivery, about 46 s. Item4's answer key: copy passed first time (0
+  redrafts), audit legible PASS / brand FAIL / accurate PASS, the same three
+  tools. Also `probe_keyless_smoke.py`: 9/9 PASS.
+- **Expected from now on:** the register is unchanged, **6 modify, 32 no
+  change, 11 Unsupported, 2 to ignore**. `aif-dev-wus-01` shows only `-
+  properties.armFeatures` again. A `disableLocalAuth` line in a future
+  what-if means something changed it.
+- **Undo:** set `false` and redeploy. The gateway can take minutes to hours
+  to follow (Learn).
 
 ## Load-bearing lines — do not edit casually
 
@@ -607,7 +648,7 @@ rather than a documented constraint.
 | Property | Why | Owner |
 |---|---|---|
 | `storage/allowSharedKeyAccess` | unset on the live account (keys enabled) | **Decide at M11, alongside `disableLocalAuth`** *(was "M10"; moved 2026-09-24. Nothing in `scripts/` uses an account key since `08bc35c`; `--blob` signs with a user delegation key)* |
-| `foundry/disableLocalAuth` | unset on the live account | **Decide at M11** *(was "M10"; moved 2026-09-24, see `phase2-orientation.md` Phase 2 Backlog — the VS Code poll is the one known consumer left)* |
+| ~~`foundry/disableLocalAuth`~~ | **DECLARED 2026-10-14** (`true`, see "Keys off"). Was unset, with keys working | done |
 | `keyvault/enablePurgeProtection` | off, and cannot be undone once on — stays a decision, never a side effect | explicit decision only |
 | `storage/networkAcls.resourceAccessRules` | Defender for Storage injects its own `storageDataScanner` rule; a template that owns this array fights the security provider on every deploy | not ours |
 | `storage/allowCrossTenantDelegationSas` | `false`, which is the default, and absent from the `2023-05-01` schema | — |

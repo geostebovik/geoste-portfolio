@@ -48,12 +48,53 @@ GERARD'S EDITS, 2026-10-13 (Claude applied them):
 - Title (Gerard): no "M7"; "laptop" became "a developer's machine" to
   match bullet 1. M7's title dropped "M7" the same day.
 
+CLAUDE'S EDITS, 2026-10-14 (for Gerard to review): key authentication was
+switched off on the Foundry account the same day, so case study 5's "Status"
+became "Fix" (the test in both directions, plus the 403-not-401 detail). The
+"Known limits" bullet and the "After Phase 2" bullet for it were removed. "One
+rule held" and the evidence table gained the keys-off upload. "How this was
+built" gained the decision. "In short" was NOT touched (held for the outside
+readers). Not added to "Known limits": storage-account and AI Search key
+access, under Gerard's rule against operational details about the live tenant.
+Gerard's call whether to add them.
+
 STILL OPEN BEFORE PUBLISHING:
 - M13's rollback (C9, the week of 2026-10-26): add one closing line to the
   M13 row and to "Known limits". Nothing else depends on it.
-- Gerard's edit pass, then outside readers for "In short".
+- ~~Gerard's edit pass~~ (done 2026-10-13), then outside readers for "In
+  short" (requests out; see OUTSIDE READERS below).
+- Case study 1, "Root cause", ends with a stray sentence left over from
+  drafting: "Unable to verify this message through Microsoft Learn
+  documentation." It's not a finding. Remove it (found by Claude 2026-10-14;
+  awaiting Gerard's OK as editor). Not in what the outside readers saw.
 - At publish time: an "On this page" link list, and the evidence table's
   repo-relative paths turned into GitHub links.
+
+OUTSIDE READERS (shared with m7-writeup-draft.md; recorded by Claude
+2026-10-14). Gerard emailed five people on 2026-10-13. Each got only the two
+"In short" sections (M7 and Phase 2, with the pre-Oct-14 wording) and five
+questions. Readers are not named here, because this repo is public.
+- Reader 1, replied 2026-10-13: a senior Azure and AI-security practitioner
+  who has built agents in production.
+  - Understood it only "somewhat", "based on my guesses"; found it hard to
+    follow.
+  - Stopped on "IIP" and "M8-M14". Neither was on the list of words the email
+    asked about. They are internal labels, and neither page or glossary
+    defines them (checked 2026-10-14).
+  - Had to guess what "copy" meant (marketing copy).
+  - Came away with "learning about building agents for automation". The
+    troubleshooting and deciding-what-to-trust point of "What it's really
+    about" didn't come across.
+  - Read every bullet "to try to get a complete grasp"; named none as the
+    one that made him read on.
+  - Admitting what doesn't work yet: "Believable." Keep those bullets.
+  - Suggested: first say what the project is trying to accomplish, then a
+    diagram of the stages.
+  - DECIDED (Gerard, 2026-10-14): no change to "In short" until the other
+    four replies are in, so their answers stay comparable with this one.
+    Then rewrite it goal first, with no internal labels and a diagram at the
+    top, and send the rewrite back to Reader 1.
+- Readers 2-5: no reply yet (2026-10-14).
 -->
 
 ## In short
@@ -170,8 +211,9 @@ app, the same test image (item4 from the M7 answer key, with one planted brand
 flaw) was uploaded again. The correct answer is: copy passes first time; the
 audit says legible PASS, brand FAIL, accurate PASS. It came back correct with
 the Function inside the private network, after the storage firewall went on,
-after the teardown, with Conditional Access On, after the first GitHub deploy, and after
-tracing was added. Each of those result files is committed.
+after the teardown, with Conditional Access On, after the first GitHub deploy, after
+tracing was added, and after key authentication was switched off. Each of
+those result files is committed.
 
 ## Case studies
 
@@ -384,9 +426,23 @@ about eight times an hour under Gerard's identity, the `listKeys` record
 can't show a genuine retrieval. Turning keys off would also make "who
 fetched a key?" worth asking again.
 
-**Status.** `disableLocalAuth` hasn't been done yet. It's in the backlog, with
-both known breakages listed (the VS Code poll, and the now-closed M3
-pipeline). See "Known limits".
+**Fix.** Gerard decided to switch key authentication off on the account
+(`disableLocalAuth`, declared in Bicep) once nothing in the project used a
+key. A search of the scripts and the Function's code found no key use, and
+the account had no connections that could depend on one. The change was
+tested in both directions:
+- **The key path is closed.** A key fetched just before the change worked
+  (HTTP 200). The same key was refused afterwards: HTTP 403,
+  `AuthenticationTypeDisabled`. Fetching a key now fails too ("Failed to list
+  key"), so VS Code's timed fetch stops, rather than collecting keys that no
+  longer work.
+- **The Entra ID path still works.** The test upload gave item4's correct
+  answer, and a local smoke test of all nine keyless call paths passed.
+
+One detail differed from the documentation. Microsoft Learn's page on this
+setting says to expect a 401. The service returned 403. Gerard stopped the run
+there, because it wasn't the predicted result, and the error text settled it:
+the refusal was for the key, not the network.
 
 **Lesson.** "The code is keyless" and "the account is keyless" are different
 claims. Check the role's permissions, not just the code's behaviour.
@@ -471,8 +527,6 @@ code. Reading it changed what got built.
   trial. The policies are deleted and security defaults turned back on before
   the trial ends, and the exported policy files become the record.
   *[Add the C9 result here.]*
-- **Key access is still on for the Foundry account** (case study 5).
-  `disableLocalAuth` is in the backlog.
 - **The Function's Foundry role is broader than it needs.** Foundry User
   grants everything on the account (`Microsoft.CognitiveServices/*`). One
   shared AI Services account serves both the chat models and Vision, so
@@ -512,8 +566,6 @@ code. Reading it changed what got built.
 - **Moving the agent to Microsoft's new Agents API,** before the classic API
   retires. The agent's network isolation, designed and costed in M12, gets
   built as part of that move.
-- **Turning key authentication off on the Foundry account,** the open step
-  from case study 5.
 
 ## How this was built
 
@@ -538,7 +590,8 @@ deploy, test, upload and query. Recorded decisions include:
 - building the agent's network isolation inside the API migration rather than
   now;
 - the order of M14's parts, trusting only the `main` branch for deploys, the
-  alert frequency, the lean tracing packages, and naming each tool call.
+  alert frequency, the lean tracing packages, and naming each tool call;
+- switching key authentication off on the Foundry account.
 
 He also caught problems himself:
 - unregistered what-if diffs and an empty queue check;
@@ -567,7 +620,8 @@ say.
 | Conditional Access policies, exported | `evidence/m13-conditional-access/`; `phase2-conditional-access-spec-draft.md` |
 | First GitHub deploy over OIDC | `fd02de9`; `.github/workflows/iip-function-deploy.yml` |
 | Tracing | `8b4dce6`; `function/tracing.py`; `evidence/m14-tracing/` |
-| Regression uploads (item4) | `scripts/results/*_function_item4_*.json` (CA001 On; M12 stages 2 and 3; teardown; OIDC; tracing) |
+| Regression uploads (item4) | `scripts/results/*_function_item4_*.json` (CA001 On; M12 stages 2 and 3; teardown; OIDC; tracing; keys off) |
+| Key authentication off (case study 5) | `infrastructure/iip/modules/foundry.bicep`; `infrastructure/iip/README.md`, "Keys off" |
 | Case study 1 (alerts) | `m14-prep.md`, Part 2 and "the delivery fault" |
 | Case study 6 (tracing) | `m14-prep.md`, Part 3, "the build and the run" |
 | Full session log | `STATUS.md` (the Phase 2 entries) |

@@ -72,7 +72,13 @@ GERARD'S EDIT, 2026-10-13 (3): title drops "M7", which means nothing
 outside the project. Phase 2's title changed the same day.
 
 STILL OPEN BEFORE PUBLISHING:
-- Outside readers for "In short".
+- Outside readers for "In short". Requests went out 2026-10-13, and one reply
+  is in. The full record, and Gerard's decision on how to handle it, is in
+  phase2-writeup-draft.md's header under OUTSIDE READERS (one record for both
+  pages). What it means for this page: "IIP" and "seventh and final milestone"
+  stopped the reader (internal labels this page never defines), "copy" needed
+  a guess, and the "deciding what to trust" point didn't come across. No
+  change to "In short" until the other replies are in.
 - At publish time: an "On this page" link list at the top, and the evidence
   table's repo-relative paths turned into GitHub links.
 - The group push with Phase 2. *(The "two stale site lines" once listed here were

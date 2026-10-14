@@ -66,7 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 13, 2026. Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 14, 2026 (Oct 14: outside readers 1 of 5 back;
+key authentication switched off on the Foundry account, see the Oct 14 session
+entry). Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
@@ -104,6 +106,17 @@ open in the draft: M13's C9 closing line (week of Oct 26), then the joint push
 with the M7 write-up. **Settled the same day (Gerard):** the M7 page now
 matches Phase 2. Claude-only errors are cut, and the one Gerard helped catch
 is kept, credited to him (header of `m7-writeup-draft.md`).
+
+**Outside readers, 2026-10-14: 5 requests sent Oct 13 (only the two "In short"
+sections), 1 reply in.** Recorded without names (the repo is public) in
+`phase2-writeup-draft.md`'s header, "OUTSIDE READERS". In short: "IIP" and
+"M8-M14" stopped the reader, because they are internal labels neither page
+defines. The troubleshooting point didn't come across. Admitting the limits
+read as "believable". He asked for the goal first, then a diagram.
+**Decided (Gerard):** no rewrite of "In short" until the other four replies
+are in. Then rewrite it goal first, with no internal labels and a diagram, and
+send it back to Reader 1. **Don't redo:** reading the reply and the reader's
+background (done Oct 14).
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -335,6 +348,18 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **The Sunday punch-list task is cloud-only** (2026-10-12, Gerard). It needs
   no computer: it clones the repo and reads Todoist. Don't tie it to a device
   again.
+- **Key authentication is OFF on `aif-dev-wus-01`** (2026-10-14,
+  `p2-keysoff-20261014`; `disableLocalAuth: true` in `foundry.bicep`). A key
+  is refused with **403** `AuthenticationTypeDisabled` (not 401 as Learn says),
+  and `listKeys` fails with BadRequest. Entra ID sign-in is proven by a
+  regression upload and `probe_keyless_smoke.py` 9/9. **Don't re-test.** The
+  register is unchanged: 6 modify, 32 no change, 11 Unsupported, 2 to ignore.
+  Record: `infrastructure/iip/README.md`, "Keys off".
+- **Device file writes, a third way to fail** (2026-10-14): one of three files
+  in a single commit call came back unchanged, although the call reported it
+  written. The staging path had never been used before, so a fresh path alone
+  doesn't prevent it. Read back every file, every time. Retry from a new
+  unique name.
 
 Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
 step), and goes out in one group push with the Phase 2 write-up.
@@ -652,6 +677,62 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 14, 2026 — outside reader 1 of 5 back; key authentication off on the Foundry account
+
+**Attribution:** Claude read the reviewer's reply (in Gerard's Gmail, via the
+browser), recorded it, searched the code for key use, wrote the Bicep change,
+every command and these doc edits. Gerard made the decisions below and ran
+every Azure command. Times are Phoenix (UTC-7) unless marked Z.
+
+**Outside readers.** Gerard emailed five people on Oct 13 with only the two
+"In short" sections and five questions. One reply is in. It's recorded without
+a name in `phase2-writeup-draft.md`'s header ("OUTSIDE READERS"), because the
+repo is public. The useful parts:
+- "IIP" and "M8-M14" stopped him. They are internal labels neither page
+  defines.
+- The troubleshooting point didn't come across.
+- Admitting the limits read as "believable".
+- He asked for the goal first, then a diagram.
+
+**Decided (Gerard):** record it anonymously, and don't rewrite "In short"
+until the other four replies are in. Then rewrite it goal first, with no
+internal labels and a diagram, and send the rewrite back to the same reader.
+**Also found (Claude):** a stray drafting sentence at the end of case study 1's
+"Root cause" ("Unable to verify this message through Microsoft Learn
+documentation."). It was not in what the readers saw. It's listed in the
+draft's header for Gerard's OK to remove.
+
+**Keys off (Gerard's pick from the backlog).** Full record:
+`infrastructure/iip/README.md`, "Keys off".
+1. Connections on the account and the project: `[]` and `[]`.
+2. A key fetched before the change: HTTP 200.
+3. What-if: 6 / 32 / 11 / 2, the register unchanged. Deployed as
+   `p2-keysoff-20261014`; read back `true`.
+4. The same key: **HTTP 403**, `AuthenticationTypeDisabled`. **Gerard stopped
+   here**, because Claude's step had predicted 401 (from Learn's page) and
+   named no other outcome. Claude checked: Microsoft Q&A shows 403
+   `AuthenticationTypeDisabled` is the real response to a disabled key, and
+   the error text confirmed it.
+5. `listKeys`: `(BadRequest) Failed to list key. disableLocalAuth is set to be
+   true`.
+6. Regression upload `item4-keysoff-20261014.png` → item4's answer key, first
+   delivery (`scripts/results/20261014-171536_function_item4_keysoff.json`).
+   `probe_keyless_smoke.py`: 9/9.
+
+Write-up updated to match: case study 5's "Status" became "Fix", and the
+"Known limits" and "After Phase 2" bullets were removed. "In short" was left
+alone. Phase 2 Backlog item struck through; Todoist task completed.
+
+**Working-format rule, set by Gerard after it cost about an hour today:**
+every step Claude gives is laid out as **Step N: the command, Expected,
+Give result, Stop if, Notes**, with all the steps in one message. Not one
+step per message, not commands followed by a separate list of asks, and no
+prose mixed into the steps. Every possible result Claude knows of goes under
+Expected, or the step says it's unsure.
+
+**Still open:** storage-account shared-key access (`allowSharedKeyAccess` on
+`stiipdevwus01`) and AI Search key access. Each is its own decision and test.
 
 ### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 
