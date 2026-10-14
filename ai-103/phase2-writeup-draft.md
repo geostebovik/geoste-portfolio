@@ -63,10 +63,9 @@ STILL OPEN BEFORE PUBLISHING:
   M13 row and to "Known limits". Nothing else depends on it.
 - ~~Gerard's edit pass~~ (done 2026-10-13), then outside readers for "In
   short" (requests out; see OUTSIDE READERS below).
-- Case study 1, "Root cause", ends with a stray sentence left over from
-  drafting: "Unable to verify this message through Microsoft Learn
-  documentation." It's not a finding. Remove it (found by Claude 2026-10-14;
-  awaiting Gerard's OK as editor). Not in what the outside readers saw.
+- ~~Case study 1, "Root cause": a stray drafting sentence~~ REMOVED
+  2026-10-14 (found by Claude; Gerard approved). It wasn't in what the outside
+  readers saw.
 - At publish time: an "On this page" link list, and the evidence table's
   repo-relative paths turned into GitHub links.
 
@@ -250,8 +249,7 @@ and solve problems"). It reported all three real notifications as failed:
 had ever been sent.** The portal Test sends straight to the receiver, so it
 skips the step that was failing. Real alerts resolve the group's receivers
 first, and that came back empty. The portal also showed the receiver as
-Verified, which retired the obvious theory, an unverified address. Unable to
-verify this message through Microsoft Learn documentation.
+Verified, which retired the obvious theory, an unverified address.
 
 **Fix.** The action group was re-saved with no change to any property, which
 causes no drift from the Bicep. About twelve minutes later, the Resolved

@@ -734,6 +734,17 @@ Expected, or the step says it's unsure.
 **Still open:** storage-account shared-key access (`allowSharedKeyAccess` on
 `stiipdevwus01`) and AI Search key access. Each is its own decision and test.
 
+**Also today:**
+- The stray drafting sentence in case study 1 was removed (Gerard approved).
+- **ostebovik.net (Gerard picked it; Claude wrote it):** the planned homepage
+  menu fix and link previews were already done and live, so the Todoist note
+  was out of date. Instead, 4 dead-end pages now link back to the site: the
+  Phase 2, 3 and 4 guides (header links to home and to their section) and
+  PowerShell vs Bash (a link to Resources at the top and bottom). Rendered at
+  360, 390 and 1280px with no overflow. **Found, not fixed:** PowerShell vs
+  Bash is 848px wide on a phone. It already was before today. Logged in
+  Todoist.
+
 ### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 
 **Attribution:** Claude read the evidence, wrote every command, the log

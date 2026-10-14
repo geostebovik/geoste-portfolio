@@ -188,6 +188,22 @@ pre.cli { background: #0d1117; border: 1px solid var(--border); border-radius: 0
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* Header links (2026-10-14): this guide had no way back to the rest of the
+   site. The existing header text now links home and to the guide's section. */
+.site-header a { color: inherit; text-decoration: none; }
+.site-header a:hover { color: var(--text); text-decoration: underline; }
+/* On a phone the header ran out of room and wrapped to three lines (it
+   already wrapped before the links were added). Keep the links on one line
+   and drop the minor text; the phase badge stays. Tested at 390px. */
+@media (max-width: 600px) {
+  .site-header { padding: 0 1rem; gap: 12px; }
+  .logo { white-space: nowrap; font-size: 11px; }
+  .logo-dot { flex-shrink: 0; }
+  .header-right { min-width: 0; }
+  .header-right > span:not(.phase-badge) { display: none; }
+  .phase-badge { padding: 3px 9px; }
+}
 </style>
 </head>
 <body>
@@ -195,7 +211,7 @@ pre.cli { background: #0d1117; border: 1px solid var(--border); border-radius: 0
 <header class="site-header">
   <div class="logo">
     <div class="logo-dot"></div>
-    ostebovik.net · az-104
+    <a href="/">ostebovik.net</a> · <a href="/az-104/networking/">az-104 / network</a>
   </div>
   <div class="header-right">
     <span>West US 3</span>
