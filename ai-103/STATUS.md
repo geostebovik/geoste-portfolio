@@ -752,6 +752,25 @@ Expected, or the step says it's unsure.
   pipeline cards at 360px). Below 700px the table rows now stack as cards,
   with each code cell labelled PowerShell or Bash. Fits at 360 and 390px.
   Desktop is pixel-identical to before.
+- **Current page's menu link** kept in view on phones: new `js/nav.js` on the
+  8 pages with an active link (`771d139`). Before: off-screen on 6 of 8 at
+  390px. After: in view on 8 of 8.
+- **Opened project cards on all 5 section pages cut text off on phones.** The
+  card's grid column (`1fr`) couldn't shrink below its widest code line or
+  table, so paragraphs were laid out up to 631px wide inside a 268px card.
+  Fixed in the shared `css/mobile.css` (`minmax(0, 1fr)`, plus wrapping for
+  long code words and hostnames, and a screenshot grid that fits a 360px
+  phone). Text past the screen edge went from 13-32 lines per page to 0, at
+  360 and 390px, every card opened. Desktop is untouched (all rules are
+  inside `max-width: 700px`).
+- **Claude's test error, caught the same afternoon:** a finding logged earlier
+  ("IaC and Networking are 475/411px wide on a phone") was false. The sandbox
+  can't reach Google Fonts, so the title rendered in a much wider fallback
+  font. With the real fonts (Fontsource packages from npm) both pages fit.
+  **Rule for site tests from now on:** load the real fonts first, and open
+  every card.
+- **Found, not fixed (Todoist):** the compute comparison reference is 515px
+  wide on a phone, and one table in the Phase 4 guide is cut off.
 
 ### Session — October 13, 2026 — M14 done-when complete: alert-email fault closed, tracing built and shown
 

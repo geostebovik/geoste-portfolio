@@ -51,3 +51,24 @@
   /* 3.5rem side padding left a ~210px text column on a 390px phone */
   .resume-card { padding: 1.75rem 1.25rem !important; }
 }
+
+/* 4. PROJECT CARDS (2026-10-14). On the five section pages an opened project
+   card cut its text off on a phone: .project-body-inner is a grid, and a
+   plain 1fr column can't shrink below its widest content (one long code line
+   or table), so every paragraph in the column was laid out at that width,
+   up to 631px inside a 268px card. minmax(0, 1fr) lets the column shrink; wide
+   code blocks and tables then scroll sideways inside themselves instead.
+   Tested headless at 360 and 390px with the site's real fonts. */
+@media (max-width: 700px) {
+  .project-body-inner { grid-template-columns: minmax(0, 1fr) !important; }
+  .project-body-inner > * { min-width: 0; }
+  .project-body-inner pre, .project-body-inner table { max-width: 100%; overflow-x: auto; }
+  .project-body-inner table { display: block; }
+  /* long inline code words (e.g. skipGithubActionWorkflowGeneration) wrap */
+  .project-body-inner code { overflow-wrap: anywhere; }
+  /* the evidence screenshot grid had a 280px minimum column, 13px wider than
+     an opened card on a 360px phone */
+  .screenshot-grid { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)) !important; }
+  /* Networking's DNS cards: a long hostname couldn't wrap */
+  .dns-hop { overflow-wrap: anywhere; }
+}
