@@ -38,15 +38,17 @@ resource search 'Microsoft.Search/searchServices@2025-05-01' = {
     computeType: 'Default'
     publicNetworkAccess: 'enabled'
     semanticSearch: 'free'
-    // disableLocalAuth is false on the live service (admin keys work).
-    // M10 revisits this; it is stated rather than omitted because the
-    // aadOrApiKey block below is only valid while local auth is enabled.
-    disableLocalAuth: false
-    authOptions: {
-      aadOrApiKey: {
-        aadAuthFailureMode: 'http401WithBearerChallenge'
-      }
-    }
+    // API keys OFF (2026-10-15; Gerard's decision, Claude wrote it). Roles
+    // only: every client signs in with Entra ID. The clients are the M5
+    // scripts, run as Gerard (Search Index Data Reader and Contributor, plus
+    // Owner inheritance for creating the index; RBAC model, "AI Search"). The
+    // Phase 2 app doesn't use Search. Learn ("Enable or disable role-based
+    // access control"): works on any tier, including free.
+    // authOptions is deliberately absent: it can only be set while
+    // disableLocalAuth is false (it held aadOrApiKey with
+    // http401WithBearerChallenge until today). Undo: set false and restore
+    // that block. Record: README.md, "Search keys off".
+    disableLocalAuth: true
     // encryptionWithCmk.enforcement is writable. Its sibling
     // encryptionComplianceStatus is read-only and stays undeclared.
     encryptionWithCmk: {

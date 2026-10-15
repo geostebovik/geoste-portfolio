@@ -350,8 +350,10 @@ closed.)*
   `infrastructure/iip/README.md`, "Keys off". **Still open, separately:**
   ~~shared-key access on `stiipdevwus01` (`allowSharedKeyAccess`, unset)~~
   **DONE 2026-10-15** (`p2-sharedkeyoff-20261015`; Gerard decided and ran it,
-  Claude wrote it; `infrastructure/iip/README.md`, "Shared key off") and key
-  access on AI Search, still open. Each is its own decision and test. The original note
+  Claude wrote it; `infrastructure/iip/README.md`, "Shared key off") and
+  ~~key access on AI Search~~ **DONE 2026-10-15** (`p2-searchkeysoff-20261015`;
+  README "Search keys off"). All three key paths (Foundry, storage, Search)
+  are now closed, each with its own decision and test. The original note
   follows. Found 2026-09-22 while reading the Foundry User role definition
   (`53ca6127-db72-4b80-b1b0-d745d6d5456d`). Its `actions` include
   `Microsoft.CognitiveServices/accounts/listkeys/action`, so an identity

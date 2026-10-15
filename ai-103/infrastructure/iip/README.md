@@ -666,6 +666,50 @@ commands and read every result. Deployment `p2-sharedkeyoff-20261015`.
   `allowSharedKeyAccess` line in a future what-if means something changed it.
 - **Undo:** set `allowSharedKeyAccess: true` and redeploy.
 
+## Search keys off — `disableLocalAuth` on `srch-iip-dev-wus-01` (2026-10-15)
+
+Gerard decided it and ran every command; Claude wrote the Bicep and the
+commands and read every result. Deployment `p2-searchkeysoff-20261015`.
+- **Change:** `modules/search.bicep` sets `disableLocalAuth: true` and drops
+  the `authOptions` block (`aadOrApiKey`, `http401WithBearerChallenge`), which
+  can only be set while keys are on (Learn, "Enable or disable role-based
+  access control in Azure AI Search": any tier, including free). Compiled and
+  compared with the previous template by Claude: only those two properties
+  differ.
+- **Measured first, with weaker tools than storage had:** Search has no metric
+  that splits requests by how they authenticated (as far as Claude knows). So:
+  - The activity log for 30 days shows one `listAdminKeys`, by Gerard, on Sep
+    21 (before `get_search_admin_key()` was removed from `m5_index.py` on Sep
+    23).
+  - No variable name in `scripts/.env` contains KEY or SECRET (names checked,
+    values never printed).
+  - No tracked script or Function code uses a Search key (grep). The Phase 2
+    app doesn't use Search.
+- **Before the change:** an admin key returned HTTP 200 from `GET /indexes`,
+  and `probe_keyless_search.py` passed all three steps (token; query, 1
+  document; `get_index`, 4 fields).
+- **What-if:** 6 modify, 32 no change, 11 Unsupported, 2 to ignore, as
+  predicted. Search was already a Modify (its registered `-
+  properties.endpoint`), so the count couldn't change. The new lines were `-
+  properties.authOptions` (`aadOrApiKey.aadAuthFailureMode`) and `~
+  properties.disableLocalAuth: false => true`.
+- **Read back:** `disableLocalAuth` true, `authOptions` null.
+- **Negative control:** the same admin key now gets **HTTP 401** with an empty
+  error body. Learn says key requests are refused without naming the code.
+  Compare Foundry yesterday (403, not the 401 Learn named there) and storage
+  today (`KeyBasedAuthenticationNotPermitted`; its HTTP code wasn't printed).
+  Don't assume one service's refusal code from another's.
+- **Positive control:** `probe_keyless_search.py` again: token, query (1
+  document) and `get_index` (4 fields) all succeeded with keys off.
+- **Post-deploy what-if:** 6 / 32 / 11 / 2; Search shows only `-
+  properties.endpoint` again. The register is unchanged.
+- **Still possible:** `az search admin-key show` still returns the admin key
+  (a control-plane read, Learn); the key just no longer works.
+- **Expected from now on:** a `disableLocalAuth` or `authOptions` line under
+  Search in a future what-if means something changed it.
+- **Undo:** set `disableLocalAuth: false`, restore the `authOptions` block
+  (git history), and redeploy.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).

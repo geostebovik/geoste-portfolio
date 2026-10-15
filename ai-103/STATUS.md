@@ -67,8 +67,9 @@ split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
 **Status as of:** October 15, 2026 (Oct 15: both "In short" sections
-rewritten and reader follow-ups drafted; shared-key access switched off on
-`stiipdevwus01`, see the Oct 15 session entry). Phase 1 of the IIP labs is closed: M7
+rewritten and reader follow-ups sent; shared-key access switched off on
+`stiipdevwus01` and API keys switched off on AI Search, see the Oct 15
+session entry). Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
@@ -117,13 +118,15 @@ four":** rewrite now and make the ask lighter. Two days in, the likelier
 problem was the size of the first ask: 731 words plus five written answers
 under a "2 minutes" subject line. Rewrite committed in `28a763f`: goal first,
 no internal labels, diagram `images/in-short-stages.svg`; Part 1 258 → 213
-words, Part 2 260 → 210. Follow-ups are Gmail reply drafts for Gerard to
-send: the readers who haven't answered get Part 2's "In short" only, the
-diagram and one question ("After a 30-second skim, what do you think this
-project is?"); Reader 1 gets both rewrites and "did this fix what stopped
-you?". **Unresolved:** Gmail's Sent folder holds 4 request emails to 3 people
-(one at two addresses), while earlier entries say 5 requests. **Don't redo:**
-the rewrite, the word counts, the diagram.
+words, Part 2 260 → 210. Follow-ups, sent by Gerard on Oct 15 as replies:
+the readers who haven't answered got Part 2's "In short" only, the diagram and
+one question ("After a 30-second skim, what do you think this project is?");
+Reader 1 got both rewrites and "did this fix what stopped you?". **The count
+is 5 readers** (resolved Oct 15, Gerard): 4 emails, one of them misaddressed
+by name, plus one reader reached through another. One reader expects to
+answer this weekend. One is going through a hard stretch and is being left
+alone (Gerard's call, no follow-up). **Don't redo:** the rewrite, the word
+counts, the diagram.
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -360,11 +363,22 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Shared-key access is OFF on `stiipdevwus01`** (2026-10-15,
   `p2-sharedkeyoff-20261015`; `allowSharedKeyAccess: false` and
   `defaultToOAuthAuthentication: true` in `storage.bicep`). A key is refused
-  with 403 `KeyBasedAuthenticationNotPermitted`. Proven without it: a
+  with `KeyBasedAuthenticationNotPermitted` (403 per Learn; the CLI didn't
+  print the code). Proven without it: a
   regression upload (first delivery), a user delegation SAS (HTTP 200), and
   Bicep deploys and what-ifs. **Don't re-test.** The register is unchanged:
   6 modify, 32 no change, 11 Unsupported, 2 to ignore. Record:
   `infrastructure/iip/README.md`, "Shared key off".
+- **API keys are OFF on `srch-iip-dev-wus-01`** (2026-10-15,
+  `p2-searchkeysoff-20261015`; `disableLocalAuth: true`, `authOptions`
+  removed, in `search.bicep`). A key is refused with **401** and an empty body
+  (Foundry gave 403; storage's code wasn't printed). `probe_keyless_search.py` 3/3 after the
+  change. **Don't re-test.** Register unchanged: 6 / 32 / 11 / 2. Record:
+  `infrastructure/iip/README.md`, "Search keys off". With this, all three key
+  paths in the Phase 2 Backlog are closed.
+- **Result files are git-ignored by default** (`ai-103/scripts/results/*`).
+  A cited one needs its own `!` line in the root `.gitignore`, or `git add`
+  refuses it (2026-10-15: missed once, caught by Gerard's file count).
 - **An "AccountKey" count in this account's metrics doesn't mean a client has
   the key** (2026-10-15). Azure's own deploy and what-if calls are labelled
   AccountKey (and SAS) and still succeed with the key off (trusted access).
@@ -701,7 +715,7 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
-### Session — October 15, 2026 — "In short" rewritten for outside readers; shared-key access off on `stiipdevwus01`
+### Session — October 15, 2026 — "In short" rewritten for outside readers; shared-key access off on `stiipdevwus01`; API keys off on AI Search
 
 **Attribution:** Claude read the request email in Gerard's Gmail (via the
 browser) and measured it, drafted both rewrites, the diagram, the follow-up
@@ -731,7 +745,8 @@ the readers who haven't answered; both rewrites for Reader 1). Record:
    ListContainers 1. Oct 5 (9) has no session entry and wasn't traced.
 3. The key worked before (container list). What-if 7 / 31 / 11 / 2, as
    predicted. Deployed `p2-sharedkeyoff-20261015`; read back False / True.
-4. The key is refused: 403 `KeyBasedAuthenticationNotPermitted`.
+4. The key is refused: `KeyBasedAuthenticationNotPermitted` (403 per Learn;
+   the CLI printed the error code, not the HTTP status).
 5. Regression upload → item4's answer key, first delivery
    (`scripts/results/20261015-171118_function_item4_sharedkeyoff.json`). A
    user delegation SAS still reads a blob (HTTP 200).
@@ -748,6 +763,9 @@ the readers who haven't answered; both rewrites for Reader 1). Record:
   Two tables lost rows until re-run with `--top 50`.
 - Predicted the DelegationSAS counts would be one per `m3_analyze` run. The
   days match the runs; the counts don't, because the metric counts requests.
+- Didn't add a `.gitignore` exception for the new result file, so the
+  shared-key commit (`ce65477`) left it out. Gerard noticed 4 files instead of
+  5. Fixed in `186dd8c`.
 
 **Working format, set by Gerard today:** steps come in batches that run up to
 the first gate. A message ends at the first step whose result decides what
@@ -758,7 +776,21 @@ types "done" so Claude reads the file.
 Gerard's own script checks the copy (Gerard; Todoist updated, with the
 note that its paths were read on serenity).
 
-**Still open:** key access on AI Search (its own decision and test).
+**AI Search keys off (Gerard's pick after shared key).** Full record:
+`infrastructure/iip/README.md`, "Search keys off". Search has no
+auth-type metric, so the evidence before the change was: one `listAdminKeys`
+in 30 days (Gerard, Sep 21), no key-like variable in `scripts/.env`, no key
+in the code. Before: a key got 200, and the probe passed 3/3. What-if 6 / 32 /
+11 / 2, with the two predicted lines under Search. Deployed
+`p2-searchkeysoff-20261015`; read back `disableLocalAuth` true, `authOptions`
+null. After: the same key gets **401** (Foundry gave 403); the
+probe passes 3/3. Post-deploy what-if 6 / 32 / 11 / 2.
+
+**Outside readers, later the same day:** follow-ups sent (Gerard). The count
+of 5 is settled; see "Current next action".
+
+**Still open:** nothing from the Phase 2 Backlog's key items; all three key
+paths are closed.
 
 ### Session — October 14, 2026 — outside reader 1 of 5 back; key authentication off on the Foundry account
 

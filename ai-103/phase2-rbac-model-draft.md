@@ -280,6 +280,12 @@ M11.
   moves to an automated identity, Search Service Contributor must be granted
   explicitly.
 
+  **Amended 2026-10-15:** API keys are off on the service
+  (`p2-searchkeysoff-20261015`, `infrastructure/iip/README.md` "Search keys
+  off"), so these two assignments, plus the Owner inheritance above, are now
+  the only way into its data. `probe_keyless_search.py` passed 3/3 after the
+  change.
+
   **Free tier, settled empirically 2026-09-22.** Microsoft Learn contradicts
   itself: three pages say RBAC and keyless work on any tier including free, one
   says keyless clients need a billable tier, and a fifth says free "doesn't
