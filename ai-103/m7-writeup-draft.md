@@ -100,6 +100,12 @@ names the line it counts (the audit's explanation of its brand verdict), and
 "most runs" is exact for both runs (40 of 45 and 34 of 45). 258 words became
 213. The previous wording is in git history.
 
+GERARD'S DECISION, 2026-10-15: "Known limits" gains "The brand check judges
+colour only" (Claude drafted after an outside reader asked whether the agent
+would notice changed fonts or colours; Gerard approved it as written). It also
+covers the Todoist [stretch] item "document that brand_consistent is
+palette-only" for this page.
+
 GERARD'S REVIEW, Sep 15: he read "In short" and kept it as written. He
 judged it longer than ideal, but found that each point says something
 significant and leads into the next section. He plans to ask a few people
@@ -454,6 +460,12 @@ audit's notes (see "Known limits").
   this page comes from a direct probe run unless it says otherwise.
 - **Runs can be made more consistent, but not repeatable.** Temperature is
   0, but the Agents SDK has no seed parameter.
+- **The brand check judges colour only.** The store's brand guide also names
+  a logo, but the audit's brand check looks at the colour scheme alone. A
+  wrong logo would pass, and so would a font change that doesn't hurt
+  legibility. No test image has a logo or font flaw, so this gap has never
+  been measured. Closing it starts with a new test image, then a change to
+  what the model is asked.
 
 ## Lessons worth keeping
 

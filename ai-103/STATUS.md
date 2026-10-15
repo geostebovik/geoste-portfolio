@@ -126,7 +126,15 @@ is 5 readers** (resolved Oct 15, Gerard): 4 emails, one of them misaddressed
 by name, plus one reader reached through another. One reader expects to
 answer this weekend. One is going through a hard stretch and is being left
 alone (Gerard's call, no follow-up). **Don't redo:** the rewrite, the word
-counts, the diagram.
+counts, the diagram. **Reader 1 replied to the rewrite** (Oct 15): "makes
+absolute sense", so the rewrite fixed what stopped him. He suggested a human
+in the loop at the end, and asked whether the agent would notice changed
+fonts, files or colours. Colour, yes; a logo, no (the brand check is
+palette-only); a font only if it hurts legibility. Recorded in
+`phase2-writeup-draft.md`'s header. **Decided (Gerard):** both go on the
+pages: M7's "Known limits" gains "The brand check judges colour only", and
+Phase 2's "After Phase 2" gains "A person in the loop" (Claude drafted;
+Gerard approved as written).
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**

@@ -111,6 +111,21 @@ questions. Readers are not named here, because this repo is public.
   words) plus the diagram and ONE question ("After a 30-second skim, what do
   you think this project is?"); Reader 1 gets both rewrites and "did this fix
   what stopped you?". The previous wording is in git history.
+- Reader 1, second reply, 2026-10-15 (to the rewrite): "This is awesome and
+  makes absolute sense." The rewrite fixed what stopped him. Two suggestions,
+  both about the agent rather than the summary: (1) a human in the loop at the
+  end, to validate results and keep tuning; (2) would the agent notice if
+  fonts, files or colours changed, and alert someone to take a look.
+  Claude's notes: colour is the one it does catch (item4's planted flaw is a
+  colour violation, and the audit fails it). The brand check judges the colour
+  scheme alone, so a changed logo passes unnoticed, and so does a changed
+  font unless it hurts legibility (the separate legibility check caught
+  item3's 3px title) (m7-orientation.md, "brand_consistent is palette-only"; Todoist [stretch]
+  item). The results page is where a person reviews a result, but nothing
+  feeds that review back into tuning. **Decided (Gerard, same day):** add
+  both, honestly. M7 page "Known limits" gains "The brand check judges colour
+  only"; this page's "After Phase 2" gains "A person in the loop". Claude
+  drafted both; Gerard approved them as written.
 -->
 
 ## In short
@@ -587,6 +602,10 @@ code. Reading it changed what got built.
 - **Moving the agent to Microsoft's new Agents API,** before the classic API
   retires. The agent's network isolation, designed and costed in M12, gets
   built as part of that move.
+- **A person in the loop.** Today a person reads each result on the results
+  page, but nothing they decide there goes back into the agent. Recording
+  whether the reviewer agrees with each verdict would show where the checks
+  drift from human judgement, and what to tune next.
 
 ## How this was built
 
