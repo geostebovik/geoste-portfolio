@@ -600,6 +600,72 @@ commands and read every result. Deployment `p2-keysoff-20261014`.
 - **Undo:** set `false` and redeploy. The gateway can take minutes to hours
   to follow (Learn).
 
+## Shared key off — `allowSharedKeyAccess` on `stiipdevwus01` (2026-10-15)
+
+Gerard decided it and ran every command; Claude wrote the Bicep and the
+commands and read every result. Deployment `p2-sharedkeyoff-20261015`.
+- **Change:** `modules/storage.bicep` declares `allowSharedKeyAccess: false`
+  and `defaultToOAuthAuthentication: true` (the portal's storage browser
+  starts with Entra sign-in). Compiled and compared with the previous
+  template by Claude: exactly those two properties differ.
+- **Measured first** (Azure Monitor metric `Transactions`, split by
+  `Authentication`, Sep 15 - Oct 15, before the change): OAuth 179,157;
+  AccountKey 415; Anonymous 197; SAS 39; DelegationSAS 3.
+  - **AccountKey 415**, on 11 days: Sep 21, 24, 25, 28, 29, 30 and Oct 9,
+    10, 12, 14 (the session log's deploy days) plus Oct 5 (9; no session
+    entry, not traced). 412 are the calls the storage service makes for a
+    Bicep deploy or what-if of containers, queues and blob settings:
+    GetContainerProperties 56, GetContainerServiceMetadata 53,
+    GetQueueMetadata 46, CreateContainer / GetContainerACL / SetContainerACL /
+    SetContainerMetadata 42 each, CreateQueue 38, GetBlobServiceProperties 31,
+    SetBlobServiceProperties 20. The other 3: GetFileServiceProperties 2,
+    ListContainers 1.
+  - **SAS 39** (41 counting today's 2): GetBlobServiceProperties 20,
+    GetQueueMetadata 20, SetBlobServiceProperties 1, on deploy days only.
+    Also Azure's own deploy traffic, not a client.
+  - **DelegationSAS 3**: Sep 23 (1) and Oct 10 (2), days `m3_analyze.py
+    --blob` ran. The metric counts storage requests, not script runs.
+- **The key worked before:** `az storage container list --auth-mode key`
+  listed `docs`, `results`, `uploads`.
+- **What-if:** 7 modify, 31 no change, 11 Unsupported, 2 to ignore, as
+  predicted. `stiipdevwus01` was a Modify with only `+
+  properties.allowSharedKeyAccess: false` and `+
+  properties.defaultToOAuthAuthentication: true`, plus its usual `x
+  properties.encryption.services`.
+- **Read back:** `allowSharedKeyAccess` False, `defaultToOAuthAuthentication`
+  True.
+- **Negative control:** the same container list now fails: `Key based
+  authentication is not permitted on this storage account.`, ErrorCode
+  `KeyBasedAuthenticationNotPermitted` (403, per Learn). The metric records it
+  as `Unknown, AccountKey, AuthenticationError`.
+- **Positive controls:** a regression upload,
+  `item4-sharedkeyoff-20261015.png` →
+  `scripts/results/20261015-171118_function_item4_sharedkeyoff.json`, first
+  delivery (`dequeue_count` 1). Item4's answer key: copy passed first time (0
+  redrafts), audit legible PASS / brand FAIL / accurate PASS. A user
+  delegation SAS (`az storage blob generate-sas --as-user`) read that blob:
+  HTTP 200, so `m3_analyze.py --blob` still works (while the firewall is
+  open; see "M12").
+- **Azure's own calls after the change:** the deploy and the post-deploy
+  what-if still made container, queue and blob-service calls that the metric
+  labels AccountKey, and they succeeded (for example CreateQueue 2,
+  SetContainerACL 2; CreateContainer 2 as `ClientOtherError`, which is the
+  container already existing). Learn: with Shared Key disallowed, Shared Key in
+  the logs means trusted access. **So an AccountKey count on this account is
+  not proof that a client holds the key.** Split it by `ApiName` and
+  `ResponseType` before acting on one.
+- **`az monitor metrics list` returns only the top 10 dimension values unless
+  `--top` is given.** Two of the tables above lost rows until they were re-run
+  with `--top 50`.
+- **Post-deploy what-if:** 6 modify, 32 no change, 11 Unsupported, 2 to
+  ignore. The register is unchanged.
+- **What stops working:** account SAS and service SAS on this account, and
+  browsing it with the key from the portal or VS Code. The portal now defaults
+  to Entra sign-in; Gerard's data roles are RBAC rows 3, 13 and 18.
+- **Expected from now on:** the register stays 6 / 32 / 11 / 2. An
+  `allowSharedKeyAccess` line in a future what-if means something changed it.
+- **Undo:** set `allowSharedKeyAccess: true` and redeploy.
+
 ## Load-bearing lines — do not edit casually
 
 **`foundryCustomSubDomainName = 'aif-iip-dev-wus-01'`** (`dev.bicepparam`).
@@ -647,7 +713,7 @@ rather than a documented constraint.
 
 | Property | Why | Owner |
 |---|---|---|
-| `storage/allowSharedKeyAccess` | unset on the live account (keys enabled) | **Decide at M11, alongside `disableLocalAuth`** *(was "M10"; moved 2026-09-24. Nothing in `scripts/` uses an account key since `08bc35c`; `--blob` signs with a user delegation key)* |
+| ~~`storage/allowSharedKeyAccess`~~ | **DECLARED 2026-10-15** (`false`, see "Shared key off"). Was unset, with keys accepted | done |
 | ~~`foundry/disableLocalAuth`~~ | **DECLARED 2026-10-14** (`true`, see "Keys off"). Was unset, with keys working | done |
 | `keyvault/enablePurgeProtection` | off, and cannot be undone once on — stays a decision, never a side effect | explicit decision only |
 | `storage/networkAcls.resourceAccessRules` | Defender for Storage injects its own `storageDataScanner` rule; a template that owns this array fights the security provider on every deploy | not ours |

@@ -41,6 +41,17 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     allowCrossTenantReplication: false
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
+    // Shared key OFF (2026-10-15; Gerard's decision, Claude wrote it). Every
+    // client of this account signs in with Entra ID: the Function (RBAC rows
+    // 5, 6, 15, 16), Event Grid's delivery to the queue (row 14), Gerard's CLI
+    // (rows 3, 13, 18), and m3_analyze.py --blob, whose user delegation SAS is
+    // signed through Entra ID and still works (Learn, "Prevent Shared Key
+    // authorization"). Account and service SAS stop working. Undo: set true
+    // and redeploy. The record is in README.md, "Shared key off".
+    allowSharedKeyAccess: false
+    // The portal's storage browser now starts with Entra sign-in instead of
+    // the account key, which this account refuses from now on.
+    defaultToOAuthAuthentication: true
     encryption: {
       keySource: 'Microsoft.Storage'
       services: {
@@ -162,9 +173,9 @@ resource resultsContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
 // account, which is the default, and the 2023-05-01 schema does not carry
 // it. Omitted rather than chasing a newer API version for a default value.
 //
-// NOT declared, deliberately: allowSharedKeyAccess. It is unset on the live
-// account (so: keys enabled). M10 is the milestone that sets it false; naming
-// it here would make M8 predict a change it is not making.
+// allowSharedKeyAccess: DECLARED 2026-10-15 (false; see the account above).
+// Unset from M8 until then, which meant keys were accepted. It was left out on
+// purpose so that M8 didn't predict a change it wasn't making.
 
 // --- M11: the event queue and its poison queue (2026-09-24, Claude) ---------
 // On THIS account, not the host account (Gerard, Sep 24), so the Function's

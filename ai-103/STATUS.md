@@ -66,9 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 14, 2026 (Oct 14: outside readers 1 of 5 back;
-key authentication switched off on the Foundry account, see the Oct 14 session
-entry). Phase 1 of the IIP labs is closed: M7
+**Status as of:** October 15, 2026 (Oct 15: both "In short" sections
+rewritten and reader follow-ups drafted; shared-key access switched off on
+`stiipdevwus01`, see the Oct 15 session entry). Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
 M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
@@ -107,16 +107,23 @@ with the M7 write-up. **Settled the same day (Gerard):** the M7 page now
 matches Phase 2. Claude-only errors are cut, and the one Gerard helped catch
 is kept, credited to him (header of `m7-writeup-draft.md`).
 
-**Outside readers, 2026-10-14: 5 requests sent Oct 13 (only the two "In short"
-sections), 1 reply in.** Recorded without names (the repo is public) in
-`phase2-writeup-draft.md`'s header, "OUTSIDE READERS". In short: "IIP" and
-"M8-M14" stopped the reader, because they are internal labels neither page
-defines. The troubleshooting point didn't come across. Admitting the limits
-read as "believable". He asked for the goal first, then a diagram.
-**Decided (Gerard):** no rewrite of "In short" until the other four replies
-are in. Then rewrite it goal first, with no internal labels and a diagram, and
-send it back to Reader 1. **Don't redo:** reading the reply and the reader's
-background (done Oct 14).
+**Outside readers, updated 2026-10-15: 1 reply in; "In short" rewritten;
+follow-ups drafted.** Recorded without names (the repo is public) in
+`phase2-writeup-draft.md`'s header, "OUTSIDE READERS". Reader 1 (Oct 13):
+"IIP" and "M8-M14" stopped him; the troubleshooting point didn't come across;
+the admitted limits read as "believable"; he asked for the goal first, then a
+diagram. **Decided (Gerard, Oct 15), replacing Oct 14's "wait for the other
+four":** rewrite now and make the ask lighter. Two days in, the likelier
+problem was the size of the first ask: 731 words plus five written answers
+under a "2 minutes" subject line. Rewrite committed in `28a763f`: goal first,
+no internal labels, diagram `images/in-short-stages.svg`; Part 1 258 → 213
+words, Part 2 260 → 210. Follow-ups are Gmail reply drafts for Gerard to
+send: the readers who haven't answered get Part 2's "In short" only, the
+diagram and one question ("After a 30-second skim, what do you think this
+project is?"); Reader 1 gets both rewrites and "did this fix what stopped
+you?". **Unresolved:** Gmail's Sent folder holds 4 request emails to 3 people
+(one at two addresses), while earlier entries say 5 requests. **Don't redo:**
+the rewrite, the word counts, the diagram.
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -179,15 +186,10 @@ P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
   trim the Azure SDK's HTTP logging (sized Oct 13: about 99 AppTraces rows,
   122 KB, per upload, larger than the trace itself; not yet checked against a
   pre-tracing run).
-- Gerard's steps: update the project instructions (`id-iip-dev-wus-03` is
-  deployed, not PLANNED; add IIP Results (dev), IIP Results Viewers (dev) with
-  `iip-ca-test` as its member, the results page, the custom role IIP Queue
-  Trigger (dev), soft delete 7 days, the P2 trial dates; **new Oct 8:**
-  security defaults off, the baseline CA900-CA903, `bg-admin-01`; **new Oct
-  10, updated Oct 12:** the M12 skeleton that stays (VNet, 2 subnets, 2
-  NSGs; the endpoints and private DNS zones were deleted Oct 12, and the
-  firewall on `stiipdevwus01` is open again), and `set-home-ip.ps1` before any
-  `main.bicep` what-if).
+- ~~Gerard's steps: update the project instructions~~ Done 2026-10-12
+  (Todoist; the instructions now carry every item that was listed here).
+  **New Oct 15 (Gerard's step):** add "shared-key access OFF since
+  2026-10-15" to the `stiipdevwus01` line.
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
@@ -355,6 +357,21 @@ Harmless so far; the instance-id follow-up would tell them apart.
   regression upload and `probe_keyless_smoke.py` 9/9. **Don't re-test.** The
   register is unchanged: 6 modify, 32 no change, 11 Unsupported, 2 to ignore.
   Record: `infrastructure/iip/README.md`, "Keys off".
+- **Shared-key access is OFF on `stiipdevwus01`** (2026-10-15,
+  `p2-sharedkeyoff-20261015`; `allowSharedKeyAccess: false` and
+  `defaultToOAuthAuthentication: true` in `storage.bicep`). A key is refused
+  with 403 `KeyBasedAuthenticationNotPermitted`. Proven without it: a
+  regression upload (first delivery), a user delegation SAS (HTTP 200), and
+  Bicep deploys and what-ifs. **Don't re-test.** The register is unchanged:
+  6 modify, 32 no change, 11 Unsupported, 2 to ignore. Record:
+  `infrastructure/iip/README.md`, "Shared key off".
+- **An "AccountKey" count in this account's metrics doesn't mean a client has
+  the key** (2026-10-15). Azure's own deploy and what-if calls are labelled
+  AccountKey (and SAS) and still succeed with the key off (trusted access).
+  Split by `ApiName` and `ResponseType` first.
+- **`az monitor metrics list` returns only the top 10 dimension values by
+  default.** Pass `--top 50` whenever a query splits by a dimension
+  (2026-10-15: two tables silently lost rows).
 - **Public repo rule** (Gerard, 2026-10-14): the repo and the site are public,
   so no tracked file or site page names the subscription's offer type, its
   billing details or its full ID. Say "the lab subscription" and "cost
@@ -683,6 +700,65 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 15, 2026 — "In short" rewritten for outside readers; shared-key access off on `stiipdevwus01`
+
+**Attribution:** Claude read the request email in Gerard's Gmail (via the
+browser) and measured it, drafted both rewrites, the diagram, the follow-up
+emails (left as Gmail drafts), the Bicep change, every command and these doc
+edits. Gerard made every decision below and ran every Azure command. Times are
+UTC unless marked.
+
+**Outside readers.** Two days after the requests, 1 reply. Claude's read: the
+ask was bigger than its subject line. The email was 731 words (about 3.1
+minutes of reading at 238 words a minute) plus five written answers, under
+"Quick favor: 2 minutes". **Decided (Gerard):** rewrite now and send a
+lighter ask, rather than wait for all four replies (replaces the Oct 14
+decision). Committed in `28a763f`: both "In short" sections goal first, no
+internal labels, and the diagram `images/in-short-stages.svg`. Follow-ups
+are Gmail reply drafts for Gerard to send (Part 2 only plus one question for
+the readers who haven't answered; both rewrites for Reader 1). Record:
+`phase2-writeup-draft.md`'s header, "OUTSIDE READERS".
+
+**Shared key off (Gerard's pick from the backlog).** Full record:
+`infrastructure/iip/README.md`, "Shared key off".
+1. Measured before changing anything (metric `Transactions` by
+   `Authentication`, Sep 15 - Oct 15): OAuth 179,157; AccountKey 415;
+   Anonymous 197; SAS 39; DelegationSAS 3.
+2. The AccountKey and SAS traffic was Azure's own Bicep deploy and what-if
+   calls (container, queue and blob-service operations, deploy days only).
+   3 of the 415 fall outside that pattern: GetFileServiceProperties 2,
+   ListContainers 1. Oct 5 (9) has no session entry and wasn't traced.
+3. The key worked before (container list). What-if 7 / 31 / 11 / 2, as
+   predicted. Deployed `p2-sharedkeyoff-20261015`; read back False / True.
+4. The key is refused: 403 `KeyBasedAuthenticationNotPermitted`.
+5. Regression upload → item4's answer key, first delivery
+   (`scripts/results/20261015-171118_function_item4_sharedkeyoff.json`). A
+   user delegation SAS still reads a blob (HTTP 200).
+6. After the change, the deploy's and a what-if's own calls still succeeded
+   while labelled AccountKey: trusted access, as Learn describes.
+   Post-deploy what-if: 6 / 32 / 11 / 2, the register unchanged.
+
+**Claude's errors, caught the same session:**
+- Predicted that a user delegation SAS would count as "SAS". The metric has a
+  separate `DelegationSAS` value.
+- Step 2's stop rule ("writes on days you didn't upload by hand") didn't
+  allow for deploy days, so it fired on Azure's own traffic.
+- `az monitor metrics list` returns the top 10 dimension values by default.
+  Two tables lost rows until re-run with `--top 50`.
+- Predicted the DelegationSAS counts would be one per `m3_analyze` run. The
+  days match the runs; the counts don't, because the metric counts requests.
+
+**Working format, set by Gerard today:** steps come in batches that run up to
+the first gate. A message ends at the first step whose result decides what
+comes next. Results go in `D:\claude\iip\<date>-results.txt`, and Gerard
+types "done" so Claude reads the file.
+
+**Also today:** the D: drive move is deferred until pywalk Lesson 5, so
+Gerard's own script checks the copy (Gerard; Todoist updated, with the
+note that its paths were read on serenity).
+
+**Still open:** key access on AI Search (its own decision and test).
 
 ### Session — October 14, 2026 — outside reader 1 of 5 back; key authentication off on the Foundry account
 
