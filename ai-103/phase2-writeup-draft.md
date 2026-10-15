@@ -93,33 +93,46 @@ questions. Readers are not named here, because this repo is public.
     four replies are in, so their answers stay comparable with this one.
     Then rewrite it goal first, with no internal labels and a diagram at the
     top, and send the rewrite back to Reader 1.
-- Readers 2-5: no reply yet (2026-10-14).
+    *(Superseded 2026-10-15, Gerard: rewrite now rather than wait. Two days
+    in, with one reply of four, the likelier problem was the size of the
+    ask: the email was 731 words plus five written answers, under a subject
+    line promising two minutes.)*
+- Readers 2-5: no reply yet (2026-10-14; still none 2026-10-15).
+- 2026-10-15 (Gerard decided; Claude drafted): "In short" rewritten on both
+  pages (goal first, no internal labels, the diagram
+  images/in-short-stages.svg; troubleshooting moved to the first bullet;
+  "How it works" cut because the diagram shows it). 260 words became 210.
+  Gerard approved it as written. Follow-ups, as replies in the original
+  threads: the readers who haven't answered get Part 2's "In short" only (about 210
+  words) plus the diagram and ONE question ("After a 30-second skim, what do
+  you think this project is?"); Reader 1 gets both rewrites and "did this fix
+  what stopped you?". The previous wording is in git history.
 -->
 
 ## In short
 
-- **What it is:** the second phase of the IIP lab build for AI-103. Phase 1
-  ended with an AI agent that worked on a developer's machine: it drafts
-  marketing copy for a fictional hardware store, checks the draft, and audits
-  the thumbnail image. Phase 2 turned that into an app that runs in Azure.
-  Upload a thumbnail and a topic. An Azure Function then runs the agent with no
-  keys and saves the result. The result shows on a web page behind an Entra
-  ID sign-in.
-- **What it proves:** each of the seven milestones (M8-M14) has a written
-  definition of done, shown rather than asserted. Six are complete; M13's
-  last step, a scheduled rollback, is still ahead. The same test
-  upload, with a known correct answer, was re-run after each major change
-  and gave the right answer each time.
-- **What it's really about:** troubleshooting. Much of the work went into
-  things that looked right and weren't: a role that matched
-  Microsoft's documented minimum and still failed, an alert that fired but
-  never emailed, a deployment preview whose "noise" would have wiped real
-  settings. Six of those are written up below as case studies, each written the way a
-  support engineer works a ticket: symptom, evidence, root cause, fix.
-- **What it doesn't do yet:** some of what was built is deliberately not left
-  running. The private networking was built, proven and then torn down to
-  save cost, and the Conditional Access policies are deleted when a free
-  licence trial ends. "Known limits" lists these and the rest.
+**The goal:** take the AI agent from Part 1, which ran only on a developer's
+machine, and turn it into a secure app in Azure: no keys or passwords in the
+code, a sign-in to see results, and an alert when something breaks. It's
+hands-on preparation for Microsoft's AI-103 exam.
+
+![Two-part diagram. Part 1: an AI agent takes a topic and an image, writes a title and text, checks the text against a fact sheet, audits the image and reports pass or fail. Part 2: the same agent runs in Azure: upload, queue, an Azure Function runs the agent, the result is saved, and you sign in to view it.](images/in-short-stages.svg)
+
+- **What it's really about:** troubleshooting, the way a support engineer
+  works a ticket. Several things looked right and weren't: a permission that
+  matched Microsoft's documented minimum and still failed, an alert that fired
+  but never sent its email, and a deployment preview whose "harmless noise"
+  would have wiped real settings. Six are written up below as case studies:
+  symptom, evidence, root cause, fix.
+- **What it proves:** the work was split into seven stages, each with a
+  written definition of done that was shown, not just claimed. Six are
+  complete; one has a final step left, a planned rollback. One test upload
+  with a known right answer was repeated after each major change and came back
+  right every time.
+- **What isn't left running:** some parts were built, proven and then switched
+  off on purpose: the private networking to save cost, and the stricter
+  sign-in rules when a free licence trial ends. "Known limits" lists these and
+  the rest.
 
 ## Terms used on this page
 

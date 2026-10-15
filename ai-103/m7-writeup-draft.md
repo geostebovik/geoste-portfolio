@@ -84,11 +84,21 @@ STILL OPEN BEFORE PUBLISHING:
   pages). What it means for this page: "IIP" and "seventh and final milestone"
   stopped the reader (internal labels this page never defines), "copy" needed
   a guess, and the "deciding what to trust" point didn't come across. No
-  change to "In short" until the other replies are in.
+  change to "In short" until the other replies are in. *(Superseded
+  2026-10-15: "In short" was rewritten that day; see the next entry.)*
 - At publish time: an "On this page" link list at the top, and the evidence
   table's repo-relative paths turned into GitHub links.
 - The group push with Phase 2. *(The "two stale site lines" once listed here were
   fixed on 2026-09-21 in `5fccd4a`. Corrected 2026-09-28.)*
+
+"IN SHORT" REWRITTEN, 2026-10-15 (Claude drafted from Reader 1's feedback;
+Gerard approved it as written). Goal first, no internal labels (IIP,
+milestone, "copy"), and the stage diagram images/in-short-stages.svg under
+the goal line (the same diagram as the Phase 2 page). The colour bullet keeps
+its meaning but drops its four fractions; they stay in "Known limits". It still
+names the line it counts (the audit's explanation of its brand verdict), and
+"most runs" is exact for both runs (40 of 45 and 34 of 45). 258 words became
+213. The previous wording is in git history.
 
 GERARD'S REVIEW, Sep 15: he read "In short" and kept it as written. He
 judged it longer than ideal, but found that each point says something
@@ -99,26 +109,27 @@ bullets 2 to 4 because their figures changed; he approved them the same day.
 
 ## In short
 
-- **What it is:** a single Azure AI Foundry agent that drafts marketing copy
-  for a fictional hardware store. It checks each draft against the store's
-  fact sheet, then audits the thumbnail image for legibility, brand colours
-  and factual accuracy. It is the seventh and final milestone of the IIP lab
-  build for AI-103.
-- **What it proves:** the agent does what it was designed to do, measured
-  against a written answer key. In the full acceptance test, run on the code
-  as shipped, it completed **120 of 120 runs with zero crashes**, and **all 120
-  text rows and all 120 audit rows** matched the key. It is the first pass in
-  the project with no misses.
-- **What it does not do yet:** one test image is entirely orange, and the
-  audit still calls its lighter orange "cream," a brand colour that isn't
-  in the image. A fix removed the word from the line where the audit
-  describes the image (0 of 45 runs, then 1 of 45 on a repeat). It did not
-  remove it from the line where the audit explains its brand verdict (40 of
-  45, then 34 of 45). The verdicts are right, the word is wrong, and the agent repeats
-  it in its summary. It is an open flaw, and this page says so.
-- **What it's really about:** deciding what to trust. Much of the work on
-  this milestone went into finding out when a result could be believed,
-  including several times when a good-looking number turned out to be wrong.
+**The goal:** build an AI agent that writes marketing text and checks its own
+work, and find out when its results can actually be trusted. It's hands-on
+preparation for Microsoft's AI-103 exam.
+
+![Two-part diagram. Part 1: an AI agent takes a topic and an image, writes a title and text, checks the text against a fact sheet, audits the image and reports pass or fail. Part 2: the same agent runs in Azure: upload, queue, an Azure Function runs the agent, the result is saved, and you sign in to view it.](images/in-short-stages.svg)
+
+- **What it does:** given a topic and a product image, the agent writes a
+  title and description for a fictional hardware store. It checks the text
+  against the store's fact sheet, the one source of truth for its hours,
+  services and brand. Then it audits the image: is the text readable, are the
+  colours on brand, are the facts right?
+- **How it was tested:** against a written answer key of eight test items,
+  including five images, three of them with one deliberate flaw each. In the
+  final test of 120 runs, every result matched the key and nothing crashed.
+- **The flaw it still has:** on an all-orange test image, the audit's
+  explanation of its brand verdict names "cream", a brand colour that isn't in
+  the image, in most runs. The verdicts are right; the word is wrong. This page
+  says so rather than hiding it.
+- **What it's really about:** deciding what to trust. Much of the work went
+  into proving when a result could be believed, including several times a
+  good-looking number turned out to be wrong.
 
 ## Terms used on this page
 
