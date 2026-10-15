@@ -58,6 +58,10 @@ readers). Not added to "Known limits": storage-account and AI Search key
 access, under Gerard's rule against operational details about the live tenant.
 Gerard's call whether to add them.
 
+GERARD'S DECISION, 2026-10-15: case study 5 gains the "Then storage and AI
+Search" paragraph (Claude drafted both sentences; Gerard approved both). It
+states the security posture only, not the live tenant's settings.
+
 STILL OPEN BEFORE PUBLISHING:
 - M13's rollback (C9, the week of 2026-10-26): add one closing line to the
   M13 row and to "Known limits". Nothing else depends on it.
@@ -449,6 +453,12 @@ tested in both directions:
   longer work.
 - **The Entra ID path still works.** The test upload gave item4's correct
   answer, and a local smoke test of all nine keyless call paths passed.
+
+**Then storage and AI Search.** The same change was made on the project's
+storage account and its AI Search service. Each was measured first, to see
+what still used a key, then tested in both directions. All three services now
+refuse keys. On storage, the only key traffic in 30 days turned out to be
+Azure's own deployment calls, which still succeed after the change.
 
 One detail differed from the documentation. Microsoft Learn's page on this
 setting says to expect a 401. The service returned 403. Gerard stopped the run
