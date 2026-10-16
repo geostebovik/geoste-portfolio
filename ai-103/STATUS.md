@@ -723,6 +723,58 @@ Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
 
+### Session — October 16, 2026 — punch-list reconciliation; ostebovik.net traffic read (a reach problem, not engagement)
+
+**Attribution:** Claude read the docs and Todoist, checked the site files
+against GitHub `main` and the live site, wrote the KQL and interpreted the
+results, and updated Todoist. Gerard chose the work, ran every query in the
+portal and confirmed the phone test. No IIP code or Azure resource changed.
+
+**Two Todoist tasks were stale, found before any work was done on them.**
+Claude's first plan put "homepage menu on phones" and "add link previews"
+first, from the task text alone. Both were already live: `index.html` loads
+`/css/mobile.css`, `js/nav.js` keeps the current link in view, and all 16
+pages carry a meta description, Open Graph tags and `img/og-card.png`
+(about Oct 5 and Oct 14). Verified: local files identical to GitHub `main`;
+the live pages serve them (fetched in Gerard's Chrome opened as
+`?internal=1`, which also marked that browser). Gerard had tested the phone
+menu. The nav task was reworded to its 2 leftovers (the homepage menu's
+design, Gerard's call; the AI page's header, cosmetic). **Lesson (Claude):**
+check a task's claims against the files before ranking it.
+
+**Site traffic, Sep 29 - Oct 16** (queries in `D:\claude\iip\`, v2 and v3;
+screenshots in `D:\claude\iip\screenshots\`; Gerard also saved them in Azure,
+DefaultQueryPack in the auto-created RG `LogAnalyticsDefaultResources`):
+- 70 page views. 16 were crawlers (Googlebot, bingbot).
+- People only: 16 visits; 13 opened 2-3 pages.
+- Per browser: 7 of 9 rows are Phoenix, Windows Chrome or Android Chrome,
+  seen only on site-work days. Gerard's own browsers before they were marked.
+- Likely outside visitors: 2, one page each (iOS Safari from Ashburn VA, a
+  data-centre hub, so maybe not a person; Samsung Internet from the
+  Sacramento area).
+- **Conclusion:** engagement can't be judged; almost nobody outside arrives.
+  Site polish has no measurable payoff; justify site items on content
+  grounds only. Re-test: application dates with the link, then Q4/Q5 a week
+  later. The Todoist analytics task is completed with these findings.
+
+**Claude's query errors, caught the same session:** `views` is a KQL
+reserved word (Q2 failed to parse; renamed every output column); the first
+queries didn't filter crawlers; `!has "Headless"` could never match
+`HeadlessChrome` (`has` matches whole terms; `contains` is the substring
+operator). The portal's grid doesn't copy as text: ask for screenshots.
+
+**Project instructions, still stale (Gerard's step, ~2 min):** the
+`aif-dev-wus-01` line doesn't say key auth OFF since 2026-10-14, and the
+`srch-iip-dev-wus-01` line doesn't say API keys OFF since 2026-10-15.
+
+**Lead for the open observation (untested, Claude):** the doubled
+`QueuesOptions` line at each host start (Sep 29) may be told apart by the
+`cloud_RoleInstance` column that Application Insights stamps on every trace,
+which would also answer the Flex instance-id follow-up. Not run today
+(Gerard's call).
+
+The Current next action is unchanged: outside readers (Gerard's step).
+
 ### Session — October 15, 2026 — "In short" rewritten for outside readers; shared-key access off on `stiipdevwus01`; API keys off on AI Search
 
 **Attribution:** Claude read the request email in Gerard's Gmail (via the
