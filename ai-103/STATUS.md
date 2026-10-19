@@ -107,8 +107,12 @@ checked with a 10-question quiz grounded in Microsoft Learn. **Open the
 next session with a 10-minute retest** of the Oct 19 quiz misses, in new
 wording: deployment types (Data Zone Standard, Global Batch), the quota
 pool and RPM's short windows, content filter defaults, the indirect-attack
-Prompt Shield, and what needs Microsoft's approval. This week's groups (in
-Todoist): Speech; Set up AI solutions in Foundry; Responsible AI. The exam is booked on a milestone,
+Prompt Shield, and what needs Microsoft's approval; plus from the Speech
+quiz, listening vs speaking features (custom speech vs SSML / custom
+voice) and Voice Live's trigger symptoms. Spread correct answers across
+option positions (the Speech quiz had 7 of 10 in slot b). This week's
+groups (in Todoist): Speech (done Oct 19); Set up AI solutions in Foundry
+(next); Responsible AI. The exam is booked on a milestone,
 not a date: after a comfortable retake of the official practice
 assessment. Detail: the Oct 19 session entry. **Don't redo:** the gap
 map's coverage marks (verified against the code at `90a7109`).
@@ -819,6 +823,39 @@ cited.
   task's study count from 1-2 to 3-4 and added this week's two extra groups,
   picked by rating (all 4 Not yet, heaviest domain) and matching the quiz
   misses: Set up AI solutions in Foundry; Responsible AI.
+
+**Speech study block, the same afternoon.** Claude gave a decision table
+(situation to feature) and three Learn pages; Gerard read them and wrote a
+three-part explain-back. Claude's critique: (a) he treated "fast
+transcription" as immediate results, which is real-time; batch is about
+volume and "later"; (b) custom speech was right, and he correctly found
+that the reading never covered the cheaper alternative (a phrase list), so
+Claude's question was unfair; (c) Voice Live was right in spirit, but the
+exam cues are symptoms (interruptions, end-of-turn, echo, noise, latency).
+**Speech quiz: 7/10.** Missed Q3 and Q5 (both listening-vs-speaking mix-ups)
+and Q8 (Voice Live symptoms). Speech skills re-rated to Shaky (Gerard:
+"generous but more accurate than Not yet").
+
+**Site visitor log (side thread).** Claude wrote a visitor-log query for
+the "IIP data" dashboard; Gerard ran, exported and pinned it
+(`D:\claude\iip\2026-10-19-site-visitors-tile.kql`, export in
+`D:\claude\iip\results\`). Read of the export: probably one real outside
+visitor in 30 days (Sep 30, Sacramento area, from Google); the rest are
+crawlers or data-centre traffic (Mountain View Android 6.0 is very likely
+Google's smartphone crawler, which the "bot" filter misses). **Two faults
+found and settled, don't re-check:**
+- **The owner mark misses www.** Gerard's phone kept sending telemetry
+  after he had marked it. His screenshot (`D:\claude\iip\screenshots\lead-separation.png`)
+  shows every phone row from Oct 6 to Oct 17 with the same `user_Id` and
+  the `www` address. The mark is stored per origin; the bare domain serves
+  the site without redirecting, and `js/telemetry.js` documents only the
+  bare-domain link, so earlier marks went there. He opened the www link on
+  Oct 19. Check: no new Phoenix Android row after Oct 19. Lasting fix
+  options are in Todoist (Gerard's call). Claude's error: it told him to
+  mark the phone without asking whether he already had.
+- **Times showed 7 hours early in the portal** (Claude's query bug): the
+  query converted to Phoenix time and the portal converted again. Fixed in
+  the file; the pinned tile needs re-pinning (Todoist).
 
 **Also done:** both the email and the push from the Oct 18 Sunday run
 arrived (Gerard), so the disabled laptop-bound task "Iip sunday punch list"
