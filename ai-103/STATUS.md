@@ -100,10 +100,15 @@ a stated limit.)*
 ## Current next action
 
 **Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19).
-First, Gerard rates all 64 skills in the "AI-103 Gap Map" artifact
-(baseline, ~20 min). Then study the weakest areas one group per session,
-each checked with a 10-question quiz grounded in Microsoft Learn. Speech is
-first (never touched by the project). The exam is booked on a milestone,
+Baseline done (Oct 19): Gerard rated all 64 skills in the "AI-103 Gap
+Map" artifact: 0 Solid, 12 Shaky, 52 Not yet. **Study is now the main
+work** (Gerard): 3-4 `[study]` items a week, one skill group each, each
+checked with a 10-question quiz grounded in Microsoft Learn. **Open the
+next session with a 10-minute retest** of the Oct 19 quiz misses, in new
+wording: deployment types (Data Zone Standard, Global Batch), the quota
+pool and RPM's short windows, content filter defaults, the indirect-attack
+Prompt Shield, and what needs Microsoft's approval. This week's groups (in
+Todoist): Speech; Set up AI solutions in Foundry; Responsible AI. The exam is booked on a milestone,
 not a date: after a comfortable retake of the official practice
 assessment. Detail: the Oct 19 session entry. **Don't redo:** the gap
 map's coverage marks (verified against the code at `90a7109`).
@@ -796,6 +801,24 @@ likely a recall slip rather than a bad question.
 deployment types, reasoning-model parameters, quota and rate limits, and
 content filters. Every answer is taken from a Microsoft Learn page and
 cited.
+
+**Results, later the same day (Gerard):**
+- **Quiz: 3/10.** Right: the wildcard parser, reasoning-model parameters,
+  and max_tokens counting toward the rate limit, the three he had met in
+  this session or in his own probe script. Missed: Q3 and Q5 (he
+  second-guessed both), Q4, and Q7-Q10. The misses fall
+  into three groups: deployment types, quota and rate limits, content
+  filters.
+- **Baseline ratings: 0 Solid, 12 Shaky, 52 Not yet.** All 12 Shaky skills
+  are ones the project built or partly built; 7 Built skills were still
+  rated Not yet. **Correction (Claude):** the "about 52% practiced"
+  estimate overstated readiness. Building something gave a foothold on 12
+  skills, no more. The ratings are the baseline, not the estimate.
+- **Decided: study is the main work,** 3-4 `[study]` items a week (first
+  pass about 14-21 hours, so roughly 4-5 weeks). Claude raised the Sunday
+  task's study count from 1-2 to 3-4 and added this week's two extra groups,
+  picked by rating (all 4 Not yet, heaviest domain) and matching the quiz
+  misses: Set up AI solutions in Foundry; Responsible AI.
 
 **Also done:** both the email and the push from the Oct 18 Sunday run
 arrived (Gerard), so the disabled laptop-bound task "Iip sunday punch list"
