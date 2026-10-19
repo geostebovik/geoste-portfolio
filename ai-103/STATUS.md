@@ -66,7 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 15, 2026 (Oct 15: both "In short" sections
+**Status as of:** October 19, 2026 (Oct 19: AI-103 exam study started
+after the official practice assessment showed the gap; see the Oct 19
+session entry. Oct 15: both "In short" sections
 rewritten and reader follow-ups sent; shared-key access switched off on
 `stiipdevwus01` and API keys switched off on AI Search, see the Oct 15
 session entry). Phase 1 of the IIP labs is closed: M7
@@ -97,8 +99,17 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: outside readers for `phase2-writeup-draft.md`** (Gerard's
-step). Replaced 2026-10-13. **Gerard's edit pass is DONE** (2026-10-13,
+**Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19).
+First, Gerard rates all 64 skills in the "AI-103 Gap Map" artifact
+(baseline, ~20 min). Then study the weakest areas one group per session,
+each checked with a 10-question quiz grounded in Microsoft Learn. Speech is
+first (never touched by the project). The exam is booked on a milestone,
+not a date: after a comfortable retake of the official practice
+assessment. Detail: the Oct 19 session entry. **Don't redo:** the gap
+map's coverage marks (verified against the code at `90a7109`).
+
+**In parallel, unchanged: outside readers for `phase2-writeup-draft.md`**
+(Gerard's step; this was the headline from 2026-10-13). **Gerard's edit pass is DONE** (2026-10-13,
 section by section, every change approved by him). His rules are recorded in
 the draft's header: no Claude-only wrong turns, no clock times or day-level
 dates, no operational details about the live tenant. **Don't re-ask:** the
@@ -722,6 +733,75 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 19, 2026 — the practice assessment exposed the exam gap; AI-103 Gap Map built; exam study starts now
+
+**Attribution:** Gerard took Microsoft's official AI-103 practice
+assessment before the session, raised the problem, and made every decision
+below. Claude mapped the study guide against the repo, built the gap map and
+the quiz, updated the Sunday scheduled task and Todoist, and wrote this
+entry. No IIP code or Azure resource changed.
+
+**The finding (Gerard).** The assessment's first four questions were on
+model and deployment configuration settings. He guessed all four and
+stopped there. The project builds depth in one slice; the exam tests breadth
+and the exact names of settings, including options the project never chose.
+
+**Gap map (Claude; coverage verified against the code at `90a7109`, not
+only the docs).** All 64 skills in the study guide (skills measured as of
+Apr 16, 2026), each marked Built, Partial or Gap with file-level evidence:
+**16 Built, 27 Partial, 21 Gap.** Weighted by domain (Built 1, Partial ½),
+about **52%** of the exam has hands-on practice behind it: generative AI and
+agents 72%, information extraction 62%, plan/manage/secure 56%, computer
+vision 19%, text analysis and speech 12%. Checked in the code:
+- M5 search is vector-only (`search_text=None` in `m5_retrieve.py`); semantic
+  ranking is enabled on the free tier but never queried.
+- Every model deployment runs the default content filter
+  (`raiPolicyName: 'Microsoft.DefaultV2'` in `foundry.bicep`); never configured.
+- Vision is Vision Read OCR plus a multimodal model (`m7_legibility_check.py`,
+  `m7_cv_audit_tool.py`).
+- Nothing anywhere uses Speech, Translator, the Language service, image or
+  video generation, Search skillsets, or more than one agent.
+Built is not exam-ready: the assessment caught him on settings in areas the
+project built. His own rating per skill is the measure that counts.
+
+**Where it lives:** the "AI-103 Gap Map" artifact on claude.ai (private to
+Gerard). Each skill has Solid / Shaky / Not yet buttons; ratings are stored
+in the artifact's database (collection `ratings`, one document per skill
+id), which Claude can read back to plan sessions. Checked once after
+publishing: an owner write, read and delete worked, and a Contributor-level
+write was refused, so only Gerard can rate.
+
+**The remembered question** ("the setting on an OpenAI model to allow
+wildcard searches"): no model setting does that. Wildcards belong to Azure
+AI Search: `queryType=full` (the full Lucene parser) for infix and suffix
+wildcards; the default simple syntax supports prefix only (`sea*`). Most
+likely a recall slip rather than a bad question.
+
+**Decided (Gerard):**
+- **The paused study material was mislabelled.** The Sunday task's standing
+  assumption, "the 26-video MS Learn series is PAUSED through all of Phase
+  2", was wrong: the paused material was Pluralsight courses, and the
+  Pluralsight subscription is now cancelled. All learning goes through
+  Microsoft Learn and what is built in sessions, starting now, not after
+  Phase 2.
+- **Exam study shows up as 1-2 `[study]` items in the Sunday list.** Claude
+  rewrote that part of the Sunday task's prompt: it reads the gap map's
+  ratings if it can, otherwise picks the least-practiced domain first, and
+  says which it did.
+- **The exam is a milestone, not a date:** book it after retaking the
+  official practice assessment and scoring comfortably.
+
+**First study block:** a 10-question quiz (in the session chat) on
+deployment types, reasoning-model parameters, quota and rate limits, and
+content filters. Every answer is taken from a Microsoft Learn page and
+cited.
+
+**Also done:** both the email and the push from the Oct 18 Sunday run
+arrived (Gerard), so the disabled laptop-bound task "Iip sunday punch list"
+was deleted and its Todoist check completed. **Todoist:** added "[study]
+Baseline: rate all 64 skills in the AI-103 Gap Map" (due Oct 21) and
+"[study] Speech solutions".
 
 ### Session — October 16, 2026 — punch-list reconciliation; ostebovik.net traffic read (a reach problem, not engagement)
 

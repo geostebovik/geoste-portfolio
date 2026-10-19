@@ -23,7 +23,7 @@
 
 ---
 
-## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13)
+## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13, Exam row 2026-10-19)
 
 *Added 2026-10-10 at Gerard's request, after he lost track of where the work
 stood. This is a dated snapshot, so by the rule above it may name milestones.
@@ -49,7 +49,7 @@ update and the AI-103 exam.
 | M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **All three done-when items shown, 2026-10-13**: a push deploys the Function over OIDC (Oct 12); a parked upload fires an alert, and its email arrives (Oct 12; email fixed Oct 13); a traced upload shows every step, the three tools by name (Oct 13). Gerard ticks it |
 | Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | M7's is waiting on outside readers (Gerard) |
 | Site | ostebovik.net's AI page updated to match | After the push |
-| Exam | AI-103 | No date set (Gerard, 2026-10-10) |
+| Exam | AI-103 | **Study active from 2026-10-19**: the official practice assessment showed the project alone won't carry the exam. Weekly `[study]` items from the AI-103 Gap Map. Booked on a milestone, not a date: after a comfortable retake of the official practice assessment (Gerard, 2026-10-19) |
 
 **Why the marker and the work can differ:** the marker stays on M13 until its
 rollback, while M12 and M14 can run in the gap, because neither depends on the
