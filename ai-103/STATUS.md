@@ -99,22 +99,25 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19).
-Baseline done (Oct 19): Gerard rated all 64 skills in the "AI-103 Gap
-Map" artifact: 0 Solid, 12 Shaky, 52 Not yet. **Study is now the main
-work** (Gerard): 3-4 `[study]` items a week, one skill group each, each
-checked with a 10-question quiz grounded in Microsoft Learn. **Open the
-next session with a 10-minute retest** of the Oct 19 quiz misses, in new
-wording: deployment types (Data Zone Standard, Global Batch), the quota
-pool and RPM's short windows, content filter defaults, the indirect-attack
-Prompt Shield, and what needs Microsoft's approval; plus from the Speech
-quiz, listening vs speaking features (custom speech vs SSML / custom
-voice) and Voice Live's trigger symptoms. Spread correct answers across
-option positions (the Speech quiz had 7 of 10 in slot b). This week's
-groups (in Todoist): Speech (done Oct 19); Set up AI solutions in Foundry
-(next); Responsible AI. The exam is booked on a milestone,
-not a date: after a comfortable retake of the official practice
-assessment. Detail: the Oct 19 session entry. **Don't redo:** the gap
+**Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19;
+study loop changed 2026-10-20). **Study is the main work** (Gerard): 3-4
+`[study]` items a week, one skill group each. **The loop, from Oct 20
+(Gerard chose it): cards first, then hands-on, then quiz.** Claude adds a
+deck for the group to the "AI-103 Flashcards" artifact (Learn-grounded,
+phone-ready, Again/Got-it progress Claude can read); Gerard studies it; a
+read-only look at the same thing in his own subscription; then a
+10-question quiz with answers spread across positions. Never quiz before
+teaching (Oct 19's 3/10 was an unlabelled pretest). **Open the next
+session** by reading the flashcard page's `progress` collection (every card
+was marked Again on the first pass, Oct 20, so all 25 are due), then the
+next group. Oct 20 quiz misses to retest: Q3 (latency variance at steady
+volume = Provisioned) and Q7 (only off / annotate-only on output needs
+approval). This week's groups (in Todoist): Speech (done Oct 19); Set up AI
+solutions in Foundry (cards + quiz done Oct 20; re-rate in the gap map);
+Responsible AI (content filters and Prompt Shields covered by Oct 20's
+cards; safety evaluations not yet). The exam is booked on a milestone, not a
+date: after a comfortable retake of the official practice assessment.
+Detail: the Oct 19 and Oct 20 session entries. **Don't redo:** the gap
 map's coverage marks (verified against the code at `90a7109`).
 
 **In parallel, unchanged: outside readers for `phase2-writeup-draft.md`**
@@ -742,6 +745,74 @@ scanning a page of search results.
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
 was reordered, and several were already wrong before it was.
+
+### Session — October 20, 2026 — study loop changed to cards → hands-on → quiz (8/10); Reader 2's feedback lands on the "In short"
+
+**Attribution:** Gerard raised the problem (book study isn't carrying the
+energy hands-on building did, and Oct 19 quizzed him on terms he hadn't
+studied), found the flashcards were what taught him, chose the new loop and
+the card format, ran every command, and made every decision below. Claude
+built the flashcard page and its 25 cards, wrote the commands and the quiz,
+recorded the reader feedback, and wrote this entry. No IIP code or Azure
+resource changed.
+
+**Why the loop changed.** Oct 19's first quiz came before any teaching, so
+its 3/10 measured exposure, not ability (Claude's error: it wasn't labelled
+a pretest). Gerard found the quiz widget's flashcards taught him more than
+the Learn page, but they lived only in that session's chat and weren't
+reachable from his phone. **Decided (Gerard):** a published flashcard page,
+and the order cards → hands-on → quiz.
+
+**Built (Claude): "AI-103 Flashcards" artifact.** Cards and progress live
+in the page's database (owner-only writes; Claude adds decks with
+`ArtifactData`, no republish needed). Each card: answer, analogy, exam cue,
+"in your project" link to his own repo, and its Learn source. 25 cards in 7
+decks: deployment types (7), deployment settings (2), quota and rate limits
+(4), content filters (3), Prompt Shields (4), speech (3, the Oct 19 misses),
+CI/CD (2). Leitner spacing: Again = today; Got it = 1, 3, 7, 14 days.
+**Verified on claude.ai:** Gerard's grading wrote 25 `progress` documents
+(all "again", first pass, as instructed). Results are saved per card, so
+the next session reads them instead of asking.
+
+**Hands-on (Gerard ran; results in `D:\claude\iip\2026-10-20-results.txt`):**
+- Deployments match the Bicep: capacities 300/300/30/10, all
+  `OnceCurrentVersionExpired`, all `Microsoft.DefaultV2`. **Claude's error:**
+  the SKU column didn't print because the command aliased it `type`, a name
+  the CLI's table output drops (as far as Claude knows). Alias it `sku`.
+- **Open lead, not urgent: `gpt-5.4` GlobalStandard quota shows 300 used
+  against a limit of 250** in westus (`az cognitiveservices usage list`).
+  The deployment holds more than the pool now allows. Claude's guess,
+  unverified: the limit dropped after the deployment was raised, and
+  existing allocations are kept. Risk: a deploy that recreates `gpt-5-4` at
+  300 would likely fail; the Oct 12-14 updates went through. In Todoist.
+- Guardrails: Gerard's answer, from the defaults: an instruction hidden in an
+  uploaded loan PDF would reach the model today, because document attack
+  detection is off by default. Correct. Not checked: whether the IIP code
+  wraps documents in `<documents>` delimiters, which the Chat Completions
+  shield needs. **Claude's error:** the portal path omitted the top menu.
+  Microsoft's path is **Build → Guardrails** (Gerard was under Manage;
+  screenshot `D:\claude\iip\screenshots\foundry-project-guardrails-noshow.png`).
+
+**Quiz: 8/10** (new questions, all on the cards). Missed Q3 (steady high
+volume with swinging latency = Provisioned) and Q7 (only turning harm
+filters off or annotate-only on output needs approval; Prompt Shields
+on/off doesn't). Gerard's observation: tying descriptions and uses to the
+terms lets him recognise the wrong answers, which points him to the right
+one. Different question sets, so 3/10 → 7/10 → 8/10 is a trend, not a
+controlled measure.
+
+**Outside readers: Reader 2 replied** (recorded without names in
+`phase2-writeup-draft.md`'s header, OUTSIDE READERS; read in Gerard's Gmail
+with his knowledge). A technical reader she passed it to couldn't follow the
+story or see why it matters ("numbers but no context and no significance"),
+and could tell it was AI-written. Both land on Claude's prose: Claude drafted
+the whole page, the Oct 15 rewrite included. **Decided (Gerard): Option A.**
+Gerard drafts the next "In short" in his own voice; Claude critiques it for
+the "so what" in each line (~45-60 min, before the joint push; nothing waits
+on it before C9 in the week of Oct 26). **Don't redo:** recording the reply.
+**File-write note:** the first write of that header changed the file's
+timestamp but not its content; the read-back caught it, and the second write
+was verified identical.
 
 ### Session — October 19, 2026 — the practice assessment exposed the exam gap; AI-103 Gap Map built; exam study starts now
 

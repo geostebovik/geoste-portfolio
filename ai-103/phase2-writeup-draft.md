@@ -102,6 +102,7 @@ questions. Readers are not named here, because this repo is public.
     ask: the email was 731 words plus five written answers, under a subject
     line promising two minutes.)*
 - Readers 2-5: no reply yet (2026-10-14; still none 2026-10-15).
+  *(2026-10-20: Reader 2 replied; see the entry at the end of this list.)*
 - 2026-10-15 (Gerard decided; Claude drafted): "In short" rewritten on both
   pages (goal first, no internal labels, the diagram
   images/in-short-stages.svg; troubleshooting moved to the first bullet;
@@ -126,6 +127,32 @@ questions. Readers are not named here, because this repo is public.
   both, honestly. M7 page "Known limits" gains "The brand check judges colour
   only"; this page's "After Phase 2" gains "A person in the loop". Claude
   drafted both; Gerard approved them as written.
+- Reader 2, replied 2026-10-20 (to the Oct 15 follow-up: Part 2's rewritten
+  "In short" only, the diagram, one question). She passed it to a technical
+  reader she knows and relayed his comments; she added one framing of her own.
+  Recorded by Claude from the email, read in Gerard's Gmail with his
+  knowledge.
+  - The technical reader could not follow the story or quickly grasp the
+    significance. He pieced it together only because he knows the field.
+  - "The summary read out numbers but there was no context and no
+    information to the significance to the finding."
+  - Reader 2's framing: it reads like "listing tasks" rather than "telling a
+    story about your impact."
+  - He could tell from the start that it read as AI-written, and found that
+    odd from someone studying AI. His suggestions: have an LLM proof
+    everything and ask whether it sounds AI-written; record yourself reading
+    the summary aloud and listen to whether you can follow it.
+  - Claude's notes: both main points are fair, and both land on Claude's
+    work. Claude drafted all of this page's prose, the Oct 15 rewrite
+    included (see WHO WROTE THIS DRAFT), so "reads as AI-written" is
+    accurate. The counts in "In short" (seven stages, six complete, six case
+    studies, one test upload) are exactly the "numbers without
+    significance": none says what it changes for the reader. Reader 1's
+    "makes absolute sense" came after he had read the first version and
+    asked for this shape; this reader saw the rewrite cold, so his reading
+    is the better test of a first impression.
+  - NOT YET DECIDED (Gerard): whether and how to rewrite "In short" again,
+    and in whose voice.
 -->
 
 ## In short
