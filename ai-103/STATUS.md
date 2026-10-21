@@ -108,14 +108,16 @@ phone-ready, Again/Got-it progress Claude can read); Gerard studies it; a
 read-only look at the same thing in his own subscription; then a
 10-question quiz with answers spread across positions. Never quiz before
 teaching (Oct 19's 3/10 was an unlabelled pretest). **Open the next
-session** by reading the flashcard page's `progress` collection (every card
-was marked Again on the first pass, Oct 20, so all 25 are due), then the
-next group. Oct 20 quiz misses to retest: Q3 (latency variance at steady
-volume = Provisioned) and Q7 (only off / annotate-only on output needs
-approval). This week's groups (in Todoist): Speech (done Oct 19); Set up AI
-solutions in Foundry (cards + quiz done Oct 20; re-rate in the gap map);
-Responsible AI (content filters and Prompt Shields covered by Oct 20's
-cards; safety evaluations not yet). The exam is booked on a milestone, not a
+session (Oct 21) with the Responsible AI quiz** (Gerard, Oct 20 evening: he
+reviews the cards before the session). Cards and hands-on for it are done
+(Oct 20 entry). Then read the flashcard page's `progress` collection: all
+36 cards were marked Again on their first pass, so all are due. Retest in
+the quiz too: Oct 20 misses Q3 (latency variance at steady volume =
+Provisioned) and Q7 (only off / annotate-only on output needs approval), and
+the corrected blocking-level wording (new portal: High = strictest). This
+week's groups (in Todoist): Speech (done Oct 19); Set up AI solutions in
+Foundry (done Oct 20, re-rated); Responsible AI (cards + hands-on done Oct
+20; quiz next, then re-rate). The exam is booked on a milestone, not a
 date: after a comfortable retake of the official practice assessment.
 Detail: the Oct 19 and Oct 20 session entries. **Don't redo:** the gap
 map's coverage marks (verified against the code at `90a7109`).
@@ -812,7 +814,40 @@ the "so what" in each line (~45-60 min, before the joint push; nothing waits
 on it before C9 in the week of Oct 26). **Don't redo:** recording the reply.
 **File-write note:** the first write of that header changed the file's
 timestamp but not its content; the read-back caught it, and the second write
-was verified identical.
+was verified identical. The same happened with this file's first write
+(a half-updated copy); also caught by the read-back.
+
+**Later the same day: Responsible AI group, cards and hands-on (quiz moved
+to Oct 21, Gerard).** Set up AI solutions in Foundry re-rated by Gerard and
+its Todoist task completed. Claude added an 11-card "Responsible AI" deck
+(guardrail anatomy and intervention points, agent-overrides-model,
+protected material / PII / groundedness / task adherence / blocklists,
+safety evaluators and defect rate, AI Red Teaming Agent and ASR, tracing and
+content recording, Content Credentials, tool approval, constraining agents,
+the six principles). **Card correction (Claude's error, found while
+researching):** the morning's harm-category card said "stricter = Low",
+which is the classic portal's wording only. The new portal's "blocking
+level" runs the other way (High = most restrictive, Low = blocks high only;
+Medium is the same in both). Card rewritten to show both.
+- **Guardrail, seen in the portal** (Gerard; screenshots
+  `D:\claude\iip\screenshots\2026-10-20-guardrails-*.png`, three because the
+  pane won't scroll expanded): `Microsoft.DefaultV2` is applied to all four
+  deployments and no agents. Jailbreak (user prompt attack): user input,
+  Block. Content safety: hate, self-harm, sexual, violence at Medium
+  blocking, user input and output, Block. Protected material: code on output,
+  **Annotate**; text on output, Block. **No document attack control**, which
+  confirms the morning's answer by observation: an instruction hidden in an
+  uploaded loan PDF isn't scanned today. Also listed, unassigned:
+  `Microsoft.Default` and `Microsoft.MAIDefault`.
+- **Trace spans** (Gerard; `2026-10-20-trace-spans.png`): AppDependencies
+  with `gen_ai` over 14 days shows 3 traced uploads (3 x `create_agent
+  riverside-content-agent`, 3 each of the three `execute_tool` spans) plus
+  the classic Agents API calls (`get_thread_run` 25, `list_run_steps` 12,
+  `submit_tool_outputs` 9, `create_thread`, `start_thread_run`). Those
+  thread/run names are the classic API that retires 2027-03-31 (Todoist).
+  **Not verified:** that the span properties hold no message content. The
+  code sets `enable_content_recording=False`; opening one span's Properties
+  would confirm it (~2 min).
 
 ### Session — October 19, 2026 — the practice assessment exposed the exam gap; AI-103 Gap Map built; exam study starts now
 
