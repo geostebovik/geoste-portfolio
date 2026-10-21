@@ -59,6 +59,23 @@ trial clock.
 2027-03-31; first step due Dec 1), which now includes the agent-isolation build
 (D-M12-8). Everything else is parked in Todoist or the Phase 2 Backlog.
 
+**How build work runs (Gerard chose 2026-10-21): learn before build.** Before
+any build step that brings in a concept from the AI-103 skills outline,
+Claude stops and does four things in order:
+1. Says what the thing is and why this design needs it, with an analogy.
+2. Adds 2-4 cards for it to the "AI-103 Flashcards" page. Each card's
+   "In your project" box names the file or resource about to be built.
+3. Gerard studies them. Then the build.
+4. A 3-question check before moving on.
+
+Cost: about 20-30 minutes per new concept (accepted). Why: guardrails,
+evaluators, deployment types and quota were built as config with no stop
+for what or why, so Gerard met the exam's topics months after building
+them (his observation, Oct 21). Claude's share: it built at the pace of the
+code, not the pace of learning. First candidates: a custom guardrail with
+document attack on; a safety-evaluator run on the IIP; the classic-agent
+migration.
+
 ---
 
 **What this page is:** a snapshot of where things stand now. It isn't a log

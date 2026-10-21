@@ -100,27 +100,24 @@ a stated limit.)*
 ## Current next action
 
 **Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19;
-study loop changed 2026-10-20). **Study is the main work** (Gerard): 3-4
-`[study]` items a week, one skill group each. **The loop, from Oct 20
-(Gerard chose it): cards first, then hands-on, then quiz.** Claude adds a
-deck for the group to the "AI-103 Flashcards" artifact (Learn-grounded,
-phone-ready, Again/Got-it progress Claude can read); Gerard studies it; a
-read-only look at the same thing in his own subscription; then a
-10-question quiz with answers spread across positions. Never quiz before
-teaching (Oct 19's 3/10 was an unlabelled pretest). **Open the next
-session (Oct 21) with the Responsible AI quiz** (Gerard, Oct 20 evening: he
-reviews the cards before the session). Cards and hands-on for it are done
-(Oct 20 entry). Then read the flashcard page's `progress` collection: all
-36 cards were marked Again on their first pass, so all are due. Retest in
-the quiz too: Oct 20 misses Q3 (latency variance at steady volume =
-Provisioned) and Q7 (only off / annotate-only on output needs approval), and
-the corrected blocking-level wording (new portal: High = strictest). This
-week's groups (in Todoist): Speech (done Oct 19); Set up AI solutions in
-Foundry (done Oct 20, re-rated); Responsible AI (cards + hands-on done Oct
-20; quiz next, then re-rate). The exam is booked on a milestone, not a
-date: after a comfortable retake of the official practice assessment.
-Detail: the Oct 19 and Oct 20 session entries. **Don't redo:** the gap
-map's coverage marks (verified against the code at `90a7109`).
+study loop changed 2026-10-20; updated 2026-10-21). **Study is the main
+work** (Gerard): 3-4 `[study]` items a week, one skill group each. **The
+loop (Gerard chose it Oct 20): cards first, then hands-on, then quiz.**
+Claude adds a deck for the group to the "AI-103 Flashcards" artifact;
+Gerard studies it; a read-only look at the same thing in his own
+subscription; then a 10-question quiz with answers spread across
+positions. Never quiz before teaching. **New standing rule (Gerard, Oct
+21): learn before build** for any build step that touches an exam topic
+(`phase2-orientation.md`, under "Planned but off the critical path").
+**This week's groups (in Todoist):** Speech (done Oct 19); Set up AI
+solutions in Foundry (done Oct 20); Responsible AI (done Oct 21: quiz
+9/10, re-rated); **Build agents (s23-s28): 12 cards added Oct 21 in the
+"Build agents" deck. Next: Gerard studies them, then the hands-on look
+(Claude writes the commands), then the quiz, then re-rate s23-s28.** The
+exam is booked on a milestone, not a date: after a comfortable retake of
+the official practice assessment. Detail: the Oct 19-21 session entries.
+**Don't redo:** the gap map's coverage marks (verified against the code at
+`90a7109`); the Responsible AI quiz and its re-rating.
 
 **In parallel, unchanged: outside readers for `phase2-writeup-draft.md`**
 (Gerard's step; this was the headline from 2026-10-13). **Gerard's edit pass is DONE** (2026-10-13,
@@ -743,6 +740,57 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 21, 2026 — Responsible AI quiz 9/10; learn-before-build rule; Build agents deck
+
+**Attribution:** Gerard raised the learning problem, chose the
+learn-before-build rule, took the quiz, re-rated the four skills and chose
+the next study group. Claude wrote the quiz and the 12 new cards, recorded
+the rule, and wrote this entry. No IIP code or Azure resource changed.
+
+**Why the rule.** Gerard: the flashcards covered things the project had
+already built (guardrails, evaluators, model selection, deployment types,
+quota), with no stop for what or why while building them. He felt "along
+for the ride" and learned them months later. Claude's share: it built at
+the pace of the code, not the pace of learning. **Decided (Gerard): learn
+before build.** Before a build step that brings in an exam concept: a
+what/why with an analogy, 2-4 cards tied to the resource about to be
+built, Gerard studies them, the build, then a 3-question check. About
+20-30 minutes per concept, accepted. Recorded in `phase2-orientation.md`
+(verified by read-back). First candidates: a custom guardrail with
+document attack on; a safety-evaluator run on the IIP; the classic-agent
+migration.
+
+**Responsible AI quiz: 9/10.** Only miss: Q8. An instruction in the system
+prompt doesn't enforce tool approval; `require_approval` does. Gerard:
+answered too quickly and too confidently. All three retests passed: the
+two Oct 20 misses (approval is needed only for off or annotate-only on
+output; Provisioned for steady volume with swinging latency) and the
+corrected blocking-level wording (new portal: High = strictest).
+**Re-rated by Gerard** (gap map, all four were Not yet on Oct 19): **s13
+Solid, s14 Shaky, s15 Shaky, s16 Shaky.** Todoist task completed with the
+result. **Claude's caveat:** Q5 and Q9 were about his own build, which
+makes them easier than exam questions.
+
+**Card progress:** the page shows all 36 earlier cards reviewed twice
+(Oct 20 and 21) and marked Again both times, so the spacing hasn't
+started. Set against 9/10, Again looks stricter than his recall. Gerard's
+call.
+
+**Fourth group this week (Gerard chose it): Build agents by using Foundry
+(s23-s28),** the biggest exam domain. Claude added a 12-card "Build
+agents" deck (`ag01`-`ag12`), researched on Learn the same day, read back
+from the page's database and matched field by field. Todoist task added.
+Two facts found while researching that may show up on the exam: Foundry
+portal **workflows retire 2026-12-01** (move to Agent Framework, Logic
+Apps or A2A), and **Connected Agents** aren't in the new API (A2A replaces
+them). The April 2026 study guide may still name both. **Found in the code
+while writing card ag10:** the two-redraft cap is instruction clause 7.
+`m7_orchestrator.py` counts redrafts after the run, and nothing stops a
+third. That's the Q8 trap inside the IIP's own design. It's already a
+stated limit in Todoist, so nothing changes.
+
+**Not done yet:** the Build agents hands-on and quiz; re-rating s23-s28.
 
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
