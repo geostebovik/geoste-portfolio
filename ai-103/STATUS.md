@@ -111,13 +111,16 @@ positions. Never quiz before teaching. **New standing rule (Gerard, Oct
 (`phase2-orientation.md`, under "Planned but off the critical path").
 **This week's groups (in Todoist):** Speech (done Oct 19); Set up AI
 solutions in Foundry (done Oct 20); Responsible AI (done Oct 21: quiz
-9/10, re-rated); **Build agents (s23-s28): 12 cards added Oct 21 in the
-"Build agents" deck. Next: Gerard studies them, then the hands-on look
-(Claude writes the commands), then the quiz, then re-rate s23-s28.** The
-exam is booked on a milestone, not a date: after a comfortable retake of
-the official practice assessment. Detail: the Oct 19-21 session entries.
-**Don't redo:** the gap map's coverage marks (verified against the code at
-`90a7109`); the Responsible AI quiz and its re-rating.
+9/10, re-rated); Build agents (done Oct 21: quiz 10/10, re-rated). **All
+four groups for this week are done. Next session: Gerard picks next
+week's 3-4 groups** (Claude proposes them from the gap map's Not yet
+ratings). Study aids on the flashcard page: one deck per group, plus a
+"Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
+on a milestone, not a date: after a comfortable retake of the official
+practice assessment. Detail: the Oct 19-21 session entries. **Don't
+redo:** the gap map's coverage marks (verified against the code at
+`90a7109`); the Responsible AI and Build agents quizzes and their
+re-ratings; the span content-recording check (closed Oct 21).
 
 **In parallel, unchanged: outside readers for `phase2-writeup-draft.md`**
 (Gerard's step; this was the headline from 2026-10-13). **Gerard's edit pass is DONE** (2026-10-13,
@@ -790,7 +793,36 @@ while writing card ag10:** the two-redraft cap is instruction clause 7.
 third. That's the Q8 trap inside the IIP's own design. It's already a
 stated limit in Todoist, so nothing changes.
 
-**Not done yet:** the Build agents hands-on and quiz; re-rating s23-s28.
+**Later the same day: Build agents hands-on and quiz.**
+- **Tool schemas** (Claude rebuilt them from the three tool files with
+  azure-ai-agents 1.1.0, the version the code uses; Gerard read them):
+  `D:\claude\iip\2026-10-21-tool-schemas.json`. Each description is one
+  line and says when to call the tool, and `evaluate_draft`'s `query`
+  guidance now arrives whole. This is a rebuild from source, not a capture
+  from the deployed Function.
+- **The agent loop in the spans** (Gerard ran Part A of
+  `D:\claude\iip\2026-10-21-agent-loop.kql`; screenshot
+  `2026-10-21-agent-loop-A.png`). The newest traced upload is **Oct 15,
+  10:10**, with 31 span names in time order (15 visible): `create_agent`,
+  `create_thread`, `create_message`, `start_thread_run`, 11 x
+  `get_thread_run` (polling), `execute_tool get_fact_sheet`,
+  `submit_tool_outputs` (3). That's the classic API's loop.
+- **Content recording, closed** (Part B; `2026-10-21-agent-loop-B.png`).
+  18 of 19 span property names are visible. All are IDs, model names,
+  statuses or token counts. None of the content names
+  (`gen_ai.input.messages`, `gen_ai.output.messages`,
+  `gen_ai.tool.call.arguments`) is present. This closes the Oct 20
+  "not verified" item. Not checked: `AppTraces`, where span events can
+  land (about 2 minutes; left, since recording is off in code).
+- **Look-alikes deck** (Gerard asked for it after saying the terms blur
+  together): 12 cards (`lk01`-`lk12`) set similar-sounding terms side by
+  side. Examples: task adherence the guardrail control vs the evaluator,
+  and file search vs the Azure AI Search tool vs Foundry IQ. Read back
+  and matched. Gerard studied it before the quiz.
+- **Quiz: 10/10.** Claude's caveat: it was taken minutes after the cards,
+  so it's a best case. **Re-rated by Gerard:** **s23 Solid, s28 Solid;
+  s24, s25, s26 and s27 Shaky** (s24-s27 were Not yet on Oct 19).
+  Todoist task completed.
 
 Newest first. Cross-references name the date of the entry they point at,
 not a direction ("above"/"below") — those went stale the moment this file
@@ -895,7 +927,8 @@ Medium is the same in both). Card rewritten to show both.
   thread/run names are the classic API that retires 2027-03-31 (Todoist).
   **Not verified:** that the span properties hold no message content. The
   code sets `enable_content_recording=False`; opening one span's Properties
-  would confirm it (~2 min).
+  would confirm it (~2 min). [2026-10-21: confirmed for span properties;
+  see the Oct 21 entry.]
 
 ### Session — October 19, 2026 — the practice assessment exposed the exam gap; AI-103 Gap Map built; exam study starts now
 
