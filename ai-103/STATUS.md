@@ -100,7 +100,7 @@ a stated limit.)*
 ## Current next action
 
 **Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19;
-study loop changed 2026-10-20; updated 2026-10-21). **Study is the main
+study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
 work** (Gerard): 3-4 `[study]` items a week, one skill group each. **The
 loop (Gerard chose it Oct 20): cards first, then hands-on, then quiz.**
 Claude adds a deck for the group to the "AI-103 Flashcards" artifact;
@@ -112,9 +112,12 @@ positions. Never quiz before teaching. **New standing rule (Gerard, Oct
 **This week's groups (in Todoist):** Speech (done Oct 19); Set up AI
 solutions in Foundry (done Oct 20); Responsible AI (done Oct 21: quiz
 9/10, re-rated); Build agents (done Oct 21: quiz 10/10, re-rated). **All
-four groups for this week are done. Next session: Gerard picks next
-week's 3-4 groups** (Claude proposes them from the gap map's Not yet
-ratings). Study aids on the flashcard page: one deck per group, plus a
+four groups for this week are done.** **Next week's groups (week of Oct
+26; Gerard chose all four on Oct 22, in Todoist):** Build generative apps
+(s17-s22); Optimize and operationalize (s29-s32); Choose Foundry services
+(s01-s04); Retrieval and grounding (s57-s61). **Next study step: Claude
+builds the first deck** (Gerard picks which group goes first). After these,
+8 of 14 groups are done; the first pass ends about the week of Nov 9. Study aids on the flashcard page: one deck per group, plus a
 "Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
 on a milestone, not a date: after a comfortable retake of the official
 practice assessment. Detail: the Oct 19-21 session entries. **Don't
@@ -216,6 +219,13 @@ session: (a) check for Microsoft-managed policies (0 on Oct 8; if any exist,
 test whether one that's Off blocks security defaults), (b) recurring billing
 still Off, (c) decide what happens to RBAC row 10's group assignment when
 P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
+[2026-10-22: **(a), (b) and (c) are done.** (a) 0 Microsoft-managed
+policies; (b) recurring billing Off, expires 11/7/2026; (c) row 10 decided
+by Gerard: keep the group through the trial, test it as `iip-ca-test` on
+Nov 7, then switch to direct assignment either way (Todoist, due Nov 7;
+`phase2-rbac-model-draft.md`). So the C9 session is mechanical: a
+one-minute re-glance at the policy list, delete the five policies, turn
+security defaults on, move the marker.]
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
@@ -234,8 +244,9 @@ P1/P2 lapses (untested). The marker stays on M13 until C9 is done.
 - Oct 7 (Todoist): a USB FIDO2 key as `bg-admin-01`'s second method (p2);
   lock the two unlocked pay-as-you-go subscriptions (p4); re-run the inventory's
   service-principal sections once the beta report resumes.
-- **New Oct 8 (Todoist):** delete `AzSvcAdmin@ostebovik.net` on Oct 22 if
-  nothing complained; migrate off the **classic Foundry Agent Service APIs**
+- **New Oct 8 (Todoist):** ~~delete `AzSvcAdmin@ostebovik.net` on Oct 22 if
+  nothing complained;~~ [Done 2026-10-22, Gerard: deleted, in Deleted users
+  until about Nov 21.] migrate off the **classic Foundry Agent Service APIs**
   before 2027-03-31 (Microsoft's notice, tracking ID HYJP-QGZ; first step due
   Dec 1).
 
@@ -317,7 +328,9 @@ Harmless so far; the instance-id follow-up would tell them apart.
   only On is blocked (2026-10-08).
 - **`AzSvcAdmin@ostebovik.net`**: all four Azure roles removed, sign-in
   blocked, sessions revoked (2026-10-08). Its only use was an Edge profile on
-  the home network. Delete on Oct 22 if quiet (Todoist).
+  the home network. Delete on Oct 22 if quiet (Todoist). **[2026-10-22:
+  deleted (Gerard); nothing had complained. Soft delete, restorable 30
+  days.]**
 - **CA001 has no "Never persistent" control** (Gerard, C5 amended
   2026-10-08): that control needs a policy targeting All cloud apps. CA001
   keeps the 8-hour sign-in frequency.
@@ -743,6 +756,53 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 22, 2026 — next week's study groups chosen; M13 C9 prep done; row 10 decided (test, then switch)
+
+**Attribution:** Gerard chose the four study groups and row 10's option,
+and ran the three portal checks. Claude read the gap map's ratings,
+proposed the groups, researched row 10 on Microsoft Learn, wrote the
+Todoist tasks, the row 10 note in `phase2-rbac-model-draft.md` and this
+entry. No IIP code or Azure resource changed; one Entra user was deleted.
+
+**Gap map, as rated on Oct 22:** 3 Solid, 26 Shaky, 35 Not yet (baseline
+Oct 19: 0 / 12 / 52). Groups with the most Not yet left: Multimodal
+understanding 6, Image/video generation 5, Build generative apps 4,
+Retrieval and grounding 4, Language model text analysis 4.
+
+**Next week's groups (Gerard chose all four Claude proposed):** Build
+generative apps (s17-s22, 4 Not yet), Optimize and operationalize
+(s29-s32, 3; s29 is where the practice test caught him), Choose Foundry
+services (s01-s04, 3), Retrieval and grounding (s57-s61, 4; pairs with
+s03). Why these: the two heaviest domains first, and several Not yet
+skills there were built in the IIP (s18 RAG in M5, s19 workflows in M7),
+so the hands-on is his own repo. The never-touched vision and text groups
+move to the week of Nov 2. Four Todoist `[study]` tasks, each telling the
+Sunday task to carry it, not duplicate it (its prompt already says to
+carry open `[study]` items).
+
+**Row 10 after the P2 trial: decided (Gerard), option C, test then
+switch.** Learn: group assignment to an enterprise app needs P1/P2;
+direct user assignment works on Free. Not documented: what happens to an
+existing group assignment when the licence lapses. The only evidence is
+one Microsoft Q&A answer (existing kept, new blocked). Also untested:
+whether an `entra.bicep` redeploy, which re-sends `viewersGroupAssignment`,
+fails on Free. Plan: on Nov 7, sign in as `iip-ca-test` and record
+allowed or AADSTS50105, then move row 10 back to a direct assignment
+regardless (about 10 + 30 min; Todoist, due Nov 7). Recorded in
+`phase2-rbac-model-draft.md` under the Oct 7 update; verified on disk.
+
+**C9 pre-checks (Gerard; `D:\claude\iip\2026-10-22-results.txt`):**
+- (a) Conditional Access: 0 Microsoft-managed policies. The total count
+  wasn't recorded.
+- (b) P2 trial (`D:\claude\iip\screenshots\2026-10-22-entraid-trial.png`):
+  recurring billing "Off, expires on 11/7/2026", status Active, 2 of 100
+  licences. Noted, not chased: the page shows an "Extend end date" link.
+- `AzSvcAdmin@ostebovik.net`: nothing complained since Oct 8, deleted,
+  listed in Deleted users. Todoist task completed; the C9 prep task too.
+
+**Don't redo:** the four group choices; row 10's decision; (a), (b) and
+the AzSvcAdmin delete.
 
 ### Session — October 21, 2026 — Responsible AI quiz 9/10; learn-before-build rule; Build agents deck
 

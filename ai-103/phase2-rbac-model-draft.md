@@ -22,6 +22,22 @@ deployed.
 > (`m11-entra-20261007a`), the direct assignment was deleted by CLI, and
 > `iip-ca-test` was refused (AADSTS50105). Once made a member of the group
 > (`m11-entra-20261007b`), it reached the results page.
+>
+> **Decision, 2026-10-22 (Gerard chose; Claude researched and drafted): row 10
+> after the P2 trial.** Microsoft Learn says assigning a group to an
+> enterprise app needs Entra ID P1/P2, and a direct user assignment works on
+> Free. Learn does not say what happens to an *existing* group assignment when
+> the licence lapses. The only evidence is one Microsoft Q&A answer (existing
+> assignments kept, new ones blocked). Also untested: whether redeploying
+> `entra.bicep`, which re-sends `viewersGroupAssignment`, fails on Free.
+> **Chosen: test, then switch.** The group stays through the trial, and C9
+> doesn't touch it. On 2026-11-07, `iip-ca-test` (a group member with no direct
+> assignment) signs in to the results page, and the result is recorded
+> (allowed or AADSTS50105). Then, whatever the result, row 10 goes back to a
+> direct assignment of `iip-ca-test` in `entra.bicep`, and the group assignment
+> is deleted by CLI. **Why:** the test gives a real finding the docs don't
+> cover, and the end state doesn't depend on a licence the tenant won't have.
+> Steps and cost (about 10 + 30 min) are in Todoist.
 
 ## The app this model is for
 
