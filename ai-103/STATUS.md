@@ -164,6 +164,15 @@ pages: M7's "Known limits" gains "The brand check judges colour only", and
 Phase 2's "After Phase 2" gains "A person in the loop" (Claude drafted;
 Gerard approved as written).
 
+**New Oct 23 (Gerard): a revamped feedback request.** Replies have been few
+and thin, and Gerard may have one or two more readers. The idea is to
+rework the ask using what Readers 1 and 2 said. **Claude's view (overturn
+freely):** send it after Gerard's own "In short" (Option A, Oct 20). A new
+reader given the same Claude-written text would likely hit the same two
+problems: no "so what", and it reads as AI-written. Sizing: the "In short"
+draft and critique about 45-60 min, then the new request about 20-30 min.
+Next session decides the order.
+
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
 - `function/tracing.py` is deployed (`8b4dce6`). A traced item4 upload
@@ -793,8 +802,8 @@ regardless (about 10 + 30 min; Todoist, due Nov 7). Recorded in
 `phase2-rbac-model-draft.md` under the Oct 7 update; verified on disk.
 
 **C9 pre-checks (Gerard; `D:\claude\iip\2026-10-22-results.txt`):**
-- (a) Conditional Access: 0 Microsoft-managed policies. The total count
-  wasn't recorded.
+- (a) Conditional Access: 0 Microsoft-managed policies; 5 policies in all
+  (CA001, CA900-CA903), as expected (Gerard, after the push).
 - (b) P2 trial (`D:\claude\iip\screenshots\2026-10-22-entraid-trial.png`):
   recurring billing "Off, expires on 11/7/2026", status Active, 2 of 100
   licences. Noted, not chased: the page shows an "Extend end date" link.
