@@ -115,8 +115,10 @@ solutions in Foundry (done Oct 20); Responsible AI (done Oct 21: quiz
 four groups for this week are done.** **Next week's groups (week of Oct
 26; Gerard chose all four on Oct 22, in Todoist):** Build generative apps
 (s17-s22); Optimize and operationalize (s29-s32); Choose Foundry services
-(s01-s04); Retrieval and grounding (s57-s61). **Next study step: Claude
-builds the first deck** (Gerard picks which group goes first). After these,
+(s01-s04); Retrieval and grounding (s57-s61). **First deck built (Oct 24,
+Gerard chose the group):** Optimize and operationalize (s29-s32), 12 cards
+`op01`-`op12`. Next: Gerard studies it, then the read-only hands-on, then
+the quiz; the other three groups' decks follow one at a time. After these,
 8 of 14 groups are done; the first pass ends about the week of Nov 9. Study aids on the flashcard page: one deck per group, plus a
 "Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
 on a milestone, not a date: after a comfortable retake of the official
@@ -164,14 +166,16 @@ pages: M7's "Known limits" gains "The brand check judges colour only", and
 Phase 2's "After Phase 2" gains "A person in the loop" (Claude drafted;
 Gerard approved as written).
 
-**New Oct 23 (Gerard): a revamped feedback request.** Replies have been few
-and thin, and Gerard may have one or two more readers. The idea is to
-rework the ask using what Readers 1 and 2 said. **Claude's view (overturn
-freely):** send it after Gerard's own "In short" (Option A, Oct 20). A new
-reader given the same Claude-written text would likely hit the same two
-problems: no "so what", and it reads as AI-written. Sizing: the "In short"
-draft and critique about 45-60 min, then the new request about 20-30 min.
-Next session decides the order.
+**Revamped feedback request: DROPPED (Gerard, Oct 24).** The supplementary
+reader he had in mind is no longer an option, so no new requests go out.
+Option A (Oct 20) stands: Gerard drafts his own "In short" offline, from the
+Claude Doc "In short — offline edit" (both sections as of `28a763f`, the
+readers' points, and three questions to edit against). When he's back,
+Claude critiques it line by line for the "so what" (about 45-60 min), then
+moves the approved text into both drafts. **Don't re-ask:** whether to send
+a new request. *(Replaced 2026-10-24. The Oct 23 paragraph proposed sending a
+revamped request after his "In short"; it's recorded in the Todoist write-up
+task.)*
 
 **M14 part 3 is DONE (2026-10-13), so all three M14 done-when items are shown.
 Gerard ticks M14. Settled, don't re-check:**
@@ -765,6 +769,47 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 24, 2026 — feedback request dropped; "In short" moved to a doc for offline editing; Optimize and operationalize deck built
+
+**Attribution:** Gerard dropped the feedback request, chose to edit "In
+short" offline, and chose the study group. Claude created the "In short —
+offline edit" doc, wrote the 12 cards, corrected the gap map note, updated
+Todoist, and wrote this entry. No IIP code or Azure resource changed.
+
+**Since last session (Gerard):** reviewed the Python Error Names flashcards
+and marked Got it where earned (pywalk track, not IIP).
+
+**Feedback request dropped (Gerard).** The extra reader isn't an option any
+more. No new requests. Option A stands, now offline: the Claude Doc "In
+short — offline edit" holds both "In short" sections exactly as in the repo
+(`28a763f`), the readers' points, the numbers that carry no "so what", and a
+"Your version" space under each part. It's on claude.ai, so it works from the
+phone with the PC off. Todoist write-up task updated (id 6hWMVjVpcgf7rGCH).
+
+**Deck: Optimize and operationalize (s29-s32), 12 cards `op01`-`op12`**
+(Gerard chose it first; Oct 19 ratings s29, s31, s32 Not yet, s30 Shaky).
+Researched on Microsoft Learn the same day: sampling parameters
+(temperature vs top_p, one at a time), penalties/stop/length limits,
+reasoning-model parameters and `reasoning_effort`, `seed` as best effort,
+zero/few-shot, chain of thought vs reasoning summary (raw-reasoning
+extraction may violate the AUP), the evaluator-optimizer loop and its
+termination condition, Foundry's three observability pillars and the Agent
+Monitoring Dashboard, token and latency data in traces, model router
+(Balanced default / Quality / Cost, model subset of at least 2), and
+Agent Framework workflow edges for hybrid LLM + rules. Plus a
+symptom-to-setting card (`op12`). Written to the page's database and read
+back: 12 of 12 match field by field.
+
+**Claude's error, found while writing card `op03`:** the gap map's s29 note
+said `probe_reasoning_params.py` found the deployments *reject* the
+sampling parameters. The Sep record (`STATUS-archive-m7.md`) says the
+opposite: **all three deployments accept temperature and seed** (accepted,
+not proven honored). The note was written from memory on Oct 19, not from
+the record. Corrected on the page (version 2, the only change; ratings
+untouched) with a bracket saying what it first said.
+
+**Don't redo:** the drop decision; the doc's contents; the deck's research.
 
 ### Session — October 22, 2026 — next week's study groups chosen; M13 C9 prep done; row 10 decided (test, then switch)
 
