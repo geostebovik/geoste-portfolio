@@ -111,7 +111,9 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Don't redo:** the C9 steps and sign-in checks,
+work** (next paragraph). **Start of next session (Gerard, Oct 26): the
+Optimize and operationalize deck (`op01`-`op12`), then its read-only
+hands-on, then the quiz.** **Don't redo:** the C9 steps and sign-in checks,
 the critique rounds, or the "In short" move (Oct 26 session entry).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
@@ -796,7 +798,7 @@ scanning a page of search results.
 
 ## Session log
 
-### Session — October 26, 2026 (about 2.5 h) — Overlord cleanup and inbox; C9 done, M13 closed, Phase 2 complete; "In short" critiqued
+### Session — October 26, 2026 (about 3 h) — Overlord cleanup and inbox; C9 done, M13 closed, Phase 2 complete; "In short" critiqued
 
 **Attribution:** Gerard ran the Overlord review (Oct 25), brought its five
 IIP items, and made the four choices below. Claude checked each item against
