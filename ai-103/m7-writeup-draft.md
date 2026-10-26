@@ -1,4 +1,4 @@
-# An Azure AI Foundry agent that checks its own work
+# An AI agent on Azure AI Foundry that writes marketing text and checks its own work
 
 <!--
 DRAFT, NOT FOR PUBLICATION. Written 2026-09-15, reworked 2026-09-16.
@@ -77,8 +77,23 @@ notes, How this was built). The term only exists on some subscription
 offers, so it said how the lab is funded, which this public page leaves
 out.
 
+GERARD'S "IN SHORT", 2026-10-26. Gerard rewrote "In short" in his own voice
+(Option A, his decision of 2026-10-20) in the Claude Doc "In short — offline
+edit", then revised it through three rounds of line-by-line critique by
+Claude. Gerard decided every change, and the title changed with it. The final
+wording is mixed. Treat these as Claude's, adopted by Gerard: the title
+("marketing text", not "copy": Claude first suggested "copy", then caught
+that it contradicted Reader 1's record); the goal (Gerard went back to the
+Oct 15 wording, which Claude drafted, and took Claude's one-change fix); the
+fact-sheet sentence in "What it does"; the 15-per-item reason; and the
+reviewer lesson in "Flaws that remain". The rest of the order and wording is
+Gerard's. Claude normalised "color" to this page's "colour". The Oct 15
+version is in git history.
+
 STILL OPEN BEFORE PUBLISHING:
-- Outside readers for "In short". Requests went out 2026-10-13, and one reply
+- ~~Outside readers for "In short".~~ Dropped 2026-10-24 (Gerard); replaced by
+  his own "In short", 2026-10-26 (entry above).
+  *(Earlier note follows.)* Outside readers for "In short". Requests went out 2026-10-13, and one reply
   is in. The full record, and Gerard's decision on how to handle it, is in
   phase2-writeup-draft.md's header under OUTSIDE READERS (one record for both
   pages). What it means for this page: "IIP" and "seventh and final milestone"
@@ -115,27 +130,29 @@ bullets 2 to 4 because their figures changed; he approved them the same day.
 
 ## In short
 
-**The goal:** build an AI agent that writes marketing text and checks its own
-work, and find out when its results can actually be trusted. It's hands-on
-preparation for Microsoft's AI-103 exam.
+**The goal:** build an AI agent that writes marketing text and checks it
+against a fact sheet, then find out when its results can actually be trusted.
+This is self-study, hands-on work for Microsoft's AI-103 exam, Developing AI
+Apps and Agents on Azure.
 
 ![Two-part diagram. Part 1: an AI agent takes a topic and an image, writes a title and text, checks the text against a fact sheet, audits the image and reports pass or fail. Part 2: the same agent runs in Azure: upload, queue, an Azure Function runs the agent, the result is saved, and you sign in to view it.](images/in-short-stages.svg)
 
-- **What it does:** given a topic and a product image, the agent writes a
-  title and description for a fictional hardware store. It checks the text
-  against the store's fact sheet, the one source of truth for its hours,
-  services and brand. Then it audits the image: is the text readable, are the
-  colours on brand, are the facts right?
+- **What it does:** given a topic and a product image related to a fictional
+  hardware store, the agent writes a title and description. It checks the
+  text against the store's fact sheet, the one source of truth for hours,
+  services and brand. The agent then audits the image: is the text readable,
+  are the colours on brand, are the facts right?
 - **How it was tested:** against a written answer key of eight test items,
-  including five images, three of them with one deliberate flaw each. In the
-  final test of 120 runs, every result matched the key and nothing crashed.
-- **The flaw it still has:** on an all-orange test image, the audit's
-  explanation of its brand verdict names "cream", a brand colour that isn't in
-  the image, in most runs. The verdicts are right; the word is wrong. This page
-  says so rather than hiding it.
-- **What it's really about:** deciding what to trust. Much of the work went
-  into proving when a result could be believed, including several times a
-  good-looking number turned out to be wrong.
+  three of which contained one deliberate flaw each. In the final test of 120
+  runs (15 per item, because AI can answer differently each time), every
+  result matched the key, with no crashes.
+- **Flaws that remain:** using an all-orange test image, the audit's
+  explanation of its brand verdict names "cream" in most runs, a brand colour
+  that is not in the image. The verdicts are right; the word is wrong. Thus, a
+  reviewer should trust the pass/fail and check the reasoning.
+- **The point:** this is about deciding what to trust from the agent. Most of
+  the effort went into proving when a result could be believed, including
+  catching results that looked right but were not.
 
 ## Terms used on this page
 

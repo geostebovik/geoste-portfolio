@@ -66,8 +66,21 @@ STILL OPEN BEFORE PUBLISHING:
 - ~~M13's rollback (C9, the week of 2026-10-26): add one closing line to the
   M13 row and to "Known limits". Nothing else depends on it.~~ DONE
   2026-10-26: Gerard ran C9; Claude added both lines.
-- ~~Gerard's edit pass~~ (done 2026-10-13), then outside readers for "In
-  short" (requests out; see OUTSIDE READERS below).
+- ~~Gerard's edit pass~~ (done 2026-10-13), then ~~outside readers for "In
+  short" (requests out; see OUTSIDE READERS below)~~. Readers dropped
+  2026-10-24 (Gerard). His own "In short" went in 2026-10-26 (next entry).
+
+GERARD'S "IN SHORT", 2026-10-26. Gerard rewrote "In short" in his own voice
+(Option A, his decision of 2026-10-20) in the Claude Doc "In short — offline
+edit", then revised it through three rounds of line-by-line critique by
+Claude. Gerard decided every change. The final wording is mixed. Treat these
+as Claude's, adopted by Gerard: most of "What it shows" ("so a break showed
+up right away" replaced Claude's own first suggestion, "never quietly broke",
+which overclaimed: M12's firewall did break M3's `--blob` path); "no keys or
+passwords in the code to leak"; and "symptom, evidence, root cause, fix",
+matched to the case-study headings. The rest of the order and wording is
+Gerard's. The page title is unchanged. The Oct 15 version is in git
+history.
 - ~~Case study 1, "Root cause": a stray drafting sentence~~ REMOVED
   2026-10-14 (found by Claude; Gerard approved). It wasn't in what the outside
   readers saw.
@@ -152,34 +165,35 @@ questions. Readers are not named here, because this repo is public.
     "makes absolute sense" came after he had read the first version and
     asked for this shape; this reader saw the rewrite cold, so his reading
     is the better test of a first impression.
-  - NOT YET DECIDED (Gerard): whether and how to rewrite "In short" again,
-    and in whose voice.
+  - ~~NOT YET DECIDED (Gerard): whether and how to rewrite "In short" again,
+    and in whose voice.~~ Decided 2026-10-20 (Option A, his own voice); done
+    2026-10-26 (see GERARD'S "IN SHORT" above).
 -->
 
 ## In short
 
-**The goal:** take the AI agent from Part 1, which ran only on a developer's
-machine, and turn it into a secure app in Azure: no keys or passwords in the
-code, a sign-in to see results, and an alert when something breaks. It's
-hands-on preparation for Microsoft's AI-103 exam.
+**The goal:** deploy the AI agent from a development environment to a secure
+app in Azure, with no keys or passwords used in the code to leak, a sign-in to
+see results, and email alerts automatically sent when something breaks. This
+is self-study, hands-on work for Microsoft's AI-103 exam, Developing AI Apps
+and Agents on Azure.
 
 ![Two-part diagram. Part 1: an AI agent takes a topic and an image, writes a title and text, checks the text against a fact sheet, audits the image and reports pass or fail. Part 2: the same agent runs in Azure: upload, queue, an Azure Function runs the agent, the result is saved, and you sign in to view it.](images/in-short-stages.svg)
 
-- **What it's really about:** troubleshooting, the way a support engineer
-  works a ticket. Several things looked right and weren't: a permission that
-  matched Microsoft's documented minimum and still failed, an alert that fired
-  but never sent its email, and a deployment preview whose "harmless noise"
-  would have wiped real settings. Six are written up below as case studies:
-  symptom, evidence, root cause, fix.
-- **What it proves:** the work was split into seven stages, each with a
-  written definition of done that was shown, not just claimed. Six are
-  complete; one has a final step left, a planned rollback. One test upload
-  with a known right answer was repeated after each major change and came back
-  right every time.
-- **What isn't left running:** some parts were built, proven and then switched
-  off on purpose: the private networking to save cost, and the stricter
-  sign-in rules when a free licence trial ends. "Known limits" lists these and
-  the rest.
+- **Why do this:** troubleshooting and root cause analysis (RCA), the way an
+  engineer works a ticket. Through this work, several items looked right but
+  were not: a permission that matched Microsoft's documented minimum and still
+  failed, an alert that fired but never sent its email, and a deployment
+  preview whose "harmless noise" would have wiped real settings. Six are
+  written up as case studies below: symptom, evidence, root cause, fix.
+- **What it shows:** the work was split into seven stages, each with a
+  definition of done written first and shown with evidence. All seven are
+  complete. After every big change, the same test upload with a known answer
+  was rerun, so a break showed up right away.
+- **What was torn down after use:** some parts were built, proven and then
+  switched off intentionally: the private network connections to save cost,
+  and the stricter sign-in rules, before the Entra ID P2 trial ends. "Known
+  limits" lists everything that is no longer running and why.
 
 ## Terms used on this page
 

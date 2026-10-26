@@ -104,13 +104,15 @@ a stated limit.)*
 
 **Next action (replaced 2026-10-26): all Phase 2 milestones are done. M13
 closed today with C9**, and the marker in `phase2-orientation.md` now reads
-"Phase 2 complete" (Gerard chose it). Before the joint push: Gerard makes his
-last fixes to his own "In short" in the Claude Doc "In short — offline edit"
-(4 small comments open, Oct 26). Then Claude moves the approved text into
-both drafts (about 20 min) and records in their headers which lines came
-from Claude's suggestions. **Study stays the main work** (next paragraph).
-**Don't redo:** the C9 steps and sign-in checks, or the two critique rounds
-(Oct 26 session entry).
+"Phase 2 complete" (Gerard chose it). **Gerard's own "In short" is final and in
+both drafts** (Oct 26; each draft's header says which lines came from
+Claude's suggestions). Next on the write-ups: the joint push. Its remaining
+items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
+this page" list, GitHub links for the evidence paths). Publishing also needs
+`/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
+Not yet sized; size it at the start of that session. **Study stays the main
+work** (next paragraph). **Don't redo:** the C9 steps and sign-in checks,
+the critique rounds, or the "In short" move (Oct 26 session entry).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
@@ -870,6 +872,14 @@ break M3's `--blob` path. Claude caught it in round 2 and replaced it with
 "so a break showed up right away". Part 1's title and most of Part 2's
 "What it shows" bullet are Claude's suggested wording, adopted by Gerard.
 That goes in the drafts' headers when the text moves in.
+
+**"In short" final and moved in.** Gerard chose the goal's one-change fix,
+"marketing text" for the Part 1 title, and case-study labels for Part 2.
+Claude moved both sections into `m7-writeup-draft.md` (title, goal,
+4 bullets) and `phase2-writeup-draft.md` (goal, 3 bullets), and wrote the
+attribution notes in both headers. **Claude's error:** its round-1 title
+option said "marketing copy", although the M7 draft's header records that
+Reader 1 had to guess at "copy". Claude caught it before the move.
 
 **Don't redo:** the five checks above, the four choices, C9 and its sign-in
 checks, and the critique rounds.
