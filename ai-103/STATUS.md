@@ -81,8 +81,11 @@ shown (deploys and alerts on Oct 12, tracing on Oct 13), and the Phase 2
 write-up is next. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
-write-up waits on outside readers and goes out in one group push with the Phase
-2 write-up.
+and Phase 2 write-ups go out in one group push. They no longer wait on outside
+readers (the request was dropped Oct 24): they wait on Gerard's own "In
+short", Claude's critique of it, and M13's C9 closing line.
+*(Corrected 2026-10-26, Claude, from the Overlord review of Oct 25: this said
+the M7 write-up "waits on outside readers".)*
 *(Updated 2026-10-13, Claude: the Oct 10 text said M12's agent-isolation
 write-up and its teardown "(by Oct 16)" remained. Both were done by Oct 12,
 and the stale date had also been carried into Claude's suggested session
@@ -99,7 +102,17 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action: AI-103 exam study, from the gap map** (replaced 2026-10-19;
+**Next action (replaced 2026-10-26): all Phase 2 milestones are done. M13
+closed today with C9**, and the marker in `phase2-orientation.md` now reads
+"Phase 2 complete" (Gerard chose it). Before the joint push: Gerard makes his
+last fixes to his own "In short" in the Claude Doc "In short — offline edit"
+(4 small comments open, Oct 26). Then Claude moves the approved text into
+both drafts (about 20 min) and records in their headers which lines came
+from Claude's suggestions. **Study stays the main work** (next paragraph).
+**Don't redo:** the C9 steps and sign-in checks, or the two critique rounds
+(Oct 26 session entry).
+
+**Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
 work** (Gerard): 3-4 `[study]` items a week, one skill group each. **The
 loop (Gerard chose it Oct 20): cards first, then hands-on, then quiz.**
@@ -127,8 +140,11 @@ redo:** the gap map's coverage marks (verified against the code at
 `90a7109`); the Responsible AI and Build agents quizzes and their
 re-ratings; the span content-recording check (closed Oct 21).
 
-**In parallel, unchanged: outside readers for `phase2-writeup-draft.md`**
-(Gerard's step; this was the headline from 2026-10-13). **Gerard's edit pass is DONE** (2026-10-13,
+**In parallel: the write-ups (`phase2-writeup-draft.md`, `m7-writeup-draft.md`).**
+Nothing waits on outside readers since Oct 24: next is Gerard's own "In
+short", then Claude's critique, then C9's closing line and the joint push.
+*(Until 2026-10-26 this heading read "outside readers for
+`phase2-writeup-draft.md`", the headline from 2026-10-13.)* **Gerard's edit pass is DONE** (2026-10-13,
 section by section, every change approved by him). His rules are recorded in
 the draft's header: no Claude-only wrong turns, no clock times or day-level
 dates, no operational details about the live tenant. **Don't re-ask:** the
@@ -239,6 +255,9 @@ Nov 7, then switch to direct assignment either way (Todoist, due Nov 7;
 `phase2-rbac-model-draft.md`). So the C9 session is mechanical: a
 one-minute re-glance at the policy list, delete the five policies, turn
 security defaults on, move the marker.]
+[2026-10-26: **C9 DONE, M13 COMPLETE** (Gerard ran it; Oct 26 session
+entry). Five policies deleted, security defaults On, admin and break-glass
+sign-ins asked for MFA afterwards. Marker moved to "Phase 2 complete".]
 
 **Carried** (details in Todoist):
 - Pass 1 follow-ups: deployed-package provenance; the Flex instance-id field;
@@ -247,8 +266,9 @@ security defaults on, move the marker.]
   pre-tracing run).
 - ~~Gerard's steps: update the project instructions~~ Done 2026-10-12
   (Todoist; the instructions now carry every item that was listed here).
-  **New Oct 15 (Gerard's step):** add "shared-key access OFF since
-  2026-10-15" to the `stiipdevwus01` line.
+  ~~**New Oct 15 (Gerard's step):** add "shared-key access OFF since
+  2026-10-15" to the `stiipdevwus01` line.~~ Done: the instructions carry it
+  (seen 2026-10-26).
 - Small, any time: the `__main__`-guard refactor; `.gitattributes` for
   `.gitignore`; the token-undercount item; the `az-104` repo's uncommitted
   changes.
@@ -313,7 +333,9 @@ Harmless so far; the instance-id follow-up would tell them apart.
   the template is the whole member list.
 - **The P2 trial's recurring billing is Off by default** (Your products,
   2026-10-07, edit control greyed out). Nothing to switch off. Re-check once,
-  on the Nov 2 Todoist reminder.
+  in the C9 session (Gerard, 2026-10-26: folded in there; the "Nov 2 Todoist
+  reminder" this line named was never created, found by the Oct 25 Overlord
+  review).
 - **Gate tests need every Incognito window closed first.** Chrome shares one
   session across Incognito windows, so a leftover sign-in skips Entra.
 - **The break-glass account exists and works** (2026-10-07):
@@ -457,8 +479,10 @@ Harmless so far; the instance-id follow-up would tell them apart.
   doesn't prevent it. Read back every file, every time. Retry from a new
   unique name.
 
-Still open and unchanged: the M7 write-up waits on outside readers (Gerard's
-step), and goes out in one group push with the Phase 2 write-up.
+Still open: the M7 write-up goes out in one group push with the Phase 2
+write-up. It no longer waits on outside readers (dropped Oct 24); it waits on
+Gerard's "In short" and Claude's critique. *(Corrected 2026-10-26, Claude,
+from the Overlord review: this said it "waits on outside readers".)*
 
 ## Milestones (Phase 1)
 
@@ -769,6 +793,86 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 26, 2026 (about 2.5 h) — Overlord cleanup and inbox; C9 done, M13 closed, Phase 2 complete; "In short" critiqued
+
+**Attribution:** Gerard ran the Overlord review (Oct 25), brought its five
+IIP items, and made the four choices below. Claude checked each item against
+its source, edited this file and Todoist, read the GitHub Actions run, and
+wrote this entry. No IIP code or Azure resource changed.
+
+**The Overlord review's five IIP items:**
+- `[study] Optimize` Todoist line: **already fixed**. The Sunday punch-list
+  run reworded it on Oct 25 (bracket in the task). Overlord read Todoist
+  before that run, so nothing to do.
+- Nov 2 billing check: no such task existed. **Gerard chose to fold it into
+  today's C9** (a 1-minute re-glance). The settled line about it is
+  corrected.
+- "Write-ups wait on readers": corrected in place in three live spots (the
+  status paragraph, the write-up paragraph heading in "Current next action",
+  and its last line). Same fix on the Todoist write-up task's title (was "M7:
+  the write-up — outside readers, then publish with Phase 2"). The Sunday
+  punch-list task's prompt says the same thing ("waiting on outside readers,
+  which is Gerard's step, not a task for this list"); left as is, because its
+  effect, no task for the write-up, is still right.
+- D: move task: "about 4 lessons out" was stale. `D:\learn\pywalk\LESSONS.md`
+  (read today): Lessons 1-4 done, Lesson 5 part 1 done Oct 23, part 2 stopped
+  Oct 24 at the name → size lookup. So the rest of Lesson 5 part 2 is what's
+  left. Todoist task updated.
+- Ubuntu runner: **not tested yet, by GitHub's timing.** Run #212 (commit
+  `987f0e2`, Oct 24) was green but ran on `ubuntu-24.04` (version
+  20261012.334.1). GitHub moves `ubuntu-latest` to 26.04 over several weeks,
+  Oct 19 to Nov 19 (actions/runner-images#14748). All SWA runs since Oct 19
+  (#204-#212) are green. **Gerard chose to leave `ubuntu-latest`** and re-check
+  after Nov 19 (Todoist task re-dated to Nov 20). Noted, not chased: a
+  warning that `actions/checkout@v4` targets Node.js 20.
+
+**Overlord adjustments (Gerard chose all four):** (1) an inbox file,
+`D:\claude\overlord\inbox-iip.md`: Overlord writes IIP items there, and this
+project reads it at session start and marks each one done, so Gerard stops
+relaying them; (2) Overlord reviews after the Sunday punch-list task and
+re-reads Todoist live before listing a fix; (3) it cites a heading and a
+quoted phrase, not line numbers; (4) IIP session headings carry "(about N h)"
+for its workload check. Gerard pastes the instruction lines (Claude drafted).
+
+**C9 done, M13 closed.** Gerard ran every portal step; Claude wrote the
+steps and the docs. Results:
+- Step 1: 0 Microsoft-managed and 5 user-created policies, all On
+  (`D:\claude\iip\screenshots\entra-ca-policies.png`).
+- Step 2: recurring billing still Off (the folded-in Nov 2 check).
+- Step 3: CA001 and CA900-CA903 deleted, 0 policies left. Microsoft Learn
+  ("Recover from deletions"): deleted policies can be restored for 30 days
+  under Conditional Access > Deleted policies. After that, the export in
+  `evidence/m13-conditional-access/` is the only record.
+- Step 4: security defaults Enabled ("Your organization is protected by
+  security defaults."). The deleted-but-restorable policies didn't block it.
+- Step 5, about 30 min later: `djeemunee`, password, then an Authenticator
+  MFA prompt, signed in.
+- Step 6: `bg-admin-01`. First a passkey prompt asking for a USB security key
+  (the tower has no Bluetooth for the phone's passkey); cancelled. Then the
+  password, then "Verify your identity" (MFA), signed in
+  (`portal_bgadmin-login-01.png`, `portal_bgadmin-login-after-pwd.png`, same
+  folder). Security defaults now requires MFA from the break-glass account
+  too; CA had excluded it.
+- Marker: Gerard chose "Phase 2 complete; write-ups and exam". Claude moved
+  it, ticked M13 and updated the Road to done (`phase2-orientation.md`), and
+  added the C9 closing lines to `phase2-writeup-draft.md` (the M13 row and
+  Known limits).
+
+**"In short": Gerard's own draft, critiqued line by line** in the Claude Doc
+"In short — offline edit": 21 comments, then 6, then 4 small ones still
+open. Accuracy catches: "human-in-the-loop verification" (not built), "the
+VNets" (the VNet stays; the endpoints and firewall went), "at least one
+flaw" (exactly one), "no keys or passwords are used" (true of the code
+only). **Claude's error, round 1:** its suggested wording "so a new change
+never quietly broke an old one" overclaimed, because M12's firewall did
+break M3's `--blob` path. Claude caught it in round 2 and replaced it with
+"so a break showed up right away". Part 1's title and most of Part 2's
+"What it shows" bullet are Claude's suggested wording, adopted by Gerard.
+That goes in the drafts' headers when the text moves in.
+
+**Don't redo:** the five checks above, the four choices, C9 and its sign-in
+checks, and the critique rounds.
 
 ### Session — October 24, 2026 — feedback request dropped; "In short" moved to a doc for offline editing; Optimize and operationalize deck built
 

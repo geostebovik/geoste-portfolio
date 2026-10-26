@@ -2,7 +2,7 @@
 
 ---
 
-> ## CURRENT MILESTONE: **M13** — Conditional Access
+> ## CURRENT MILESTONE: **Phase 2 complete** (M8-M14) — next: the write-ups and the AI-103 exam
 >
 > **This line is the single source of truth for "where are we".** Nothing else
 > — not the project instructions, not a scheduled task, not the portfolio site
@@ -10,10 +10,11 @@
 > moves, change this line and the table's checkmark. That is the whole
 > update.**
 >
-> Last moved: 2026-10-07, M11 → **M13** (Gerard), passing over M12 on
-> purpose: M13 must finish inside the Entra ID P2 trial (ends 2026-11-06), and
-> M12 has no clock. M12 comes after M13. (M10 → M11 2026-09-23; M9 → M10 and
-> M8 → M9 both 2026-09-21.)
+> Last moved: 2026-10-26, M13 → **Phase 2 complete** (Gerard chose it): C9,
+> the rollback, closed M13, the last open milestone. Before that: 2026-10-07,
+> M11 → M13 (Gerard), passing over M12 on purpose, because M13 had to finish
+> inside the Entra ID P2 trial (ends 2026-11-06) and M12 had no clock.
+> (M10 → M11 2026-09-23; M9 → M10 and M8 → M9 both 2026-09-21.)
 >
 > **The rule that keeps this true:** a *dated* statement may name a milestone,
 > because it was correct on its date and reads as history — STATUS.md session
@@ -23,7 +24,7 @@
 
 ---
 
-## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13, Exam row 2026-10-19)
+## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13, Exam row 2026-10-19, M13 and Write-ups rows 2026-10-26)
 
 *Added 2026-10-10 at Gerard's request, after he lost track of where the work
 stood. This is a dated snapshot, so by the rule above it may name milestones.
@@ -45,15 +46,16 @@ update and the AI-103 exam.
 | M10 | No keys anywhere | Done 2026-09-23 |
 | M11 | The app: upload → Function → result → sign-in page | Done 2026-10-07 |
 | M12 | Networking: private endpoints, storage firewall | **Done 2026-10-12**: built and proven 2026-10-10; evidence captured and torn down 2026-10-12 (Bicep and the free VNet skeleton kept) |
-| M13 | Conditional Access | Tested 2026-10-09; **rollback in the week of 2026-10-26, before 2026-11-06** |
+| M13 | Conditional Access | **Done 2026-10-26**: tested 2026-10-09; rollback (C9) 2026-10-26: the five policies deleted, security defaults back on, admin and break-glass sign-ins asked for MFA |
 | M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **All three done-when items shown, 2026-10-13**: a push deploys the Function over OIDC (Oct 12); a parked upload fires an alert, and its email arrives (Oct 12; email fixed Oct 13); a traced upload shows every step, the three tools by name (Oct 13). Gerard ticks it |
-| Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | M7's is waiting on outside readers (Gerard) |
+| Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | Readers dropped 2026-10-24. Gerard's own "In short" critiqued 2026-10-26; next it moves into both drafts, then the push |
 | Site | ostebovik.net's AI page updated to match | After the push |
 | Exam | AI-103 | **Study active from 2026-10-19**: the official practice assessment showed the project alone won't carry the exam. Weekly `[study]` items from the AI-103 Gap Map. Booked on a milestone, not a date: after a comfortable retake of the official practice assessment (Gerard, 2026-10-19) |
 
-**Why the marker and the work can differ:** the marker stays on M13 until its
-rollback, while M12 and M14 can run in the gap, because neither depends on the
-trial clock.
+**Why the marker and the work could differ (until 2026-10-26):** the marker
+stayed on M13 until its rollback, while M12 and M14 ran in the gap, because
+neither depended on the trial clock. *(2026-10-26: M13 is closed. The only
+trial-related item left is the Nov 7 row 10 sign-in test, in Todoist.)*
 
 **Planned but off the critical path:** the classic-agent migration (before
 2027-03-31; first step due Dec 1), which now includes the agent-isolation build
@@ -186,6 +188,10 @@ write-up is waiting for outside readers and a joint push with Phase 2.
   2026-10-09". **The rollback (C9) is the only step left**, planned for the
   week of 2026-10-26 (Gerard), about 10 days before the trial ends
   (2026-11-06). The marker stays on M13 until C9 is done.
+  [2026-10-26: **C9 done, M13 COMPLETE.** Gerard deleted the five policies
+  and turned security defaults back on; admin and break-glass sign-ins were
+  then asked for MFA (STATUS.md, Oct 26). The marker moved to "Phase 2
+  complete" (Gerard).]
 - **M12 is under way while M13 waits (2026-10-09).** Cost estimate and design
   done (`m12-prep.md`, decisions D-M12-1 to -7). Build stages 1 (VNet,
   private endpoints, DNS) and 2 (the Function in the VNet) are deployed and
@@ -287,7 +293,7 @@ Function must not use keys.
 | **M10** ✅ | **Keyless migration.** The **nine tracked** key-based scripts move to Entra ID, M7's tools first. *(The plan said eleven; `m10-prep.md` corrected that to ten on the grounds that `tester3.py` is gitignored; `m6_probe.py` is gitignored on the same `.gitignore` line and was missed. Nine is the tracked count, confirmed 2026-09-22 with `git ls-files`. `m6_probe.py` was migrated anyway.)* M7's acceptance test is re-run, optionally with one colour-wording attempt bundled in. The M3–M6 scripts are smoke-tested. | The acceptance test passes on the keyless code, and no **surveyed** script reads a key. **Amended 2026-09-22, by Gerard:** `m3_analyze.py`'s own Content Understanding pipeline is a STATED EXCEPTION. It reads two keys (`Ocp-Apim-Subscription-Key` at lines 183/206, and an account-key SAS via `get_storage_key()`), and `m10-prep.md` never surveyed it — it treated `m3_analyze.py` as the *home* of the key helper and never looked at the module's own `main()`. M3's migration is tracked separately: the REST auth swap is small, the account-key SAS → user-delegation SAS is a design change that amends the RBAC model. The exception is named here rather than left as a milestone that quietly stays open. **Exception CLOSED 2026-09-23:** `m3_analyze.py` migrated at `fcc55b6` (Entra ID bearer auth; user-delegation SAS for `--blob`, decision (A), Gerard) and verified live on both paths, so "no script reads a key" now holds without exception. | 1–2 sessions (includes the ~95 min run) | M9 |
 | **M11** ✅ | **The app.** The Function app on Flex Consumption, its host storage, Application Insights and Log Analytics, the Event Grid system topic, the ~~blob trigger~~ **storage queue → queue trigger** → agent → results flow, the results page with built-in sign-in (via `id-iip-dev-wus-03` as a federated credential, no client secret), the app registration and the viewers group. *(Amended 2026-09-24: Gerard's D-M11-1 (b) and D-M11-2 (b), Sep 23 — see `m11-prep.md`.)* Settles the RBAC model's **VERIFY** rows. | An upload produces a result, and a group member can sign in and see it. The VERIFY rows are recorded as confirmed or changed. | 2–3 sessions | M10 |
 | **M12** ✅ | **Networking.** A VNet with an integration subnet, and private endpoints for ~~Key Vault and~~ storage. *(Amended 2026-10-09, Gerard, D-M12-1: endpoints on `stiipdevwus01` blob + queue only; Key Vault is empty on purpose, so it gets none. Built for an evidence window, then deleted, Bicep kept (D-M12-2). See `m12-prep.md`.)* ~~Decides Event Grid delivery vs. inbound restrictions (Todoist task),~~ *(Amended 2026-09-24. D-M11-1 (b) removed the Function's inbound webhook, so the original question is gone and the Todoist task was closed Sep 23 — but the constraint **moved to the storage account**, it did not disappear. Microsoft Learn (Event Grid, storage queue handler): once `stiipdevwus01` has a firewall or network rule, Event Grid can deliver to its queue only with the system topic's **system-assigned** identity and only with *Allow Azure services on the trusted service list* enabled; a user-assigned identity is not supported at all. So M11 should give the system topic a system-assigned identity now, and M12 must keep the trusted-services exception on.)* Decides the two provisioning flags (`networkAcls.defaultAction`, `publicNetworkAccess`). Agent isolation is written up as designed-not-deployed, with the cost stated. | The app still works end to end, with the private paths verified. The cost is estimated with the Azure pricing calculator **before** anything is built. *(Amended 2026-10-09, Gerard, D-M12-3: estimated from Azure's retail price list, the calculator's own source. **Done 2026-10-09:** $15.60/month running, about $3.60 for a one-week window; one open item, outbound internet through the VNet, in `m12-prep.md`.)* | 1–2 sessions | M11 |
-| **M13** | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
+| **M13** ✅ | **Conditional Access.** Inside the P2 trial window: the break-glass account, the baseline policies, then security defaults off, then CA001 in report-only mode and then on, test matrix T1–T6, evidence exported, and the rollback before the trial ends. | T1–T6 pass with CA001 on, the evidence is committed, and the rollback is done before the trial end date. | 1–2 sessions, **inside the 30 days** | M11 (ideally M12) |
 | **M14** ✅ | **Operate.** Foundry tracing into Application Insights, alerts and an action group (reusing the $90 budget alert), and CI/CD from GitHub Actions over OIDC using `id-iip-dev-wus-02`. | A push deploys the Function, and a trace and an alert can each be shown. | 1–2 sessions | M11 |
 
 **M8's done-when — amended Sep 21, by Gerard.** It originally read

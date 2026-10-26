@@ -63,8 +63,9 @@ Search" paragraph (Claude drafted both sentences; Gerard approved both). It
 states the security posture only, not the live tenant's settings.
 
 STILL OPEN BEFORE PUBLISHING:
-- M13's rollback (C9, the week of 2026-10-26): add one closing line to the
-  M13 row and to "Known limits". Nothing else depends on it.
+- ~~M13's rollback (C9, the week of 2026-10-26): add one closing line to the
+  M13 row and to "Known limits". Nothing else depends on it.~~ DONE
+  2026-10-26: Gerard ran C9; Claude added both lines.
 - ~~Gerard's edit pass~~ (done 2026-10-13), then outside readers for "In
   short" (requests out; see OUTSIDE READERS below).
 - ~~Case study 1, "Root cause": a stray drafting sentence~~ REMOVED
@@ -221,7 +222,7 @@ hands-on preparation for Microsoft's AI-103 exam.
 | **M10** (Sep 2026) | No keys: every tracked script moved to Entra ID sign-in | The M7 agent's acceptance test re-run on the keyless code, and no surveyed script reading a key |
 | **M11** (Oct 2026) | The app: upload, Event Grid, queue, Function, agent, result, and a sign-in page | An upload produces a correct result, and a member of the viewers group can sign in and see it |
 | **M12** (Oct 2026) | Private networking: private endpoints and a storage firewall | The app still worked end to end with the private paths verified. Then torn down, Bicep kept |
-| **M13** (tested Oct 2026) | Conditional Access: phishing-resistant sign-in for the results page | Six sign-in tests passed with the policy On, and the policies are exported. Rollback due before the licence trial ends |
+| **M13** (Oct 2026) | Conditional Access: phishing-resistant sign-in for the results page | Six sign-in tests passed with the policy On, and the policies are exported. Then rolled back ahead of the licence trial's end: policies deleted, security defaults back on |
 | **M14** (Oct 2026) | Operate: deploys from GitHub, alerts, tracing | A push deploys the Function; a failed upload emails an alert; one upload's trace shows every step |
 
 ```
@@ -587,9 +588,10 @@ code. Reading it changed what got built.
   security groups stay, at $0. One Bicep parameter rebuilds the rest for a
   demo. Today the storage account is back to its pre-M12 network settings.
 - **Conditional Access is temporary.** It runs on a 30-day Entra ID P2
-  trial. The policies are deleted and security defaults turned back on before
-  the trial ends, and the exported policy files become the record.
-  *[Add the C9 result here.]*
+  trial. The policies were deleted and security defaults turned back on
+  ahead of the trial's end, and the exported policy files are the record.
+  Afterwards both an admin sign-in and the break-glass account's sign-in were
+  asked for MFA, so the rollback didn't leave the tenant unprotected.
 - **The Function's Foundry role is broader than it needs.** Foundry User
   grants everything on the account (`Microsoft.CognitiveServices/*`). One
   shared AI Services account serves both the chat models and Vision, so
