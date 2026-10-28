@@ -66,7 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 19, 2026 (Oct 19: AI-103 exam study started
+**Status as of:** October 28, 2026 (Oct 26: C9 done, M13 closed, so all
+Phase 2 milestones are done; Gerard's "In short" final and in both drafts;
+see the Oct 26 session entry. Oct 19: AI-103 exam study started
 after the official practice assessment showed the gap; see the Oct 19
 session entry. Oct 15: both "In short" sections
 rewritten and reader follow-ups sent; shared-key access switched off on
@@ -74,16 +76,20 @@ rewritten and reader follow-ups sent; shared-key access switched off on
 session entry). Phase 1 of the IIP labs is closed: M7
 passed its acceptance test at `a915217` (`results/20260915-184006`, 120/120 text
 and 120/120 audit rows). Phase 2's M8, M9 and M10 are complete (Sep 21-23), and
-M11 closed on Oct 7. M13 is nearly done: CA001 passed T1-T6 while On (Oct 9)
-and the policies are exported; only the rollback (C9) remains, planned for the
-week of Oct 26. M12 is complete (Oct 12). M14's three done-when items are all
+M11 closed on Oct 7. M13 closed on Oct 26: CA001 passed T1-T6 while On (Oct 9),
+the policies are exported, and the rollback (C9) deleted them and turned
+security defaults back on. M12 is complete (Oct 12). M14's three done-when items are all
 shown (deploys and alerts on Oct 12, tracing on Oct 13), and the Phase 2
 write-up is next. For
 which milestone is current, read the marker at the top of
 `phase2-orientation.md` — that line is the single source of truth. The M7
 and Phase 2 write-ups go out in one group push. They no longer wait on outside
-readers (the request was dropped Oct 24): they wait on Gerard's own "In
-short", Claude's critique of it, and M13's C9 closing line.
+readers (the request was dropped Oct 24), on Gerard's "In short" or on
+M13's C9 closing line (both done Oct 26). What's left is the publish prep
+listed in each draft's header under "STILL OPEN BEFORE PUBLISHING".
+*(Corrected 2026-10-28, Claude, from the Overlord review of Oct 26: this
+paragraph was dated Oct 19, said "M13 is nearly done", and said the
+write-ups wait on the "In short", its critique and C9's closing line.)*
 *(Corrected 2026-10-26, Claude, from the Overlord review of Oct 25: this said
 the M7 write-up "waits on outside readers".)*
 *(Updated 2026-10-13, Claude: the Oct 10 text said M12's agent-isolation
@@ -145,16 +151,20 @@ redo:** the gap map's coverage marks (verified against the code at
 re-ratings; the span content-recording check (closed Oct 21).
 
 **In parallel: the write-ups (`phase2-writeup-draft.md`, `m7-writeup-draft.md`).**
-Nothing waits on outside readers since Oct 24: next is Gerard's own "In
-short", then Claude's critique, then C9's closing line and the joint push.
+Nothing waits on outside readers since Oct 24, and Gerard's "In short",
+Claude's critique of it and C9's closing lines are all done (Oct 26). Next
+is the joint push: the publish prep in each draft's header under "STILL OPEN
+BEFORE PUBLISHING". *(Corrected 2026-10-28, Claude, from the Overlord review
+of Oct 26: these two lines, and "Still open in the draft" below, still read
+as of before Oct 26.)*
 *(Until 2026-10-26 this heading read "outside readers for
 `phase2-writeup-draft.md`", the headline from 2026-10-13.)* **Gerard's edit pass is DONE** (2026-10-13,
 section by section, every change approved by him). His rules are recorded in
 the draft's header: no Claude-only wrong turns, no clock times or day-level
 dates, no operational details about the live tenant. **Don't re-ask:** the
 shape, length, the AI-103 table rows, or the "After Phase 2" section. Still
-open in the draft: M13's C9 closing line (week of Oct 26), then the joint push
-with the M7 write-up. **Settled the same day (Gerard):** the M7 page now
+open: the joint push with the M7 write-up (M13's C9 closing line went in on
+Oct 26). **Settled the same day (Gerard):** the M7 page now
 matches Phase 2. Claude-only errors are cut, and the one Gerard helped catch
 is kept, credited to him (header of `m7-writeup-draft.md`).
 
