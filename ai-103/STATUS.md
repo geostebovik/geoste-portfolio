@@ -117,10 +117,20 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Start of next session (Gerard, Oct 26): the
-Optimize and operationalize deck (`op01`-`op12`), then its read-only
-hands-on, then the quiz.** **Don't redo:** the C9 steps and sign-in checks,
-the critique rounds, or the "In short" move (Oct 26 session entry).
+work** (next paragraph). **Start of next session (replaced 2026-10-28):
+Build generative apps again, not a new group.** The quiz scored 6/10 on
+Oct 28, and three of the four misses were choices between two options
+(Gerard). Missed: Q2 (managed compute is billed per VM hour), Q4 (a local
+`evaluate()` isn't in the portal unless it's logged to the project), Q6
+(permissions are enforced at retrieval time with security filters), Q9
+(embeddings go through the OpenAI SDK's `/openai/v1` endpoint). Those map
+to cards `bg02`, `bg10`, `bg06` and `bg11`. So: re-study the deck, marking
+those cards Again, then a FRESH 10-question quiz aimed at those
+distinctions, not a retake. Then the next group: Choose Foundry services
+(s01-s04) or Retrieval and grounding (s57-s61), Gerard's pick. **Don't
+redo:** the Optimize group (done Oct 28) and either hands-on (Oct 28 session
+entry); the C9 steps and sign-in checks, the critique rounds, or the "In
+short" move (Oct 26 session entry).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
@@ -140,8 +150,10 @@ four groups for this week are done.** **Next week's groups (week of Oct
 (s17-s22); Optimize and operationalize (s29-s32); Choose Foundry services
 (s01-s04); Retrieval and grounding (s57-s61). **First deck built (Oct 24,
 Gerard chose the group):** Optimize and operationalize (s29-s32), 12 cards
-`op01`-`op12`. Next: Gerard studies it, then the read-only hands-on, then
-the quiz; the other three groups' decks follow one at a time. After these,
+`op01`-`op12`. **Done Oct 28:** studied, hands-on, quiz 8/10, re-rated.
+**Second deck built Oct 28:** Build generative apps (s17-s22), 12 cards
+`bg01`-`bg12`; studied, hands-on, quiz 6/10, so it's repeated next session.
+The other two groups' decks follow one at a time. After these,
 8 of 14 groups are done; the first pass ends about the week of Nov 9. Study aids on the flashcard page: one deck per group, plus a
 "Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
 on a milestone, not a date: after a comfortable retake of the official
@@ -807,6 +819,95 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 28, 2026 (about 4.5 h) — Overlord inbox closed; Optimize group done (quiz 8/10); Build generative apps deck built (quiz 6/10)
+
+**Attribution:** Gerard studied both decks, ran every portal step and
+command, took both quizzes, set every rating and did the screenshot
+housekeeping. Claude closed the inbox items, wrote the Build generative apps
+deck (`bg01`-`bg12`, researched on Microsoft Learn today), both hands-on step
+lists, the KQL file, both quizzes, the gap map fixes, the Todoist updates and
+this entry. The Optimize deck is Claude's from Oct 24.
+
+**Overlord inbox, 2026-10-26 review: 3 of 3 closed** (detail in
+`D:\claude\overlord\inbox-iip.md`). The status paragraph was re-dated and
+"M13 is nearly done" corrected. The two stale lines in "In parallel: the
+write-ups" were corrected. The Todoist task "Cross-project status hub
+('Overlord')" was closed at Gerard's call: both of its paste steps are done.
+
+**Optimize and operationalize (s29-s32): done.** Hands-on, read-only,
+Gerard ran it. Screenshots are in `D:\claude\iip\screenshots\`; C and D
+are in `D:\claude\iip\results\latency-breakdown-results.txt`:
+- **A, playground parameters** (`2026-10-28-foundry-gpt-params.png`,
+  `2026-10-28-foundry-gpt-mini-params.png`): both deployments offer only Max
+  Completion Tokens (16384) and Reasoning Effort (low). No temperature or
+  top_p, as op03 says. Contrast: `probe_reasoning_params.py` (Sep) found the
+  API *accepts* temperature. On the exam, answer from the documented list.
+- **B, agent Monitor tab:** `riverside-content-agent` isn't in the portal's
+  Agents list. Why (from C): an `AgentsClient.delete_agent` span shows the
+  Function creates the agent and deletes it on every upload, through the
+  classic API. So the agent Monitor tab can't apply, and the traces are the
+  agent's only monitoring. This resolves with the classic-API migration
+  (Todoist, before 2027-03-31).
+- **C, latency breakdown** (`D:\claude\iip\2026-10-28-latency-breakdown.kql`)
+  of the Oct 15 upload, 36.7 s in total. The agent run takes 29.1 s:
+  `evaluate_draft` 8.8 s, `audit_thumbnail` 3.4 s, polling (11 x
+  `get_thread_run`) 3.3 s, `submit_tool_outputs` 1.6 s, and about 12 s with
+  no span. Setup takes about 1.8 s. About 4 s before `create_agent` is
+  unexplained; not chased. The trace's tokens are 11,535 in and 548 out, for
+  the agent run only. The tool spans show 0 because the judge and the CV
+  audit call the model through the uninstrumented `openai` package. The fix
+  would be OpenAI instrumentation, which is a build, so it's logged as an
+  option only (learn before build).
+- **The `gpt-5-4` deployment's Monitor tab** (`2026-10-28-foundry-gpt-monitor-01.png`,
+  `-02.png`), last month: 71 requests, 164.02K tokens (155.96K in, 8.06K
+  out), an estimated $0.34. That's an average of 2,197 in and 113 out per
+  request, and an average time to last byte of 2.1 s. 11,535 / 2,197 is
+  about 5 calls, and 5 x 2.1 s is about the 12 s gap. These are monthly
+  averages, so consistent, not exact. The deployment's metrics count every
+  call, uninstrumented ones included. Input dwarfs output because the agent
+  loop resends the thread on every turn; the "cd inp" line is cached input.
+  The 0.3 ms average time to first byte isn't explained, so it isn't relied on.
+- **D, model router:** available on `aif-dev-wus-01` in versions 2025-05-19,
+  2025-08-07 and 2025-11-18, each as GlobalStandard and DataZoneStandard.
+  There's no regional Standard. Nothing was deployed.
+- **Quiz 8/10.** Q8 was a misclick; Gerard's reasoning was right. Q10:
+  "must ALWAYS" means enforced in code. **Re-rated (Gerard):** s29, s31 and
+  s32 Not yet → Shaky; s30 stays Shaky. Gerard also re-rated about 15 other
+  skills the same day; none are Solid until he can explain them cold.
+
+**Build generative apps (s17-s22): deck built, hands-on done, quiz 6/10.**
+- **Hands-on:** A: the Phi-4 family is available on the account, 10 models,
+  all format Microsoft, all GlobalStandard only, so they're sold by Azure
+  and serverless. `Phi-4-reasoning` shows that small models can be
+  reasoning models. B: `az account get-access-token --resource
+  https://ai.azure.com` succeeded, which proves authentication, not
+  authorization (the role). C: M6 and M7 aren't in the portal's
+  Evaluations: a local `evaluate()` is never logged unless you log it. The
+  Create wizard shows 47 evaluators, with 5 pre-selected (Output quality, a
+  composite of 6, plus the 4 safety evaluators), and a judge model is
+  required (`2026-10-28-foundry-evaluator-selection.png`). Card `bg08` updated.
+- **Quiz 6/10.** Missed Q2, Q4, Q6 and Q9; three of the four were choices
+  between two options (Gerard). s17-s22 stay Shaky (Gerard). It's repeated
+  next session ("Current next action").
+
+**Gap map:** the s21 note is corrected (the Search SDK is M5 only, not
+called from the Function), and each row now shows its skill ID.
+
+**Housekeeping (Gerard):** a date-prefix rule for screenshots. The 11 files
+STATUS.md cites are back in `D:\claude\iip\screenshots\`; the uncited
+q1-q5 site-traffic screenshots are deleted. The four undated names are kept
+because entries cite them by name.
+
+**Claude's errors, caught the same session:**
+- Wrote "Gerard started studying it" into the Optimize Todoist task before
+  he had; removed.
+- The first Part A instructions didn't say where the parameters were (the
+  sliders icon), which cost a redo.
+- Optimize quiz Q1's option (a) began with the word "Correct:".
+
+**Don't redo:** the four Optimize hands-on parts, the Monitor tab reading,
+the Phi, token and evaluator checks.
 
 ### Session — October 26, 2026 (about 3 h) — Overlord cleanup and inbox; C9 done, M13 closed, Phase 2 complete; "In short" critiqued
 
