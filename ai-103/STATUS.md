@@ -66,7 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 28, 2026 (Oct 26: C9 done, M13 closed, so all
+**Status as of:** October 29, 2026 (Oct 29: study only; the Build generative
+apps re-quiz scored 3/10 and the Retrieval deck was built, see the Oct 29
+session entry. Oct 26: C9 done, M13 closed, so all
 Phase 2 milestones are done; Gerard's "In short" final and in both drafts;
 see the Oct 26 session entry. Oct 19: AI-103 exam study started
 after the official practice assessment showed the gap; see the Oct 19
@@ -117,20 +119,21 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Start of next session (replaced 2026-10-28):
-Build generative apps again, not a new group.** The quiz scored 6/10 on
-Oct 28, and three of the four misses were choices between two options
-(Gerard). Missed: Q2 (managed compute is billed per VM hour), Q4 (a local
-`evaluate()` isn't in the portal unless it's logged to the project), Q6
-(permissions are enforced at retrieval time with security filters), Q9
-(embeddings go through the OpenAI SDK's `/openai/v1` endpoint). Those map
-to cards `bg02`, `bg10`, `bg06` and `bg11`. So: re-study the deck, marking
-those cards Again, then a FRESH 10-question quiz aimed at those
-distinctions, not a retake. Then the next group: Choose Foundry services
-(s01-s04) or Retrieval and grounding (s57-s61), Gerard's pick. **Don't
-redo:** the Optimize group (done Oct 28) and either hands-on (Oct 28 session
-entry); the C9 steps and sign-in checks, the critique rounds, or the "In
-short" move (Oct 26 session entry).
+work** (next paragraph). **Start of next session (replaced 2026-10-29):
+the Retrieval and grounding hands-on, then its quiz.** Gerard plans to study
+the cards over the weekend, so check the deck's progress first rather than
+assuming what he's seen. (1) Start from card `rg00` ("Basics": index,
+vector, KNN, HNSW, RRF), not straight into the other cards; the Oct 29
+session entry says why. (2) Read-only hands-on on `loan-agreement-index` in
+`srch-iip-dev-wus-01`, in the portal's Search Explorer. Gerard holds Search
+Index Data Reader there (Oct 1 entry), so keys off is no obstacle. (3) A
+10-question Retrieval quiz on what the cards actually say, nothing beyond
+them. (4) Claude rebuilds the Build generative apps deck as one decision per
+card (same `bg` IDs, so progress links hold), then a fresh quiz. **Why:**
+the Oct 29 re-quiz scored 3/10, mostly guessed (Gerard), and s17-s22 are
+now Not yet. **Don't redo:** the Optimize group and both Oct 28 hands-on
+parts; the Retrieval deck's sources (all Microsoft Learn, Oct 29); the 13
+cards that were on Again since Oct 23 (all Got it, Oct 29).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
@@ -152,9 +155,13 @@ four groups for this week are done.** **Next week's groups (week of Oct
 Gerard chose the group):** Optimize and operationalize (s29-s32), 12 cards
 `op01`-`op12`. **Done Oct 28:** studied, hands-on, quiz 8/10, re-rated.
 **Second deck built Oct 28:** Build generative apps (s17-s22), 12 cards
-`bg01`-`bg12`; studied, hands-on, quiz 6/10, so it's repeated next session.
-The other two groups' decks follow one at a time. After these,
-8 of 14 groups are done; the first pass ends about the week of Nov 9. Study aids on the flashcard page: one deck per group, plus a
+`bg01`-`bg12`; studied, hands-on, quiz 6/10. Re-studied Oct 29: fresh quiz
+3/10, re-rated Not yet (Gerard); the deck gets rebuilt. **Third deck built
+Oct 29:** Retrieval and grounding (s57-s61), 13 cards `rg00`-`rg12`, read
+once; hands-on and quiz next session. Choose Foundry services (s01-s04) is
+the one group of the four not started. The "first pass ends about the week
+of Nov 9" estimate no longer holds after Oct 29; re-estimate it after the
+next quiz, when there's a pace to measure against. Study aids on the flashcard page: one deck per group, plus a
 "Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
 on a milestone, not a date: after a comfortable retake of the official
 practice assessment. Detail: the Oct 19-21 session entries. **Don't
@@ -819,6 +826,56 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 29, 2026 (about 2.5 h) — Build generative apps re-quiz 3/10; Retrieval and grounding deck built; a missing briefing found
+
+**Attribution:** Gerard studied 35 cards (Responsible AI, Build agents,
+Build generative apps), took the quiz, set the ratings, chose the next group
+and read the new deck. Claude ran the session-start checks and wrote the
+quiz, the Retrieval and grounding deck (`rg00`-`rg12`, researched on
+Microsoft Learn today), the vectors-and-indexes briefing and this entry.
+
+**Session start:** Overlord inbox, no open items. Punch list, no change
+since Oct 28.
+
+**Flashcard backlog:** all 84 cards were due. Gerard chose the Build
+generative apps deck plus the 13 cards on Again since Oct 23 (10 Build
+agents, plus `ra03`, `ra06`, `ra10`). All 13 are now Got it. In Build
+generative apps, `bg02`, `bg06`, `bg10` and `bg11` went on Again as planned;
+Gerard also put `bg07` and `bg08` on Again himself, so the quiz covered them.
+The other decks' overdue cards were left.
+
+**Build generative apps re-quiz: 3/10** (Q1, Q9, Q10 right), mostly random
+guesses with no clear eliminations (Gerard). s17-s22 re-rated **Not yet**
+(Gerard). The Todoist task stays open.
+- **Claude's errors:** Oct 28's Q2 answer key said managed compute is billed
+  "per VM hour". Learn says hourly per accelerator SKU, from a quota separate
+  from Azure VM quota; card `bg02` already said so. Two of today's questions
+  went past the cards: Q3 (a stored response is ignored when the run has a
+  target) and Q6 (the `search.in` syntax).
+- **Likely causes (Claude's view):** the cards are dense lists, so flipping
+  one tests recognition, not recall; and poor sleep (Gerard).
+- **Changed:** Claude rebuilds the deck as one decision per card before the
+  next quiz. When studying, say the card's "On the exam" line before
+  flipping, and press Got it only if you produced the deciding word yourself.
+
+**Retrieval and grounding (s57-s61):** Gerard picked it over Choose Foundry
+services. Deck built (12 cards, every one cited to Learn) and read once.
+**Gerard found the gap:** the cards used RRF, KNN and HNSW without
+explaining them, and vectors and indexing weren't explained at all.
+**Claude's miss:** the project instructions say to offer an introductory
+briefing when a topic is new, and none was offered. Fixed the same session:
+a briefing (a diagram of keyword and vector search merged by RRF, then
+reranked, plus plain-word definitions with analogies) and card `rg00`
+("Basics"), first in the deck. The hands-on and the quiz moved to next
+session (Gerard), because nothing new was sticking by then.
+
+**Gerard's call, not a rule:** whether Python and IIP share a day is his to
+manage. When he does both, he'll say so in the session prompt so it can be
+taken into account.
+
+**Don't redo:** the 13 cards on Again since Oct 23 (all Got it, Oct 29); the
+Retrieval deck's research.
 
 ### Session — October 28, 2026 (about 4.5 h) — Overlord inbox closed; Optimize group done (quiz 8/10); Build generative apps deck built (quiz 6/10)
 
