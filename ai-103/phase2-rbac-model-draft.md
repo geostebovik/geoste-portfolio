@@ -288,6 +288,18 @@ M11.
   | Gerard (`fdc0b6bb-…`) | `srch-iip-dev-wus-01` | Search Index Data Reader | `m5_retrieve.py` queries the index. A **dataAction**. |
   | Gerard (`fdc0b6bb-…`) | `srch-iip-dev-wus-01` | Search Index Data Contributor | `m5_index.py` uploads documents. A **dataAction**. |
 
+  **[2026-10-30: Search Index Data Contributor REMOVED; just-in-time from now
+  on (Gerard's decision).** The Oct 30 security-trimming lab's cleanup deleted
+  this standing grant: the lab's step design (Claude's) deleted both lab roles
+  without checking which one already existed. Gerard chose to leave it off,
+  because nothing writes to `loan-agreement-index` today. If `m5_index.py` is
+  re-run, grant it first (`az role assignment create --assignee-object-id
+  <gerard> --assignee-principal-type User --role
+  8ebe5a00-799e-43f5-93ac-243d3dce84a7 --scope <srch-iip-dev-wus-01 id>`), then
+  remove it afterwards. Search Index Data Reader stays, for `m5_retrieve.py`.
+  Verified by `az role assignment list --include-inherited` at 14:21 Phoenix
+  (STATUS.md, Oct 30 entry).**]**
+
   `m5_index.py` also creates the index, which is a **control-plane** action
   normally needing Search Service Contributor. Gerard's Owner inheritance on the
   `Non-Prod` management group covers it today. **That inheritance is why
@@ -347,6 +359,22 @@ access is broader:
 given nothing" (the M5 scripts), and all of them showed in `az role assignment
 list --all` on 2026-09-30. Neither is wider than what's above. This note is
 about completeness, not exposure.
+
+*(Added 2026-10-30, Claude; Gerard ran every command and made both decisions:)*
+**User Access Administrator at root scope `/` was found and removed.** It was in
+none of the records above. `az role assignment list --include-inherited`
+on `srch-iip-dev-wus-01` showed it during the Oct 30 lab. It was created
+2026-10-08 15:53:34Z by Gerard's own account (assignment
+`1207cba2-…`). Gerard's recollection: he elevated
+access to manage some users and didn't turn it off. *(Claude's observation, not
+confirmed: the time matches the Oct 8 session, the one in which AzSvcAdmin's four
+roles were removed.)* Removed on 2026-10-30 by setting Entra ID > Properties >
+**Access management for Azure resources** to **No** (it read Yes). Verified at
+14:21 Phoenix: `az role assignment list --role "User Access Administrator"
+--scope "/"` returns nothing. The standing admin posture is back to the D1 table
+above. **Going forward (Gerard):** he won't elevate again without reporting it in the
+session. *(Claude's suggestion, not yet his decision: turn it off in the same
+session it's turned on.)*
 
 **Two of those are wider than subscription Owner.** Management-group Owner covers
 every subscription under `Non-Prod`, and root-level Contributor reaches the whole

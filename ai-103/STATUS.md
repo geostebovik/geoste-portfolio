@@ -66,7 +66,9 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 29, 2026 (Oct 29: study only; the Build generative
+**Status as of:** October 30, 2026 (Oct 30: Retrieval and grounding done,
+quiz 10/10, plus a security-trimming lab; two standing role changes found and
+fixed, see the Oct 30 session entry. Oct 29: study only; the Build generative
 apps re-quiz scored 3/10 and the Retrieval deck was built, see the Oct 29
 session entry. Oct 26: C9 done, M13 closed, so all
 Phase 2 milestones are done; Gerard's "In short" final and in both drafts;
@@ -119,21 +121,20 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Start of next session (replaced 2026-10-29):
-the Retrieval and grounding hands-on, then its quiz.** Gerard plans to study
-the cards over the weekend, so check the deck's progress first rather than
-assuming what he's seen. (1) Start from card `rg00` ("Basics": index,
-vector, KNN, HNSW, RRF), not straight into the other cards; the Oct 29
-session entry says why. (2) Read-only hands-on on `loan-agreement-index` in
-`srch-iip-dev-wus-01`, in the portal's Search Explorer. Gerard holds Search
-Index Data Reader there (Oct 1 entry), so keys off is no obstacle. (3) A
-10-question Retrieval quiz on what the cards actually say, nothing beyond
-them. (4) Claude rebuilds the Build generative apps deck as one decision per
-card (same `bg` IDs, so progress links hold), then a fresh quiz. **Why:**
-the Oct 29 re-quiz scored 3/10, mostly guessed (Gerard), and s17-s22 are
-now Not yet. **Don't redo:** the Optimize group and both Oct 28 hands-on
-parts; the Retrieval deck's sources (all Microsoft Learn, Oct 29); the 13
-cards that were on Again since Oct 23 (all Got it, Oct 29).
+work** (next paragraph). **Start of next session (replaced 2026-10-30): the Build generative apps
+deck rebuild, then its study and a fresh quiz.** (1) Claude rebuilds the deck
+as one decision per card (same `bg` IDs, so progress links hold), about 60-75
+min of Claude's work, and first checks every term on every card against an
+earlier card (the Oct 29 and Oct 30 sessions each found a term used before it
+was explained). (2) Gerard studies it: say the "On the exam" line before
+flipping; Got it only if he produced the deciding word. (3) A 10-question quiz
+from the cards only. **Why:** the Oct 29 re-quiz scored 3/10, and s17-s22 are
+Not yet. **Steps go in `D:\claude\iip\<date>-steps.md`** (standing, Gerard,
+Oct 30), with a results file pre-labelled by step. **Then:** Choose Foundry
+services (s01-s04) is the one group of the week of Oct 26 not started.
+**Don't redo:** the Retrieval group (done Oct 30, quiz 10/10; s57 Shaky, s58-s61
+unchanged, Gerard); the security-trimming lab; the root-scope access removal
+(verified Oct 30).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
@@ -157,8 +158,9 @@ Gerard chose the group):** Optimize and operationalize (s29-s32), 12 cards
 **Second deck built Oct 28:** Build generative apps (s17-s22), 12 cards
 `bg01`-`bg12`; studied, hands-on, quiz 6/10. Re-studied Oct 29: fresh quiz
 3/10, re-rated Not yet (Gerard); the deck gets rebuilt. **Third deck built
-Oct 29:** Retrieval and grounding (s57-s61), 13 cards `rg00`-`rg12`, read
-once; hands-on and quiz next session. Choose Foundry services (s01-s04) is
+Oct 29:** Retrieval and grounding (s57-s61), 13 cards `rg00`-`rg12`. **Done
+Oct 30:** studied, Search Explorer hands-on, a security-trimming lab, quiz
+10/10, re-rated (s57 Shaky). Choose Foundry services (s01-s04) is
 the one group of the four not started. The "first pass ends about the week
 of Nov 9" estimate no longer holds after Oct 29; re-estimate it after the
 next quiz, when there's a pace to measure against. Study aids on the flashcard page: one deck per group, plus a
@@ -826,6 +828,88 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — October 30, 2026 (about 5.5 h, with an errand mid-way) — Retrieval and grounding done (quiz 10/10); security-trimming lab; root-scope access found and removed
+
+**Attribution:** Gerard studied the 13 Retrieval cards, ran every portal step
+and command, took the quiz, set the ratings and made every decision below.
+Claude ran the session-start checks and wrote the steps file, the hands-on and
+lab steps, the lab's index and document JSON, the quiz, the card fixes, the
+RBAC model notes and this entry.
+
+**Session start:** Overlord inbox, no open items. Punch list, no change since
+Oct 29. Flashcard page: no presses since Oct 29 (rg01-rg12 on Again, rg00
+never marked).
+
+**New standing method (Gerard):** steps go in a dated file,
+`D:\claude\iip\2026-10-30-steps.md`, kept beside the chat. The chat carries
+only status and "Step X changed"; answers to study questions go in the file's
+Q&A section. It replaces "re-state the commands in full in the chat". Gerard
+updated the project instructions to match.
+
+**Cards:** all 13 studied, all pressed Again under the "produce the deciding word
+yourself" rule. Gerard asked what `k` means. The cards used it without
+explaining it (Claude's miss, the same pattern as Oct 29), so rg00 and rg03 now
+say what `k` is, `k` vs `top`, and why 50 with semantic ranker. rg04's cue is
+corrected: the query names the semantic configuration **unless the index sets a
+default** (the Step 8 error said so).
+
+**Search Explorer hands-on on `loan-agreement-index` (read-only), 8 of 10 as
+predicted.** One index on the free service. HNSW at the defaults (m=4,
+efConstruction=400, efSearch=500, cosine), no vectorizer. A keyword query found
+section XV ("governing law"): the index always supported keyword search, but M5
+never used it. Exact errors, each one a card's exam cue: `section` isn't
+filterable (rg12); `semanticConfiguration` must not be empty (rg04); no
+vectorizer for a text vector query (rg07). Keys are under **Security +
+networking** now, RBAC only. Field attributes: `section` and `content` are
+searchable (read by `az rest` in the lab; Gerard's corrected screenshot,
+`D:\claude\iip\screenshots\2026-10-30-portal-index-fields.png`. His first
+reading of the Fields tab was wrong, and he corrected it himself).
+- **Claude's errors:** Step 6 tested "promissory", which isn't in any chunk, so
+  both counts were 0. Proven by Step 11: "promissory" 0, "goverming" 0,
+  "goverming~" (fuzzy, `queryType=full`) 1, section XV. Step 10 gave the old path
+  to Keys.
+- **Seen twice:** a query that returned every document with every score 1, the
+  sign of an empty search. A rerun of Step 5 returned all 16 chunks with score 1;
+  the first Step 5 run was right. Not chased.
+
+**Quiz: 10/10.** Gerard's note: he had a sense of each answer before reading the
+options, and could usually rule out two at once; only Q9 had two plausible
+answers. Claude's view: that's how the exam works (it tests recognition), but
+the questions came from the cards' own cues, so the exam's wrong options will be
+closer. **Re-rated (Gerard):** s57 Shaky; s58-s61 left as they were, until he can
+explain them.
+
+**Security-trimming lab (rg12), $0.** A throwaway index `lab-trim-index`: 4
+documents, a `group_ids` field filterable and not retrievable, loaded by push.
+No filter: 4 results, including "Merger plan". Finance groups: 2. HR groups: 3.
+**A forged filter with "grp-exec" returned the Merger plan.** The search trusts
+the strings it's given, so the app has to build the filter from the caller's
+verified token. Index deleted. Search Service Contributor was granted at
+13:33 Phoenix and removed by 13:51 (verified).
+
+**Two standing role changes (both Gerard's decisions; details in
+`phase2-rbac-model-draft.md`):**
+1. **Search Index Data Contributor, removed.** Gerard already held it (since
+   Sep 22, documented for `m5_index.py`). The lab's cleanup deleted it because
+   Claude's cleanup step removed both lab roles without checking which one was
+   new. Gerard chose to leave it off and grant it just-in-time if `m5_index.py`
+   is re-run. **Claude's lesson:** a cleanup step removes only what that lab
+   created.
+2. **User Access Administrator at root scope `/`, removed.** Created 2026-10-08
+   15:53:34Z by Gerard's account, and in no record. Gerard recalls elevating to
+   manage some users and not turning it off. The Entra toggle "Access management
+   for Azure resources" read Yes; set to No. Verified at 14:21 Phoenix: none at
+   `/`. Gerard: he won't elevate again without reporting it in the session.
+   *(Claude's note: elevation grants Azure RBAC rights, not Entra user
+   management. A Global Admin already manages users without it, so it was
+   probably not needed for that task.)*
+
+**Moved to next session:** the Build generative apps deck rebuild (about 60-75
+min of Claude's work; "Current next action").
+
+**Don't redo:** the Retrieval group and its quiz; the lab; the field attributes;
+the root-scope removal.
 
 ### Session — October 29, 2026 (about 2.5 h) — Build generative apps re-quiz 3/10; Retrieval and grounding deck built; a missing briefing found
 
