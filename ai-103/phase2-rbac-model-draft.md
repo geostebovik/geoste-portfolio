@@ -365,14 +365,20 @@ about completeness, not exposure.
 none of the records above. `az role assignment list --include-inherited`
 on `srch-iip-dev-wus-01` showed it during the Oct 30 lab. It was created
 2026-10-08 15:53:34Z by Gerard's own account (assignment
-`1207cba2-…`). Gerard's recollection: he elevated
-access to manage some users and didn't turn it off. *(Claude's observation, not
-confirmed: the time matches the Oct 8 session, the one in which AzSvcAdmin's four
-roles were removed.)* Removed on 2026-10-30 by setting Entra ID > Properties >
+`1207cba2-…`). Why (Gerard): he elevated to delete
+unused subscriptions, which needs Owner on each one, and his account didn't hold
+it there. It was a self-directed cleanup, done outside a session, so nothing
+recorded it, and the toggle was left on. *(Corrected 2026-10-30, Gerard: this
+line first said "to manage some users", and carried a guess by Claude linking it
+to the Oct 8 AzSvcAdmin cleanup. Both are withdrawn.)* Removed on 2026-10-30 by setting Entra ID > Properties >
 **Access management for Azure resources** to **No** (it read Yes). Verified at
 14:21 Phoenix: `az role assignment list --role "User Access Administrator"
 --scope "/"` returns nothing. The standing admin posture is back to the D1 table
-above. **Going forward (Gerard):** he won't elevate again without reporting it in the
+above. A follow-up check of Gerard's subscription-level roles on all four
+subscriptions he can see found none created on Oct 8, and all four still
+Enabled: the cleanup the elevation was meant for didn't happen. The two
+non-lab subscriptions where he holds Owner held it before Oct 8, and are outside
+this model's scope (STATUS.md, Oct 30 entry). **Going forward (Gerard):** he won't elevate again without reporting it in the
 session. *(Claude's suggestion, not yet his decision: turn it off in the same
 session it's turned on.)*
 

@@ -897,13 +897,23 @@ verified token. Index deleted. Search Service Contributor was granted at
    is re-run. **Claude's lesson:** a cleanup step removes only what that lab
    created.
 2. **User Access Administrator at root scope `/`, removed.** Created 2026-10-08
-   15:53:34Z by Gerard's account, and in no record. Gerard recalls elevating to
-   manage some users and not turning it off. The Entra toggle "Access management
+   15:53:34Z by Gerard's account, and in no record. Gerard elevated to delete
+   unused subscriptions (that needs Owner on each, which his account didn't
+   hold), a self-directed cleanup outside a session, and left it on. The Entra toggle "Access management
    for Azure resources" read Yes; set to No. Verified at 14:21 Phoenix: none at
    `/`. Gerard: he won't elevate again without reporting it in the session.
-   *(Claude's note: elevation grants Azure RBAC rights, not Entra user
-   management. A Global Admin already manages users without it, so it was
-   probably not needed for that task.)*
+   *(Corrected 2026-10-30, Gerard: this entry first said he elevated "to
+   manage some users", and carried a note from Claude about that. Both are
+   withdrawn.)*
+   **Follow-up check, R4 (read-only):** Gerard's subscription-level roles on all
+   four subscriptions you can see. None was created on Oct 8, so the elevation
+   left nothing behind but the root-scope role. All four subscriptions are still
+   Enabled, so the cleanup it was meant for never happened. Owner at subscription
+   scope: the lab subscription (Sep 2025, the D1 table) and two others (May 2024,
+   Dec 2025), all held from before Oct 8. The fourth subscription has no role at
+   its own scope. Names and IDs are kept out of this public repo; they're in
+   Todoist, on "Lock the two unlocked PAYG subscriptions against accidental
+   deployment".
 
 **Moved to next session:** the Build generative apps deck rebuild (about 60-75
 min of Claude's work; "Current next action").
