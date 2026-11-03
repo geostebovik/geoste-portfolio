@@ -386,9 +386,13 @@ Harmless so far; the instance-id follow-up would tell them apart.
 - **Bare-domain DNS is an ALIAS record** (Gerard, 2026-10-06, option A). Its
   Front Door certificate no longer auto-renews: a monthly Todoist task checks
   for "Pending Revalidation". Current cert expires 2027-03-18.
-- **Security defaults is OFF; the baseline CA900-CA903 is ON** (2026-10-08,
-  11:14 Phoenix), each excluding `bg-admin-01` only. Verified by What If and by
-  real sign-ins for `djeemunee`, `bg-admin-01` and `iip-ca-test`.
+- **Security defaults is ON; CA001 and CA900-CA903 are deleted** (C9,
+  2026-10-26). They can be restored from Deleted policies until about
+  2026-11-25; the export is in `evidence/m13-conditional-access/`.
+  *(Corrected 2026-11-02, Claude, from the Overlord review of Nov 1. Until
+  today this line read "Security defaults is OFF; the baseline CA900-CA903 is
+  ON (2026-10-08, 11:14 Phoenix), each excluding `bg-admin-01` only. Verified
+  by What If and by real sign-ins". That described the tenant before C9.)*
 - **Authentication methods: Migration Complete** (2026-10-08). On: Passkey
   (FIDO2), Microsoft Authenticator (All users, Any, OTP Yes), Email OTP. SMS and
   Voice stay off. The legacy per-user MFA settings no longer apply.
