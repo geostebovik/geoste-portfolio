@@ -66,7 +66,10 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** October 30, 2026 (Oct 30: Retrieval and grounding done,
+**Status as of:** November 3, 2026 (Nov 2-3: Build generative apps rebuilt,
+quiz 10/10; Choose Foundry services done, quiz 7/10; Row 10's Saturday test
+re-planned around the trial's grace stage; see the Nov 2-3 session entry.
+Oct 30: Retrieval and grounding done,
 quiz 10/10, plus a security-trimming lab; two standing role changes found and
 fixed, see the Oct 30 session entry. Oct 29: study only; the Build generative
 apps re-quiz scored 3/10 and the Retrieval deck was built, see the Oct 29
@@ -121,20 +124,33 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Start of next session (replaced 2026-10-30): the Build generative apps
-deck rebuild, then its study and a fresh quiz.** (1) Claude rebuilds the deck
-as one decision per card (same `bg` IDs, so progress links hold), about 60-75
-min of Claude's work, and first checks every term on every card against an
-earlier card (the Oct 29 and Oct 30 sessions each found a term used before it
-was explained). (2) Gerard studies it: say the "On the exam" line before
-flipping; Got it only if he produced the deciding word. (3) A 10-question quiz
-from the cards only. **Why:** the Oct 29 re-quiz scored 3/10, and s17-s22 are
-Not yet. **Steps go in `D:\claude\iip\<date>-steps.md`** (standing, Gerard,
-Oct 30), with a results file pre-labelled by step. **Then:** Choose Foundry
-services (s01-s04) is the one group of the week of Oct 26 not started.
-**Don't redo:** the Retrieval group (done Oct 30, quiz 10/10; s57 Shaky, s58-s61
-unchanged, Gerard); the security-trimming lab; the root-scope access removal
-(verified Oct 30).
+work** (next paragraph). **Start of next session (replaced 2026-11-03):
+Saturday Nov 7, Row 10, status first.** The steps are pre-written in
+`D:\claude\iip\working\steps.md`. (1) Read the P2 trial's state
+(`/directory/subscriptions`) and `iip-ca-test`'s licences. (2) If the state is
+`Warning` (the 30-day grace stage Microsoft documents for trials, when the
+licence still works): no gate test. Re-date the Todoist task to the new
+`nextLifecycleDateTime` and test then. If it's `Suspended` or `Deleted`: run
+the gate test as `iip-ca-test`. (3) Only after a real test: Claude edits
+`entra.bicep` (direct assignment back, group assignment out), and Gerard
+deploys it and deletes the group row by CLI. **Why (found Nov 3):** the trial
+changes state at 2026-11-07T00:00Z (Thu Nov 6, 5pm Phoenix), but probably into
+grace, so a Saturday pass wouldn't show a lapse. Gerard chose "read status, then
+decide". **Then:** choose the next study groups (all four of the week of Oct 26
+are done); the exam-window talk (Todoist, Nov 7); the write-ups' publish prep.
+**Steps go in `D:\claude\iip\working\steps.md`, results in
+`working\results.txt`** (fixed names; standing, Gerard, Nov 3, replacing Oct
+30's dated `<date>-steps.md`). At session end Claude copies both to
+`D:\claude\iip\archive\<date>-steps.md` / `-results.txt` and blanks them (or
+seeds them with steps already prepared for the next session, as on Nov 3).
+**Older citations (2026-11-03):** every file this document cites directly in
+`D:\claude\iip\` (not under `screenshots\` or `results\`) was moved to
+`D:\claude\iip\archive\`, with the same file name. **Don't redo:** the Build
+generative apps rebuild and quiz (Nov 3, 10/10, s17-s22 Shaky); the Choose
+Foundry services group (Nov 3: cards, quiz 7/10, PII playground; s01/s02 stay
+Shaky); the P2 trial status read (Nov 3); the Retrieval group (done Oct 30,
+quiz 10/10; s57 Shaky, s58-s61 unchanged, Gerard); the security-trimming lab;
+the root-scope access removal (verified Oct 30).
 
 **Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
@@ -160,10 +176,13 @@ Gerard chose the group):** Optimize and operationalize (s29-s32), 12 cards
 3/10, re-rated Not yet (Gerard); the deck gets rebuilt. **Third deck built
 Oct 29:** Retrieval and grounding (s57-s61), 13 cards `rg00`-`rg12`. **Done
 Oct 30:** studied, Search Explorer hands-on, a security-trimming lab, quiz
-10/10, re-rated (s57 Shaky). Choose Foundry services (s01-s04) is
-the one group of the four not started. The "first pass ends about the week
-of Nov 9" estimate no longer holds after Oct 29; re-estimate it after the
-next quiz, when there's a pace to measure against. Study aids on the flashcard page: one deck per group, plus a
+10/10, re-rated (s57 Shaky). **Done Nov 2-3:** Build generative apps rebuilt
+as 23 one-decision cards (`bg00`-`bg22`), studied, quiz 10/10, re-rated Shaky;
+Choose Foundry services deck (`fs00`-`fs15`), studied, quiz 7/10, Language
+PII playground hands-on, s01/s02 left Shaky. **All four groups of the week of
+Oct 26 are done.** The "first pass ends about the week of Nov 9" estimate no
+longer holds after Oct 29. Pace to measure against: Nov 3 finished two groups
+in one session. Re-estimate when the next groups are chosen. Study aids on the flashcard page: one deck per group, plus a
 "Look-alikes" deck of similar-sounding terms (Oct 21). The exam is booked
 on a milestone, not a date: after a comfortable retake of the official
 practice assessment. Detail: the Oct 19-21 session entries. **Don't
@@ -832,6 +851,102 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — November 2-3, 2026 (about 6 h over two days; Nov 2 stopped early for Bridge to 67) — Build generative apps rebuilt (quiz 10/10); Choose Foundry services done (quiz 7/10); steps files moved to working + archive; Row 10's Saturday test re-planned
+
+**Attribution:** Gerard committed, ran the Front Door check, the archive
+move, the trial status read and the PII playground; he found the portal route
+Learn had wrong; he studied both decks, took both quizzes, set the ratings and
+made every decision below. Claude ran the session-start checks, rebuilt the
+Build generative apps deck, researched and wrote the Choose Foundry services
+deck and card `lk13`, wrote the quizzes, steps and commands, the Todoist
+updates and this entry.
+
+**Session start (Nov 2):** Overlord inbox: 2 items, both closed (the Tower task
+was retitled, Gerard chose "fix facts only"; the "Settled" line on security
+defaults was corrected, commit `9166fec`). Punch list: no change since Oct 30
+except the Front Door check, overdue since Nov 1.
+
+**Front Door certificate (Nov 3):** both domains Approved; ostebovik.net 135
+days to expiry (= 2027-03-18), www 139 days. Record:
+`D:\claude\iip\screenshots\2026-11-03_afd_domains.png`. Todoist task
+completed, so it moves to Dec 1.
+
+**Steps files (Gerard, Nov 3):** fixed names in `D:\claude\iip\working\`
+(`steps.md`, `results.txt`); archived at session end to `archive\<date>-…`.
+Gerard's reason: typing a date into a path risks opening or overwriting the
+wrong day's file. Claude agreed, but argued against deleting old results: this
+document cites 22 of them as evidence, so they're archived, not removed. The 25
+dated root files were moved to `archive\` (Gerard, count verified). The
+project instructions were updated to match (Gerard).
+
+**Build generative apps (s17-s22):** Claude rebuilt the deck as 23
+one-decision cards (Nov 2). `bg00` Basics defines every term the others use,
+checked against the earlier decks, and the 12 original IDs were kept so their
+progress holds. Gerard asked about the word "embedding" (it sounds like
+putting something inside something). The answer: it gives text an address on a
+map of meaning; "embed" is the maths sense, to place at a point. Answer in
+`archive\2026-11-02-steps.md`, Q&A; the same sentence was added to `bg00` and
+`rg00`. **Quiz: 10/10** (Oct 29 was 3/10). Re-rated **Shaky**, all six (Gerard,
+against Claude's caution: the quiz came the same morning as the study, from
+the cards' own cues).
+
+**Choose Foundry services (s01-s04):** a new deck, `fs00`-`fs15`. It's built
+on Microsoft's three "choose a technology" guides (language, image and video,
+speech) and the Foundry Tools overview: Foundry Tool vs model, and the
+look-alike services. The retired-service replacements were verified (LUIS →
+CLU, every LUIS endpoint failing since 2026-03-31; QnA Maker → custom question
+answering). **Quiz: 7/10, with closer distractors.** Q1 was a slip (Gerard).
+Q2 (custom template instead of Content Understanding) and Q9 (Video Indexer
+instead of Content Understanding) are the same gap, so Claude added card
+`lk13`, "Content Understanding vs its neighbours". s01/s02 left Shaky
+(Gerard). **Hands-on:** Language Text PII Redaction in the playground. It found
+PersonType ("Borrower", 94%), Person, Address, Date, PhoneNumber and Email (80%,
+the lowest), and two runs matched. Records:
+`screenshots\2026-11-03_foundry_build_services.png` and
+`…_foundry_build_services_results.png`.
+- **The portal route Learn has wrong (found by Gerard):** Learn says Build →
+  Models → "AI services" tab. That tab doesn't exist. The Foundry Tools are
+  under **Build → Services → Playgrounds**.
+- **Seen in Services:** Content Understanding has prebuilt Invoice and Tax (US)
+  analyzers. Learn's guidance still sends standard forms to Document
+  Intelligence (cheaper, deterministic), but the line is blurrier than card
+  `fs04` shows.
+
+**Row 10, re-planned (Nov 3):** Claude found that Microsoft documents a 30-day
+"Expired" stage after a trial, when users keep normal access. That table is
+written for Microsoft 365 trials. Gerard's read of `/directory/subscriptions`:
+`AAD_PREMIUM_P2`, trial, **Enabled**, next state change at
+**2026-11-07T00:00Z** (Thu Nov 6, 5pm Phoenix). The admin center shows
+recurring billing Off and expiry 11/7/2026
+(`screenshots\2026-11-03_m365_p2_details.png`). Neither shows the state it
+moves into. **Decided (Gerard):** on Saturday, read the status first. On
+`Warning` (grace): no gate test, re-date the task. On `Suspended` or `Deleted`:
+test as planned. The steps are pre-written in `working\steps.md`.
+
+**Claude's errors:**
+- The Row 10 task (Oct 22, updated Oct 26) assumed the licence stops on Nov 6.
+  Nobody had checked how a trial ends.
+- The first STATUS.md write of Nov 3 put the old content back: an output file
+  name was reused, and the copy tool served the stale copy. Caught by checking
+  the size; rewritten from a new name.
+- A steps-file commit landed before the last edits had synced, so it missed
+  them. Caught by checking the size; recommitted. **Rule now:** a new output
+  name for every write, and the size checked after every commit.
+- Step 7's portal path came from an out-of-date Learn page.
+- Step 8's expected list missed PersonType.
+
+**Open observation, not chased:** in the new portal, the Deployments page's
+"Call this model" sample builds the endpoint from the resource name
+(`aif-dev-wus-01.services.ai.azure.com`), not the custom subdomain
+`aif-iip-dev-wus-01` that every script uses
+(`screenshots\2026-11-03_foundry_build_models.png`). It may be a portal
+quirk, or a host that doesn't serve this account. A 1-minute check (resolve the
+host, or compare with `az cognitiveservices account show … properties.endpoint`)
+settles it. Not done.
+
+**Don't redo:** both decks and their quizzes and ratings; the trial status read;
+the archive move; the portal route.
 
 ### Session — October 30, 2026 (about 5.5 h, with an errand mid-way) — Retrieval and grounding done (quiz 10/10); security-trimming lab; root-scope access found and removed
 
