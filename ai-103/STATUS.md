@@ -124,9 +124,15 @@ items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
 this page" list, GitHub links for the evidence paths). Publishing also needs
 `/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
 Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Start of next session (replaced 2026-11-03):
-Saturday Nov 7, Row 10, status first.** The steps are pre-written in
-`D:\claude\iip\working\steps.md`. (1) Read the P2 trial's state
+work** (next paragraph). **Next session: Thursday Nov 5 (Gerard; Wed is Python and Bridge to 67).**
+Choose the next study groups (all four of the week of Oct 26 are done), then
+the exam-window talk (Todoist, Nov 7). Not Row 10: the trial only changes state
+Fri Nov 6, 5pm Phoenix. **Then Saturday Nov 7: Row 10, status first.** Its steps are
+pre-written at the bottom of `D:\claude\iip\working\steps.md`, under "Prepared
+for Saturday Nov 7". Thursday's steps go above them, and at Thursday's end
+Claude archives Thursday's part and keeps that section. *(Corrected 2026-11-03,
+14:05: this sentence first said "Start of next session: Saturday Nov 7",
+written as if the next IIP session were Saturday. Gerard caught it.)* (1) Read the P2 trial's state
 (`/directory/subscriptions`) and `iip-ca-test`'s licences. (2) If the state is
 `Warning` (the 30-day grace stage Microsoft documents for trials, when the
 licence still works): no gate test. Re-date the Todoist task to the new
@@ -134,10 +140,9 @@ licence still works): no gate test. Re-date the Todoist task to the new
 the gate test as `iip-ca-test`. (3) Only after a real test: Claude edits
 `entra.bicep` (direct assignment back, group assignment out), and Gerard
 deploys it and deletes the group row by CLI. **Why (found Nov 3):** the trial
-changes state at 2026-11-07T00:00Z (Thu Nov 6, 5pm Phoenix), but probably into
+changes state at 2026-11-07T00:00Z (Fri Nov 6, 5pm Phoenix), but probably into
 grace, so a Saturday pass wouldn't show a lapse. Gerard chose "read status, then
-decide". **Then:** choose the next study groups (all four of the week of Oct 26
-are done); the exam-window talk (Todoist, Nov 7); the write-ups' publish prep.
+decide". **Also open:** the write-ups' publish prep.
 **Steps go in `D:\claude\iip\working\steps.md`, results in
 `working\results.txt`** (fixed names; standing, Gerard, Nov 3, replacing Oct
 30's dated `<date>-steps.md`). At session end Claude copies both to
@@ -917,7 +922,7 @@ the lowest), and two runs matched. Records:
 "Expired" stage after a trial, when users keep normal access. That table is
 written for Microsoft 365 trials. Gerard's read of `/directory/subscriptions`:
 `AAD_PREMIUM_P2`, trial, **Enabled**, next state change at
-**2026-11-07T00:00Z** (Thu Nov 6, 5pm Phoenix). The admin center shows
+**2026-11-07T00:00Z** (Fri Nov 6, 5pm Phoenix). The admin center shows
 recurring billing Off and expiry 11/7/2026
 (`screenshots\2026-11-03_m365_p2_details.png`). Neither shows the state it
 moves into. **Decided (Gerard):** on Saturday, read the status first. On
@@ -935,6 +940,9 @@ test as planned. The steps are pre-written in `working\steps.md`.
   name for every write, and the size checked after every commit.
 - Step 7's portal path came from an out-of-date Learn page.
 - Step 8's expected list missed PersonType.
+- The weekday: 2026-11-07T00:00Z was written as "Thu Nov 6" all session. It's
+  **Friday** Nov 6, 5pm Phoenix. Caught while correcting the next-session
+  line (Gerard's catch); fixed here, in Todoist and in the steps file.
 
 **Open observation, not chased:** in the new portal, the Deployments page's
 "Call this model" sample builds the endpoint from the resource name
