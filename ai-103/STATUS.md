@@ -127,12 +127,12 @@ half is already met** (resolved the same day): the official practice
 assessment moved to AI Skills Navigator (`aka.ms/AI103-PA`, sign-in needed),
 per the Tip block on the certification page (page updated 2026-10-31). The
 exam page's "not currently available" line is out of date. So in practice the
-trigger is: AI-103 leaves beta. **Start of the next IIP session:** (1) Row 10 Step S1, the
-2-minute read-only status read of the P2 trial and `iip-ca-test`'s licences
-(`D:\claude\iip\working\steps.md`, "Step S1"). The Nov 5 and Nov 7 sessions
-didn't run, so S1 hasn't either. Then the Nov 3 rule: `Warning` (grace) means
-re-date the Todoist task to the new `nextLifecycleDateTime` and no gate test;
-`Suspended` or `Deleted` means S2, then S3. (2) Size the write-ups' publish
+trigger is: AI-103 leaves beta. **Row 10:** Step S1 ran Nov 9 (Gerard): the P2 trial is in `Warning`
+(grace) until **2026-12-07T15:41:32Z (Mon Dec 7, 08:41 Phoenix)**, and
+`iip-ca-test` still holds `AAD_PREMIUM_P2`. So no gate test yet (the Nov 3
+rule); the Todoist task is due Dec 7. On or after that time: re-run S1 (2
+min), then S2 and S3 if it reads `Suspended` or `Deleted`
+(`D:\claude\iip\working\steps.md`). **Next IIP session:** (1) Size the write-ups' publish
 prep: each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On this
 page" list, GitHub links for the evidence paths), plus opening `/ai-103/*` in
 `staticwebapp.config.json`, which returns 404 today. The site's stale "Phase 2
@@ -933,6 +933,12 @@ hired fast" to knowledge for side income, possibly with a Udemy course.
   [stretch] items; never carries or re-labels Backlog tasks; keeps the active
   list short; checks the AI-103 exam page weekly for the restart trigger;
   no longer framed as "job-searching, exam study is the main work".
+- Row 10 Step S1 (Gerard ran it; results in
+  `D:\claude\iip\archive\2026-11-09-results.txt`): `AAD_PREMIUM_P2`, trial,
+  status `Warning`, next lifecycle date 2026-12-07T15:41:32Z (Mon Dec 7,
+  08:41 Phoenix); `iip-ca-test` still holds `AAD_PREMIUM_P2`. Grace stage, as
+  the Nov 3 re-plan expected, so no gate test. Todoist task re-dated to Dec 7
+  and retitled.
 - Overlord inbox: the 2026-11-08 item closed. `working\steps.md`: the
   Saturday-only heading now reads "start of the next IIP session".
 
