@@ -136,7 +136,12 @@ re-date the Todoist task to the new `nextLifecycleDateTime` and no gate test;
 prep: each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On this
 page" list, GitHub links for the evidence paths), plus opening `/ai-103/*` in
 `staticwebapp.config.json`, which returns 404 today. The site's stale "Phase 2
-in progress" lines (Todoist) ride in the same push. Then do what fits.
+in progress" lines (Todoist) ride in the same push. **Format decided (Gerard,
+Nov 9): A, link to the GitHub copy.** GitHub displays the Markdown as a
+formatted page; the site's AI page gets a summary card linking to each
+write-up; `/ai-103/*` stays 404. Sized at about 1.5-2 h in one session (Claude
+about 45-60 min of edits; Gerard about 45 min of review, including the phone).
+**Phase 3 is closed (Gerard, Nov 9):** the write-ups replace it.
 **Punch list (Gerard, Nov 9):** the active list is the Todoist tasks with no
 section (about 5, plus dated chores). Everything parked is in the "Backlog
 (parked)" section, which the Sunday task no longer carries forward.
@@ -902,6 +907,18 @@ hired fast" to knowledge for side income, possibly with a Udemy course.
   this trigger.
 - The write-ups' publish prep is the main IIP work.
 - Punch list: a short active list plus one backlog.
+- Later the same day, after Claude sized the publish prep: publish the
+  write-ups as **links to the GitHub copy** (option A, about 1.5-2 h, one
+  session), not as styled HTML pages on the site (option B, about 4-5 h, two
+  sessions). The site's AI page gets a summary card per write-up, and
+  `/ai-103/*` stays 404 (opening it would publish STATUS.md and every
+  working file).
+- **Phase 3 closed: the write-ups replace it.** The July plan's Phase 3
+  ("Business-Ready Experience": dashboard, architecture diagram, security
+  write-up, cost estimate, demo video, repo docs) had dropped out of
+  `phase2-orientation.md` with no recorded decision; Claude found it when
+  Gerard asked whether more phases were left. Never built: the dashboard and
+  the demo video.
 
 **Changes (Claude):**
 - Todoist: new section "Backlog (parked)"; 29 tasks moved there, including

@@ -2,7 +2,7 @@
 
 ---
 
-> ## CURRENT MILESTONE: **Phase 2 complete** (M8-M14) — next: the write-ups and the AI-103 exam
+> ## CURRENT MILESTONE: **Phase 2 complete** (M8-M14) — next: the write-ups (AI-103 study paused 2026-11-09; Phase 3 closed 2026-11-09)
 >
 > **This line is the single source of truth for "where are we".** Nothing else
 > — not the project instructions, not a scheduled task, not the portfolio site
@@ -16,6 +16,10 @@
 > inside the Entra ID P2 trial (ends 2026-11-06) and M12 had no clock.
 > (M10 → M11 2026-09-23; M9 → M10 and M8 → M9 both 2026-09-21.)
 >
+> Next-step text changed 2026-11-09 (Gerard): AI-103 study is paused until
+> the exam leaves beta, and the July plan's Phase 3 is closed because the
+> write-ups replace it. Record: STATUS.md, "Session — November 9, 2026".
+>
 > **The rule that keeps this true:** a *dated* statement may name a milestone,
 > because it was correct on its date and reads as history — STATUS.md session
 > entries, Todoist task descriptions, commit messages. *Undated standing
@@ -24,7 +28,7 @@
 
 ---
 
-## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13, Exam row 2026-10-19, M13 and Write-ups rows 2026-10-26)
+## Road to done (snapshot dated 2026-10-10; M12 row updated 2026-10-12, M14 row 2026-10-13, Exam row 2026-10-19, M13 and Write-ups rows 2026-10-26, Write-ups and Exam rows 2026-11-09)
 
 *Added 2026-10-10 at Gerard's request, after he lost track of where the work
 stood. This is a dated snapshot, so by the rule above it may name milestones.
@@ -48,9 +52,9 @@ update and the AI-103 exam.
 | M12 | Networking: private endpoints, storage firewall | **Done 2026-10-12**: built and proven 2026-10-10; evidence captured and torn down 2026-10-12 (Bicep and the free VNet skeleton kept) |
 | M13 | Conditional Access | **Done 2026-10-26**: tested 2026-10-09; rollback (C9) 2026-10-26: the five policies deleted, security defaults back on, admin and break-glass sign-ins asked for MFA |
 | M14 | Operate: tracing, alerts, GitHub deploys over OIDC | **All three done-when items shown, 2026-10-13**: a push deploys the Function over OIDC (Oct 12); a parked upload fires an alert, and its email arrives (Oct 12; email fixed Oct 13); a traced upload shows every step, the three tools by name (Oct 13). Gerard ticks it |
-| Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | Readers dropped 2026-10-24. Gerard's own "In short" critiqued 2026-10-26; next it moves into both drafts, then the push |
+| Write-ups | Phase 2 write-up, then one joint push with the M7 write-up | Readers dropped 2026-10-24. Gerard's own "In short" critiqued 2026-10-26; next it moves into both drafts, then the push. **2026-11-09 (Gerard): publish as links to the GitHub copy**; the site's AI page gets a summary card per write-up and `/ai-103/*` stays 404. About 1.5-2 h, one session |
 | Site | ostebovik.net's AI page updated to match | After the push |
-| Exam | AI-103 | **Study active from 2026-10-19**: the official practice assessment showed the project alone won't carry the exam. Weekly `[study]` items from the AI-103 Gap Map. Booked on a milestone, not a date: after a comfortable retake of the official practice assessment (Gerard, 2026-10-19) |
+| Exam | AI-103 | **Study active from 2026-10-19**: the official practice assessment showed the project alone won't carry the exam. Weekly `[study]` items from the AI-103 Gap Map. Booked on a milestone, not a date: after a comfortable retake of the official practice assessment (Gerard, 2026-10-19). **PAUSED 2026-11-09 (Gerard)** until AI-103 leaves beta; the practice assessment is on AI Skills Navigator (`aka.ms/AI103-PA`) |
 
 **Why the marker and the work could differ (until 2026-10-26):** the marker
 stayed on M13 until its rollback, while M12 and M14 ran in the gap, because
