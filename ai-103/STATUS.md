@@ -66,7 +66,10 @@ A gotchas/tips-and-tricks page and a master index page (once there's enough
 split across pages to justify one) are deferred until real material
 accumulates for them — no point building empty structure now.
 
-**Status as of:** November 3, 2026 (Nov 2-3: Build generative apps rebuilt,
+**Status as of:** November 9, 2026 (Nov 9: course-correct. AI-103 study is
+paused, the write-ups' publish prep is now the main work, and the punch list
+is cut to a short active list plus one backlog; see the Nov 9 session entry.
+Nov 2-3: Build generative apps rebuilt,
 quiz 10/10; Choose Foundry services done, quiz 7/10; Row 10's Saturday test
 re-planned around the trial's grace stage; see the Nov 2-3 session entry.
 Oct 30: Retrieval and grounding done,
@@ -115,34 +118,28 @@ a stated limit.)*
 
 ## Current next action
 
-**Next action (replaced 2026-10-26): all Phase 2 milestones are done. M13
-closed today with C9**, and the marker in `phase2-orientation.md` now reads
-"Phase 2 complete" (Gerard chose it). **Gerard's own "In short" is final and in
-both drafts** (Oct 26; each draft's header says which lines came from
-Claude's suggestions). Next on the write-ups: the joint push. Its remaining
-items are in each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On
-this page" list, GitHub links for the evidence paths). Publishing also needs
-`/ai-103/*` opened in `staticwebapp.config.json`, which returns 404 today.
-Not yet sized; size it at the start of that session. **Study stays the main
-work** (next paragraph). **Next session: Thursday Nov 5 (Gerard; Wed is Python and Bridge to 67).**
-Choose the next study groups (all four of the week of Oct 26 are done), then
-the exam-window talk (Todoist, Nov 7). Not Row 10: the trial only changes state
-Fri Nov 6, 5pm Phoenix. **Then Saturday Nov 7: Row 10, status first.** Its steps are
-pre-written at the bottom of `D:\claude\iip\working\steps.md`, under "Prepared
-for Saturday Nov 7". Thursday's steps go above them, and at Thursday's end
-Claude archives Thursday's part and keeps that section. *(Corrected 2026-11-03,
-14:05: this sentence first said "Start of next session: Saturday Nov 7",
-written as if the next IIP session were Saturday. Gerard caught it.)* (1) Read the P2 trial's state
-(`/directory/subscriptions`) and `iip-ca-test`'s licences. (2) If the state is
-`Warning` (the 30-day grace stage Microsoft documents for trials, when the
-licence still works): no gate test. Re-date the Todoist task to the new
-`nextLifecycleDateTime` and test then. If it's `Suspended` or `Deleted`: run
-the gate test as `iip-ca-test`. (3) Only after a real test: Claude edits
-`entra.bicep` (direct assignment back, group assignment out), and Gerard
-deploys it and deletes the group row by CLI. **Why (found Nov 3):** the trial
-changes state at 2026-11-07T00:00Z (Fri Nov 6, 5pm Phoenix), but probably into
-grace, so a Saturday pass wouldn't show a lapse. Gerard chose "read status, then
-decide". **Also open:** the write-ups' publish prep.
+**Next action (replaced 2026-11-09): the write-ups' publish prep is the main
+IIP work, and AI-103 study is PAUSED** (Gerard, Nov 9; see the Nov 9 session
+entry). Restart trigger for study (Gerard): Microsoft takes AI-103 out of beta
+AND publishes the official practice assessment, or sooner if Gerard wants to.
+The Sunday scheduled task checks the exam page each week. **The assessment
+half is already met** (resolved the same day): the official practice
+assessment moved to AI Skills Navigator (`aka.ms/AI103-PA`, sign-in needed),
+per the Tip block on the certification page (page updated 2026-10-31). The
+exam page's "not currently available" line is out of date. So in practice the
+trigger is: AI-103 leaves beta. **Start of the next IIP session:** (1) Row 10 Step S1, the
+2-minute read-only status read of the P2 trial and `iip-ca-test`'s licences
+(`D:\claude\iip\working\steps.md`, "Step S1"). The Nov 5 and Nov 7 sessions
+didn't run, so S1 hasn't either. Then the Nov 3 rule: `Warning` (grace) means
+re-date the Todoist task to the new `nextLifecycleDateTime` and no gate test;
+`Suspended` or `Deleted` means S2, then S3. (2) Size the write-ups' publish
+prep: each draft's header under "STILL OPEN BEFORE PUBLISHING" (an "On this
+page" list, GitHub links for the evidence paths), plus opening `/ai-103/*` in
+`staticwebapp.config.json`, which returns 404 today. The site's stale "Phase 2
+in progress" lines (Todoist) ride in the same push. Then do what fits.
+**Punch list (Gerard, Nov 9):** the active list is the Todoist tasks with no
+section (about 5, plus dated chores). Everything parked is in the "Backlog
+(parked)" section, which the Sunday task no longer carries forward.
 **Steps go in `D:\claude\iip\working\steps.md`, results in
 `working\results.txt`** (fixed names; standing, Gerard, Nov 3, replacing Oct
 30's dated `<date>-steps.md`). At session end Claude copies both to
@@ -150,14 +147,17 @@ decide". **Also open:** the write-ups' publish prep.
 seeds them with steps already prepared for the next session, as on Nov 3).
 **Older citations (2026-11-03):** every file this document cites directly in
 `D:\claude\iip\` (not under `screenshots\` or `results\`) was moved to
-`D:\claude\iip\archive\`, with the same file name. **Don't redo:** the Build
+`D:\claude\iip\archive\`, with the same file name. **Don't redo:** the Nov 9
+course-correct decisions (the pause, its trigger, the backlog); the Build
 generative apps rebuild and quiz (Nov 3, 10/10, s17-s22 Shaky); the Choose
 Foundry services group (Nov 3: cards, quiz 7/10, PII playground; s01/s02 stay
 Shaky); the P2 trial status read (Nov 3); the Retrieval group (done Oct 30,
 quiz 10/10; s57 Shaky, s58-s61 unchanged, Gerard); the security-trimming lab;
 the root-scope access removal (verified Oct 30).
 
-**Main work: AI-103 exam study, from the gap map** (replaced 2026-10-19;
+*[PAUSED 2026-11-09, Gerard: see the first paragraph and the Nov 9 session
+entry. Kept as the record to restart from.]* **Was the main work: AI-103 exam
+study, from the gap map** (replaced 2026-10-19;
 study loop changed 2026-10-20; updated 2026-10-22). **Study is the main
 work** (Gerard): 3-4 `[study]` items a week, one skill group each. **The
 loop (Gerard chose it Oct 20): cards first, then hands-on, then quiz.**
@@ -195,7 +195,8 @@ redo:** the gap map's coverage marks (verified against the code at
 `90a7109`); the Responsible AI and Build agents quizzes and their
 re-ratings; the span content-recording check (closed Oct 21).
 
-**In parallel: the write-ups (`phase2-writeup-draft.md`, `m7-writeup-draft.md`).**
+**The write-ups (`phase2-writeup-draft.md`, `m7-writeup-draft.md`): the main
+IIP work since 2026-11-09** (until then "in parallel" with study).
 Nothing waits on outside readers since Oct 24, and Gerard's "In short",
 Claude's critique of it and C9's closing lines are all done (Oct 26). Next
 is the joint push: the publish prep in each draft's header under "STILL OPEN
@@ -856,6 +857,69 @@ scanning a page of search results.
 ---
 
 ## Session log
+
+### Session — November 9, 2026 (about 1 h) — course-correct: AI-103 study paused; the write-ups become the main work; punch list cut to an active list plus one backlog
+
+**Attribution:** Gerard raised the course-correct, made every decision below,
+and gave Claude read-only access to Bridge's `PLAN.md` and Venture's
+`VENTURE.md` for it. Claude read the docs, checked Microsoft Learn and
+Udemy's terms, made the Todoist and scheduled-task changes, and wrote this
+entry. No IIP code or Azure resource changed.
+
+**Why (Gerard):** since starting Bridge to 67 and Venture he has slowed this
+work. With retirement a real option, the reason for the cert moves from "get
+hired fast" to knowledge for side income, possibly with a Udemy course.
+
+**What the records and sources showed (Claude):**
+- No IIP session since Nov 3: `working\results.txt` is empty under the Nov 5
+  and Nov 7 headings, so Row 10's Step S1 hasn't run.
+- Bridge (`PLAN.md`): no job is needed, and a job would pause that plan.
+  Venture (`VENTURE.md`): its Udemy work is AZ-104 practice tests; AI-103
+  practice tests are parked ("15+ sets already; Gerard not yet certified —
+  revisit after he passes"). So no income case pushes a fast AI-103 cert now.
+- AI-103 is still in beta (Learn exam page, read Nov 9; Microsoft had
+  announced GA for June 2026). The same page says "The Practice Assessment
+  for this exam is not currently available", and that one usually follows
+  within 8 weeks of GA. Gerard noticed the conflict with the Oct 19 entry
+  (he took "Microsoft's official AI-103 practice assessment") and couldn't
+  find the link on the certification page. **Resolved the same day
+  (Claude):** that page's Tip block says the practice assessment now lives on
+  AI Skills Navigator (`aka.ms/AI103-PA`, sign-in needed), as Venture found
+  for AZ-104. The exam page's line is out of date, so the assessment half of
+  the trigger is already met. Claude's first reading, that no assessment
+  existed, was wrong.
+- Udemy (its help article): instructors keep 37% of sales made without their
+  own coupon or link, 97% with one. Subscription viewing pays from a pool,
+  now 15% (third-party reports).
+- Punch list: 36 open tasks, about 10 already marked parked.
+
+**Decided (Gerard):**
+- AI-103 study is paused. Restart trigger: AI-103 out of beta AND the
+  official practice assessment published, or sooner if he wants to (Claude's
+  recommendation; chosen over "only if a job or Venture needs it" and "no
+  trigger"). He first chose "pause until Venture decides on Udemy"; Claude
+  then found that Venture waits on the cert (a loop), and he replaced it with
+  this trigger.
+- The write-ups' publish prep is the main IIP work.
+- Punch list: a short active list plus one backlog.
+
+**Changes (Claude):**
+- Todoist: new section "Backlog (parked)"; 29 tasks moved there, including
+  the three study items (retitled "[paused study]", with the trigger in a
+  comment) and the Letter7.net decision (due date removed; its own text
+  calls it "a decision, not a deadline"). "Discuss an AI-103 exam date or
+  window" closed with the decision. Active (no section): the write-ups
+  (retitled as the main work), the site's status lines, Row 10 (due date
+  removed until S1's result), the classic Agent Service migration (Dec 1),
+  the monthly Front Door check (Dec 1), the CI runner check (Nov 20).
+- Scheduled task "IIP Sunday punch list": prompt rewritten. No [study] or
+  [stretch] items; never carries or re-labels Backlog tasks; keeps the active
+  list short; checks the AI-103 exam page weekly for the restart trigger;
+  no longer framed as "job-searching, exam study is the main work".
+- Overlord inbox: the 2026-11-08 item closed. `working\steps.md`: the
+  Saturday-only heading now reads "start of the next IIP session".
+
+**Don't re-ask:** the pause, its trigger, the backlog structure.
 
 ### Session — November 2-3, 2026 (about 6 h over two days; Nov 2 stopped early for Bridge to 67) — Build generative apps rebuilt (quiz 10/10); Choose Foundry services done (quiz 7/10); steps files moved to working + archive; Row 10's Saturday test re-planned
 
